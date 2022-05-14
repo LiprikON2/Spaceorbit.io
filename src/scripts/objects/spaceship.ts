@@ -3,8 +3,19 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        this.setCircularHitbox(50);
 
-        this.setCollideWorldBounds(true).setScale(0.5).setOrigin(0.5);
+        this.setCollideWorldBounds(true).setScale(0.75).setOrigin(0.5);
+    }
+
+    setCircularHitbox(hitboxRadius) {
+        this.body.setCircle(
+            hitboxRadius,
+            this.body.width / 2 - hitboxRadius,
+            this.body.height / 2 - hitboxRadius
+        );
+        // this.body.setSize(50, 50);
+        // this.body.setOffset(12, 5);
     }
 
     public update() {}
