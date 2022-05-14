@@ -4,11 +4,14 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("phaser-logo", "assets/img/phaser-logo.png");
         this.load.image("spaceship", "assets/img/spaceship.webp");
-        this.load.image("bg 1-1", "assets/img/bg 1-1.jpg");
-        this.load.spritesheet("particles", "assets/img/particles.png", {
-            frameWidth: 1920,
+        this.load.image("map_1-1", "assets/img/map_1-1.jpg");
+        // this.load.spritesheet("particles", "assets/img/particles.png", {
+        //     frameWidth: 1920,
+        //     frameHeight: 1080,
+        // });
+        this.load.spritesheet("particles", "assets/img/particles_1080x1080.png", {
+            frameWidth: 1080,
             frameHeight: 1080,
         });
     }
