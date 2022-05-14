@@ -1,9 +1,10 @@
 import Spaceship from "../objects/spaceship";
-import FpsText from "../objects/fpsText";
+import GenericText from "../objects/genericText";
 
 export default class MainScene extends Phaser.Scene {
-    fpsText: FpsText;
+    debugText: GenericText;
     player;
+    background;
     keys = {};
     constructor() {
         super({ key: "MainScene" });
@@ -23,21 +24,41 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
-        this.player = new Spaceship(this, this.cameras.main.width / 2, 0, "spaceship");
-        this.fpsText = new FpsText(this);
+        this.loadBackground("bg 1-1");
 
-        // Look at the cursor
-        this.input.on("pointermove", (event) => {
-            this.player.lookAtPoint(event.x, event.y);
+        this.player = new Spaceship(
+            this,
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            "spaceship"
+        );
+
+        this.debugText = new GenericText(this, {
+            fps: Math.floor(this.game.loop.actualFps),
+            x: this.player.x,
+            y: this.player.y,
         });
-        // Look at the cursor
-        this.input.keyboard.on("keydown-SPACE", (event) => {
-            this.player.shoot();
-        });
+
+        // Make player look at the cursor
+        this.input.on(
+            "pointermove",
+            (event) => {
+                this.player.lookAtPoint(event.x, event.y);
+            },
+            this
+        );
+        // Make player shoot by precssing spacebar
+        this.input.keyboard.on(
+            "keydown-SPACE",
+            (event) => {
+                this.player.shoot();
+            },
+            this
+        );
     }
 
     update() {
-        this.fpsText.update();
+        this.debugText.update();
         // console.log("Phaser.Input.Keyboard", Phaser.Input.Keyboard);
         // if (Phaser.Input.Keyboard == this.keys["SPACE"]) {
         //     this.player.shoot();
@@ -54,5 +75,16 @@ export default class MainScene extends Phaser.Scene {
         // if (key == this.keys["D"]) {
         //     this.player.moveRight();
         // }
+    }
+
+    loadBackground(texture: string | Phaser.Textures.Texture) {
+        const image = this.add
+            .image(this.cameras.main.width, this.cameras.main.height, texture)
+            .setScale(100)
+            .setOrigin(1, 1);
+        const scaleX = this.cameras.main.width / image.width;
+        const scaleY = this.cameras.main.height / image.height;
+        const scale = Math.max(scaleX, scaleY);
+        image.setScale(scale).setScrollFactor(0);
     }
 }

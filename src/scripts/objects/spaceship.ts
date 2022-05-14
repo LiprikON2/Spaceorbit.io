@@ -7,7 +7,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true).setScale(0.5).setOrigin(0.5);
     }
 
-    public update() {}
+    public update() {
+        const text = this.scene.add.text(10, 20, "", { color: "white", fontSize: "2rem" });
+        text.setText(`x: ${this.x} y: ${this.y}`);
+    }
 
     lookAtPoint(x, y) {
         const angle = Phaser.Math.RAD_TO_DEG * Phaser.Math.Angle.Between(this.x, this.y, x, y) + 90;
@@ -34,7 +37,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         graphics.fillStyle(0x00ff00, 1);
         graphics.beginPath();
         graphics.moveTo(0, 0);
-        graphics.lineTo(60, 10);
+        graphics.lineTo(60, 0);
+        graphics.lineTo(60, 20);
         graphics.lineTo(0, 20);
         graphics.lineTo(0, 0);
         graphics.fillPath();
