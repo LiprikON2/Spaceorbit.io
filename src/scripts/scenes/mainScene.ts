@@ -5,25 +5,15 @@ export default class MainScene extends Phaser.Scene {
     debugText: GenericText;
     player;
     background;
-    keys = {};
+    keys;
+    debugTextDict;
     constructor() {
         super({ key: "MainScene" });
-        // const spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        // const W = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        // const A = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        // const S = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-        // const D = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-
-        // this.keys = {
-        //     spacebar,
-        //     W,
-        //     A,
-        //     S,
-        //     D,
-        // };
     }
 
     create() {
+        // Init keys
+        this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE");
         this.loadBackground("bg 1-1");
 
         this.player = new Spaceship(
@@ -32,12 +22,8 @@ export default class MainScene extends Phaser.Scene {
             this.cameras.main.height / 2,
             "spaceship"
         );
-
-        this.debugText = new GenericText(this, {
-            fps: Math.floor(this.game.loop.actualFps),
-            x: this.player.x,
-            y: this.player.y,
-        });
+        // this.cameras.main.startFollow(this.player);
+        this.debugText = new GenericText(this, this.player);
 
         // Make player look at the cursor
         this.input.on(
@@ -47,34 +33,28 @@ export default class MainScene extends Phaser.Scene {
             },
             this
         );
-        // Make player shoot by precssing spacebar
-        this.input.keyboard.on(
-            "keydown-SPACE",
-            (event) => {
-                this.player.shoot();
-            },
-            this
-        );
     }
 
     update() {
         this.debugText.update();
-        // console.log("Phaser.Input.Keyboard", Phaser.Input.Keyboard);
-        // if (Phaser.Input.Keyboard == this.keys["SPACE"]) {
-        //     this.player.shoot();
-        // }
-        // if (key == this.keys["W"]) {
-        //     this.player.moveUp();
-        // }
-        // if (key == this.keys["A"]) {
-        //     this.player.moveLeft();
-        // }
-        // if (key == this.keys["S"]) {
-        //     this.player.moveDown();
-        // }
-        // if (key == this.keys["D"]) {
-        //     this.player.moveRight();
-        // }
+        this.player.setVelocity(0);
+
+        // Handle player movement
+        if (this.keys.A.isDown) {
+            this.player.setVelocityX(-300);
+        } else if (this.keys.D.isDown) {
+            this.player.setVelocityX(300);
+        }
+        if (this.keys.W.isDown) {
+            this.player.setVelocityY(-300);
+        } else if (this.keys.S.isDown) {
+            this.player.setVelocityY(300);
+        }
+
+        // Make player shoot by pressing spacebar
+        if (this.keys.SPACE.isDown) {
+            this.player.shoot();
+        }
     }
 
     loadBackground(texture: string | Phaser.Textures.Texture) {

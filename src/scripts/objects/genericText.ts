@@ -1,17 +1,17 @@
-export default class GenericText extends Phaser.GameObjects.Text {
-    textString;
-    constructor(scene, dict) {
+export default class FpsText extends Phaser.GameObjects.Text {
+    player;
+    constructor(scene, player) {
         super(scene, 10, 10, "", { color: "white", fontSize: "2rem" });
         scene.add.existing(this);
         this.setOrigin(0);
-
-        this.textString = "";
-        for (const [key, value] of Object.entries(dict)) {
-            this.textString += `${key}: ${value}\n`;
-        }
+        this.player = player;
     }
 
     public update() {
-        this.setText(this.textString);
+        this.setText(
+            `fps: ${Math.floor(this.scene.game.loop.actualFps)}\nx: ${this.player.x} y: ${
+                this.player.y
+            }`
+        );
     }
 }
