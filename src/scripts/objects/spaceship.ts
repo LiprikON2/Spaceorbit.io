@@ -28,9 +28,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         graphics.fillPath();
         graphics.generateTexture("sprite", 60, 40);
 
-        const velocity = 1000;
-        const velocityX = Math.sin(this.rotation) * velocity;
-        const velocityY = Math.cos(this.rotation) * -velocity;
+        const bulletVelocity = 2000;
+        const shipVelocityX = this.body.velocity.x;
+        const shipVelocityY = this.body.velocity.y;
+        const velocityX = Math.sin(this.rotation) * bulletVelocity + shipVelocityX;
+        const velocityY = Math.cos(this.rotation) * -bulletVelocity + shipVelocityY;
 
         this.scene.physics.add
             .sprite(this.x, this.y, "sprite")

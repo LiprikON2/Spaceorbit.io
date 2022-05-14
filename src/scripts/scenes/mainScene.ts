@@ -22,7 +22,7 @@ export default class MainScene extends Phaser.Scene {
             this.cameras.main.height / 2,
             "spaceship"
         );
-        // this.cameras.main.startFollow(this.player);
+        this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player);
 
         // Make player look at the cursor
@@ -41,14 +41,14 @@ export default class MainScene extends Phaser.Scene {
 
         // Handle player movement
         if (this.keys.A.isDown) {
-            this.player.setVelocityX(-300);
+            this.player.setVelocityX(-1000);
         } else if (this.keys.D.isDown) {
-            this.player.setVelocityX(300);
+            this.player.setVelocityX(1000);
         }
         if (this.keys.W.isDown) {
-            this.player.setVelocityY(-300);
+            this.player.setVelocityY(-1000);
         } else if (this.keys.S.isDown) {
-            this.player.setVelocityY(300);
+            this.player.setVelocityY(1000);
         }
 
         // Make player shoot by pressing spacebar
@@ -57,14 +57,20 @@ export default class MainScene extends Phaser.Scene {
         }
     }
 
+    updateRootBackground(color?) {
+        const root = document.getElementById("phaser-game");
+        root!.style.backgroundColor = color ?? "#1d252c";
+    }
+
     loadBackground(texture: string | Phaser.Textures.Texture) {
         const image = this.add
             .image(this.cameras.main.width, this.cameras.main.height, texture)
-            .setScale(100)
             .setOrigin(1, 1);
         const scaleX = this.cameras.main.width / image.width;
         const scaleY = this.cameras.main.height / image.height;
         const scale = Math.max(scaleX, scaleY);
-        image.setScale(scale).setScrollFactor(0);
+        image.setScale(scale);
+        // todo dynamically get bg average dark color
+        this.updateRootBackground("#181814");
     }
 }
