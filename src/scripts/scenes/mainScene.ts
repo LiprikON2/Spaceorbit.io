@@ -40,12 +40,7 @@ export default class MainScene extends Phaser.Scene {
     update() {
         this.debugText.update();
         this.player.setVelocity(0);
-
-        // Parralax
-        this.backgroundDict["bg 1-1"].x =
-            this.cameras.main.scrollX * this.backgroundDict["bg 1-1"].parralax;
-        this.backgroundDict["bg 1-1"].y =
-            this.cameras.main.scrollY * this.backgroundDict["bg 1-1"].parralax;
+        this.updateBackground();
 
         // Handle player movement
         if (this.keys.A.isDown) {
@@ -70,27 +65,27 @@ export default class MainScene extends Phaser.Scene {
         root!.style.backgroundColor = color ?? "#1d252c";
     }
 
-    loadBackground(texture: string, parralax: number) {
+    loadBackground(texture: string, parallax: number) {
         const gameWidth = Number(this.game.config.width);
         const gameHeight = Number(this.game.config.height);
 
         const dimX = gameWidth * 2;
         const dimY = gameHeight * 2;
 
-        const parralaxMarginX = parralax * gameWidth;
-        const parralaxMarginY = parralax * gameHeight;
+        const parallaxMarginX = parallax * gameWidth;
+        const parallaxMarginY = parallax * gameHeight;
 
         this.physics.world.setBounds(
-            -parralaxMarginX,
-            -parralaxMarginY,
-            dimX + parralaxMarginX * 4,
-            dimY + parralaxMarginY * 4
+            -parallaxMarginX,
+            -parallaxMarginY,
+            dimX + parallaxMarginX * 4,
+            dimY + parallaxMarginY * 4
         );
 
         const background = this.add.image(0, 0, texture).setOrigin(0);
         console.log("background", background);
         this.backgroundDict[texture] = background;
-        this.backgroundDict[texture].parralax = parralax;
+        this.backgroundDict[texture].parallax = parallax;
 
         const scaleX = dimX / background.width;
         const scaleY = dimY / background.height;
@@ -100,5 +95,14 @@ export default class MainScene extends Phaser.Scene {
         background.setScale(scaleX, scaleY);
         // todo dynamically get bg average dark color
         this.updateRootBackground("#181814");
+    }
+    updateBackground() {
+        for (const [key, value] of Object.entries(this.backgroundDict)) {
+            // parallax
+            this.backgroundDict[key].x =
+                this.cameras.main.scrollX * this.backgroundDict[key].parallax;
+            this.backgroundDict[key].y =
+                this.cameras.main.scrollY * this.backgroundDict[key].parallax;
+        }
     }
 }

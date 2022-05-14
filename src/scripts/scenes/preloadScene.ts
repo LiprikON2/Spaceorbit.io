@@ -7,15 +7,15 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("phaser-logo", "assets/img/phaser-logo.png");
         this.load.image("spaceship", "assets/img/spaceship.webp");
         this.load.image("bg 1-1", "assets/img/bg 1-1.jpg");
-        this.load.image("particles", "assets/img/particles.png");
-        // this.load.spritesheet("particles", "assets/img/particles.jpg", {
-        //     frameWidth: 145,
-        //     frameHeight: 145,
-        // });
+        this.load.spritesheet("particles", "assets/img/particles.png", {
+            frameWidth: 1920,
+            frameHeight: 1080,
+        });
     }
 
     create() {
         this.scene.start("MainScene");
+        // this.scene.start("ExportParticlesScene");
 
         /**
          * This is how you would dynamically import the mainScene class (with code splitting),
