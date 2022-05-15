@@ -1,9 +1,13 @@
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, texture) {
+    health;
+    shields;
+    speed;
+    constructor(scene, x, y, texture, speed = 200) {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.setCircularHitbox(50);
+        this.speed = speed;
 
         this.setCollideWorldBounds(true).setScale(0.75).setOrigin(0.5);
     }
@@ -23,6 +27,39 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     lookAtPoint(x, y) {
         const angle = Phaser.Math.RAD_TO_DEG * Phaser.Math.Angle.Between(this.x, this.y, x, y) + 90;
         this.setAngle(angle);
+    }
+
+    stopMoving() {
+        this.setVelocity(0);
+    }
+    moveUp() {
+        this.setVelocityY(-this.speed);
+    }
+    moveDown() {
+        this.setVelocityY(this.speed);
+    }
+    moveLeft() {
+        this.setVelocityX(-this.speed);
+    }
+    moveRight() {
+        this.setVelocityX(this.speed);
+    }
+
+    moveUpRight() {
+        this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
+        this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
+    }
+    moveUpLeft() {
+        this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
+        this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
+    }
+    moveDownRight() {
+        this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
+        this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
+    }
+    moveDownLeft() {
+        this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
+        this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
     }
 
     shoot() {

@@ -25,7 +25,8 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-1", 0.5);
-        this.loadBackground("particles", 0.25, true);
+        this.loadBackground("particles", 0.4, true);
+        this.loadBackground("particles", 0.2, true);
 
         // Make player look at the cursor
         this.input.on(
@@ -39,23 +40,84 @@ export default class MainScene extends Phaser.Scene {
 
     update() {
         this.debugText.update();
-        this.player.setVelocity(0);
         this.updateBackground();
+        console.log("this", this.player);
 
         // Handle player movement
-        if (this.keys.A.isDown) {
-            this.player.setVelocityX(-1000);
-        } else if (this.keys.D.isDown) {
-            this.player.setVelocityX(1000);
-        }
-        if (this.keys.W.isDown) {
-            this.player.setVelocityY(-1000);
-        } else if (this.keys.S.isDown) {
-            this.player.setVelocityY(1000);
+        this.player.stopMoving();
+
+        // if (this.keys.A.isDown) {
+        //     this.player.moveLeft();
+        // } else if (this.keys.D.isDown) {
+        //     this.player.moveRight();
+        // }
+
+        // if (this.keys.W.isDown) {
+        //     this.player.moveUp();
+        // } else if (this.keys.S.isDown) {
+        //     this.player.moveDown();
+        // }
+
+        if (
+            this.keys.W.isDown &&
+            !this.keys.A.isDown &&
+            !this.keys.S.isDown &&
+            !this.keys.D.isDown
+        ) {
+            this.player.moveUp();
+        } else if (
+            !this.keys.W.isDown &&
+            this.keys.A.isDown &&
+            !this.keys.S.isDown &&
+            !this.keys.D.isDown
+        ) {
+            this.player.moveLeft();
+        } else if (
+            !this.keys.W.isDown &&
+            !this.keys.A.isDown &&
+            this.keys.S.isDown &&
+            !this.keys.D.isDown
+        ) {
+            this.player.moveDown();
+        } else if (
+            !this.keys.W.isDown &&
+            !this.keys.A.isDown &&
+            !this.keys.S.isDown &&
+            this.keys.D.isDown
+        ) {
+            this.player.moveRight();
+        } else if (
+            this.keys.W.isDown &&
+            this.keys.A.isDown &&
+            !this.keys.S.isDown &&
+            !this.keys.D.isDown
+        ) {
+            this.player.moveUpLeft();
+        } else if (
+            this.keys.W.isDown &&
+            !this.keys.A.isDown &&
+            !this.keys.S.isDown &&
+            this.keys.D.isDown
+        ) {
+            this.player.moveUpRight();
+        } else if (
+            !this.keys.W.isDown &&
+            this.keys.A.isDown &&
+            this.keys.S.isDown &&
+            !this.keys.D.isDown
+        ) {
+            this.player.moveDownLeft();
+        } else if (
+            !this.keys.W.isDown &&
+            !this.keys.A.isDown &&
+            this.keys.S.isDown &&
+            this.keys.D.isDown
+        ) {
+            this.player.moveDownRight();
         }
 
-        // Make player shoot by pressing spacebar
         if (this.keys.SPACE.isDown) {
+            // Make player shoot by pressing spacebar
             this.player.shoot();
         }
     }
