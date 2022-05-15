@@ -14,7 +14,7 @@ export default class MainScene extends Phaser.Scene {
 
     create() {
         // Init keys
-        this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE");
+        this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
 
         this.player = new Spaceship(
             this,
@@ -41,83 +41,36 @@ export default class MainScene extends Phaser.Scene {
     update() {
         this.debugText.update();
         this.updateBackground();
-        console.log("this", this.player);
 
-        // Handle player movement
         this.player.stopMoving();
+        // Key bindings
+        const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
+        const leftBtn = this.keys.A.isDown || this.keys.LEFT.isDown;
+        const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
+        const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
+        const primaryShootBtn = this.input.activePointer.isDown;
 
-        // if (this.keys.A.isDown) {
-        //     this.player.moveLeft();
-        // } else if (this.keys.D.isDown) {
-        //     this.player.moveRight();
-        // }
-
-        // if (this.keys.W.isDown) {
-        //     this.player.moveUp();
-        // } else if (this.keys.S.isDown) {
-        //     this.player.moveDown();
-        // }
-
-        if (
-            this.keys.W.isDown &&
-            !this.keys.A.isDown &&
-            !this.keys.S.isDown &&
-            !this.keys.D.isDown
-        ) {
+        // Moving
+        if (upBtn && !leftBtn && !downBtn && !rightBtn) {
             this.player.moveUp();
-        } else if (
-            !this.keys.W.isDown &&
-            this.keys.A.isDown &&
-            !this.keys.S.isDown &&
-            !this.keys.D.isDown
-        ) {
+        } else if (!upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveLeft();
-        } else if (
-            !this.keys.W.isDown &&
-            !this.keys.A.isDown &&
-            this.keys.S.isDown &&
-            !this.keys.D.isDown
-        ) {
+        } else if (!upBtn && !leftBtn && downBtn && !rightBtn) {
             this.player.moveDown();
-        } else if (
-            !this.keys.W.isDown &&
-            !this.keys.A.isDown &&
-            !this.keys.S.isDown &&
-            this.keys.D.isDown
-        ) {
+        } else if (!upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveRight();
-        } else if (
-            this.keys.W.isDown &&
-            this.keys.A.isDown &&
-            !this.keys.S.isDown &&
-            !this.keys.D.isDown
-        ) {
+        } else if (upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveUpLeft();
-        } else if (
-            this.keys.W.isDown &&
-            !this.keys.A.isDown &&
-            !this.keys.S.isDown &&
-            this.keys.D.isDown
-        ) {
+        } else if (upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveUpRight();
-        } else if (
-            !this.keys.W.isDown &&
-            this.keys.A.isDown &&
-            this.keys.S.isDown &&
-            !this.keys.D.isDown
-        ) {
+        } else if (!upBtn && leftBtn && downBtn && !rightBtn) {
             this.player.moveDownLeft();
-        } else if (
-            !this.keys.W.isDown &&
-            !this.keys.A.isDown &&
-            this.keys.S.isDown &&
-            this.keys.D.isDown
-        ) {
+        } else if (!upBtn && !leftBtn && downBtn && rightBtn) {
             this.player.moveDownRight();
         }
 
-        if (this.keys.SPACE.isDown) {
-            // Make player shoot by pressing spacebar
+        // Shooting
+        if (primaryShootBtn) {
             this.player.shoot();
         }
     }
