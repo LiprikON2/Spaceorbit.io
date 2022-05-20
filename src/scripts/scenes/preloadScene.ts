@@ -5,17 +5,12 @@ export default class PreloadScene extends Phaser.Scene {
 
     preload() {
         this.load.image("spaceship", "assets/img/spaceship.webp");
-        this.load.image("map_1-1", "assets/img/map_1-1.jpg");
-        this.load.image("particle", "assets/img/particle.webp");
-        // this.load.spritesheet("particles", "assets/img/particles.png", {
-        //     frameWidth: 1920,
-        //     frameHeight: 1080,
-        // });
         this.load.spritesheet("particles", "assets/img/particles_1080x1080.png", {
             frameWidth: 1080,
             frameHeight: 1080,
         });
-        this.load.atlas("megaset", "assets/atlas/megaset-0.png", "assets/atlas/megaset-0.json");
+        this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
+        this.load.atlas("map_1-2", "assets/maps/map_1-1.jpg", "assets/maps/map_1-2.json");
     }
 
     create() {

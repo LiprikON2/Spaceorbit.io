@@ -3,15 +3,18 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     shields;
     speed;
     hitboxRadius;
-    constructor(scene, x, y, texture, speed = 200, hitboxRadius = 50) {
+    constructor(scene, x, y, texture, speed = 2000, hitboxRadius = 50) {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.setCircularHitbox(hitboxRadius);
-        this.speed = speed;
-        this.hitboxRadius = hitboxRadius;
 
+        this.setCircularHitbox(hitboxRadius);
         this.setCollideWorldBounds(true).setScale(0.75).setOrigin(0.5);
+        this.x = 0;
+        this.y = 0;
+
+        this.hitboxRadius = hitboxRadius;
+        this.speed = speed;
     }
 
     setCircularHitbox(hitboxRadius) {
@@ -22,6 +25,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
         // this.body.setSize(50, 50);
         // this.body.setOffset(12, 5);
+    }
+    getHit() {
+        this.setTint(0xee4824);
+        setTimeout(() => {
+            this.clearTint();
+        }, 200);
     }
 
     public update() {}
@@ -65,6 +74,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     shoot() {
+        this.getHit();
         // Generates an "arrow" sprite
         const graphics = this.scene.add.graphics();
         graphics.setVisible(false);

@@ -26,16 +26,15 @@ export default class MainScene extends Phaser.Scene {
         ).setDepth(10);
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
-        this.loadBackground("map_1-1", 0.5);
-        // this.loadBackground("particles", 0.5, true);
-        this.createAligned(
+        this.loadBackground("map_1-2", 0.5);
+        this.loadTileBackground(
             this,
             this.physics.world.bounds.width,
             this.physics.world.bounds.height,
             "particles",
             0.75
         );
-        this.createAligned(
+        this.loadTileBackground(
             this,
             this.physics.world.bounds.width,
             this.physics.world.bounds.height,
@@ -52,7 +51,6 @@ export default class MainScene extends Phaser.Scene {
 
     update() {
         this.debugText.update();
-        this.updateBackground();
 
         this.player.stopMoving();
 
@@ -93,7 +91,7 @@ export default class MainScene extends Phaser.Scene {
         root!.style.backgroundColor = color ?? "#1d252c";
     }
 
-    createAligned = (
+    loadTileBackground = (
         scene: Phaser.Scene,
         totalWidth: number,
         totalHeight: number,
@@ -122,38 +120,53 @@ export default class MainScene extends Phaser.Scene {
     };
 
     loadBackground(texture: string, parallax: number) {
-        const background = this.add.image(0, 0, texture).setOrigin(0);
-        // Check if texture name corresponds to the map texture,
-        // for example: map_1-1, map_3-2...
-        if (/map_\d-\d/g.test(texture)) {
-            const offsetX = parallax * background.width;
-            const offsetY = parallax * background.height;
-            // TODO fix magic numer 37
-            this.physics.world.setBounds(
-                0,
-                0,
-                background.width + 2 * offsetX - 2 * 1.5 * (0.5 * this.player.hitboxRadius),
-                background.height + 2 * offsetY - 2 * 1.5 * (0.5 * this.player.hitboxRadius)
-            );
-        }
+        // Texture atlas' frame is named the same as the texture
+        const width = this.textures.get(texture).frames[texture].width;
+        const height = this.textures.get(texture).frames[texture].height;
+        const [imageOffset, boundsSize] = this.getScrollingFactorCollisionAdjustment(
+            texture,
+            parallax,
+            width,
+            height
+        );
 
-        this.backgroundDict[texture] = background;
-        this.backgroundDict[texture].parallax = parallax;
+        this.add
+            .image(imageOffset.x, imageOffset.y, texture)
+            .setOrigin(0, 0)
+            .setScrollFactor(parallax);
 
-        // background.setScale(mapScale);
+        this.physics.world.setBounds(0, 0, boundsSize.width, boundsSize.height);
 
-        // TODO blur map edges
-        this.updateRootBackground("#181814");
+        const atlasTexture = this.textures.get(texture);
+        console.log("atlasTexture", atlasTexture);
+        // @ts-ignore
+        this.updateRootBackground(atlasTexture.customData.meta.bgColor);
     }
-    updateBackground() {
-        for (const [key, value] of Object.entries(this.backgroundDict)) {
-            // parallax
-            // this.backgroundDict[key].x =
-            //     this.cameras.main.scrollX * this.backgroundDict[key].parallax;
-            // this.backgroundDict[key].y =
-            //     this.cameras.main.scrollY * this.backgroundDict[key].parallax;
-            this.backgroundDict[key].x = this.player.body.x * this.backgroundDict[key].parallax;
-            this.backgroundDict[key].y = this.player.body.y * this.backgroundDict[key].parallax;
-        }
+
+    // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
+    getScrollingFactorCollisionAdjustment(
+        texture,
+        parallax,
+        textureWidth,
+        textureHeight
+    ): [
+        {
+            x: number;
+            y: number;
+        },
+        any
+    ] {
+        var csx = this.cameras.main.scrollX;
+        var csy = this.cameras.main.scrollY;
+
+        var px = 0 + csx * parallax - csx;
+        var py = 0 + csy * parallax - csy;
+
+        const imageOffset: { x: number; y: number } = { x: px, y: py };
+        const boundsSize: { width: number; height: number } = {
+            width: (textureWidth * 1) / parallax,
+            height: (textureHeight * 1) / parallax,
+        };
+        return [imageOffset, boundsSize];
     }
 }
