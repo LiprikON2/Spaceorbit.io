@@ -1,13 +1,16 @@
 import Spaceship from "../objects/spaceship";
 import GenericText from "../objects/genericText";
+import eventsCenter from "../eventsCenter";
 
 export default class MainScene extends Phaser.Scene {
     debugText: GenericText;
     player;
     background;
     keys;
-    debugTextDict;
+    debugTextDict = {};
     backgroundDict = {};
+    screen;
+    emitter;
     constructor() {
         super({ key: "MainScene" });
     }
@@ -25,17 +28,47 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-1", 0.5);
-        this.loadBackground("particles", 0.4, true);
-        this.loadBackground("particles", 0.2, true);
+        // this.loadBackground("particles", 0.4, true);
+        // this.loadBackground("particles", 0.2, true);
+
+        this.scene.launch("ExportParticlesScene", { player: this.player });
+
+        // this.screen = new Phaser.Geom.Rectangle(
+        //     this.player.x - (this.screenWidth * 1.5) / 2,
+        //     this.player.x - (this.screenHeight * 1.5) / 2,
+        //     this.screenWidth * 3,
+        //     this.screenHeight * 3sd
+        // );
+
+        // {
+        // {
+        //     frame: "red_ball",
+        //     emitZone: { source: screen, quantity: 12 },
+        //     deathZone: { source: offscreen, type: "onLeave" },
+        //     // frequency: 150,
+        //     lifespan: 30000,
+        //     scale: 0.8,
+        // },
+        // {
+        //     frame: "yellow_ball",
+        //     emitZone: { source: screen },s
+        //     deathZone: { source: offscreen, type: "onLeave" },
+        //     // frequency: 500,
+        //     quantity: 4,
+        //     lifespan: 30000,
+        // },
+        // ]);
+
+        // emitter.speedX.propertyValue = 1000;
+        // emitter.emitZone.updateSource();
+        // console.log("emitter", emitter.speedX);
 
         // Make player look at the cursor
-        this.input.on(
-            "pointermove",
-            (event) => {
-                this.player.lookAtPoint(event.worldX, event.worldY);
-            },
-            this
-        );
+        this.input.on("pointermove", (event) => {
+            this.player.lookAtPoint(event.worldX, event.worldY);
+            // TODO watch for change of this.player
+            eventsCenter.emit("update-player", this.player);
+        });
     }
 
     update() {
@@ -43,6 +76,7 @@ export default class MainScene extends Phaser.Scene {
         this.updateBackground();
 
         this.player.stopMoving();
+
         // Key bindings
         const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
         const leftBtn = this.keys.A.isDown || this.keys.LEFT.isDown;

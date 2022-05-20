@@ -6,6 +6,7 @@ export default class PreloadScene extends Phaser.Scene {
     preload() {
         this.load.image("spaceship", "assets/img/spaceship.webp");
         this.load.image("map_1-1", "assets/img/map_1-1.jpg");
+        this.load.image("particle", "assets/img/particle.webp");
         // this.load.spritesheet("particles", "assets/img/particles.png", {
         //     frameWidth: 1920,
         //     frameHeight: 1080,
@@ -14,11 +15,12 @@ export default class PreloadScene extends Phaser.Scene {
             frameWidth: 1080,
             frameHeight: 1080,
         });
+        this.load.atlas("megaset", "assets/atlas/megaset-0.png", "assets/atlas/megaset-0.json");
     }
 
     create() {
         this.scene.start("MainScene");
-        // this.scene.start("ExportParticlesScene");
+        // this.scene.launch("ExportParticlesdsScene");
 
         /**
          * This is how you would dynamically import the mainScene class (with code splitting),
