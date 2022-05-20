@@ -1,6 +1,5 @@
 import Spaceship from "../objects/spaceship";
 import GenericText from "../objects/genericText";
-import eventsCenter from "../eventsCenter";
 
 export default class MainScene extends Phaser.Scene {
     debugText: GenericText;
@@ -28,15 +27,26 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-1", 0.5);
-        this.loadBackground("particles", 0.5, true);
-
-        // this.scene.launch("ExportParticlesScene", { player: this.player });
+        // this.loadBackground("particles", 0.5, true);
+        this.createAligned(
+            this,
+            this.physics.world.bounds.width,
+            this.physics.world.bounds.height,
+            "particles",
+            0.75
+        );
+        this.createAligned(
+            this,
+            this.physics.world.bounds.width,
+            this.physics.world.bounds.height,
+            "particles",
+            1,
+            180
+        );
 
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);
-            // TODO watch for change of this.player
-            // eventsCenter.emit("update-player", this.player);
         });
     }
 
@@ -83,24 +93,36 @@ export default class MainScene extends Phaser.Scene {
         root!.style.backgroundColor = color ?? "#1d252c";
     }
 
-    loadBackground(texture: string, parallax: number, isTileSprite = false) {
-        let background;
-        if (!isTileSprite) {
-            // TODO use .setScrollFactor(parallax)
-            // background = this.add.image(0, 0, texture).setOrigin(0).setScrollFactor(parallax);
-            background = this.add.image(0, 0, texture).setOrigin(0);
-        } else {
-            console.log("this.physics.world.bounds", this.physics.world.bounds);
-            background = this.add
-                .tileSprite(
-                    this.physics.world.bounds.centerX,
-                    this.physics.world.bounds.centerY,
-                    17280,
-                    9720,
-                    texture
-                )
-                .setOrigin(0.5);
+    createAligned = (
+        scene: Phaser.Scene,
+        totalWidth: number,
+        totalHeight: number,
+        texture: string,
+        scrollFactor: number,
+        angle: number = 0
+    ) => {
+        const { width: w, height: h } = scene.textures.get(texture).getSourceImage();
+        const countX = Math.floor(totalWidth / w) * scrollFactor;
+        const countY = Math.floor(totalHeight / h) * scrollFactor;
+
+        let y = -h;
+        for (let i = 0; i < countY + 3; i++) {
+            let x = -w;
+            for (let j = 0; j < countX + 3; ++j) {
+                const m = scene.add
+                    .image(x, y, texture)
+                    .setOrigin(0, 1)
+                    .setScrollFactor(scrollFactor)
+                    .setAngle(angle);
+
+                x += m.width;
+            }
+            y += scene.scale.height;
         }
+    };
+
+    loadBackground(texture: string, parallax: number) {
+        const background = this.add.image(0, 0, texture).setOrigin(0);
         // Check if texture name corresponds to the map texture,
         // for example: map_1-1, map_3-2...
         if (/map_\d-\d/g.test(texture)) {
@@ -110,8 +132,8 @@ export default class MainScene extends Phaser.Scene {
             this.physics.world.setBounds(
                 0,
                 0,
-                background.width + offsetX * 2 - 2 * 37,
-                background.height + offsetY * 2 - 2 * 37
+                background.width + 2 * offsetX - 2 * 1.5 * (0.5 * this.player.hitboxRadius),
+                background.height + 2 * offsetY - 2 * 1.5 * (0.5 * this.player.hitboxRadius)
             );
         }
 
@@ -120,7 +142,6 @@ export default class MainScene extends Phaser.Scene {
 
         // background.setScale(mapScale);
 
-        // todo dynamically get bg average dark color
         // TODO blur map edges
         this.updateRootBackground("#181814");
     }

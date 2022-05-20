@@ -16,7 +16,7 @@ const config = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, MainScene, ExportParticlesScene],
+    scene: [PreloadScene, MainScene],
     physics: {
         default: "arcade",
         arcade: {
