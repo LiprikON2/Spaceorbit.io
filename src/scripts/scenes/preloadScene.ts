@@ -10,7 +10,7 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 1080,
         });
         this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
-        this.load.atlas("map_1-2", "assets/maps/map_1-1.jpg", "assets/maps/map_1-2.json");
+        this.load.atlas("map_1-2", "assets/maps/map_1-2.webp", "assets/maps/map_1-2.json");
     }
 
     create() {
