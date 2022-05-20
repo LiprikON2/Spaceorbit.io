@@ -38,16 +38,16 @@ export default class ExportParticlesScene extends Phaser.Scene {
             },
         });
 
+        eventsCenter.on("update-player", (player) => {
+            console.log(player.xdsds);
+            this.player = player;
+        });
+
         // this.fillWithParticles(
         //     Number(this.game.config.width),
         //     Number(this.game.config.height),
         //     0.001
         // );
-
-        eventsCenter.on("update-player", (player) => {
-            console.log(player.xdsds);
-            this.player = player;
-        });
     }
 
     update() {

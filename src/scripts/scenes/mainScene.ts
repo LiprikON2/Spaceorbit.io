@@ -28,46 +28,15 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-1", 0.5);
-        // this.loadBackground("particles", 0.4, true);
-        // this.loadBackground("particles", 0.2, true);
+        this.loadBackground("particles", 0.5, true);
 
-        this.scene.launch("ExportParticlesScene", { player: this.player });
-
-        // this.screen = new Phaser.Geom.Rectangle(
-        //     this.player.x - (this.screenWidth * 1.5) / 2,
-        //     this.player.x - (this.screenHeight * 1.5) / 2,
-        //     this.screenWidth * 3,
-        //     this.screenHeight * 3sd
-        // );
-
-        // {
-        // {
-        //     frame: "red_ball",
-        //     emitZone: { source: screen, quantity: 12 },
-        //     deathZone: { source: offscreen, type: "onLeave" },
-        //     // frequency: 150,
-        //     lifespan: 30000,
-        //     scale: 0.8,
-        // },
-        // {
-        //     frame: "yellow_ball",
-        //     emitZone: { source: screen },s
-        //     deathZone: { source: offscreen, type: "onLeave" },
-        //     // frequency: 500,
-        //     quantity: 4,
-        //     lifespan: 30000,
-        // },
-        // ]);
-
-        // emitter.speedX.propertyValue = 1000;
-        // emitter.emitZone.updateSource();
-        // console.log("emitter", emitter.speedX);
+        // this.scene.launch("ExportParticlesScene", { player: this.player });
 
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);
             // TODO watch for change of this.player
-            eventsCenter.emit("update-player", this.player);
+            // eventsCenter.emit("update-player", this.player);
         });
     }
 
@@ -117,6 +86,8 @@ export default class MainScene extends Phaser.Scene {
     loadBackground(texture: string, parallax: number, isTileSprite = false) {
         let background;
         if (!isTileSprite) {
+            // TODO use .setScrollFactor(parallax)
+            // background = this.add.image(0, 0, texture).setOrigin(0).setScrollFactor(parallax);
             background = this.add.image(0, 0, texture).setOrigin(0);
         } else {
             console.log("this.physics.world.bounds", this.physics.world.bounds);
