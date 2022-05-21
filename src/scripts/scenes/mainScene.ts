@@ -10,6 +10,7 @@ export default class MainScene extends Phaser.Scene {
     backgroundDict = {};
     screen;
     emitter;
+    zoom = 1;
     constructor() {
         super({ key: "MainScene" });
     }
@@ -40,6 +41,24 @@ export default class MainScene extends Phaser.Scene {
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);
+        });
+
+        this.cameras.main.setZoom(1);
+        this.cameras.main.centerOn(0, 0);
+
+        // @ts-ignore
+        const scroller = this.plugins.get("rexMouseWheelScroller").add(this, {
+            speed: 0.001,
+        });
+        scroller.on("scroll", (inc, gameObject, scroller) => {
+            this.zoom -= inc;
+            // Enforce min zoom
+            this.zoom = Math.max(this.zoom, 0.1);
+            // Snap to normal zoom
+            if (Math.abs(this.zoom - 1) < 0.08) {
+                this.zoom = 1;
+            }
+            this.cameras.main.setZoom(this.zoom);
         });
     }
 
