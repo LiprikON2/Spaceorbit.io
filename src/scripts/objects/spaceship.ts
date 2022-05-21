@@ -8,7 +8,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfHeight;
     exhaustEmitter;
     laserSounds;
-    primaryFireRate = 250; // 200 -- 600 (lower value makes faster fire rate)
+    primaryFireRate = 600; // lower value makes faster fire rate
     lastFired = -Infinity;
     constructor(scene, x, y, atlasTexture, depth = 10) {
         super(scene, x, y, atlasTexture);
@@ -141,12 +141,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.laserSounds[0].play();
         } else {
             // Play rare sound
-            console.log(
-                "randomSound",
-                randomSound,
-                "randomSound % this.laserSounds.length",
-                randomSound % this.laserSounds.length
-            );
             this.laserSounds[randomSound % this.laserSounds.length].play();
         }
 
