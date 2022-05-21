@@ -1,22 +1,22 @@
 {
-  "frames": {
-    "map": {
-      "frame": {
-        "x": 0,
-        "y": 0,
-        "w": 3698,
-        "h": 2264
-      }
-    }
-  },
-  "meta": {
-    "image": "map_1-1.jpg",
-    "format": "RGB888",
-    "size": {
-      "w": 3698,
-      "h": 2264
+    "frames": {
+        "map": {
+            "frame": {
+                "x": 0,
+                "y": 0,
+                "w": 3698,
+                "h": 2264
+            }
+        }
     },
-    "scale": 1,
-    "bgColor": "#181814"
-  }
+    "meta": {
+        "image": "map_1-1.jpg",
+        "format": "RGB888",
+        "size": {
+            "w": 3698,
+            "h": 2264
+        },
+        "scale": 1,
+        "bgColor": "#181814"
+    }
 }

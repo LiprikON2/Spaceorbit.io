@@ -1,0 +1,43 @@
+{
+    "frames": {
+        "map": {
+            "frame": {
+                "x": 0,
+                "y": 0,
+                "w": 173,
+                "h": 291
+            }
+        }
+    },
+    "meta": {
+        "image": "F5S4.png",
+        "format": "RGB888",
+        "size": {
+            "w": 173,
+            "h": 291
+        },
+        "scale": 1,
+        "speed": 200,
+        "health": 16000,
+        "hitboxRadius": 50,
+        "exhaustOrigin": {
+            "x": 86.5,
+            "y": 244
+        },
+        "thrustersOrigins": [],
+        "weaponsOrigins": [
+            {
+                "x": 0,
+                "y": 0
+            },
+            {
+                "x": 0,
+                "y": 0
+            },
+            {
+                "x": 0,
+                "y": 0
+            }
+        ]
+    }
+}

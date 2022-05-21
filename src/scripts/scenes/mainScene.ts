@@ -18,12 +18,7 @@ export default class MainScene extends Phaser.Scene {
         // Init keys
         this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
 
-        this.player = new Spaceship(
-            this,
-            this.cameras.main.width / 2,
-            this.cameras.main.height / 2,
-            "spaceship"
-        ).setDepth(10);
+        this.player = new Spaceship(this, 0, 0, "F5S4").setDepth(10);
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-2", 0.5);
@@ -42,7 +37,6 @@ export default class MainScene extends Phaser.Scene {
             1,
             180
         );
-
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);

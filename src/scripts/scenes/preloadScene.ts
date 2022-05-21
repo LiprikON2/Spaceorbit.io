@@ -4,11 +4,18 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("spaceship", "assets/img/spaceship.webp");
+        this.load.atlas({
+            key: "F5S4",
+            textureURL: "assets/ships/F5S4.png",
+            normalMap: "assets/ships/F5S4N.png",
+            atlasURL: "assets/ships/F5S4.json",
+        });
+        // TODO is it better to use power of 2?
         this.load.spritesheet("particles", "assets/img/particles_1080x1080.png", {
             frameWidth: 1080,
             frameHeight: 1080,
         });
+        this.load.image("exhaust", "assets/img/whitePuff00.png");
         this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
         this.load.atlas("map_1-2", "assets/maps/map_1-2.webp", "assets/maps/map_1-2.json");
     }

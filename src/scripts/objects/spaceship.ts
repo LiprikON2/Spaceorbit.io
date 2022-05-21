@@ -3,25 +3,54 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     shields;
     speed;
     hitboxRadius;
-    constructor(scene, x, y, texture, speed = 2000, hitboxRadius = 50) {
-        super(scene, x, y, texture);
+    exhaustOrigin;
+    halfWidth;
+    halfHeight;
+    exhaustEmitter;
+    constructor(scene, x, y, atlasTexture) {
+        super(scene, x, y, atlasTexture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.setCircularHitbox(hitboxRadius);
-        this.setCollideWorldBounds(true).setScale(0.75).setOrigin(0.5);
-        this.x = 0;
-        this.y = 0;
+        const atlas = scene.textures.get(atlasTexture);
+        this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
+        this.speed = atlas.customData["meta"].speed;
+        this.health = atlas.customData["meta"].health;
+        this.exhaustOrigin = atlas.customData["meta"].exhaustOrigin;
+        const scale = atlas.customData["meta"].scale;
 
-        this.hitboxRadius = hitboxRadius;
-        this.speed = speed;
+        this.halfWidth = this.body.width / 2;
+        this.halfHeight = this.body.height / 2;
+        this.setCircularHitbox(this.hitboxRadius);
+        this.setCollideWorldBounds(true).setScale(scale).setOrigin(0.5);
+
+        const exhaustParticles = this.scene.add.particles("exhaust");
+        this.exhaustEmitter = exhaustParticles.createEmitter({
+            x: 0,
+            y: 0,
+            quantity: 5,
+            frequency: 1,
+            scale: { start: 0.1, end: 0.06 },
+            lifespan: { min: 100, max: 300 },
+            alpha: { start: 0.5, end: 0, ease: "Sine.easeIn" },
+            radial: true,
+            rotate: { min: -180, max: 180 },
+            angle: { min: 30, max: 110 },
+            follow: this,
+            followOffset: {
+                x: -this.halfWidth + this.exhaustOrigin.x,
+                y: -this.halfHeight + this.exhaustOrigin.y,
+            },
+            blendMode: "SCREEN",
+            tint: 0x89c5f0,
+        });
     }
 
     setCircularHitbox(hitboxRadius) {
         this.body.setCircle(
             hitboxRadius,
-            this.body.width / 2 - hitboxRadius,
-            this.body.height / 2 - hitboxRadius
+            this.halfWidth - hitboxRadius,
+            this.halfHeight - hitboxRadius
         );
         // this.body.setSize(50, 50);
         // this.body.setOffset(12, 5);
@@ -32,12 +61,21 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.clearTint();
         }, 200);
     }
-
+    public create() {}
     public update() {}
 
     lookAtPoint(x, y) {
-        const angle = Phaser.Math.RAD_TO_DEG * Phaser.Math.Angle.Between(this.x, this.y, x, y) + 90;
+        const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y);
+        this.updateExhaustPosition(rotation);
+
+        const angle = Phaser.Math.RAD_TO_DEG * rotation + 90;
         this.setAngle(angle);
+    }
+    updateExhaustPosition(rotation) {
+        const R = this.halfHeight - this.exhaustOrigin.y;
+        const offsetX = R * Math.cos(rotation);
+        const offsetY = R * Math.sin(rotation);
+        this.exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
     }
 
     stopMoving() {
