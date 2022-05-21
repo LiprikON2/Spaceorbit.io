@@ -7,14 +7,14 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth;
     halfHeight;
     exhaustEmitter;
-    constructor(scene, x, y, atlasTexture) {
+    constructor(scene, x, y, atlasTexture, depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
         const atlas = scene.textures.get(atlasTexture);
         this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
-        this.speed = atlas.customData["meta"].speed;
+        this.speed = atlas.customData["meta"].speed + 200;
         this.health = atlas.customData["meta"].health;
         this.exhaustOrigin = atlas.customData["meta"].exhaustOrigin;
         const scale = atlas.customData["meta"].scale;
@@ -22,9 +22,9 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.hitboxRadius);
-        this.setCollideWorldBounds(true).setScale(scale).setOrigin(0.5);
+        this.setCollideWorldBounds(true).setScale(scale).setOrigin(0.5).setDepth(depth);
 
-        const exhaustParticles = this.scene.add.particles("exhaust");
+        const exhaustParticles = this.scene.add.particles("exhaust").setDepth(depth - 1);
         this.exhaustEmitter = exhaustParticles.createEmitter({
             x: 0,
             y: 0,
@@ -41,8 +41,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 x: -this.halfWidth + this.exhaustOrigin.x,
                 y: -this.halfHeight + this.exhaustOrigin.y,
             },
-            blendMode: "SCREEN",
             tint: 0x89c5f0,
+            blendMode: "SCREEN",
         });
     }
 
