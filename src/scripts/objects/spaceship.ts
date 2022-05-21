@@ -17,7 +17,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         const atlas = scene.textures.get(atlasTexture);
         this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
-        this.speed = atlas.customData["meta"].speed + 200;
+        this.speed = atlas.customData["meta"].speed;
         this.health = atlas.customData["meta"].health;
         this.exhaustOrigin = atlas.customData["meta"].exhaustOrigin;
         (this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) => {
@@ -144,7 +144,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.laserSounds[randomSound % this.laserSounds.length].play();
         }
 
-        const projectileVelocity = 2000;
+        const projectileVelocity = 5000;
+        const projectileLifespan = 30;
 
         const shipVelocityX = this.body.velocity.x;
         const shipVelocityY = this.body.velocity.y;
@@ -161,7 +162,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         setTimeout(() => {
             laserBeam.destroy();
-        }, 1000);
+        }, projectileVelocity / projectileLifespan);
     }
 
     primaryFire(time) {
