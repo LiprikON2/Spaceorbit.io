@@ -91,6 +91,8 @@ export default class MainScene extends Phaser.Scene {
         root!.style.backgroundColor = color ?? "#1d252c";
     }
 
+    // https://blog.ourcade.co/posts/2020/add-pizazz-parallax-scrolling-phaser-3/
+    // TODO a way to optimize it further would be to recylcle the tiles
     loadTileBackground = (
         scene: Phaser.Scene,
         totalWidth: number,
@@ -119,33 +121,30 @@ export default class MainScene extends Phaser.Scene {
         }
     };
 
-    loadBackground(texture: string, parallax: number) {
-        // Texture atlas' frame is named the same as the texture
-        const width = this.textures.get(texture).frames[texture].width;
-        const height = this.textures.get(texture).frames[texture].height;
+    loadBackground(atlasTexture: string, parallax: number) {
+        const atlas = this.textures.get(atlasTexture);
+        const width = atlas.frames["map"].width;
+        const height = atlas.frames["map"].height;
+        const color = atlas.customData["meta"].bgColor;
+
         const [imageOffset, boundsSize] = this.getScrollingFactorCollisionAdjustment(
-            texture,
             parallax,
             width,
             height
         );
 
         this.add
-            .image(imageOffset.x, imageOffset.y, texture)
+            .image(imageOffset.x, imageOffset.y, atlasTexture)
             .setOrigin(0, 0)
             .setScrollFactor(parallax);
 
         this.physics.world.setBounds(0, 0, boundsSize.width, boundsSize.height);
 
-        const atlasTexture = this.textures.get(texture);
-        console.log("atlasTexture", atlasTexture);
-        // @ts-ignore
-        this.updateRootBackground(atlasTexture.customData.meta.bgColor);
+        this.updateRootBackground(color);
     }
 
     // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
     getScrollingFactorCollisionAdjustment(
-        texture,
         parallax,
         textureWidth,
         textureHeight
