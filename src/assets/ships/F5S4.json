@@ -22,7 +22,7 @@
         "hitboxRadius": 50,
         "exhaustOrigin": {
             "x": 86.5,
-            "y": 244
+            "y": 250
         },
         "thrustersOrigins": [],
         "weaponsOrigins": [

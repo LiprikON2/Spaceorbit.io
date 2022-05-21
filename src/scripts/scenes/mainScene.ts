@@ -43,7 +43,7 @@ export default class MainScene extends Phaser.Scene {
         });
     }
 
-    update() {
+    update(time, delta) {
         this.debugText.update();
 
         this.player.stopMoving();
@@ -76,7 +76,7 @@ export default class MainScene extends Phaser.Scene {
 
         // Shooting
         if (primaryShootBtn) {
-            this.player.shoot();
+            this.player.primaryFire(time);
         }
     }
 

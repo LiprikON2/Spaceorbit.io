@@ -1,6 +1,7 @@
 import "phaser";
 import MainScene from "./scenes/mainScene";
 import ExportParticlesScene from "./scenes/exportParticlesScene";
+import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import PreloadScene from "./scenes/preloadScene";
 
 const DEFAULT_WIDTH = 1920;
@@ -23,6 +24,15 @@ const config = {
             debug: false,
             gravity: {},
         },
+    },
+    plugins: {
+        global: [
+            {
+                key: "rexMouseWheelScroller",
+                plugin: MouseWheelScrollerPlugin,
+                start: true,
+            },
+        ],
     },
 };
 

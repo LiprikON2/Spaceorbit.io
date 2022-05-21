@@ -4,20 +4,32 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
+        // Maps
+        this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
+        this.load.atlas("map_1-2", "assets/maps/map_1-2.webp", "assets/maps/map_1-2.json");
+
+        // Ships
         this.load.atlas({
             key: "F5S4",
             textureURL: "assets/ships/F5S4.png",
             normalMap: "assets/ships/F5S4N.png",
             atlasURL: "assets/ships/F5S4.json",
         });
+        // Weapons
+        this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
+        this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");
+        this.load.audio("laser_sound_3", "assets/weapons/lasers/laser3_short.mp3");
+        this.load.spritesheet("laser_beam", "assets/weapons/lasers/spr_bullet_strip02.png", {
+            frameWidth: 95,
+            frameHeight: 68,
+        });
+        // Particles
         // TODO is it better to use power of 2?
         this.load.spritesheet("particles", "assets/img/particles_1080x1080.png", {
             frameWidth: 1080,
             frameHeight: 1080,
         });
         this.load.image("exhaust", "assets/img/whitePuff00.png");
-        this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
-        this.load.atlas("map_1-2", "assets/maps/map_1-2.webp", "assets/maps/map_1-2.json");
     }
 
     create() {
