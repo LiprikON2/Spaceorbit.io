@@ -19,24 +19,34 @@
         "scale": 1,
         "speed": 200,
         "health": 16000,
-        "hitboxRadius": 50,
-        "exhaustOrigin": {
-            "x": 86.5,
-            "y": 250
-        },
+        "hitboxRadius": 75,
+        "exhaustOrigins": [
+            {
+                "x": 86.5,
+                "y": 250
+            },
+            {
+                "x": 45,
+                "y": 258
+            },
+            {
+                "x": 129,
+                "y": 258
+            }
+        ],
         "thrustersOrigins": [],
         "weaponsOrigins": [
             {
-                "x": 0,
-                "y": 0
+                "x": 86.5,
+                "y": 43
             },
             {
-                "x": 0,
-                "y": 0
+                "x": 9.5,
+                "y": 192
             },
             {
-                "x": 0,
-                "y": 0
+                "x": 163.5,
+                "y": 192
             }
         ]
     }

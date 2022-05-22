@@ -1,6 +1,6 @@
 import "phaser";
 import MainScene from "./scenes/mainScene";
-import ExportParticlesScene from "./scenes/exportParticlesScene";
+// import ExportParticlesScene from "./scenes/exportParticlesScene";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import PreloadScene from "./scenes/preloadScene";
 

@@ -3,37 +3,47 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     shields;
     speed;
     hitboxRadius;
-    exhaustOrigin;
+    exhaustOrigins;
     halfWidth;
     halfHeight;
-    exhaustEmitter;
+    exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     laserSounds;
     primaryFireRate = 600; // lower value makes faster fire rate
     lastFired = -Infinity;
-    constructor(scene, x, y, atlasTexture, depth = 10) {
+    enemies;
+    weaponsOrigins;
+    constructor(scene, x, y, atlasTexture, enemies = [], depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
         const atlas = scene.textures.get(atlasTexture);
+        this.enemies = enemies;
         this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
         this.speed = atlas.customData["meta"].speed;
         this.health = atlas.customData["meta"].health;
-        this.exhaustOrigin = atlas.customData["meta"].exhaustOrigin;
+        this.exhaustOrigins = atlas.customData["meta"].exhaustOrigins;
+        this.weaponsOrigins = atlas.customData["meta"].weaponsOrigins;
         (this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) => {
             return scene.sound.add(sound);
         })),
-            console.log("this.laserSounds", this.laserSounds);
-
-        this.halfWidth = this.body.width / 2;
+            (this.halfWidth = this.body.width / 2);
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.hitboxRadius);
 
         const scale = atlas.customData["meta"].scale;
         this.setCollideWorldBounds(true).setScale(scale).setOrigin(0.5).setDepth(depth);
 
-        const exhaustParticles = this.scene.add.particles("exhaust").setDepth(depth - 1);
-        this.exhaustEmitter = exhaustParticles.createEmitter({
+        // Create engine exhaust effect
+        this.exhaustOrigins.forEach(() => {
+            this.createExhaust();
+        });
+        this.updateExhaustPosition();
+    }
+
+    createExhaust() {
+        const exhaustParticles = this.scene.add.particles("exhaust").setDepth(this.depth - 1);
+        const exhaustEmitter = exhaustParticles.createEmitter({
             x: 0,
             y: 0,
             quantity: 5,
@@ -45,13 +55,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             rotate: { min: -180, max: 180 },
             angle: { min: 30, max: 110 },
             follow: this,
-            followOffset: {
-                x: -this.halfWidth + this.exhaustOrigin.x,
-                y: -this.halfHeight + this.exhaustOrigin.y,
-            },
             tint: 0x89c5f0,
             blendMode: "SCREEN",
         });
+        exhaustEmitter.stop();
+
+        this.exhaustEmitters.push(exhaustEmitter);
     }
 
     setCircularHitbox(hitboxRadius) {
@@ -60,8 +69,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.halfWidth - hitboxRadius,
             this.halfHeight - hitboxRadius
         );
-        // this.body.setSize(50, 50);
-        // this.body.setOffset(12, 5);
     }
     getHit() {
         this.setTint(0xee4824);
@@ -74,101 +81,166 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     lookAtPoint(x, y) {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y);
-        this.updateExhaustPosition(rotation);
 
         const angle = Phaser.Math.RAD_TO_DEG * rotation + 90;
         this.setAngle(angle);
+        this.updateExhaustPosition();
     }
-    updateExhaustPosition(rotation) {
-        const R = this.halfHeight - this.exhaustOrigin.y;
-        const offsetX = R * Math.cos(rotation);
-        const offsetY = R * Math.sin(rotation);
-        this.exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
+    updateExhaustPosition() {
+        this.exhaustEmitters.forEach((exhaustEmitter, index) => {
+            const { offsetX, offsetY } = this.getRotatedPoint(this.exhaustOrigins[index]);
+            // @ts-ignore
+            exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
+        });
+    }
+    stopExhaust() {
+        this.exhaustEmitters.forEach((exhaustEmitter) => {
+            exhaustEmitter.stop();
+        });
+    }
+    startExhaust() {
+        this.exhaustEmitters.forEach((exhaustEmitter) => {
+            exhaustEmitter.start();
+        });
     }
 
     stopMoving() {
         this.setVelocity(0);
-        this.exhaustEmitter.stop();
+        this.stopExhaust();
     }
     moveUp() {
         this.setVelocityY(-this.speed);
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveDown() {
         this.setVelocityY(this.speed);
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveLeft() {
         this.setVelocityX(-this.speed);
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveRight() {
         this.setVelocityX(this.speed);
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
 
     moveUpRight() {
         this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
         this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveUpLeft() {
         this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
         this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveDownRight() {
         this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
         this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
     moveDownLeft() {
         this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
         this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
-        this.exhaustEmitter.start();
+        this.startExhaust();
     }
 
-    fireLaser() {
+    playRandomSound(sounds) {
         // Bigger value makes rare sounds more rare
         const rareSoundChance = 10;
-        const soundsCount = this.laserSounds.length;
+        const soundsCount = sounds.length;
         // Ensure there is enough sounds
         const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareSoundChance));
 
         // Makes first (main) sound more likely to be played
-        if (randomSound < rareSoundChance - this.laserSounds.length - 1) {
+        if (randomSound < rareSoundChance - sounds.length - 1) {
             // Play main sound
-            this.laserSounds[0].play();
+            sounds[0].play();
         } else {
             // Play rare sound
-            this.laserSounds[randomSound % this.laserSounds.length].play();
+            sounds[randomSound % sounds.length].play();
+        }
+    }
+
+    getRotatedPoint(point, absolute = false) {
+        // Distance from center of a ship to a point on a ship; Corresponds to Y
+        const R = Phaser.Math.Distance.Between(this.halfWidth, this.halfHeight, point.x, point.y);
+
+        // Corresponds to X
+        const additionalRotation = Phaser.Math.Angle.Between(
+            this.halfWidth,
+            this.halfHeight,
+            point.x,
+            point.y
+        );
+
+        let offsetX;
+        let offsetY;
+        if (absolute) {
+            // If needed absolute coordinates, use current position of a ship in a world as a circle origin
+            offsetX = R * Math.cos(this.rotation + additionalRotation) + this.x;
+            offsetY = R * Math.sin(this.rotation + additionalRotation) + this.y;
+        } else {
+            // Otherwise use relative to the sprite coordinates
+            offsetX = R * Math.cos(this.rotation + additionalRotation);
+            offsetY = R * Math.sin(this.rotation + additionalRotation);
+        }
+        return { offsetX, offsetY };
+    }
+
+    fireWeapon(weaponOrigin, addShipMomentum = false) {
+        const projectileVelocity = 5000;
+        const projectileDistance = 900000;
+        const projectileLifespan = projectileDistance / projectileVelocity;
+
+        let velocityX, velocityY;
+        if (addShipMomentum) {
+            // Take ship velocity in asdccount for speed of the bullet
+            const shipVelocityX = this.body.velocity.x;
+            const shipVelocityY = this.body.velocity.y;
+            velocityX = Math.sin(this.rotation) * projectileVelocity + shipVelocityX;
+            velocityY = -Math.cos(this.rotation) * projectileVelocity + shipVelocityY;
+        } else {
+            velocityX = Math.sin(this.rotation) * projectileVelocity;
+            velocityY = -Math.cos(this.rotation) * projectileVelocity;
         }
 
-        const projectileVelocity = 5000;
-        const projectileLifespan = 30;
-
-        const shipVelocityX = this.body.velocity.x;
-        const shipVelocityY = this.body.velocity.y;
-        // Take ship velocity in account for speed of the bullet
-        const velocityX = Math.sin(this.rotation) * projectileVelocity + shipVelocityX;
-        const velocityY = Math.cos(this.rotation) * -projectileVelocity + shipVelocityY;
+        const { offsetX, offsetY } = this.getRotatedPoint(weaponOrigin, true);
 
         const laserBeam = this.scene.physics.add
-            .sprite(this.x, this.y, "laser_beam", 0)
+            .sprite(offsetX, offsetY, "laser_beam", 0)
             .setRotation(this.rotation - Math.PI / 2)
-            .setScale(3, 1)
-            .setOrigin(0.3, 0.5)
+            .setScale(3, 1);
+
+        const hitboxSize = 2;
+        laserBeam
+            .setCircle(
+                hitboxSize,
+                laserBeam.width / 2 - hitboxSize,
+                laserBeam.height / 2 - hitboxSize
+            )
             .setVelocity(velocityX, velocityY);
+
+        this.enemies.forEach((enemy) => {
+            this.scene.physics.add.overlap(enemy, laserBeam, () => {
+                laserBeam.destroy();
+                enemy.getHit();
+            });
+        });
 
         setTimeout(() => {
             laserBeam.destroy();
-        }, projectileVelocity / projectileLifespan);
+        }, projectileLifespan);
     }
 
     primaryFire(time) {
         if (time - this.lastFired > this.primaryFireRate) {
             this.lastFired = time;
-            this.fireLaser();
+            this.playRandomSound(this.laserSounds);
+            this.weaponsOrigins.forEach((weaponOrigin) => {
+                this.fireWeapon(weaponOrigin);
+            });
         }
     }
 }

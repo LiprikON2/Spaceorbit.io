@@ -11,6 +11,7 @@ export default class MainScene extends Phaser.Scene {
     screen;
     emitter;
     zoom = 1;
+    enemies;
     constructor() {
         super({ key: "MainScene" });
     }
@@ -19,7 +20,9 @@ export default class MainScene extends Phaser.Scene {
         // Init keys
         this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
 
-        this.player = new Spaceship(this, 0, 0, "F5S4", 10);
+        this.enemies = [new Spaceship(this, 2500, 2500, "F5S4")];
+        this.player = new Spaceship(this, 0, 0, "F5S4", this.enemies);
+
         this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-2", 0.5);
