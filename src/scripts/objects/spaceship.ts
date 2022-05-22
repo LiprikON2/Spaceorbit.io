@@ -98,10 +98,9 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     public update() {}
 
     lookAtPoint(x, y) {
-        const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y);
+        const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y) + Math.PI / 2;
 
-        const angle = Phaser.Math.RAD_TO_DEG * rotation + 90;
-        this.setAngle(angle);
+        this.setRotation(rotation);
         this.updateExhaustPosition();
     }
     updateExhaustPosition() {
@@ -207,28 +206,53 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         return { offsetX, offsetY };
     }
 
-    fireWeapon(weaponOrigin, addShipMomentum = false) {
+    fireWeapon(weaponOrigin, addShipMomentum = false, atCursor = false) {
         const projectileVelocity = 5000;
         const projectileDistance = 900000;
         const projectileLifespan = projectileDistance / projectileVelocity;
+
+        const { offsetX, offsetY } = this.getRotatedPoint(weaponOrigin, true);
+
+        let rotation;
+        if (atCursor) {
+            // If firing at a cursor, aim them to shoot at cursor
+            const cursorX = this.scene.input.mousePointer.worldX;
+            const cursorY = this.scene.input.mousePointer.worldY;
+            const cursorRotation =
+                Phaser.Math.Angle.Between(offsetX, offsetY, cursorX, cursorY) + Math.PI / 2;
+
+            const maxTraverseAngle = Math.PI / 9;
+            const angleOffset = Math.abs(
+                Phaser.Math.Angle.ShortestBetween(cursorRotation, this.rotation)
+            );
+
+            // Ensures you can't fire behind your back
+            if (angleOffset > maxTraverseAngle) {
+                console.log("overload");
+                rotation = this.rotation;
+            } else {
+                rotation = cursorRotation;
+            }
+        } else {
+            // Else weapons are aimed with ship orientation
+            rotation = this.rotation;
+        }
 
         let velocityX, velocityY;
         if (addShipMomentum) {
             // Take ship velocity in asdccount for speed of the bullet
             const shipVelocityX = this.body.velocity.x;
             const shipVelocityY = this.body.velocity.y;
-            velocityX = Math.sin(this.rotation) * projectileVelocity + shipVelocityX;
-            velocityY = -Math.cos(this.rotation) * projectileVelocity + shipVelocityY;
+            velocityX = Math.sin(rotation) * projectileVelocity + shipVelocityX;
+            velocityY = -Math.cos(rotation) * projectileVelocity + shipVelocityY;
         } else {
-            velocityX = Math.sin(this.rotation) * projectileVelocity;
-            velocityY = -Math.cos(this.rotation) * projectileVelocity;
+            velocityX = Math.sin(rotation) * projectileVelocity;
+            velocityY = -Math.cos(rotation) * projectileVelocity;
         }
-
-        const { offsetX, offsetY } = this.getRotatedPoint(weaponOrigin, true);
 
         const laserBeam = this.scene.physics.add
             .sprite(offsetX, offsetY, "laser_beam", 0)
-            .setRotation(this.rotation - Math.PI / 2)
+            .setRotation(rotation - Math.PI / 2)
             .setScale(3, 1);
 
         const hitboxSize = 2;
@@ -258,7 +282,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.lastFired = time;
             this.playRandomSound(this.laserSounds);
             this.weaponsOrigins.forEach((weaponOrigin) => {
-                this.fireWeapon(weaponOrigin);
+                this.fireWeapon(weaponOrigin, false, true);
             });
         }
     }
