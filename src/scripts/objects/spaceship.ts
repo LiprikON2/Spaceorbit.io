@@ -20,14 +20,18 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const atlas = scene.textures.get(atlasTexture);
         this.enemies = enemies;
         this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
-        this.speed = atlas.customData["meta"].speed;
-        this.health = atlas.customData["meta"].health;
         this.exhaustOrigins = atlas.customData["meta"].exhaustOrigins;
         this.weaponsOrigins = atlas.customData["meta"].weaponsOrigins;
-        (this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) => {
+        this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) => {
             return scene.sound.add(sound);
-        })),
-            (this.halfWidth = this.body.width / 2);
+        });
+
+        this.speed = atlas.customData["meta"].speed;
+        // Each additional engine gives 20% speed boostdsds
+        this.speed += 0.2 * this.speed * (this.exhaustOrigins.length - 1);
+        this.health = atlas.customData["meta"].health;
+
+        this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.hitboxRadius);
 
@@ -70,12 +74,26 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.halfHeight - hitboxRadius
         );
     }
-    getHit() {
+    getHit(projectile) {
         this.setTint(0xee4824);
         setTimeout(() => {
             this.clearTint();
         }, 200);
+
+        if (projectile.name === "laser_beam") {
+            this.health -= 1000;
+
+            if (this.health <= 0) {
+                this.health = 0;
+                this.explode();
+            }
+        }
     }
+    explode() {
+        console.log("i died!");
+        this.destroy();
+    }
+
     public create() {}
     public update() {}
 
@@ -221,11 +239,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 laserBeam.height / 2 - hitboxSize
             )
             .setVelocity(velocityX, velocityY);
+        laserBeam.name = "laser_beam";
 
         this.enemies.forEach((enemy) => {
             this.scene.physics.add.overlap(enemy, laserBeam, () => {
+                enemy.getHit(laserBeam);
                 laserBeam.destroy();
-                enemy.getHit();
             });
         });
 

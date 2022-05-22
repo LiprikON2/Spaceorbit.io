@@ -20,7 +20,7 @@ export default class MainScene extends Phaser.Scene {
         // Init keys
         this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
 
-        this.enemies = [new Spaceship(this, 2500, 2500, "F5S4")];
+        this.enemies = [new Spaceship(this, 1000, 1000, "F5S4")];
         this.player = new Spaceship(this, 0, 0, "F5S4", this.enemies);
 
         this.cameras.main.startFollow(this.player);
