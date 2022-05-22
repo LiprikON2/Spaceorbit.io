@@ -12,6 +12,8 @@ export default class MainScene extends Phaser.Scene {
     emitter;
     zoom = 1;
     enemies;
+    musicPlaylist = ["track_1", "track_2", "track_3"];
+    music;
     constructor() {
         super({ key: "MainScene" });
     }
@@ -41,6 +43,10 @@ export default class MainScene extends Phaser.Scene {
             1,
             180
         );
+
+        this.sound.pauseOnBlur = false;
+        this.playMusicPlaylist(0);
+
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);
@@ -100,6 +106,18 @@ export default class MainScene extends Phaser.Scene {
         if (primaryShootBtn) {
             this.player.primaryFire(time);
         }
+    }
+
+    playMusicPlaylist(trackIndex) {
+        this.music = this.sound.add(this.musicPlaylist[trackIndex]);
+        this.music.play({ volume: 0.3 });
+
+        // Play the next track in a playlist, once finished with this one
+        this.music.on("complete", () => {
+            const nextTrackIndex = (trackIndex + 1) % this.musicPlaylist.length;
+            console.log("nextTrackIndex");
+            this.playMusicPlaylist(nextTrackIndex);
+        });
     }
 
     updateRootBackground(color?) {

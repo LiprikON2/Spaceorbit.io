@@ -22,9 +22,9 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.hitboxRadius = atlas.customData["meta"].hitboxRadius;
         this.exhaustOrigins = atlas.customData["meta"].exhaustOrigins;
         this.weaponsOrigins = atlas.customData["meta"].weaponsOrigins;
-        this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) => {
-            return scene.sound.add(sound);
-        });
+        this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) =>
+            scene.sound.add(sound)
+        );
 
         this.speed = atlas.customData["meta"].speed;
         // Each additional engine gives 20% speed boostdsds
@@ -228,7 +228,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
             // Ensures you can't fire behind your back
             if (angleOffset > maxTraverseAngle) {
-                console.log("overload");
                 rotation = this.rotation;
             } else {
                 rotation = cursorRotation;

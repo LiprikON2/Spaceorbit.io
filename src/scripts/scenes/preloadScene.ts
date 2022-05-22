@@ -30,6 +30,12 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 1080,
         });
         this.load.image("exhaust", "assets/img/whitePuff00.png");
+
+        // Music
+        this.load.audio("track_1", "assets/music/SMP1_THEME_Cargoship.mp3");
+        this.load.audio("track_2", "assets/music/SMP1_THEME_Gliese 1214b.mp3");
+        this.load.audio("track_3", "assets/music/SMP1_THEME_Space caravan.mp3");
+        this.load.audio("track_4", "assets/music/SMP1_THEME_Voyager.mp3");
     }
 
     create() {
