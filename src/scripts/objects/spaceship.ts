@@ -258,7 +258,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         let rotation;
         if (atCursor) {
-            // TODO fix misalignment when shooting to the between left and bottom-left
             // If firing at a cursor, aim them to shoot at cursor
             const cursorX = this.scene.input.mousePointer.worldX;
             const cursorY = this.scene.input.mousePointer.worldY;
@@ -267,7 +266,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
             const maxTraverseAngle = Math.PI / 9;
             const angleOffset = Math.abs(
-                Phaser.Math.Angle.ShortestBetween(cursorRotation, this.rotation)
+                Phaser.Math.Angle.ShortestBetween(
+                    Phaser.Math.Angle.Wrap(cursorRotation),
+                    this.rotation
+                )
             );
 
             // Ensures you can't fire behind your back
