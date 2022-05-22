@@ -170,13 +170,16 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         // Ensure there is enough sounds
         const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareSoundChance));
 
+        // The more weapons are firing, the 'heavier' the firing sound is
+        const pitch = Math.max((this.weaponsOrigins.length - 1) * -200, -2000);
+
         // Makes first (main) sound more likely to be played
         if (randomSound < rareSoundChance - sounds.length - 1) {
             // Play main sound
-            sounds[0].play();
+            sounds[0].play({ detune: pitch });
         } else {
             // Play rare sound
-            sounds[randomSound % sounds.length].play();
+            sounds[randomSound % sounds.length].play({ detune: pitch });
         }
     }
 
@@ -215,6 +218,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         let rotation;
         if (atCursor) {
+            // TODO fix misalignment when shooting to the between left and bottom-left
             // If firing at a cursor, aim them to shoot at cursor
             const cursorX = this.scene.input.mousePointer.worldX;
             const cursorY = this.scene.input.mousePointer.worldY;

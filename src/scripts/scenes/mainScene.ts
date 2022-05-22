@@ -45,15 +45,14 @@ export default class MainScene extends Phaser.Scene {
         );
 
         this.sound.pauseOnBlur = false;
-        this.playMusicPlaylist(0);
+        this.playMusicPlaylist(-1);
 
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
             this.player.lookAtPoint(event.worldX, event.worldY);
         });
 
-        this.cameras.main.setZoom(1);
-        this.cameras.main.centerOn(0, 0);
+        this.cameras.main.setZoom(this.zoom);
 
         // @ts-ignore
         const scroller = this.plugins.get("rexMouseWheelScroller").add(this, {
@@ -109,13 +108,16 @@ export default class MainScene extends Phaser.Scene {
     }
 
     playMusicPlaylist(trackIndex) {
+        if (trackIndex === -1) {
+            // Play random track
+            trackIndex = Phaser.Math.Between(0, this.musicPlaylist.length - 1);
+        }
         this.music = this.sound.add(this.musicPlaylist[trackIndex]);
-        this.music.play({ volume: 0.3 });
+        this.music.play({ volume: 0.1 });
 
         // Play the next track in a playlist, once finished with this one
         this.music.on("complete", () => {
             const nextTrackIndex = (trackIndex + 1) % this.musicPlaylist.length;
-            console.log("nextTrackIndex");
             this.playMusicPlaylist(nextTrackIndex);
         });
     }
@@ -178,6 +180,8 @@ export default class MainScene extends Phaser.Scene {
     }
 
     // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
+    // Scrolling factor doesn't adjust the collision boundaries,
+    //  so they need to be adjusted manually
     getScrollingFactorCollisionAdjustment(
         parallax,
         textureWidth,
