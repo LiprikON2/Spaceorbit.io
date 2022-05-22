@@ -68,6 +68,58 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         exhaustEmitter.stop();
 
         this.exhaustEmitters.push(exhaustEmitter);
+        this.initExhaustSound();
+    }
+
+    updateExhaustPosition() {
+        this.exhaustEmitters.forEach((exhaustEmitter, index) => {
+            const { offsetX, offsetY } = this.getRotatedPoint(this.exhaustOrigins[index]);
+            // @ts-ignore
+            exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
+        });
+    }
+
+    toggleExhaustSound() {
+        if (this.exhaustEmitters[0].on) {
+            this.exhaustTween.fadeIn.play();
+        } else {
+            this.exhaustTween.fadeOut.play();
+        }
+    }
+    stopExhaust() {
+        if (this.exhaustEmitters[0].on) {
+            this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.stop());
+            this.toggleExhaustSound();
+        }
+    }
+
+    initExhaustSound() {
+        // Init exhaust sound and tween
+        const pitch = Math.max((this.exhaustEmitters.length - 1) * -200, -2000);
+        const maxVolume = 0.1;
+
+        // The exhaust sound is constantly playing, tween just changes the volume
+        this.exhaustSound.play({ detune: pitch, loop: true, volume: 0 });
+        this.exhaustTween = {
+            fadeIn: this.scene.tweens.add({
+                targets: this.exhaustSound,
+                volume: maxVolume,
+                duration: 100,
+                paused: 1,
+            }),
+            fadeOut: this.scene.tweens.add({
+                targets: this.exhaustSound,
+                volume: 0,
+                duration: 100,
+                paused: 1,
+            }),
+        };
+    }
+    startExhaust() {
+        if (!this.exhaustEmitters[0].on) {
+            this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.start());
+            this.toggleExhaustSound();
+        }
     }
 
     setCircularHitbox(hitboxRadius) {
@@ -94,7 +146,15 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     explode() {
         console.log("i died!");
-        this.destroy();
+        this.disableBody(true, false);
+
+        setTimeout(() => {
+            this.disableBody(true, true);
+            // TODO dont destroy player...
+            if (!"ai") {
+                this.destroy();
+            }
+        }, 2000);
     }
 
     public create() {}
@@ -105,102 +165,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         this.setRotation(rotation);
         this.updateExhaustPosition();
-    }
-    updateExhaustPosition() {
-        this.exhaustEmitters.forEach((exhaustEmitter, index) => {
-            const { offsetX, offsetY } = this.getRotatedPoint(this.exhaustOrigins[index]);
-            // @ts-ignore
-            exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
-        });
-    }
-
-    stopExhaust() {
-        if (this.exhaustEmitters[0].on) {
-            this.exhaustTween.fadeOut.play();
-
-            this.exhaustEmitters.forEach((exhaustEmitter) => {
-                exhaustEmitter.stop();
-            });
-        }
-    }
-
-    initExhaustSound() {
-        // Init exhaust sound and tween
-        const pitch = Math.max((this.exhaustEmitters.length - 1) * -200, -2000);
-        const maxVolume = 0.1;
-
-        // The exhaust sound is constantly playing, tween just changes the volume
-        this.exhaustSound.play({ detune: pitch, loop: true, volume: 0 });
-        this.exhaustTween = {
-            fadeIn: this.scene.tweens.add({
-                targets: this.exhaustSound,
-                volume: maxVolume,
-                duration: 1000,
-            }),
-            fadeOut: this.scene.tweens.add({
-                targets: this.exhaustSound,
-                volume: 0,
-                duration: 1000,
-                paused: 1,
-            }),
-        };
-    }
-    startExhaust() {
-        if (!this.exhaustEmitters[0].on) {
-            if (!this.exhaustSound.isPlaying) {
-                this.initExhaustSound();
-            } else {
-                this.exhaustTween.fadeIn.play();
-            }
-
-            this.exhaustEmitters.forEach((exhaustEmitter) => {
-                exhaustEmitter.start();
-            });
-        }
-    }
-
-    resetMovement() {
-        this.setVelocity(0);
-    }
-    stoppedMoving() {
-        this.stopExhaust();
-    }
-    moveUp() {
-        this.setVelocityY(-this.speed);
-        this.startExhaust();
-    }
-    moveDown() {
-        this.setVelocityY(this.speed);
-        this.startExhaust();
-    }
-    moveLeft() {
-        this.setVelocityX(-this.speed);
-        this.startExhaust();
-    }
-    moveRight() {
-        this.setVelocityX(this.speed);
-        this.startExhaust();
-    }
-
-    moveUpRight() {
-        this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
-        this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
-        this.startExhaust();
-    }
-    moveUpLeft() {
-        this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
-        this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
-        this.startExhaust();
-    }
-    moveDownRight() {
-        this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
-        this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
-        this.startExhaust();
-    }
-    moveDownLeft() {
-        this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
-        this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
-        this.startExhaust();
     }
 
     playRandomSound(sounds) {
@@ -247,6 +211,78 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             offsetY = R * Math.sin(this.rotation + additionalRotation);
         }
         return { offsetX, offsetY };
+    }
+
+    resetMovement() {
+        this.setVelocity(0);
+    }
+    stoppedMoving() {
+        this.stopExhaust();
+    }
+    moveUp() {
+        if (this.active) {
+            this.setVelocityY(-this.speed);
+            this.startExhaust();
+        }
+    }
+    moveDown() {
+        if (this.active) {
+            this.setVelocityY(this.speed);
+            this.startExhaust();
+        }
+    }
+    moveLeft() {
+        if (this.active) {
+            this.setVelocityX(-this.speed);
+            this.startExhaust();
+        }
+    }
+    moveRight() {
+        if (this.active) {
+            this.setVelocityX(this.speed);
+            this.startExhaust();
+        }
+    }
+
+    moveUpRight() {
+        if (this.active) {
+            this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
+            this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
+            this.startExhaust();
+        }
+    }
+    moveUpLeft() {
+        if (this.active) {
+            this.setVelocityY(-this.speed * Math.cos(Math.PI / 4));
+            this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
+            this.startExhaust();
+        }
+    }
+    moveDownRight() {
+        if (this.active) {
+            this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
+            this.setVelocityX(this.speed * Math.cos(Math.PI / 4));
+            this.startExhaust();
+        }
+    }
+    moveDownLeft() {
+        if (this.active) {
+            this.setVelocityY(this.speed * Math.cos(Math.PI / 4));
+            this.setVelocityX(-this.speed * Math.cos(Math.PI / 4));
+            this.startExhaust();
+        }
+    }
+
+    primaryFire(time) {
+        if (this.active) {
+            if (time - this.lastFired > this.primaryFireRate) {
+                this.lastFired = time;
+                this.playRandomSound(this.laserSounds);
+                this.weaponsOrigins.forEach((weaponOrigin) => {
+                    this.fireWeapon(weaponOrigin, false, true);
+                });
+            }
+        }
     }
 
     fireWeapon(weaponOrigin, addShipMomentum = false, atCursor = false) {
@@ -320,15 +356,5 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         setTimeout(() => {
             laserBeam.destroy();
         }, projectileLifespan);
-    }
-
-    primaryFire(time) {
-        if (time - this.lastFired > this.primaryFireRate) {
-            this.lastFired = time;
-            this.playRandomSound(this.laserSounds);
-            this.weaponsOrigins.forEach((weaponOrigin) => {
-                this.fireWeapon(weaponOrigin, false, true);
-            });
-        }
     }
 }
