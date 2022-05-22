@@ -8,10 +8,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfHeight;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     laserSounds;
+    exhaustSound;
     primaryFireRate = 600; // lower value makes faster fire rate
     lastFired = -Infinity;
     enemies;
     weaponsOrigins;
+    exhaustTween;
     constructor(scene, x, y, atlasTexture, enemies = [], depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
@@ -25,6 +27,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) =>
             scene.sound.add(sound)
         );
+        this.exhaustSound = scene.sound.add("exhaust_sound_1");
 
         this.speed = atlas.customData["meta"].speed;
         // Each additional engine gives 20% speed boostdsds
@@ -110,19 +113,56 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
         });
     }
+
     stopExhaust() {
-        this.exhaustEmitters.forEach((exhaustEmitter) => {
-            exhaustEmitter.stop();
-        });
-    }
-    startExhaust() {
-        this.exhaustEmitters.forEach((exhaustEmitter) => {
-            exhaustEmitter.start();
-        });
+        if (this.exhaustEmitters[0].on) {
+            this.exhaustTween.fadeOut.play();
+
+            this.exhaustEmitters.forEach((exhaustEmitter) => {
+                exhaustEmitter.stop();
+            });
+        }
     }
 
-    stopMoving() {
+    initExhaustSound() {
+        // Init exhaust sound and tween
+        const pitch = Math.max((this.exhaustEmitters.length - 1) * -200, -2000);
+        const maxVolume = 0.1;
+
+        // The exhaust sound is constantly playing, tween just changes the volume
+        this.exhaustSound.play({ detune: pitch, loop: true, volume: 0 });
+        this.exhaustTween = {
+            fadeIn: this.scene.tweens.add({
+                targets: this.exhaustSound,
+                volume: maxVolume,
+                duration: 1000,
+            }),
+            fadeOut: this.scene.tweens.add({
+                targets: this.exhaustSound,
+                volume: 0,
+                duration: 1000,
+                paused: 1,
+            }),
+        };
+    }
+    startExhaust() {
+        if (!this.exhaustEmitters[0].on) {
+            if (!this.exhaustSound.isPlaying) {
+                this.initExhaustSound();
+            } else {
+                this.exhaustTween.fadeIn.play();
+            }
+
+            this.exhaustEmitters.forEach((exhaustEmitter) => {
+                exhaustEmitter.start();
+            });
+        }
+    }
+
+    resetMovement() {
         this.setVelocity(0);
+    }
+    stoppedMoving() {
         this.stopExhaust();
     }
     moveUp() {

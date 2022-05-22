@@ -16,9 +16,6 @@ export default class PreloadScene extends Phaser.Scene {
             atlasURL: "assets/ships/F5S4.json",
         });
         // Weapons
-        this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
-        this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");
-        this.load.audio("laser_sound_3", "assets/weapons/lasers/laser3_short.mp3");
         this.load.spritesheet("laser_beam", "assets/weapons/lasers/spr_bullet_strip02.png", {
             frameWidth: 95,
             frameHeight: 68,
@@ -30,6 +27,11 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 1080,
         });
         this.load.image("exhaust", "assets/img/whitePuff00.png");
+        // Sound Effects
+        this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
+        this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");
+        this.load.audio("laser_sound_3", "assets/weapons/lasers/laser3_short.mp3");
+        this.load.audio("exhaust_sound_1", "assets/ships/thrusters_1.mp3");
 
         // Music
         this.load.audio("track_1", "assets/music/SMP1_THEME_Cargoship.mp3");

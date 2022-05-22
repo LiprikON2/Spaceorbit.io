@@ -73,7 +73,7 @@ export default class MainScene extends Phaser.Scene {
     update(time, delta) {
         this.debugText.update();
 
-        this.player.stopMoving();
+        this.player.resetMovement();
 
         // Key bindings
         const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
@@ -82,24 +82,34 @@ export default class MainScene extends Phaser.Scene {
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.input.activePointer.isDown;
 
-        // Moving
+        let hasMoved = false;
+        // Movement
         if (upBtn && !leftBtn && !downBtn && !rightBtn) {
             this.player.moveUp();
+            hasMoved = true;
         } else if (!upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveLeft();
+            hasMoved = true;
         } else if (!upBtn && !leftBtn && downBtn && !rightBtn) {
             this.player.moveDown();
+            hasMoved = true;
         } else if (!upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveRight();
+            hasMoved = true;
         } else if (upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveUpLeft();
+            hasMoved = true;
         } else if (upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveUpRight();
+            hasMoved = true;
         } else if (!upBtn && leftBtn && downBtn && !rightBtn) {
             this.player.moveDownLeft();
+            hasMoved = true;
         } else if (!upBtn && !leftBtn && downBtn && rightBtn) {
             this.player.moveDownRight();
+            hasMoved = true;
         }
+        if (!hasMoved) this.player.stoppedMoving();
 
         // Shooting
         if (primaryShootBtn) {
