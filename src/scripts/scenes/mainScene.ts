@@ -1,31 +1,29 @@
 import Spaceship from "../objects/ship/spaceship";
 import GenericText from "../objects/genericText";
+import InputManager from "../inputManager";
 
 export default class MainScene extends Phaser.Scene {
     debugText: GenericText;
     player;
     background;
-    keys;
     debugTextDict = {};
     backgroundDict = {};
     screen;
     emitter;
-    zoom = 1;
     enemies;
     musicPlaylist = ["track_1", "track_2", "track_3"];
     music;
+    inputManager;
     constructor() {
         super({ key: "MainScene" });
     }
 
     create() {
-        // Init keys
-        this.keys = this.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
-
         this.enemies = [new Spaceship(this, 1000, 1000, "F5S4")];
         this.player = new Spaceship(this, 0, 0, "F5S4", this.enemies);
+        // Init input manager
+        this.inputManager = new InputManager(this, this.player);
 
-        this.cameras.main.startFollow(this.player);
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-2", 0.5);
         this.loadTileBackground(
@@ -46,75 +44,12 @@ export default class MainScene extends Phaser.Scene {
 
         this.sound.pauseOnBlur = false;
         // this.playMusicPlaylist(-1);
-
-        // Make player look at the cursor
-        this.input.on("pointermove", (event) => {
-            this.player.lookAtPoint(event.worldX, event.worldY);
-        });
-
-        this.cameras.main.setZoom(this.zoom);
-
-        // @ts-ignore
-        const scroller = this.plugins.get("rexMouseWheelScroller").add(this, {
-            speed: 0.001,
-        });
-        scroller.on("scroll", (inc, gameObject, scroller) => {
-            this.zoom -= inc;
-            // Enforce min zoom
-            this.zoom = Math.max(this.zoom, 0.1);
-            // Snap to normal zoom
-            if (Math.abs(this.zoom - 1) < 0.08) {
-                this.zoom = 1;
-            }
-            this.cameras.main.setZoom(this.zoom);
-        });
     }
 
     update(time, delta) {
         this.debugText.update();
 
-        this.player.resetMovement();
-
-        // Key bindings
-        const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
-        const leftBtn = this.keys.A.isDown || this.keys.LEFT.isDown;
-        const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
-        const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
-        const primaryShootBtn = this.input.activePointer.isDown;
-
-        let hasMoved = false;
-        // Movement
-        if (upBtn && !leftBtn && !downBtn && !rightBtn) {
-            this.player.moveUp();
-            hasMoved = true;
-        } else if (!upBtn && leftBtn && !downBtn && !rightBtn) {
-            this.player.moveLeft();
-            hasMoved = true;
-        } else if (!upBtn && !leftBtn && downBtn && !rightBtn) {
-            this.player.moveDown();
-            hasMoved = true;
-        } else if (!upBtn && !leftBtn && !downBtn && rightBtn) {
-            this.player.moveRight();
-            hasMoved = true;
-        } else if (upBtn && leftBtn && !downBtn && !rightBtn) {
-            this.player.moveUpLeft();
-            hasMoved = true;
-        } else if (upBtn && !leftBtn && !downBtn && rightBtn) {
-            this.player.moveUpRight();
-            hasMoved = true;
-        } else if (!upBtn && leftBtn && downBtn && !rightBtn) {
-            this.player.moveDownLeft();
-            hasMoved = true;
-        } else if (!upBtn && !leftBtn && downBtn && rightBtn) {
-            this.player.moveDownRight();
-            hasMoved = true;
-        }
-        if (!hasMoved) this.player.stoppedMoving();
-
-        // Shooting
-        if (primaryShootBtn) {
-            this.player.primaryFire(time);
-        }
+        this.inputManager.update(time);
     }
 
     playMusicPlaylist(trackIndex) {

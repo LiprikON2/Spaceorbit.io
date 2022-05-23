@@ -42,7 +42,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getSpeed() {
         // Each additional engine gives 20% speed boost
         const speed = this.baseSpecs.speed;
-        const countOfAdditionalEngines = this.modules.exhaustOrigins.length - 1;
+        const countOfAdditionalEngines = this.modules.exhaustOrigins.length - 1; // todo add/remove count engines
 
         return 0.2 * speed * countOfAdditionalEngines + speed;
     }
