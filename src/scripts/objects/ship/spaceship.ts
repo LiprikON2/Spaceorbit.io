@@ -72,24 +72,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
     explode() {
-        const explosionTop = new Explosion(
-            this.scene,
-            this.x,
-            this.y,
-            this.depth,
-            4,
-            "explosion_4"
-        );
-        const explosionBottom = new Explosion(
-            this.scene,
-            this.x,
-            this.y,
-            this.depth - 2,
-            8,
-            "explosion_1"
-        );
-
         this.disableBody(true, false);
+
+        new Explosion(this.scene, this.x, this.y, this.depth, {
+            double: true,
+        });
 
         setTimeout(() => {
             this.disableBody(true, true);

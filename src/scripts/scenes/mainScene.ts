@@ -45,7 +45,7 @@ export default class MainScene extends Phaser.Scene {
         );
 
         this.sound.pauseOnBlur = false;
-        this.playMusicPlaylist(-1);
+        // this.playMusicPlaylist(-1);
 
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
@@ -124,7 +124,6 @@ export default class MainScene extends Phaser.Scene {
         }
         this.music = this.sound.add(this.musicPlaylist[trackIndex]);
         this.music.play({ volume: 0.1 });
-        // this.music.play({ volume: 0.01 });
 
         // Play the next track in a playlist, once finished with this one
         this.music.on("complete", () => {
