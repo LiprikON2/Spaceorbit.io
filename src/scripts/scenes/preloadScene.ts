@@ -20,18 +20,38 @@ export default class PreloadScene extends Phaser.Scene {
             frameWidth: 95,
             frameHeight: 68,
         });
-        // Particles
+        // Effects
         // TODO is it better to use power of 2?
-        this.load.spritesheet("particles", "assets/img/particles_1080x1080.png", {
+        this.load.spritesheet("particles", "assets/effects/particles_1080x1080.png", {
             frameWidth: 1080,
             frameHeight: 1080,
         });
-        this.load.image("exhaust", "assets/img/whitePuff00.png");
+        this.load.image("exhaust", "assets/effects/whitePuff00.png");
+        this.load.spritesheet("explosion_1", "assets/effects/explosion_1.png", {
+            frameWidth: 256,
+            frameHeight: 256,
+        });
+        this.load.spritesheet("explosion_2", "assets/effects/explosion_2.png", {
+            frameWidth: 256,
+            frameHeight: 256,
+        });
+        this.load.spritesheet("explosion_3", "assets/effects/explosion_3.png", {
+            frameWidth: 256,
+            frameHeight: 256,
+        });
+        this.load.spritesheet("explosion_4", "assets/effects/explosion_4.png", {
+            frameWidth: 256,
+            frameHeight: 256,
+        });
+
         // Sound Effects
         this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
         this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");
         this.load.audio("laser_sound_3", "assets/weapons/lasers/laser3_short.mp3");
         this.load.audio("exhaust_sound_1", "assets/ships/thrusters_1.mp3");
+        this.load.audio("hit_sound_1", "assets/ships/metal_hit_1.mp3");
+        this.load.audio("hit_sound_2", "assets/ships/metal_hit_2.mp3");
+        this.load.audio("explosion_sound_1", "assets/ships/explosion_1.mp3");
 
         // Music
         this.load.audio("track_1", "assets/music/SMP1_THEME_Cargoship.mp3");
@@ -42,6 +62,34 @@ export default class PreloadScene extends Phaser.Scene {
 
     create() {
         this.scene.start("MainScene");
+        this.anims.create({
+            key: "explosion_1-anim",
+            frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true,
+        });
+        this.anims.create({
+            key: "explosion_2-anim",
+            frames: this.anims.generateFrameNumbers("explosion_2", { start: 0, end: 63 }),
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true,
+        });
+        this.anims.create({
+            key: "explosion_3-anim",
+            frames: this.anims.generateFrameNumbers("explosion_3", { start: 0, end: 63 }),
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true,
+        });
+        this.anims.create({
+            key: "explosion_4-anim",
+            frames: this.anims.generateFrameNumbers("explosion_4", { start: 0, end: 63 }),
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true,
+        });
         // this.scene.launch("ExportParticlesdsScene");
 
         /**

@@ -1,3 +1,5 @@
+import Explosion from "./explosion";
+
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     health;
     shields;
@@ -9,6 +11,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     laserSounds;
     exhaustSound;
+    hitSounds;
     primaryFireRate = 600; // lower value makes faster fire rate
     lastFired = -Infinity;
     enemies;
@@ -27,6 +30,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.laserSounds = ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) =>
             scene.sound.add(sound)
         );
+        this.hitSounds = ["hit_sound_1", "hit_sound_2"].map((sound) => scene.sound.add(sound));
         this.exhaustSound = scene.sound.add("exhaust_sound_1");
 
         this.speed = atlas.customData["meta"].speed;
@@ -130,6 +134,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
     getHit(projectile) {
+        this.playRandomSound(this.hitSounds, -1);
+
         this.setTint(0xee4824);
         setTimeout(() => {
             this.clearTint();
@@ -145,7 +151,23 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
     explode() {
-        console.log("i died!");
+        const explosionTop = new Explosion(
+            this.scene,
+            this.x,
+            this.y,
+            this.depth,
+            4,
+            "explosion_4"
+        );
+        const explosionBottom = new Explosion(
+            this.scene,
+            this.x,
+            this.y,
+            this.depth - 2,
+            8,
+            "explosion_1"
+        );
+
         this.disableBody(true, false);
 
         setTimeout(() => {
@@ -167,18 +189,17 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.updateExhaustPosition();
     }
 
-    playRandomSound(sounds) {
+    playRandomSound(sounds, rareDistribution = 10) {
         // Bigger value makes rare sounds more rare
-        const rareSoundChance = 10;
         const soundsCount = sounds.length;
         // Ensure there is enough sounds
-        const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareSoundChance));
+        const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareDistribution));
 
         // The more weapons are firing, the 'heavier' the firing sound is
         const pitch = Math.max((this.weaponsOrigins.length - 1) * -200, -2000);
 
         // Makes first (main) sound more likely to be played
-        if (randomSound < rareSoundChance - sounds.length - 1) {
+        if (randomSound < rareDistribution - sounds.length - 1) {
             // Play main sound
             sounds[0].play({ detune: pitch });
         } else {

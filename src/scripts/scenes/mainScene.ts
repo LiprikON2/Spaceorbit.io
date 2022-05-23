@@ -45,7 +45,7 @@ export default class MainScene extends Phaser.Scene {
         );
 
         this.sound.pauseOnBlur = false;
-        this.playMusicPlaylist(-1);
+        // this.playMusicPlaylist(-1);
 
         // Make player look at the cursor
         this.input.on("pointermove", (event) => {
