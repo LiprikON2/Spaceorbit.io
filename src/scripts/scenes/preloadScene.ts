@@ -28,20 +28,20 @@ export default class PreloadScene extends Phaser.Scene {
         });
         this.load.image("exhaust", "assets/effects/whitePuff00.png");
         this.load.spritesheet("explosion_1", "assets/effects/explosion_1.png", {
-            frameWidth: 256,
-            frameHeight: 256,
+            frameWidth: 512,
+            frameHeight: 512,
         });
         this.load.spritesheet("explosion_2", "assets/effects/explosion_2.png", {
-            frameWidth: 256,
-            frameHeight: 256,
+            frameWidth: 512,
+            frameHeight: 512,
         });
         this.load.spritesheet("explosion_3", "assets/effects/explosion_3.png", {
-            frameWidth: 256,
-            frameHeight: 256,
+            frameWidth: 512,
+            frameHeight: 512,
         });
         this.load.spritesheet("explosion_4", "assets/effects/explosion_4.png", {
-            frameWidth: 256,
-            frameHeight: 256,
+            frameWidth: 512,
+            frameHeight: 512,
         });
 
         // Sound Effects
@@ -51,7 +51,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("exhaust_sound_1", "assets/ships/thrusters_1.mp3");
         this.load.audio("hit_sound_1", "assets/ships/metal_hit_1.mp3");
         this.load.audio("hit_sound_2", "assets/ships/metal_hit_2.mp3");
-        this.load.audio("explosion_sound_1", "assets/ships/explosion_1.mp3");
+        this.load.audio("explosion_sound_1", "assets/ships/explosion_3.mp3");
 
         // Music
         this.load.audio("track_1", "assets/music/SMP1_THEME_Cargoship.mp3");

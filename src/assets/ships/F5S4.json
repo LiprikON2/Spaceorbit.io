@@ -17,37 +17,41 @@
             "h": 291
         },
         "scale": 1,
-        "speed": 200,
-        "health": 16000,
-        "hitboxRadius": 75,
-        "exhaustOrigins": [
-            {
-                "x": 86.5,
-                "y": 250
-            },
-            {
-                "x": 45,
-                "y": 258
-            },
-            {
-                "x": 129,
-                "y": 258
-            }
-        ],
-        "thrustersOrigins": [],
-        "weaponsOrigins": [
-            {
-                "x": 86.5,
-                "y": 43
-            },
-            {
-                "x": 9.5,
-                "y": 192
-            },
-            {
-                "x": 163.5,
-                "y": 192
-            }
-        ]
+        "baseSpecs": {
+            "speed": 200,
+            "health": 16000,
+            "hitboxRadius": 75
+        },
+        "modules": {
+            "exhaustOrigins": [
+                {
+                    "x": 86.5,
+                    "y": 250
+                },
+                {
+                    "x": 45,
+                    "y": 258
+                },
+                {
+                    "x": 129,
+                    "y": 258
+                }
+            ],
+            "thrustersOrigins": [],
+            "weaponsOrigins": [
+                {
+                    "x": 86.5,
+                    "y": 43
+                },
+                {
+                    "x": 9.5,
+                    "y": 192
+                },
+                {
+                    "x": 163.5,
+                    "y": 192
+                }
+            ]
+        }
     }
 }

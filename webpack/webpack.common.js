@@ -34,7 +34,7 @@ module.exports = {
         },
     },
     plugins: [
-        new HtmlWebpackPlugin({ gameName: "My Phaser Game", template: "src/index.html" }),
+        new HtmlWebpackPlugin({ gameName: "Spaceorbit.io", template: "src/index.html" }),
         new CopyWebpackPlugin({
             patterns: [
                 { from: "src/assets", to: "assets" },

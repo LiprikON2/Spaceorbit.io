@@ -1,0 +1,6 @@
+{
+  "appId": "io.spaceorbit.app",
+  "appName": "Spaceorbit.io",
+  "bundledWebRuntime": false,
+  "webDir": "dist"
+}
