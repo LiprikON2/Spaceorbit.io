@@ -1,3 +1,5 @@
+let held = false;
+
 export default class InputManager {
     scene;
     player;
@@ -43,7 +45,12 @@ export default class InputManager {
         const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
-        const secondaryShootBtn = this.keys.SPACE.isDown;
+
+        const secondaryShootBtn = this.keys.SPACE.isDown && !held;
+        // TODO refactor
+        if (this.keys.SPACE.isUp) {
+            held = false;
+        }
 
         let hasMoved = false;
         // Movement
@@ -79,6 +86,7 @@ export default class InputManager {
             this.player.primaryFire(time);
         }
         if (secondaryShootBtn) {
+            held = true;
             this.scene.enemies[0].explode();
         }
     }

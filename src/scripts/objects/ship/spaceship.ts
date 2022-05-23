@@ -62,6 +62,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getHit(projectile) {
         // @ts-ignore
         this.scene.soundManager.play("hit", {
+            sourceX: this.x,
+            sourceY: this.y,
             volume: 0.2,
         });
 
@@ -201,6 +203,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 this.lastFired = time;
                 // @ts-ignore
                 this.scene.soundManager.play("laser", {
+                    sourceX: this.x,
+                    sourceY: this.y,
                     pitchPower: this.getLaserCount(),
                     random: true,
                 });

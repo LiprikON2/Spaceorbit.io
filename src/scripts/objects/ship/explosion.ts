@@ -38,7 +38,7 @@ export default class Explosion extends Phaser.GameObjects.Sprite {
 
         if (!mergedOptions.silent) {
             // @ts-ignore
-            scene.soundManager.play("explosion");
+            scene.soundManager.play("explosion", { sourceX: x, sourceY: y });
         }
         if (mergedOptions.double) {
             this.doublyExplode(scene, x, y, targetDepth);

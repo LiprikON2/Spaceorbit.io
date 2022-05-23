@@ -47,14 +47,9 @@ export default class SoundManager {
 
     // https://phaser.discourse.group/t/sound-in-particular-place/2547/2
     play(type, options?) {
-        console.log(
-            "this.scene.cameras.main.x",
-            this.scene.cameras.main.x,
-            this.scene.cameras.main.y
-        );
         const defaults = {
-            sourceX: this.player?.x ?? this.scene.cameras.main.x,
-            sourceY: this.player?.y ?? this.scene.cameras.main.y,
+            sourceX: 0,
+            sourceY: 0,
             mainIndex: 0,
             volume: 1,
             pitchPower: 0,
@@ -76,9 +71,9 @@ export default class SoundManager {
             checkDistance,
         } = Object.assign({}, defaults, options);
 
-        let soundDistance = 0;
+        let distanceToSoundSource = 0;
         if (checkDistance) {
-            soundDistance = Phaser.Math.Distance.Between(
+            distanceToSoundSource = Phaser.Math.Distance.Between(
                 this.player.x,
                 this.player.y,
                 sourceX,
@@ -86,8 +81,19 @@ export default class SoundManager {
             );
         }
 
-        const normalizedSound = 1 - soundDistance / this.options.distanceThreshold;
+        const normalizedSound = 1 - distanceToSoundSource / this.options.distanceThreshold;
         const proximityVolume = Phaser.Math.Easing.Sine.In(normalizedSound);
+
+        console.log(
+            "soundDistance",
+            distanceToSoundSource,
+            "volume",
+            volume,
+            "normalizedSound",
+            normalizedSound,
+            "proximityVolume",
+            sd
+        );
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
