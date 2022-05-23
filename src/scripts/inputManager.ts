@@ -3,6 +3,7 @@ export default class InputManager {
     player;
     keys;
     zoom;
+    temp;
     constructor(scene, player, zoom = 1) {
         this.scene = scene;
         this.player = player;
@@ -42,6 +43,7 @@ export default class InputManager {
         const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
+        const secondaryShootBtn = this.keys.SPACE.isDown;
 
         let hasMoved = false;
         // Movement
@@ -75,6 +77,9 @@ export default class InputManager {
         // Shooting
         if (primaryShootBtn) {
             this.player.primaryFire(time);
+        }
+        if (secondaryShootBtn) {
+            this.scene.enemies[0].explode();
         }
     }
 }

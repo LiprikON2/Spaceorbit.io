@@ -1,8 +1,11 @@
 import Spaceship from "../objects/ship/spaceship";
 import GenericText from "../objects/genericText";
 import InputManager from "../inputManager";
+import SoundManager from "../soundManager";
 
 export default class MainScene extends Phaser.Scene {
+    inputManager;
+    soundManager;
     debugText: GenericText;
     player;
     background;
@@ -11,18 +14,24 @@ export default class MainScene extends Phaser.Scene {
     screen;
     emitter;
     enemies;
-    musicPlaylist = ["track_1", "track_2", "track_3"];
-    music;
-    inputManager;
+
     constructor() {
         super({ key: "MainScene" });
     }
 
     create() {
+        // Init sound manager
+        this.soundManager = new SoundManager(this);
+
         this.enemies = [new Spaceship(this, 1000, 1000, "F5S4")];
+
         this.player = new Spaceship(this, 0, 0, "F5S4", this.enemies);
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
+
+        this.soundManager.makeTarget(this.player);
+        this.soundManager.addMusic(["track_1", "track_2", "track_3"]);
+        // this.soundManager.playMusic();
 
         this.debugText = new GenericText(this, this.player).setDepth(100);
         this.loadBackground("map_1-2", 0.5);
@@ -43,28 +52,12 @@ export default class MainScene extends Phaser.Scene {
         );
 
         this.sound.pauseOnBlur = false;
-        // this.playMusicPlaylist(-1);
     }
 
     update(time, delta) {
         this.debugText.update();
 
         this.inputManager.update(time);
-    }
-
-    playMusicPlaylist(trackIndex) {
-        if (trackIndex === -1) {
-            // Play random track
-            trackIndex = Phaser.Math.Between(0, this.musicPlaylist.length - 1);
-        }
-        this.music = this.sound.add(this.musicPlaylist[trackIndex]);
-        this.music.play({ volume: 0.1 });
-
-        // Play the next track in a playlist, once finished with this one
-        this.music.on("complete", () => {
-            const nextTrackIndex = (trackIndex + 1) % this.musicPlaylist.length;
-            this.playMusicPlaylist(nextTrackIndex);
-        });
     }
 
     updateRootBackground(color?) {

@@ -23,13 +23,18 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.modules = atlas.customData["meta"].modules;
-        this.sounds = {
-            laser: ["laser_sound_2", "laser_sound_1", "laser_sound_3"].map((sound) =>
-                scene.sound.add(sound)
-            ),
-            hit: ["hit_sound_1", "hit_sound_2"].map((sound) => scene.sound.add(sound)),
-            exhaust: [scene.sound.add("exhaust_sound_1")],
-        };
+
+        // Add ship sounds
+        // @ts-ignore
+        this.scene.soundManager.addSounds("laser", [
+            "laser_sound_2",
+            "laser_sound_1",
+            "laser_sound_3",
+        ]);
+        // @ts-ignore
+        this.scene.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
+        // @ts-ignore
+        this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]);
 
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
@@ -55,7 +60,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
     getHit(projectile) {
-        this.playRandomSound(this.sounds.hit, 0.2, -1);
+        // @ts-ignore
+        this.scene.soundManager.play("hit", {
+            volume: 0.2,
+        });
 
         this.setTint(0xee4824);
         setTimeout(() => {
@@ -97,23 +105,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.exhaust.updateExhaustPosition();
     }
 
-    playRandomSound(sounds, volume = 1, rareDistribution = 10) {
-        // Bigger value makes rare sounds more rare
-        const soundsCount = sounds.length;
-        // Ensure there is enough sounds
-        const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareDistribution));
-
-        // The more weapons are firing, the 'heavier' the firing sound is
-        const pitch = Math.max((this.modules.weaponsOrigins.length - 1) * -200, -2000);
-
-        // Makes first (main) sound more likely to be played
-        if (randomSound < rareDistribution - sounds.length - 1) {
-            // Play main sound
-            sounds[0].play({ detune: pitch, volume });
-        } else {
-            // Play rare sound
-            sounds[randomSound % sounds.length].play({ detune: pitch, volume });
-        }
+    getLaserCount() {
+        return this.modules.weaponsOrigins.length;
     }
 
     getRotatedPoint(point, absolute = false) {
@@ -206,7 +199,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             if (time - this.lastFired > this.primaryFireRate) {
                 this.lastFired = time;
-                this.playRandomSound(this.sounds.laser);
+                // @ts-ignore
+                this.scene.soundManager.play("laser", {
+                    pitchPower: this.getLaserCount(),
+                    random: true,
+                });
+
                 this.modules.weaponsOrigins.forEach((weaponOrigin) => {
                     this.fireWeapon(weaponOrigin, false, true);
                 });

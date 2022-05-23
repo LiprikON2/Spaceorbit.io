@@ -46,22 +46,27 @@ export default class Exhaust {
             exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
         });
     }
+    getEngineCount() {
+        return this.exhaustEmitters.length;
+    }
     // Init exhaust sound and tween
     initExhaustSound(maxVolume = 0.08) {
-        // The more engines ship has, the 'heavier' the exhaust sound is
-        const pitch = Math.max((this.exhaustEmitters.length - 1) * -200, -2000);
-
         // The exhaust sound is constantly playing, tween just changes the volume
-        this.ship.sounds.exhaust[0].play({ detune: pitch, loop: true, volume: 0 });
+        this.scene.soundManager.play("exhaust", {
+            pitchPower: this.getEngineCount(),
+            checkDistance: false,
+            loop: true,
+            volume: 0,
+        });
         this.exhaustTween = {
             fadeIn: this.scene.tweens.add({
-                targets: this.ship.sounds.exhaust,
+                targets: this.scene.soundManager.sounds.exhaust[0],
                 volume: maxVolume,
                 duration: 100,
                 paused: 1,
             }),
             fadeOut: this.scene.tweens.add({
-                targets: this.ship.sounds.exhaust,
+                targets: this.scene.soundManager.sounds.exhaust[0],
                 volume: 0,
                 duration: 100,
                 paused: 1,
