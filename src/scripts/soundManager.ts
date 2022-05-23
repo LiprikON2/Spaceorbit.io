@@ -1,9 +1,9 @@
 type SoundManagerConfig = {
-    masterVolume?: number;
-    effectsVolume?: number;
-    musicVolume?: number;
-    distanceThreshold?: number;
-    pauseOnBlur?: boolean;
+    masterVolume: number;
+    effectsVolume: number;
+    musicVolume: number;
+    distanceThreshold: number;
+    pauseOnBlur: boolean;
 };
 
 export default class SoundManager {
@@ -86,28 +86,36 @@ export default class SoundManager {
             );
         }
 
-        // const normalizedSound = 1 - soundDistance / this.options.distanceThreshold;
-        // const finalVolume = Phaser.Math.Easing.Sine.In(normalizedSound)
+        const normalizedSound = 1 - soundDistance / this.options.distanceThreshold;
+        const proximityVolume = Phaser.Math.Easing.Sine.In(normalizedSound);
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
+        if (proximityVolume > 0) {
+            if (random) {
+                const soundsCount = this.sounds[type].length;
+                // Ensure there is enough sounds
+                const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareDistribution));
 
-        if (random) {
-            const soundsCount = this.sounds[type].length;
-            // Ensure there is enough sounds
-            const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareDistribution));
-            console.log("soundsCount", soundsCount, "randomSound", randomSound);
-
-            // Makes first (main) sound more likely to be played
-            if (randomSound < rareDistribution - soundsCount - 1) {
-                // Play main sound
-                this.sounds[type][mainIndex].play({ detune: pitch, volume, loop });
+                // Makes first (main) sound more likely to be played
+                if (randomSound < rareDistribution - soundsCount - 1) {
+                    // Play main sound
+                    this.sounds[type][mainIndex].play({
+                        detune: pitch,
+                        volume: proximityVolume,
+                        loop,
+                    });
+                } else {
+                    // Play rare sound
+                    this.sounds[type][randomSound % soundsCount].play({
+                        detune: pitch,
+                        volume: proximityVolume,
+                        loop,
+                    });
+                }
             } else {
-                // Play rare sound
-                this.sounds[type][randomSound % soundsCount].play({ detune: pitch, volume, loop });
+                this.sounds[type][mainIndex].play({ detune: pitch, volume });
             }
-        } else {
-            this.sounds[type][mainIndex].play({ detune: pitch, volume });
         }
     }
     // playSound(type, ) {

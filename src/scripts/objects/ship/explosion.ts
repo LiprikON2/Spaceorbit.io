@@ -54,7 +54,7 @@ export default class Explosion extends Phaser.GameObjects.Sprite {
         });
     }
 
-    doublyExplode(scene: any, x: any, y: any, targetDepth: number) {
+    doublyExplode(scene: Phaser.Scene, x: number, y: number, targetDepth: number) {
         const underTargetExplosionConf = {
             // @ts-ignore
             keys: [this.options.keys[0]],
