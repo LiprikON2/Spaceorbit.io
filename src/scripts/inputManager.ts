@@ -87,7 +87,7 @@ export default class InputManager {
         }
         if (secondaryShootBtn) {
             held = true;
-            this.scene.enemies[0].explode();
+            this.scene.enemies[0].primaryFire(time);
         }
     }
 }

@@ -18,7 +18,7 @@ export default class SoundManager {
             masterVolume: 1,
             effectsVolume: 1,
             musicVolume: 1,
-            distanceThreshold: 400,
+            distanceThreshold: 2000,
             pauseOnBlur: false,
         };
         this.options = Object.assign({}, defaults, options);
@@ -81,19 +81,7 @@ export default class SoundManager {
             );
         }
 
-        const normalizedSound = 1 - distanceToSoundSource / this.options.distanceThreshold;
-        const proximityVolume = Phaser.Math.Easing.Sine.In(normalizedSound);
-
-        console.log(
-            "soundDistance",
-            distanceToSoundSource,
-            "volume",
-            volume,
-            "normalizedSound",
-            normalizedSound,
-            "proximityVolume",
-            sd
-        );
+        const proximityVolume = this.normalizeVolume(distanceToSoundSource, volume);
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
@@ -120,15 +108,14 @@ export default class SoundManager {
                     });
                 }
             } else {
-                this.sounds[type][mainIndex].play({ detune: pitch, volume });
+                this.sounds[type][mainIndex].play({ detune: pitch, proximityVolume, loop });
             }
         }
     }
-    // playSound(type, ) {
-    //     this.sounds[type][mainIndex].play({ detune: pitch, volume });
-    // }
 
     playMusic(trackIndex = -1) {
+        // todo ios music
+        // https://blog.ourcade.co/posts/2020/phaser-3-web-audio-best-practices-games/
         if (trackIndex === -1) {
             // Play random track
             trackIndex = Phaser.Math.Between(0, this.musicPlaylist.length - 1);
@@ -142,5 +129,17 @@ export default class SoundManager {
             const nextTrackIndex = (trackIndex + 1) % this.musicPlaylist.length;
             this.playMusic(nextTrackIndex);
         });
+    }
+
+    normalizeVolume(distance, baseVolume = 1) {
+        const minDistance = 0;
+        const maxDistance = this.options.distanceThreshold;
+
+        if (distance < maxDistance) {
+            const normalizedVolume = 1 - (distance - minDistance) / (maxDistance - minDistance);
+            return normalizedVolume * baseVolume;
+        } else {
+            return 0;
+        }
     }
 }
