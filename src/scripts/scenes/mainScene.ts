@@ -1,16 +1,12 @@
 import Spaceship from "../objects/ship/spaceship";
-import GenericText from "../objects/genericText";
 import InputManager from "../inputManager";
-import Button from "../button";
 import SoundManager from "../soundManager";
 
 export default class MainScene extends Phaser.Scene {
     inputManager;
     soundManager;
-    debugText: GenericText;
     player;
     background;
-    debugTextDict = {};
     backgroundDict = {};
     screen;
     emitter;
@@ -24,7 +20,7 @@ export default class MainScene extends Phaser.Scene {
         // Init sound manager
         this.soundManager = new SoundManager(this);
 
-        this.player = new Spaceship(this, 0, 0, "F5S4", this.mobs);
+        this.player = new Spaceship(this, 0, 0, "F5S4", this.mobs, 100);
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
 
@@ -32,12 +28,6 @@ export default class MainScene extends Phaser.Scene {
         this.soundManager.addMusic(["track_1", "track_2", "track_3"]);
         this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
             this.soundManager.playMusic();
-        });
-
-        this.debugText = new GenericText(this, this.player).setDepth(100);
-        const button = new Button(0, 0, "Add engine", this, () => {
-            console.log("click!");
-            this.player.exhaust.createExhaust();
         });
 
         this.loadBackground("map_1-2", 0.5);
@@ -69,8 +59,6 @@ export default class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.debugText.update();
-
         this.inputManager.update(time);
     }
     spawnMobs(count) {

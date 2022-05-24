@@ -30,7 +30,6 @@ export default class Exhaust {
         // Sort by x value, from lowest to highest
         this.exhaustOrigins = exhaustOrigins.sort(({ x: a }, { x: b }) => a - b);
 
-        console.log("this", this.exhaustOrigins);
         this.createExhaust();
         this.updateExhaustPosition();
     }

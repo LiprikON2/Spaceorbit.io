@@ -119,7 +119,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getRotationSpeed() {
         const speed = this.getSpeed();
 
-        return speed * 0.00015 * Math.PI;
+        return speed * 0.0001 * Math.PI;
     }
 
     lookAtPoint(x, y) {
