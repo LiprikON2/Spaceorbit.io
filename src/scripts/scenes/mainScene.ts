@@ -59,7 +59,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.inputManager.update(time);
+        this.inputManager.update(time, delta);
     }
     spawnMobs(count) {
         const mobsToSpawn = count - this.mobs.length;

@@ -4,7 +4,9 @@ import Exhaust from "./exhaust";
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth: number;
     halfHeight: number;
-    primaryFireRate = 600; // lower value makes faster fire rate
+
+    // delay = 1000/fps
+    primaryFireRate = 600;
     lastFired = -Infinity;
     enemies: Spaceship[];
     // weaponsOrigins: { x: number; y: number }[];
@@ -13,6 +15,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     sounds;
     status;
     exhaust: Exhaust;
+    lastRotated = -Infinity;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
@@ -119,20 +122,24 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getRotationSpeed() {
         const speed = this.getSpeed();
 
-        return speed * 0.0001 * Math.PI;
+        return speed * 0.00015 * Math.PI;
     }
 
-    lookAtPoint(x, y) {
-        const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y) + Math.PI / 2;
+    lookAtPoint(x, y, time) {
+        const delta60fps = 16.5;
+        if (time - this.lastRotated > delta60fps) {
+            this.lastRotated = time;
+            const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y) + Math.PI / 2;
 
-        // this.setRotation(rotation);
-        const rotationIncrement = Phaser.Math.Angle.RotateTo(
-            this.rotation,
-            rotation,
-            this.getRotationSpeed()
-        );
-        this.setRotation(rotationIncrement);
-        this.exhaust.updateExhaustPosition();
+            // this.setRotation(rotation);
+            const rotationIncrement = Phaser.Math.Angle.RotateTo(
+                this.rotation,
+                rotation,
+                this.getRotationSpeed()
+            );
+            this.setRotation(rotationIncrement);
+            this.exhaust.updateExhaustPosition();
+        }
     }
 
     getLaserCount() {

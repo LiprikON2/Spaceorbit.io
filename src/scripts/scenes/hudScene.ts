@@ -17,7 +17,6 @@ export default class HUDScene extends Phaser.Scene {
         const player = this.currentScene.player;
         const game = this.currentScene.game;
         this.debugText = new GenericText(this, player).setDepth(1000);
-        console.log("game", game);
 
         const button = new Button(
             game.config.width - 20,
@@ -25,7 +24,6 @@ export default class HUDScene extends Phaser.Scene {
             "Add engine",
             this,
             () => {
-                console.log("click!");
                 player.exhaust.createExhaust();
             }
         );

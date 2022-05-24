@@ -3,9 +3,9 @@ export default class InputManager {
     player;
     keys;
     zoom;
-    temp;
     heldKeys = {};
     time = 0;
+    frameTime = 0;
     constructor(scene, player, zoom = 1) {
         this.scene = scene;
         this.player = player;
@@ -36,7 +36,8 @@ export default class InputManager {
         });
     }
 
-    update(time) {
+    update(time, delta) {
+        this.frameTime += delta;
         this.time = time;
         this.player.resetMovement();
 
@@ -82,7 +83,6 @@ export default class InputManager {
         }
 
         const { x: cursorX, y: cursorY } = this.player.getMousePosition();
-
-        this.player.lookAtPoint(cursorX, cursorY);
+        this.player.lookAtPoint(cursorX, cursorY, time);
     }
 }
