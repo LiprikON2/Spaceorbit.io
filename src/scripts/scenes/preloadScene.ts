@@ -61,7 +61,10 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     create() {
+        // Scenes
         this.scene.start("MainScene");
+
+        // Animations
         this.anims.create({
             key: "explosion_1-anim",
             frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),

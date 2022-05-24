@@ -1,6 +1,7 @@
 import Spaceship from "../objects/ship/spaceship";
 import GenericText from "../objects/genericText";
 import InputManager from "../inputManager";
+import Button from "../button";
 import SoundManager from "../soundManager";
 
 export default class MainScene extends Phaser.Scene {
@@ -34,6 +35,11 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.debugText = new GenericText(this, this.player).setDepth(100);
+        const button = new Button(0, 0, "Add engine", this, () => {
+            console.log("click!");
+            this.player.exhaust.createExhaust();
+        });
+
         this.loadBackground("map_1-2", 0.5);
         this.loadTileBackground(
             this,

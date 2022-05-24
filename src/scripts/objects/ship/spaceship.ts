@@ -11,6 +11,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     modules;
     baseSpecs;
     sounds;
+    status;
     exhaust: Exhaust;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
@@ -23,6 +24,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.modules = atlas.customData["meta"].modules;
+
+        this.status = { health: this.baseSpecs.health, shields: 0, laserCount: 1 };
 
         // Add ship sounds
         // @ts-ignore
@@ -47,9 +50,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getSpeed() {
         // Each additional engine gives 20% speed boost
         const speed = this.baseSpecs.speed;
-        const countOfAdditionalEngines = this.modules.exhaustOrigins.length - 1; // todo add/remove count engines
+        const countOfAdditionalEngines = this.exhaust.exhaustCount - 1;
 
-        return 0.2 * speed * countOfAdditionalEngines + speed;
+        const finalSpeed = 0.2 * speed * countOfAdditionalEngines + speed;
+        return finalSpeed;
     }
 
     setCircularHitbox(hitboxRadius) {
@@ -73,10 +77,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }, 200);
 
         if (projectile.name === "laser_beam") {
-            this.baseSpecs.health -= 1000;
+            this.status.health -= 1000;
 
-            if (this.baseSpecs.health <= 0) {
-                this.baseSpecs.health = 0;
+            if (this.status.health <= 0) {
+                this.status.health = 0;
                 this.explode();
             }
         }
@@ -103,6 +107,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
         this.y = y;
+        this.status.health = this.baseSpecs.health;
 
         this.scene.physics.add.existing(this);
         this.active = true;
