@@ -17,7 +17,7 @@ export default class SoundManager {
         const defaults = {
             masterVolume: 1,
             effectsVolume: 1,
-            musicVolume: 1,
+            musicVolume: 0.1,
             distanceThreshold: 2000,
             pauseOnBlur: false,
         };
@@ -82,6 +82,9 @@ export default class SoundManager {
         }
 
         const proximityVolume = this.normalizeVolume(distanceToSoundSource, volume);
+        const finalVolume =
+            this.options.masterVolume * this.options.effectsVolume * proximityVolume;
+        console.log("proximityVolume", volume, proximityVolume, finalVolume);
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
@@ -96,19 +99,23 @@ export default class SoundManager {
                     // Play main sound
                     this.sounds[type][mainIndex].play({
                         detune: pitch,
-                        volume: proximityVolume,
+                        volume: finalVolume,
                         loop,
                     });
                 } else {
                     // Play rare sound
                     this.sounds[type][randomSound % soundsCount].play({
                         detune: pitch,
-                        volume: proximityVolume,
+                        volume: finalVolume,
                         loop,
                     });
                 }
             } else {
-                this.sounds[type][mainIndex].play({ detune: pitch, proximityVolume, loop });
+                this.sounds[type][mainIndex].play({
+                    detune: pitch,
+                    volume: finalVolume,
+                    loop,
+                });
             }
         }
     }
@@ -121,8 +128,9 @@ export default class SoundManager {
             trackIndex = Phaser.Math.Between(0, this.musicPlaylist.length - 1);
         }
 
+        const finalVolume = this.options.masterVolume * this.options.musicVolume;
         this.music = this.scene.sound.add(this.musicPlaylist[trackIndex]);
-        this.music.play({ volume: 0.1 });
+        this.music.play({ volume: finalVolume });
 
         // Play the next track in a playlist, once finished with this one
         this.music.on("complete", () => {
@@ -131,13 +139,13 @@ export default class SoundManager {
         });
     }
 
-    normalizeVolume(distance, baseVolume = 1) {
+    normalizeVolume(distance, maxVolume = 1) {
         const minDistance = 0;
         const maxDistance = this.options.distanceThreshold;
 
         if (distance < maxDistance) {
             const normalizedVolume = 1 - (distance - minDistance) / (maxDistance - minDistance);
-            return normalizedVolume * baseVolume;
+            return Phaser.Math.Easing.Sine.In(normalizedVolume * maxVolume);
         } else {
             return 0;
         }

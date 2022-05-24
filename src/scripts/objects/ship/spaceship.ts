@@ -216,6 +216,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             }
         }
     }
+    getMousePosition() {
+        const cursorX = this.scene.input.mousePointer.worldX;
+        const cursorY = this.scene.input.mousePointer.worldY;
+        return { x: cursorX, y: cursorY };
+    }
 
     fireWeapon(weaponOrigin, addShipMomentum = false, atCursor = false) {
         const projectileVelocity = 5000;
@@ -227,8 +232,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         let rotation;
         if (atCursor) {
             // If firing at a cursor, aim them to shoot at cursor
-            const cursorX = this.scene.input.mousePointer.worldX;
-            const cursorY = this.scene.input.mousePointer.worldY;
+            const { x: cursorX, y: cursorY } = this.getMousePosition();
             const cursorRotation =
                 Phaser.Math.Angle.Between(offsetX, offsetY, cursorX, cursorY) + Math.PI / 2;
 

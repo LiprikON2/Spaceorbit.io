@@ -55,21 +55,21 @@ export default class Exhaust {
         // The exhaust sound is constantly playing, tween just changes the volume
         // TODO ensure it doesnt dies on page blur
         this.scene.soundManager.play("exhaust", {
+            volume: 0.0001,
             pitchPower: this.getEngineCount(),
             checkDistance: false,
             loop: true,
-            volume: 0,
         });
         this.exhaustTween = {
             fadeIn: this.scene.tweens.add({
-                targets: this.scene.soundManager.sounds.exhaust[0],
                 volume: maxVolume,
+                targets: this.scene.soundManager.sounds.exhaust[0],
                 duration: 100,
                 paused: 1,
             }),
             fadeOut: this.scene.tweens.add({
+                volume: 0.0001,
                 targets: this.scene.soundManager.sounds.exhaust[0],
-                volume: 0,
                 duration: 100,
                 paused: 1,
             }),

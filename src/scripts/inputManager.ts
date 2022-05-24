@@ -1,5 +1,3 @@
-let held = false;
-
 export default class InputManager {
     scene;
     player;
@@ -39,14 +37,8 @@ export default class InputManager {
 
         const secondaryShootBtn = this.keys.SPACE;
         secondaryShootBtn.on("down", () => {
-            this.scene.enemies[0].primaryFire(this.time);
+            this.scene.enemies[0].primaryFire(this.time, false, false);
         });
-    }
-
-    isHeld(key) {
-        if (!this.heldKeys[key]) {
-            this.heldKeys = key.isUp;
-        }
     }
 
     update(time) {
