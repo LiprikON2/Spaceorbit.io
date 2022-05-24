@@ -6,13 +6,13 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfHeight: number;
     primaryFireRate = 600; // lower value makes faster fire rate
     lastFired = -Infinity;
-    enemies;
+    enemies: Spaceship[];
     // weaponsOrigins: { x: number; y: number }[];
     modules;
     baseSpecs;
     sounds;
     exhaust: Exhaust;
-    constructor(scene, x, y, atlasTexture, enemies = [], depth = 10) {
+    constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -89,21 +89,44 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         });
 
         setTimeout(() => {
-            this.disableBody(true, true);
-            // TODO dont destroy player...
-            if (!"ai") {
-                this.destroy();
-            }
+            // @ts-ignore
+            this.respawn();
+            // const isAi = this.enemies[0] === this.scene.player;
+            // if (isAi) {
+            //     this.destroy();
+            // }
         }, 2000);
+    }
+
+    respawn() {
+        // @ts-ignore
+        const { x, y } = this.scene.getRandomPositionOnMap();
+        this.x = x;
+        this.y = y;
+
+        this.scene.physics.add.existing(this);
+        this.active = true;
     }
 
     public create() {}
     public update() {}
 
+    getRotationSpeed() {
+        const speed = this.getSpeed();
+
+        return speed * 0.00015 * Math.PI;
+    }
+
     lookAtPoint(x, y) {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y) + Math.PI / 2;
 
-        this.setRotation(rotation);
+        // this.setRotation(rotation);
+        const rotationIncrement = Phaser.Math.Angle.RotateTo(
+            this.rotation,
+            rotation,
+            this.getRotationSpeed()
+        );
+        this.setRotation(rotationIncrement);
         this.exhaust.updateExhaustPosition();
     }
 
@@ -197,7 +220,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    primaryFire(time) {
+    primaryFire(time, atCursor = false) {
         if (this.active) {
             // Check if enough time passed since last shot
             if (time - this.lastFired > this.primaryFireRate) {
@@ -211,12 +234,14 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 });
 
                 this.modules.weaponsOrigins.forEach((weaponOrigin) => {
-                    this.fireWeapon(weaponOrigin, false, true);
+                    this.fireWeapon(weaponOrigin, false, atCursor);
                 });
             }
         }
     }
     getMousePosition() {
+        // Updates mouse worldX, worldY manually, since when camera moves but cursor doesn't it doesn't update them
+        this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
         const cursorX = this.scene.input.mousePointer.worldX;
         const cursorY = this.scene.input.mousePointer.worldY;
         return { x: cursorX, y: cursorY };
@@ -237,15 +262,20 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 Phaser.Math.Angle.Between(offsetX, offsetY, cursorX, cursorY) + Math.PI / 2;
 
             const maxTraverseAngle = Math.PI / 9;
-            const angleOffset = Math.abs(
+            let angleOffset = Math.abs(
                 Phaser.Math.Angle.ShortestBetween(
                     Phaser.Math.Angle.Wrap(cursorRotation),
                     this.rotation
                 )
             );
 
-            // Ensures you can't fire behind your back
+            // Dirty fix for aiming at the bottom of the screen (351 deg -> 9 deg)
+            if (angleOffset > Math.PI) {
+                angleOffset = 2 * Math.PI - angleOffset;
+            }
+
             if (angleOffset > maxTraverseAngle) {
+                // Ensures you can't fire behind your back
                 rotation = this.rotation;
             } else {
                 rotation = cursorRotation;

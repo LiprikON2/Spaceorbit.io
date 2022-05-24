@@ -13,7 +13,7 @@ export default class MainScene extends Phaser.Scene {
     backgroundDict = {};
     screen;
     emitter;
-    enemies;
+    mobs: Spaceship[] = [];
 
     constructor() {
         super({ key: "MainScene" });
@@ -23,9 +23,7 @@ export default class MainScene extends Phaser.Scene {
         // Init sound manager
         this.soundManager = new SoundManager(this);
 
-        this.enemies = [new Spaceship(this, 1000, 1000, "F5S4")];
-
-        this.player = new Spaceship(this, 0, 0, "F5S4", this.enemies);
+        this.player = new Spaceship(this, 0, 0, "F5S4", this.mobs);
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
 
@@ -52,8 +50,16 @@ export default class MainScene extends Phaser.Scene {
             1,
             180
         );
+        this.spawnMobs(20);
+    }
 
-        this.sound.pauseOnBlur = false;
+    getRandomPositionOnMap() {
+        const maxX = this.physics.world.bounds.width;
+        const maxY = this.physics.world.bounds.height;
+        const randomX = Phaser.Math.Between(0, maxX);
+        const randomY = Phaser.Math.Between(0, maxY);
+
+        return { x: randomX, y: randomY };
     }
 
     update(time, delta) {
@@ -61,10 +67,19 @@ export default class MainScene extends Phaser.Scene {
 
         this.inputManager.update(time);
     }
+    spawnMobs(count) {
+        const mobsToSpawn = count - this.mobs.length;
+        for (let i = 0; i < mobsToSpawn; i++) {
+            const { x, y } = this.getRandomPositionOnMap();
+            const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
+            this.mobs.push(mob);
+        }
+        if (mobsToSpawn > 0) console.log("spawned", mobsToSpawn, "mobs");
+    }
 
-    updateRootBackground(color?) {
+    updateRootBackground(color?, defaultColor = "#1d252c") {
         const root = document.getElementById("phaser-game");
-        root!.style.backgroundColor = color ?? "#1d252c";
+        root!.style.backgroundColor = color ?? defaultColor;
     }
 
     // https://blog.ourcade.co/posts/2020/add-pizazz-parallax-scrolling-phaser-3/

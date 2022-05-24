@@ -15,11 +15,6 @@ export default class InputManager {
         scene.cameras.main.startFollow(player);
         scene.cameras.main.setZoom(this.zoom);
 
-        // Make player look at the cursor
-        scene.input.on("pointermove", (event) => {
-            player.lookAtPoint(event.worldX, event.worldY);
-        });
-
         // @ts-ignore
         const scroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
@@ -37,7 +32,7 @@ export default class InputManager {
 
         const secondaryShootBtn = this.keys.SPACE;
         secondaryShootBtn.on("down", () => {
-            this.scene.enemies[0].primaryFire(this.time, false, false);
+            this.scene.mobs.forEach((mob) => mob.primaryFire(this.time));
         });
     }
 
@@ -83,7 +78,11 @@ export default class InputManager {
 
         // Shooting
         if (primaryShootBtn) {
-            this.player.primaryFire(time);
+            this.player.primaryFire(time, true);
         }
+
+        const { x: cursorX, y: cursorY } = this.player.getMousePosition();
+
+        this.player.lookAtPoint(cursorX, cursorY);
     }
 }

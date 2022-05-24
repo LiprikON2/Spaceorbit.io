@@ -84,7 +84,7 @@ export default class SoundManager {
         const proximityVolume = this.normalizeVolume(distanceToSoundSource, volume);
         const finalVolume =
             this.options.masterVolume * this.options.effectsVolume * proximityVolume;
-        console.log("proximityVolume", volume, proximityVolume, finalVolume);
+        // console.log("proximityVolume", volume, proximityVolume, finalVolume);
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
