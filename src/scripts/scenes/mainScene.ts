@@ -68,7 +68,6 @@ export default class MainScene extends Phaser.Scene {
             const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
             this.mobs.push(mob);
         }
-        if (mobsToSpawn > 0) console.log("spawned", mobsToSpawn, "mobs");
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {

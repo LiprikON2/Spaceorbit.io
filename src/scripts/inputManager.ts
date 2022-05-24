@@ -6,6 +6,7 @@ export default class InputManager {
     heldKeys = {};
     time = 0;
     frameTime = 0;
+    rotateTo;
     constructor(scene, player, zoom = 1) {
         this.scene = scene;
         this.player = player;
@@ -36,6 +37,14 @@ export default class InputManager {
         });
     }
 
+    getMousePosition() {
+        // Updates mouse worldX, worldY manually, since when camera moves but cursor doesn't it doesn't update them
+        this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
+        const cursorX = this.scene.input.mousePointer.worldX;
+        const cursorY = this.scene.input.mousePointer.worldY;
+        return { cursorX, cursorY };
+    }
+
     update(time, delta) {
         this.frameTime += delta;
         this.time = time;
@@ -47,6 +56,8 @@ export default class InputManager {
         const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
+
+        const { cursorX, cursorY } = this.getMousePosition();
 
         let hasMoved = false;
         // Movement
@@ -79,10 +90,9 @@ export default class InputManager {
 
         // Shooting
         if (primaryShootBtn) {
-            this.player.primaryFire(time, true);
+            this.player.primaryFire(time, { cursorX, cursorY });
         }
 
-        const { x: cursorX, y: cursorY } = this.player.getMousePosition();
-        this.player.lookAtPoint(cursorX, cursorY, time);
+        this.player.lookAtPoint(cursorX, cursorY);
     }
 }

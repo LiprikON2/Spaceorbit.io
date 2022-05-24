@@ -11,6 +11,7 @@ export default class FpsText extends Phaser.GameObjects.Text {
         let text = "";
         text += `fps: ${Math.floor(this.scene.game.loop.actualFps)}\n`;
         text += `x: ${Math.floor(this.player.x)} y: ${Math.floor(this.player.y)}\n`;
+        // text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
 
         this.setText(text);
     }

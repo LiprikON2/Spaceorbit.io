@@ -15,7 +15,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     sounds;
     status;
     exhaust: Exhaust;
-    lastRotated = -Infinity;
+    rotateTo;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
         scene.add.existing(this);
@@ -48,6 +48,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         this.exhaust = new Exhaust(scene, this, this.modules.exhaustOrigins, depth);
         this.enemies = enemies;
+
+        this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
     }
 
     getSpeed() {
@@ -116,30 +118,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.active = true;
     }
 
-    public create() {}
-    public update() {}
+    lookAtPoint(cursorX, cursorY) {
+        const rotation = Phaser.Math.Angle.Between(this.x, this.y, cursorX, cursorY) + Math.PI / 2;
 
-    getRotationSpeed() {
-        const speed = this.getSpeed();
-
-        return speed * 0.00015 * Math.PI;
-    }
-
-    lookAtPoint(x, y, time) {
-        const delta60fps = 16.5;
-        if (time - this.lastRotated > delta60fps) {
-            this.lastRotated = time;
-            const rotation = Phaser.Math.Angle.Between(this.x, this.y, x, y) + Math.PI / 2;
-
-            // this.setRotation(rotation);
-            const rotationIncrement = Phaser.Math.Angle.RotateTo(
-                this.rotation,
-                rotation,
-                this.getRotationSpeed()
-            );
-            this.setRotation(rotationIncrement);
-            this.exhaust.updateExhaustPosition();
-        }
+        this.rotateTo.rotateTo(Phaser.Math.RadToDeg(rotation), 0, this.getSpeed());
+        this.exhaust.updateExhaustPosition();
     }
 
     getLaserCount() {
@@ -232,7 +215,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    primaryFire(time, atCursor = false) {
+    primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
         if (this.active) {
             // Check if enough time passed since last shot
             if (time - this.lastFired > this.primaryFireRate) {
@@ -246,20 +229,17 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                 });
 
                 this.modules.weaponsOrigins.forEach((weaponOrigin) => {
-                    this.fireWeapon(weaponOrigin, false, atCursor);
+                    this.fireWeapon(weaponOrigin, false, cursor);
                 });
             }
         }
     }
-    getMousePosition() {
-        // Updates mouse worldX, worldY manually, since when camera moves but cursor doesn't it doesn't update them
-        this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
-        const cursorX = this.scene.input.mousePointer.worldX;
-        const cursorY = this.scene.input.mousePointer.worldY;
-        return { x: cursorX, y: cursorY };
-    }
 
-    fireWeapon(weaponOrigin, addShipMomentum = false, atCursor = false) {
+    fireWeapon(
+        weaponOrigin,
+        addShipMomentum = false,
+        cursor?: { cursorX: number; cursorY: number }
+    ) {
         const projectileVelocity = 5000;
         const projectileDistance = 900000;
         const projectileLifespan = projectileDistance / projectileVelocity;
@@ -267,12 +247,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const { offsetX, offsetY } = this.getRotatedPoint(weaponOrigin, true);
 
         let rotation;
-        if (atCursor) {
+        if (cursor) {
             // If firing at a cursor, aim them to shoot at cursor
-            const { x: cursorX, y: cursorY } = this.getMousePosition();
+            const { cursorX, cursorY } = cursor;
             const cursorRotation =
                 Phaser.Math.Angle.Between(offsetX, offsetY, cursorX, cursorY) + Math.PI / 2;
-
             const maxTraverseAngle = Math.PI / 9;
             let angleOffset = Math.abs(
                 Phaser.Math.Angle.ShortestBetween(
@@ -280,12 +259,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
                     this.rotation
                 )
             );
-
             // Dirty fix for aiming at the bottom of the screen (351 deg -> 9 deg)
             if (angleOffset > Math.PI) {
                 angleOffset = 2 * Math.PI - angleOffset;
             }
-
             if (angleOffset > maxTraverseAngle) {
                 // Ensures you can't fire behind your back
                 rotation = this.rotation;

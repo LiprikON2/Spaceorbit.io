@@ -2,6 +2,7 @@ import "phaser";
 import MainScene from "./scenes/mainScene";
 import HUDScene from "./scenes/hudScene";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
+import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import PreloadScene from "./scenes/preloadScene";
 
 const DEFAULT_WIDTH = 1920;
@@ -30,6 +31,11 @@ const config = {
             {
                 key: "rexMouseWheelScroller",
                 plugin: MouseWheelScrollerPlugin,
+                start: true,
+            },
+            {
+                key: "rexRotateTo",
+                plugin: RotateToPlugin,
                 start: true,
             },
         ],
