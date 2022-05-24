@@ -1,4 +1,3 @@
-import eventsCenter from "../eventsCenter";
 export default class ExportParticlesScene extends Phaser.Scene {
     screenWidth;
     screenHeight;
@@ -36,11 +35,6 @@ export default class ExportParticlesScene extends Phaser.Scene {
                 x: -this.screenWidth / 2,
                 y: -this.screenHeight / 2,
             },
-        });
-
-        eventsCenter.on("update-player", (player) => {
-            console.log(player.xdsds);
-            this.player = player;
         });
 
         // this.fillWithParticles(
