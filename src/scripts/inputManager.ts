@@ -6,6 +6,8 @@ export default class InputManager {
     keys;
     zoom;
     temp;
+    heldKeys = {};
+    time = 0;
     constructor(scene, player, zoom = 1) {
         this.scene = scene;
         this.player = player;
@@ -34,9 +36,21 @@ export default class InputManager {
             }
             scene.cameras.main.setZoom(this.zoom);
         });
+
+        const secondaryShootBtn = this.keys.SPACE;
+        secondaryShootBtn.on("down", () => {
+            this.scene.enemies[0].primaryFire(this.time);
+        });
+    }
+
+    isHeld(key) {
+        if (!this.heldKeys[key]) {
+            this.heldKeys = key.isUp;
+        }
     }
 
     update(time) {
+        this.time = time;
         this.player.resetMovement();
 
         // Key bindings
@@ -45,12 +59,6 @@ export default class InputManager {
         const rightBtn = this.keys.D.isDown || this.keys.RIGHT.isDown;
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
-
-        const secondaryShootBtn = this.keys.SPACE.isDown && !held;
-        // TODO refactor
-        if (this.keys.SPACE.isUp) {
-            held = false;
-        }
 
         let hasMoved = false;
         // Movement
@@ -84,10 +92,6 @@ export default class InputManager {
         // Shooting
         if (primaryShootBtn) {
             this.player.primaryFire(time);
-        }
-        if (secondaryShootBtn) {
-            held = true;
-            this.scene.enemies[0].primaryFire(time);
         }
     }
 }

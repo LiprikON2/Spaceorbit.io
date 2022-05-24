@@ -199,6 +199,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     primaryFire(time) {
         if (this.active) {
+            // Check if enough time passed since last shot
             if (time - this.lastFired > this.primaryFireRate) {
                 this.lastFired = time;
                 // @ts-ignore
