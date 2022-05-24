@@ -39,3 +39,12 @@ const config = {
 window.addEventListener("load", () => {
     const game = new Phaser.Game(config);
 });
+
+let game;
+export function createGame() {
+    game = new Phaser.Game(config);
+}
+
+export function getGame() {
+    return game;
+}
