@@ -42,15 +42,16 @@ const config = {
     },
 };
 
-window.addEventListener("load", () => {
-    const game = new Phaser.Game(config);
-});
+// window.addEventListener("load", () => {
+//     const game = new Phaser.Game(config);
+// });
 
 let game;
-export function createGame() {
+export const createGame = () => {
     game = new Phaser.Game(config);
-}
+};
 
-export function getGame() {
+export const getGame = () => {
+    console.log("na");
     return game;
-}
+};

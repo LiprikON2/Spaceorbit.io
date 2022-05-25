@@ -47,20 +47,42 @@
                 margin: 0;
                 background-color: #000000;
             }
+            #UI {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 1;
+            }
+            :focus-visible {
+                outline: none;
+            }
         </style>
 
         <noscript>Please enable javascript to continue using this application.</noscript>
 
         <!-- installs the serviceWorker -->
-        <script>
+        <!-- <script>
             if ("serviceWorker" in navigator) {
                 window.addEventListener("load", () => {
                     navigator.serviceWorker.register("./sw.js");
                 });
             }
-        </script>
+        </script> -->
     </head>
     <body>
+        <!-- TODO -->
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+        ></script>
+
+        <!-- FOR PRODUCTION -->
+        <!-- <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+        ></script> -->
         <div id="phaser-game"></div>
     </body>
 </html>
