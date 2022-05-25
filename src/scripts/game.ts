@@ -54,8 +54,9 @@ const config = {
 };
 
 let game;
-export const createGame = () => {
+export const createGame = (settings?) => {
     game = new Phaser.Game(config);
+    game.settings = settings;
 };
 
 export const getGame = () => {

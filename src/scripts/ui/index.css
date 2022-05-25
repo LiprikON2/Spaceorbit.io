@@ -12,7 +12,7 @@ body,
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(auto-fit, 1fr);
     grid-template-areas:
-        "muteMusic muteEffects . . . . . . . . . fullscreen"
+        "volumeControls . . . . . . . . . . fullscreen"
         ". . . . . . . . . . . ."
         ". . . . . . . . . . . ."
         "addEngine . . . . . . . . . . .";
@@ -24,14 +24,17 @@ body,
     pointer-events: auto;
 }
 
-.muteMusic {
-    grid-area: muteMusic;
+.group {
+    display: flex;
+    gap: 0.5rem;
 }
-.muteEffects {
-    grid-area: muteEffects;
+
+.volumeControls {
+    grid-area: volumeControls;
 }
 .fullscreen {
     grid-area: fullscreen;
+    justify-self: end;
 }
 .addEngine {
     grid-area: addEngine;

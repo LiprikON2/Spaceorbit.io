@@ -2,6 +2,9 @@ type SoundManagerConfig = {
     masterVolume: number;
     effectsVolume: number;
     musicVolume: number;
+    effectsMuted: boolean;
+    musicMuted: boolean;
+
     distanceThreshold: number;
     pauseOnBlur: boolean;
 };
@@ -13,17 +16,17 @@ export default class SoundManager {
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
     music;
-    muted = {
-        masterVolume: false,
-        effectsVolume: false,
-        musicVolume: false,
-    };
     constructor(scene, options?: SoundManagerConfig) {
+        const localStorageSettings = scene.game.settings;
+        const { effectsMuted, musicMuted } = localStorageSettings;
         // https://stackoverflow.com/a/37403125
         const defaults = {
             masterVolume: 1,
             effectsVolume: 1,
             musicVolume: 0.1,
+            effectsMuted: effectsMuted ?? false,
+            musicMuted: musicMuted ?? false,
+
             distanceThreshold: 2000,
             pauseOnBlur: false,
         };
@@ -33,21 +36,18 @@ export default class SoundManager {
 
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
     }
-    getVolume(key) {
-        return !this.muted[key] ? this.options[key] : 0;
-    }
     setVolume(key, newVolume) {
         this.options[key] = newVolume;
         this.update();
     }
     toggleMute(key) {
-        this.muted[key] = !this.muted[key];
+        this.options[key] = !this.options[key];
         this.update();
     }
 
     update() {
         if (this.music) {
-            this.music.volume = this.getVolume("musicVolume");
+            this.music.mute = this.options.musicMuted;
         }
     }
 
@@ -111,6 +111,13 @@ export default class SoundManager {
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
         if (proximityVolume > 0) {
+            const config = {
+                detune: pitch,
+                volume: finalVolume,
+                mute: this.options.effectsMuted,
+                loop,
+            };
+
             if (random) {
                 const soundsCount = this.sounds[type].length;
                 // Ensure there is enough sounds
@@ -119,25 +126,13 @@ export default class SoundManager {
                 // Makes first (main) sound more likely to be played
                 if (randomSound < rareDistribution - soundsCount - 1) {
                     // Play main sound
-                    this.sounds[type][mainIndex].play({
-                        detune: pitch,
-                        volume: finalVolume,
-                        loop,
-                    });
+                    this.sounds[type][mainIndex].play(config);
                 } else {
                     // Play rare sound
-                    this.sounds[type][randomSound % soundsCount].play({
-                        detune: pitch,
-                        volume: finalVolume,
-                        loop,
-                    });
+                    this.sounds[type][randomSound % soundsCount].play(config);
                 }
             } else {
-                this.sounds[type][mainIndex].play({
-                    detune: pitch,
-                    volume: finalVolume,
-                    loop,
-                });
+                this.sounds[type][mainIndex].play(config);
             }
         }
     }
@@ -152,7 +147,7 @@ export default class SoundManager {
 
         const finalVolume = this.options.masterVolume * this.options.musicVolume;
         this.music = this.scene.sound.add(this.musicPlaylist[trackIndex]);
-        this.music.play({ volume: finalVolume });
+        this.music.play({ volume: finalVolume, mute: this.options.musicMuted });
 
         // Play the next track in a playlist, once finished with this one
         this.music.on("complete", () => {
