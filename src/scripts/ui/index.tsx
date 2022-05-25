@@ -55,24 +55,24 @@ const App = () => {
         toggleFullscreenIcon();
     };
     return (
-        init && (
-            <div id="UI">
-                <div className="volumeControls group">
-                    <Button className="muteMusic" isSquare={true} onClick={toggleMusic}>
-                        {musicIcon ? <MusicOff /> : <Music />}
-                    </Button>
-                    <Button className="effectsMute" isSquare={true} onClick={toggleEffects}>
-                        {effectsIcon ? <VolumeOff /> : <Volume />}
-                    </Button>
-                </div>
-                <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
-                    {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
+        // init && (
+        <div id="UI">
+            <div className="volumeControls group">
+                <Button className="muteMusic" isSquare={true} onClick={toggleMusic}>
+                    {musicIcon ? <MusicOff /> : <Music />}
                 </Button>
-                <Button className="addEngine" onClick={addEngine}>
-                    Add engine
+                <Button className="effectsMute" isSquare={true} onClick={toggleEffects}>
+                    {effectsIcon ? <VolumeOff /> : <Volume />}
                 </Button>
             </div>
-        )
+            <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
+                {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
+            </Button>
+            <Button className="addEngine" onClick={addEngine}>
+                Add engine
+            </Button>
+        </div>
+        // )
     );
 };
 
