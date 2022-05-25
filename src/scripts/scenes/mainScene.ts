@@ -29,7 +29,7 @@ export default class MainScene extends Phaser.Scene {
         this.soundManager.makeTarget(this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"]);
         this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
-            // this.soundManager.playMusic();
+            this.soundManager.playMusic();
         });
 
         this.loadBackground("map_1-2", 0.5);
@@ -69,8 +69,8 @@ export default class MainScene extends Phaser.Scene {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.getRandomPositionOnMap();
-            // const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
-            const mob = new Spaceship(this, 1000, 800, "F5S4", [this.player]);
+            const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
+            // const mob = new Spaceship(this, 1000, 800, "F5S4", [this.player]);
             this.mobs.push(mob);
         }
     }
