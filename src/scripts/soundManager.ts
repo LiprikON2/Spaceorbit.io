@@ -13,7 +13,13 @@ export default class SoundManager {
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
     music;
+    muted = {
+        masterVolume: false,
+        effectsVolume: false,
+        musicVolume: false,
+    };
     constructor(scene, options?: SoundManagerConfig) {
+        // https://stackoverflow.com/a/37403125
         const defaults = {
             masterVolume: 1,
             effectsVolume: 1,
@@ -26,6 +32,23 @@ export default class SoundManager {
         this.scene = scene;
 
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
+    }
+    getVolume(key) {
+        return !this.muted[key] ? this.options[key] : 0;
+    }
+    setVolume(key, newVolume) {
+        this.options[key] = newVolume;
+        this.update();
+    }
+    toggleMute(key) {
+        this.muted[key] = !this.muted[key];
+        this.update();
+    }
+
+    update() {
+        if (this.music) {
+            this.music.volume = this.getVolume("musicVolume");
+        }
     }
 
     makeTarget(player) {

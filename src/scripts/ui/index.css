@@ -1,0 +1,39 @@
+/* html,
+body,
+#UI {
+    overflow: hidden;
+} */
+
+#UI {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(auto-fit, 1fr);
+    grid-template-areas:
+        "muteMusic muteEffects . . . . . . . . . fullscreen"
+        ". . . . . . . . . . . ."
+        ". . . . . . . . . . . ."
+        "addEngine . . . . . . . . . . .";
+    pointer-events: none;
+}
+
+#UI > * {
+    margin: 1rem;
+    pointer-events: auto;
+}
+
+.muteMusic {
+    grid-area: muteMusic;
+}
+.muteEffects {
+    grid-area: muteEffects;
+}
+.fullscreen {
+    grid-area: fullscreen;
+}
+.addEngine {
+    grid-area: addEngine;
+    align-self: end;
+}

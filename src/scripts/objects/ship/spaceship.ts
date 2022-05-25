@@ -23,7 +23,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         const atlas = scene.textures.get(atlasTexture);
         const scale = atlas.customData["meta"].scale;
-        this.setCollideWorldBounds(true).setScale(scale).setOrigin(0.5).setDepth(depth);
+        this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
+        this.setScale(scale);
 
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.modules = atlas.customData["meta"].modules;

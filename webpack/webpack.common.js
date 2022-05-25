@@ -1,6 +1,7 @@
 const path = require("path");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
     // entry: ["./src/scripts/game.ts"],
@@ -20,6 +21,10 @@ module.exports = {
                 include: path.join(__dirname, "../src"),
                 loader: "ts-loader",
             },
+            {
+                test: /\.css$/i,
+                use: [MiniCssExtractPlugin.loader, "css-loader"],
+            },
         ],
     },
     optimization: {
@@ -35,6 +40,7 @@ module.exports = {
         },
     },
     plugins: [
+        new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({ gameName: "Spaceorbit.io", template: "src/index.html" }),
         new CopyWebpackPlugin({
             patterns: [
