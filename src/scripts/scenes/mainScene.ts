@@ -27,7 +27,7 @@ export default class MainScene extends Phaser.Scene {
         this.soundManager.makeTarget(this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"]);
         this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
-            this.soundManager.playMusic();
+            // this.soundManager.playMusic();
         });
 
         this.loadBackground("map_1-2", 0.5);

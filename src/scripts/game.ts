@@ -1,6 +1,5 @@
 import "phaser";
 import MainScene from "./scenes/mainScene";
-import HUDScene from "./scenes/hudScene";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import PreloadScene from "./scenes/preloadScene";
@@ -18,7 +17,7 @@ const config = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, MainScene, HUDScene],
+    scene: [PreloadScene, MainScene],
     physics: {
         default: "arcade",
         arcade: {

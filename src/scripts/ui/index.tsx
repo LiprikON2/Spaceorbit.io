@@ -8,18 +8,27 @@ const App = () => {
         createGame();
     }, []);
 
-    const addEngine = () => {
-        console.log(getGame().scene.scenes[1]);
+    const addEngine = (e) => {
+        const scene = getGame().scene.keys.MainScene;
+        scene.player.exhaust.createExhaust();
     };
 
     return (
         <div id="UI" style={{ display: "flex", flexDirection: "column" }}>
             <Button variant="outline" color="gray" size="lg" onClick={addEngine}>
-                Settings
+                Add engine
             </Button>
         </div>
     );
 };
 
-const root = createRoot(document.getElementById("phaser-game")!); // createRoot(container!) if you use TypeScript
+const container = document.getElementById("phaser-game");
+const root = createRoot(container!);
 root.render(<App />);
+
+// Stops clicking-through of the UI
+// https://github.com/photonstorm/phaser/issues/4447
+const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "touchcancel"];
+events.forEach((event) => {
+    container!.addEventListener(event, (e) => e.stopPropagation());
+});
