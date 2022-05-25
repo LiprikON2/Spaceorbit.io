@@ -7,12 +7,22 @@ import PreloadScene from "./scenes/preloadScene";
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
 
+// const graphicsSettings = { best: 1, medium: 0.75, low: 0.5 };
+// const DPR = window.devicePixelRatio * graphicsSettings.low;
+// // const { width, height } = window.screen;
+// const { width, height } = { width: 1920, height: 1080 };
+
+// // Set width and height.
+// const WIDTH = Math.round(Math.max(width, height) * DPR);
+// const HEIGHT = Math.round(Math.min(width, height) * DPR);
+
 const config = {
     type: Phaser.AUTO,
     transparent: true,
     scale: {
         parent: "phaser-game",
         mode: Phaser.Scale.FIT,
+        // mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
@@ -40,10 +50,6 @@ const config = {
         ],
     },
 };
-
-// window.addEventListener("load", () => {
-//     const game = new Phaser.Game(config);
-// });
 
 let game;
 export const createGame = () => {

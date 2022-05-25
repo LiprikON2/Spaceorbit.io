@@ -1,4 +1,4 @@
-export default class FpsText extends Phaser.GameObjects.Text {
+export default class GenericText extends Phaser.GameObjects.Text {
     player;
     constructor(scene, player) {
         super(scene, 10, 10, "", { color: "white", fontSize: "2rem" });
@@ -12,6 +12,9 @@ export default class FpsText extends Phaser.GameObjects.Text {
         text += `fps: ${Math.floor(this.scene.game.loop.actualFps)}\n`;
         text += `x: ${Math.floor(this.player.x)} y: ${Math.floor(this.player.y)}\n`;
         // text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
+        text += `${Math.floor(Number(this.scene.game.config.width))}x${Math.floor(
+            Number(this.scene.game.config.height)
+        )}\n`;
 
         this.setText(text);
     }

@@ -12,11 +12,19 @@ const App = () => {
         const scene = getGame().scene.keys.MainScene;
         scene.player.exhaust.createExhaust();
     };
+    const toggleFullscreen = (e) => {
+        const isFullscreen = document.fullscreenElement !== null;
+        if (isFullscreen) document.exitFullscreen();
+        else document.body.requestFullscreen();
+    };
 
     return (
         <div id="UI" style={{ display: "flex", flexDirection: "column" }}>
             <Button variant="outline" color="gray" size="lg" onClick={addEngine}>
                 Add engine
+            </Button>
+            <Button variant="outline" color="gray" size="lg" onClick={toggleFullscreen}>
+                []
             </Button>
         </div>
     );

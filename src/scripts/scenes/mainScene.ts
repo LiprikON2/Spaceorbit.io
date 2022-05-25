@@ -1,6 +1,7 @@
 import Spaceship from "../objects/ship/spaceship";
 import InputManager from "../inputManager";
 import SoundManager from "../soundManager";
+import GenericText from "../objects/genericText";
 
 export default class MainScene extends Phaser.Scene {
     inputManager;
@@ -11,6 +12,7 @@ export default class MainScene extends Phaser.Scene {
     screen;
     emitter;
     mobs: Spaceship[] = [];
+    debugText;
 
     constructor() {
         super({ key: "MainScene" });
@@ -47,6 +49,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.spawnMobs(20);
+        this.debugText = new GenericText(this, this.player).setDepth(1000);
     }
 
     getRandomPositionOnMap() {
@@ -60,12 +63,14 @@ export default class MainScene extends Phaser.Scene {
 
     update(time, delta) {
         this.inputManager.update(time, delta);
+        this.debugText.update();
     }
     spawnMobs(count) {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.getRandomPositionOnMap();
-            const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
+            // const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
+            const mob = new Spaceship(this, 1000, 800, "F5S4", [this.player]);
             this.mobs.push(mob);
         }
     }
