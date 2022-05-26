@@ -1,8 +1,17 @@
 import { createRoot } from "react-dom/client";
 import React, { useState, useEffect } from "react";
 
+import { Modal, MantineProvider, Slider, Text } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
-import { ArrowsMinimize, Maximize, Music, MusicOff, Volume, VolumeOff } from "tabler-icons-react";
+import {
+    ArrowsMinimize,
+    Maximize,
+    Music,
+    MusicOff,
+    Volume,
+    VolumeOff,
+    Settings,
+} from "tabler-icons-react";
 
 import { createGame, getGame } from "../game";
 import Button from "./components/button";
@@ -17,6 +26,8 @@ const App = () => {
     const [fullscreenIcon, toggleFullscreenIcon] = useToggle(false, [false, true]);
     const [musicIcon, toggleMusicIcon] = useToggle(settings.musicMuted, [false, true]);
     const [effectsIcon, toggleEffectsIcon] = useToggle(settings.effectsMuted, [false, true]);
+    const [settingsModal, toggleSettingsModal] = useToggle(false, [false, true]);
+
     useEffect(() => {
         createGame(settings);
         // setInit(true);
@@ -54,24 +65,52 @@ const App = () => {
         else document.body.requestFullscreen();
         toggleFullscreenIcon();
     };
+
+    const toggleSettings = () => {
+        const player = getGame().scene.keys.MainScene.player;
+        if (player) {
+            toggleSettingsModal();
+            player.active = !player.active;
+        }
+    };
+    const [endValue, setEndValue] = useState(50);
+
     return (
         // init && (
-        <div id="UI">
-            <div className="volumeControls group">
-                <Button className="muteMusic" isSquare={true} onClick={toggleMusic}>
-                    {musicIcon ? <MusicOff /> : <Music />}
+        // @ts-ignore
+        <MantineProvider theme={{ colorScheme: "dark" }}>
+            <div id="UI">
+                <Modal
+                    className="modal"
+                    opened={settingsModal}
+                    onClose={toggleSettings}
+                    title="Introduce yourself!"
+                >
+                    <Slider className="slider" onChangeEnd={setEndValue} />
+                    <Text mt={5} size="sm">
+                        onChangeEnd value: <b>{endValue}</b>
+                    </Text>
+                </Modal>
+
+                <div className="volumeControls group">
+                    <Button isSquare={true} onClick={toggleSettings}>
+                        <Settings />
+                    </Button>
+                    <Button className="muteMusic" isSquare={true} onClick={toggleMusic}>
+                        {musicIcon ? <MusicOff /> : <Music />}
+                    </Button>
+                    <Button className="effectsMute" isSquare={true} onClick={toggleEffects}>
+                        {effectsIcon ? <VolumeOff /> : <Volume />}
+                    </Button>
+                </div>
+                <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
+                    {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
                 </Button>
-                <Button className="effectsMute" isSquare={true} onClick={toggleEffects}>
-                    {effectsIcon ? <VolumeOff /> : <Volume />}
+                <Button className="addEngine" onClick={addEngine}>
+                    Add engine
                 </Button>
             </div>
-            <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
-                {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
-            </Button>
-            <Button className="addEngine" onClick={addEngine}>
-                Add engine
-            </Button>
-        </div>
+        </MantineProvider>
         // )
     );
 };

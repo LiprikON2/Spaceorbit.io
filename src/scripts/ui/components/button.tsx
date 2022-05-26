@@ -13,17 +13,19 @@ const Button = ({
     ...rest
 }) => {
     return (
-        <MantineButton
-            // @ts-ignore
-            variant={variant}
-            color={color}
-            // @ts-ignore
-            size={size}
-            className={isSquare ? className + " square-button" : className}
-            {...rest}
-        >
-            {children}
-        </MantineButton>
+        <>
+            <MantineButton
+                // @ts-ignore
+                variant={variant}
+                color={color}
+                // @ts-ignore
+                size={size}
+                className={isSquare ? className + " square-button" : className}
+                {...rest}
+            >
+                {children}
+            </MantineButton>
+        </>
     );
 };
 

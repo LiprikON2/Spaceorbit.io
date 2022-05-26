@@ -86,7 +86,7 @@ export default class Exhaust {
     initExhaustSound() {
         const maxVolume = 0.08;
         // The exhaust sound is constantly playing, tween just changes the volume
-        // TODO ensure it doesnt dies on page blur
+        // TODO it doesn't mute
         this.scene.soundManager.play("exhaust", {
             volume: 0.0001,
             pitchPower: this.getEngineCount(),
