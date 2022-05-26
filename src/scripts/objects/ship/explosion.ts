@@ -58,8 +58,7 @@ export default class Explosion extends Phaser.GameObjects.Sprite {
         const underTargetExplosionConf = {
             // @ts-ignore
             keys: [this.options.keys[0]],
-            // @ts-ignore
-            scale: this.options.scale + this.options.doubleDiff,
+            scale: (this.options.scale ?? 0) + (this.options.doubleDiff ?? 0) ?? 1,
             silent: true,
             double: false,
         };

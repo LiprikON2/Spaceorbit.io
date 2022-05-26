@@ -16,7 +16,6 @@ export default class InputManager {
         scene.cameras.main.startFollow(player);
         scene.cameras.main.setZoom(this.zoom);
 
-        // @ts-ignore
         const scroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
         });

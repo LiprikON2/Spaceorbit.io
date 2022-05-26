@@ -48,6 +48,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.exhaust = new Exhaust(scene, this, this.modules.exhaustOrigins, depth);
         this.enemies = enemies;
 
+        // @ts-ignore
         this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
     }
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button as MantineButton } from "@mantine/core";
+import { Button as MantineButton, ButtonVariant, MantineSize } from "@mantine/core";
 
 import "./button.css";
 
@@ -15,11 +15,9 @@ const Button = ({
     return (
         <>
             <MantineButton
-                // @ts-ignore
-                variant={variant}
+                variant={variant as ButtonVariant}
                 color={color}
-                // @ts-ignore
-                size={size}
+                size={size as MantineSize}
                 className={isSquare ? className + " square-button" : className}
                 {...rest}
             >

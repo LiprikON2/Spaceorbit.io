@@ -28,7 +28,6 @@ export default class Exhaust {
         this.depth = depth;
         // Sort by x value, from lowest to highest
         this.exhaustOrigins = exhaustOrigins.sort(({ x: a }, { x: b }) => a - b);
-        // @ts-ignore
         this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]);
 
         this.createExhaust();
