@@ -2,8 +2,8 @@ type SoundManagerConfig = {
     masterVolume: number;
     effectsVolume: number;
     musicVolume: number;
-    effectsMuted: boolean;
-    musicMuted: boolean;
+    effectsMute: boolean;
+    musicMute: boolean;
 
     distanceThreshold: number;
     pauseOnBlur: boolean;
@@ -18,14 +18,20 @@ export default class SoundManager {
     music;
     constructor(scene, options?: SoundManagerConfig) {
         const localStorageSettings = scene.game.settings;
-        const { effectsMuted, musicMuted } = localStorageSettings;
+        const {
+            masterVolume = 1,
+            effectsVolume = 0.1,
+            musicVolume = 0.1,
+            effectsMute = false,
+            musicMute = false,
+        } = localStorageSettings;
         // https://stackoverflow.com/a/37403125
         const defaults = {
-            masterVolume: 1,
-            effectsVolume: 1,
-            musicVolume: 0.1,
-            effectsMuted: effectsMuted ?? false,
-            musicMuted: musicMuted ?? false,
+            masterVolume,
+            effectsVolume,
+            musicVolume,
+            effectsMute,
+            musicMute,
 
             distanceThreshold: 2000,
             pauseOnBlur: false,
@@ -35,6 +41,7 @@ export default class SoundManager {
         this.scene = scene;
 
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
+        console.log("init this", this.options);
     }
     setVolume(key, newVolume) {
         this.options[key] = newVolume;
@@ -47,7 +54,8 @@ export default class SoundManager {
 
     update() {
         if (this.music) {
-            this.music.mute = this.options.musicMuted;
+            this.music.mute = this.options.musicMute;
+            this.music.volume = this.options.masterVolume * this.options.musicVolume;
         }
     }
 
@@ -114,7 +122,7 @@ export default class SoundManager {
             const config = {
                 detune: pitch,
                 volume: finalVolume,
-                mute: this.options.effectsMuted,
+                mute: this.options.effectsMute,
                 loop,
             };
 
@@ -147,7 +155,7 @@ export default class SoundManager {
 
         const finalVolume = this.options.masterVolume * this.options.musicVolume;
         this.music = this.scene.sound.add(this.musicPlaylist[trackIndex]);
-        this.music.play({ volume: finalVolume, mute: this.options.musicMuted });
+        this.music.play({ volume: finalVolume, mute: this.options.musicMute });
 
         // Play the next track in a playlist, once finished with this one
         this.music.on("complete", () => {
