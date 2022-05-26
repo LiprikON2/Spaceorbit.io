@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
-import { Modal, MantineProvider, Slider, Text, Title, Divider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
 import {
     ArrowsMinimize,

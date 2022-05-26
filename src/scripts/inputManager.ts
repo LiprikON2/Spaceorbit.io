@@ -88,7 +88,7 @@ export default class InputManager {
         if (!hasMoved) this.player.stoppedMoving();
 
         // Shooting
-        if (primaryShootBtn) {
+        if (primaryShootBtn && this.scene.input.activePointer.downElement.tagName === "CANVAS") {
             this.player.primaryFire(time, { cursorX, cursorY });
         }
 

@@ -1,6 +1,6 @@
 import { Divider, Modal, Slider, Title } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
-import React from "react";
+import React, { useEffect } from "react";
+
 import { getGame } from "../game";
 import Button from "./components/button";
 
