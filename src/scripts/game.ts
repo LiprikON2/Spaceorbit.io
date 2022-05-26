@@ -2,6 +2,7 @@ import "phaser";
 import MainScene from "./scenes/mainScene";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
+import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
 import PreloadScene from "./scenes/preloadScene";
 
 const DEFAULT_WIDTH = 1920;
@@ -47,6 +48,11 @@ const config = {
             {
                 key: "rexRotateTo",
                 plugin: RotateToPlugin,
+                start: true,
+            },
+            {
+                key: "rexSoundFade",
+                plugin: SoundFadePlugin,
                 start: true,
             },
         ],

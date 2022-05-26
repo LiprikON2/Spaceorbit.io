@@ -93,7 +93,6 @@ export default class PreloadScene extends Phaser.Scene {
             repeat: 0,
             hideOnComplete: true,
         });
-        // this.scene.launch("ExportParticlesdsScene");
 
         /**
          * This is how you would dynamically import the mainScene class (with code splitting),

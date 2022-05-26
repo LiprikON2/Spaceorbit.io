@@ -16,6 +16,7 @@ export default class SoundManager {
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
     music;
+    soundFade;
     constructor(scene, options?: SoundManagerConfig) {
         const localStorageSettings = scene.game.settings;
         const {
@@ -39,9 +40,10 @@ export default class SoundManager {
         this.options = Object.assign({}, defaults, options);
 
         this.scene = scene;
+        this.soundFade = this.scene.plugins.get("rexSoundFade");
 
+        // Prevent sound mute when tabbing out
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
-        console.log("init this", this.options);
     }
     setVolume(key, newVolume) {
         this.options[key] = newVolume;
@@ -74,6 +76,22 @@ export default class SoundManager {
         } else {
             this.musicPlaylist = this.musicPlaylist.concat(musicPlaylist);
         }
+    }
+
+    fadeOut(type, volume = 1, index = 0) {
+        const soundFade = this.scene.plugins.get("rexSoundFade");
+        const sound = this.sounds[type][index];
+        const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
+
+        soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
+    }
+
+    fadeIn(type, volume = 1, index = 0) {
+        const soundFade = this.scene.plugins.get("rexSoundFade");
+        const sound = this.sounds[type][index];
+        const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
+
+        soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
     }
 
     // https://phaser.discourse.group/t/sound-in-particular-place/2547/2
@@ -131,6 +149,7 @@ export default class SoundManager {
                 // Ensure there is enough sounds
                 const randomSound = Phaser.Math.Between(1, Math.max(soundsCount, rareDistribution));
 
+                // TODO have on the phone a better solution
                 // Makes first (main) sound more likely to be played
                 if (randomSound < rareDistribution - soundsCount - 1) {
                     // Play main sound
@@ -140,7 +159,7 @@ export default class SoundManager {
                     this.sounds[type][randomSound % soundsCount].play(config);
                 }
             } else {
-                this.sounds[type][mainIndex].play(config);
+                const s = this.sounds[type][mainIndex].play(config);
             }
         }
     }

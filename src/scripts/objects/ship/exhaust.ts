@@ -4,10 +4,9 @@ export default class Exhaust {
     depth;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     exhaustOrigins: { x: number; y: number }[];
-    exhaustTween;
     exhaustCount = 0;
     // Since origins are sorted in increasing order, we ensure symmetry by using a particular pattern of activation engines
-    // "have N engine slots": have 1 of them installed, have 2 engines installed, have 3 engines...
+    // "have N engine slots": list of indices when have 1 of them installed, have 2 engines installed, have 3 engines...
     exhaustOriginCountPattern = {
         "1": [[0]],
         "3": [[1], [0, 2], [0, 1, 2]],
@@ -29,6 +28,8 @@ export default class Exhaust {
         this.depth = depth;
         // Sort by x value, from lowest to highest
         this.exhaustOrigins = exhaustOrigins.sort(({ x: a }, { x: b }) => a - b);
+        // @ts-ignore
+        this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]);
 
         this.createExhaust();
         this.updateExhaustPosition();
@@ -86,48 +87,25 @@ export default class Exhaust {
     initExhaustSound() {
         const maxVolume = 0.08;
         // The exhaust sound is constantly playing, tween just changes the volume
-        // TODO it doesn't mute
         this.scene.soundManager.play("exhaust", {
-            volume: 0.0001,
+            volume: 0,
             pitchPower: this.getEngineCount(),
             checkDistance: false,
             loop: true,
         });
-        this.exhaustTween = {
-            fadeIn: this.scene.tweens.add({
-                volume: maxVolume,
-                targets: this.scene.soundManager.sounds.exhaust[0],
-                duration: 100,
-                paused: 1,
-            }),
-            fadeOut: this.scene.tweens.add({
-                volume: 0.0001,
-                targets: this.scene.soundManager.sounds.exhaust[0],
-                duration: 100,
-                paused: 1,
-            }),
-        };
-    }
-    toggleExhaustSound() {
-        // TODO fix popping sound in production
-        if (this.exhaustEmitters[0].on) {
-            this.exhaustTween.fadeIn.play();
-        } else {
-            this.exhaustTween.fadeOut.play();
-        }
     }
 
     stopExhaust() {
         if (this.exhaustEmitters[0].on) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.stop());
-            this.toggleExhaustSound();
+            this.scene.soundManager.fadeOut("exhaust", 0.08);
         }
     }
 
     startExhaust() {
         if (!this.exhaustEmitters[0].on) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.start());
-            this.toggleExhaustSound();
+            this.scene.soundManager.fadeIn("exhaust", 0.08);
         }
     }
 }

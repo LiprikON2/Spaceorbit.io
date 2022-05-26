@@ -40,8 +40,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         ]);
         // @ts-ignore
         this.scene.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
-        // @ts-ignore
-        this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]);
 
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
@@ -78,9 +76,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         });
 
         this.setTint(0xee4824);
-        setTimeout(() => {
-            this.clearTint();
-        }, 200);
+        this.scene.time.delayedCall(200, () => this.clearTint());
 
         if (projectile.name === "laser_beam") {
             this.status.health -= 1000;
@@ -98,14 +94,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             double: true,
         });
 
-        setTimeout(() => {
-            // @ts-ignore
-            this.respawn();
-            // const isAi = this.enemies[0] === this.scene.player;
-            // if (isAi) {
-            //     this.destroy();
-            // }
-        }, 2000);
+        this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
     respawn() {
@@ -309,8 +298,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             });
         });
 
-        setTimeout(() => {
-            laserBeam.destroy();
-        }, projectileLifespan);
+        this.scene.time.delayedCall(projectileLifespan, () => laserBeam.destroy());
     }
 }
