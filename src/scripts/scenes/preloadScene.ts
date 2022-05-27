@@ -16,7 +16,7 @@ export default class PreloadScene extends Phaser.Scene {
             atlasURL: "assets/ships/F5S4.json",
         });
         // Weapons
-        this.load.spritesheet("laser_beam", "assets/weapons/lasers/spr_bullet_strip02.png", {
+        this.load.spritesheet("laser", "assets/weapons/lasers/spr_bullet_strip02.png", {
             frameWidth: 95,
             frameHeight: 68,
         });

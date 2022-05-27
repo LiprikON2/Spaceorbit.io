@@ -1,7 +1,6 @@
 export default class Exhaust {
     scene;
     ship;
-    depth;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     exhaustOrigins: { x: number; y: number }[];
     exhaustCount = 0;
@@ -22,10 +21,9 @@ export default class Exhaust {
         ],
     };
 
-    constructor(scene, ship, exhaustOrigins, depth) {
+    constructor(scene, ship, exhaustOrigins) {
         this.scene = scene;
         this.ship = ship;
-        this.depth = depth;
         // Sort by x value, from lowest to highest
         this.exhaustOrigins = exhaustOrigins.sort(({ x: a }, { x: b }) => a - b);
         this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]);
@@ -38,7 +36,9 @@ export default class Exhaust {
         const hasEmptyEngineSlot = this.exhaustCount + 1 <= this.exhaustOrigins.length;
         if (hasEmptyEngineSlot) {
             this.exhaustCount++;
-            const exhaustParticles = this.scene.add.particles("exhaust").setDepth(this.depth - 1);
+            const exhaustParticles = this.scene.add
+                .particles("exhaust")
+                .setDepth(this.ship.depth - 1);
             const exhaustEmitter = exhaustParticles.createEmitter({
                 follow: this.ship,
                 x: 0,

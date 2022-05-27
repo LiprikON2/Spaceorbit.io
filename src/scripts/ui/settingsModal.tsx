@@ -1,14 +1,20 @@
-import { Divider, Modal, Slider, Title } from "@mantine/core";
+import { Divider, Modal, SegmentedControl, Slider, Title } from "@mantine/core";
 import React, { useEffect } from "react";
 
 import { getGame } from "../game";
 import Button from "./components/button";
 
 const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
-    const addEngine = (e) => {
+    const addEngine = () => {
         const scene = getGame().scene.keys.MainScene;
         if (scene) {
             scene.player.exhaust.createExhaust();
+        }
+    };
+    const addLaser = (slot) => {
+        const scene = getGame().scene.keys.MainScene;
+        if (scene) {
+            scene.player.weapons.createLaser(slot);
         }
     };
 
@@ -21,6 +27,9 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
             soundManager.setVolume(key, newValue);
             setSettings((pervSettings) => ({ ...pervSettings, [key]: newValue }));
         }
+    };
+    const handleGraphicSettings = (newValue) => {
+        setSettings((pervSettings) => ({ ...pervSettings, graphicsSettings: newValue }));
     };
 
     return (
@@ -94,10 +103,35 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                             defaultValue={settings.effectsVolume}
                         />
                     </div>
+                    <Title order={5}>Graphics</Title>
+                    <div className="group group-vertical">
+                        <Title order={6}>General</Title>
+                        <SegmentedControl
+                            color="cyan"
+                            data={[
+                                { label: "Low", value: 0.5 },
+                                { label: "Medium", value: 0.75 },
+                                { label: "High", value: 1 },
+                            ]}
+                            transitionDuration={0}
+                            value={settings.graphicsSettings}
+                            onChange={handleGraphicSettings}
+                        />
+                    </div>
                     <Title order={5}>Ship</Title>
                     <div className="group group-vertical">
+                        <Title order={6}>Modules</Title>
                         <Button className="addEngine" onClick={addEngine}>
-                            Add engine
+                            Add: Engine
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addLaser(0)}>
+                            Add: Weapon slot 1 - Laser
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addLaser(1)}>
+                            Add: Weapon slot 2 - Laser
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addLaser(2)}>
+                            Add: Weapon slot 3 - Laser
                         </Button>
                     </div>
                 </div>

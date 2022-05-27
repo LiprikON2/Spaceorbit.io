@@ -28,6 +28,7 @@ const App = () => {
             musicVolume: 0.1,
             musicMute: false,
             effectsMute: false,
+            graphicsSettings: 1,
         },
     });
     const [fullscreenIcon, toggleFullscreenIcon] = useToggle(false, [false, true]);
