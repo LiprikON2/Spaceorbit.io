@@ -1,6 +1,7 @@
 import Explosion from "./explosion";
 import Exhaust from "./exhaust";
 import Weapons from "./weapons";
+import Shield from "./shield";
 
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth: number;
@@ -14,23 +15,24 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     exhaust: Exhaust;
     rotateTo;
     weapons;
+    shield;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
 
         const atlas = scene.textures.get(atlasTexture);
         const scale = atlas.customData["meta"].scale;
-        this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
-        this.setScale(scale);
-
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.modules = atlas.customData["meta"].modules;
 
-        this.status = { health: this.baseSpecs.health, shields: 0, laserCount: 1 };
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+
+        this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
+        this.setScale(scale);
+
+        this.status = { health: this.baseSpecs.health, shields: 10000 };
 
         // Add ship sounds
-
         // @ts-ignore
         this.scene.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
 
@@ -44,6 +46,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         // @ts-ignore
         this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
+
+        this.shield = new Shield(this.scene, this);
     }
 
     getSpeed() {
@@ -63,21 +67,43 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
     getHit(projectile) {
-        // @ts-ignore
-        this.scene.soundManager.play("hit", {
-            sourceX: this.x,
-            sourceY: this.y,
-            volume: 0.2,
-        });
+        console.log(this.status.shields, this.status.health);
+        if (this.status.shields > 0) {
+            // Damage to the shield
+            // @ts-ignore
+            this.scene.soundManager.play("hit", {
+                sourceX: this.x,
+                sourceY: this.y,
+                volume: 0.2,
+            });
 
-        this.setTint(0xee4824);
-        this.scene.time.delayedCall(200, () => this.clearTint());
+            this.shield.tween.fadeIn.play();
+            this.scene.time.delayedCall(500, () => this.shield.tween.fadeOut.play());
 
-        this.status.health -= projectile.weapon.projectileDamage;
+            this.status.shields -= projectile.weapon.projectileDamage;
 
-        if (this.status.health <= 0) {
-            this.status.health = 0;
-            this.explode();
+            if (this.status.shields <= 0) {
+                this.status.shields = 0;
+            }
+        } else {
+            // Damage to the hull
+            // @ts-ignore
+            this.scene.soundManager.play("hit", {
+                sourceX: this.x,
+                sourceY: this.y,
+                volume: 0.2,
+            });
+
+            // TODO lastHit time variable in order not to bug out the tween, plus make it possible to regen shields
+            this.setTint(0xee4824);
+            this.scene.time.delayedCall(200, () => this.clearTint());
+
+            this.status.health -= projectile.weapon.projectileDamage;
+
+            if (this.status.health <= 0) {
+                this.status.health = 0;
+                this.explode();
+            }
         }
     }
     explode() {
@@ -95,6 +121,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
         this.y = y;
+        this.resetMovement();
         this.status.health = this.baseSpecs.health;
 
         this.scene.physics.add.existing(this);
@@ -110,6 +137,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     resetMovement() {
         this.setVelocity(0);
+        this.shield.x = this.x;
+        this.shield.y = this.y;
     }
     stoppedMoving() {
         this.exhaust.stopExhaust();

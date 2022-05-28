@@ -149,29 +149,34 @@ export default class Weapons {
             velocityY = -Math.cos(rotation) * projectileVelocity;
         }
 
-        console.log("weapon.type", weapon.type);
-        const laserBeam = this.scene.physics.add
+        const projectile = this.scene.physics.add
             .sprite(offsetX, offsetY, weapon.type, 0)
             .setRotation(rotation - Math.PI / 2)
             .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
-        laserBeam.weapon = weapon;
+        projectile.weapon = weapon;
 
         const hitboxSize = 2;
-        laserBeam
+        projectile
             .setCircle(
                 hitboxSize,
-                laserBeam.width / 2 - hitboxSize,
-                laserBeam.height / 2 - hitboxSize
+                projectile.width / 2 - hitboxSize,
+                projectile.height / 2 - hitboxSize
             )
             .setVelocity(velocityX, velocityY);
 
         this.ship.enemies.forEach((enemy) => {
-            this.scene.physics.add.overlap(enemy, laserBeam, () => {
-                enemy.getHit(laserBeam);
-                laserBeam.destroy();
+            this.scene.physics.add.overlap(enemy, projectile, () => {
+                enemy.getHit(projectile);
+                projectile.destroy();
+            });
+            this.scene.physics.add.overlap(enemy.shield, projectile, () => {
+                if (enemy.status.shields > 0) {
+                    enemy.getHit(projectile);
+                    projectile.destroy();
+                }
             });
         });
 
-        this.scene.time.delayedCall(projectileLifespan, () => laserBeam.destroy());
+        this.scene.time.delayedCall(projectileLifespan, () => projectile.destroy());
     }
 }

@@ -22,7 +22,7 @@ export default class MainScene extends Phaser.Scene {
         // Init sound manager
         this.soundManager = new SoundManager(this);
 
-        this.player = new Spaceship(this, 0, 0, "F5S4", this.mobs, 100);
+        this.player = new Spaceship(this, 400, 400, "F5S4", this.mobs, 100);
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
 
