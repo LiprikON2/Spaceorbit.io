@@ -1,7 +1,9 @@
 export default class Shield extends Phaser.Physics.Arcade.Sprite {
     scene;
     ship;
-    tween: { fadeIn: any; fadeOut: any } = { fadeIn: undefined, fadeOut: undefined };
+    UUID;
+    lastHit: number = -Infinity;
+    tweenFade;
     constructor(scene, ship) {
         super(scene, ship.x, ship.y, "shield");
         scene.add.existing(this);
@@ -9,30 +11,47 @@ export default class Shield extends Phaser.Physics.Arcade.Sprite {
 
         this.scene = scene;
         this.ship = ship;
-
+        this.UUID = ship.UUID;
         const scale = 0.7;
         const shieldHitboxRadius = (ship.baseSpecs.hitboxRadius / 0.7) * 1.5;
         this.setOrigin(0.5)
             .setDepth(ship.depth + 1)
             .setScale(scale)
-            .setAlpha(0);
+            .setAlpha(0, 0.1, 0, 0);
 
         this.body.setCircle(
             shieldHitboxRadius,
             this.width / 2 - shieldHitboxRadius,
             this.height / 2 - shieldHitboxRadius
         );
-        this.tween.fadeIn = scene.tweens.add({
+        this.tweenFade = scene.tweens.add({
             targets: this,
             alphaTopLeft: { value: 1, duration: 500, ease: "Power1" },
             alphaBottomRight: { value: 1, duration: 1000, ease: "Power1" },
             alphaBottomLeft: { value: 1, duration: 500, ease: "Power1", delay: 500 },
+            yoyo: true,
         });
-        this.tween.fadeOut = scene.tweens.add({
-            targets: this,
-            alphaTopLeft: { value: 0, duration: 500, ease: "Power1" },
-            alphaBottomRight: { value: 0, duration: 1000, ease: "Power1" },
-            alphaBottomLeft: { value: 0, duration: 500, ease: "Power1", delay: 500 },
+        this.scene.soundManager.addSounds("shield", ["shield_sound_1"]);
+        this.scene.soundManager.addSounds("shield_down", ["shield_down_sound_1"]);
+    }
+
+    getHit() {
+        if (!this.tweenFade.isPlaying()) {
+            this.tweenFade.play();
+            this.scene.soundManager.play("shield", {
+                sourceX: this.x,
+                sourceY: this.y,
+                volume: 1,
+            });
+        }
+    }
+    disable() {
+        // TODO crack sound
+        this.disableBody(true, true);
+        this.scene.soundManager.play("shield_down", {
+            sourceX: this.x,
+            sourceY: this.y,
+            volume: 0.3,
         });
     }
 }

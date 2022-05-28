@@ -16,6 +16,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     rotateTo;
     weapons;
     shield;
+    UUID;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
 
@@ -46,8 +47,19 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         // @ts-ignore
         this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
+        this.UUID = Phaser.Utils.String.UUID();
 
         this.shield = new Shield(this.scene, this);
+        // @ts-ignore
+        this.body.onWorldBounds = true;
+        // Prevents shield from running away when player hit world bounds
+        // TODO get ship by id, instead of spawning bunch of event listeners
+        this.scene.physics.world.on("worldbounds", (body) => {
+            if (body.gameObject.UUID === this.UUID) {
+                this.shield.x = this.x;
+                this.shield.y = this.y;
+            }
+        });
     }
 
     getSpeed() {
@@ -70,20 +82,13 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
-            // @ts-ignore
-            this.scene.soundManager.play("hit", {
-                sourceX: this.x,
-                sourceY: this.y,
-                volume: 0.2,
-            });
-
-            this.shield.tween.fadeIn.play();
-            this.scene.time.delayedCall(500, () => this.shield.tween.fadeOut.play());
+            this.shield.getHit();
 
             this.status.shields -= projectile.weapon.projectileDamage;
 
             if (this.status.shields <= 0) {
                 this.status.shields = 0;
+                this.shield.disable();
             }
         } else {
             // Damage to the hull
@@ -121,10 +126,15 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
         this.y = y;
-        this.resetMovement();
+        this.shield.x = x;
+        this.shield.y = y;
         this.status.health = this.baseSpecs.health;
+        this.status.shields = 10000; // todo
 
         this.scene.physics.add.existing(this);
+        this.scene.physics.add.existing(this.shield);
+        this.shield.active = true;
+        this.shield.visible = true;
         this.active = true;
     }
 
@@ -137,8 +147,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     resetMovement() {
         this.setVelocity(0);
-        this.shield.x = this.x;
-        this.shield.y = this.y;
+        this.shield.setVelocity(0);
     }
     stoppedMoving() {
         this.exhaust.stopExhaust();
@@ -146,24 +155,28 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     moveUp() {
         if (this.active) {
             this.setVelocityY(-this.getSpeed());
+            this.shield.setVelocityY(-this.getSpeed());
             this.exhaust.startExhaust();
         }
     }
     moveDown() {
         if (this.active) {
             this.setVelocityY(this.getSpeed());
+            this.shield.setVelocityY(this.getSpeed());
             this.exhaust.startExhaust();
         }
     }
     moveLeft() {
         if (this.active) {
             this.setVelocityX(-this.getSpeed());
+            this.shield.setVelocityX(-this.getSpeed());
             this.exhaust.startExhaust();
         }
     }
     moveRight() {
         if (this.active) {
             this.setVelocityX(this.getSpeed());
+            this.shield.setVelocityX(this.getSpeed());
             this.exhaust.startExhaust();
         }
     }
@@ -172,6 +185,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
             this.exhaust.startExhaust();
         }
     }
@@ -179,6 +194,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.exhaust.startExhaust();
         }
     }
@@ -186,6 +203,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
             this.exhaust.startExhaust();
         }
     }
@@ -193,6 +212,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shield.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.exhaust.startExhaust();
         }
     }

@@ -52,11 +52,11 @@ export default class MainScene extends Phaser.Scene {
         this.debugText = new GenericText(this, this.player).setDepth(1000);
     }
 
-    getRandomPositionOnMap() {
+    getRandomPositionOnMap(margin = 300) {
         const maxX = this.physics.world.bounds.width;
         const maxY = this.physics.world.bounds.height;
-        const randomX = Phaser.Math.Between(0, maxX);
-        const randomY = Phaser.Math.Between(0, maxY);
+        const randomX = Phaser.Math.Between(margin, maxX - margin);
+        const randomY = Phaser.Math.Between(margin, maxY - margin);
 
         return { x: randomX, y: randomY };
     }
