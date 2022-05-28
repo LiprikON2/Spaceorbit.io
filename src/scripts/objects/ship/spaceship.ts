@@ -73,13 +73,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.setTint(0xee4824);
         this.scene.time.delayedCall(200, () => this.clearTint());
 
-        if (projectile.name === "laser") {
-            this.status.health -= 1000;
+        this.status.health -= projectile.weapon.projectileDamage;
 
-            if (this.status.health <= 0) {
-                this.status.health = 0;
-                this.explode();
-            }
+        if (this.status.health <= 0) {
+            this.status.health = 0;
+            this.explode();
         }
     }
     explode() {

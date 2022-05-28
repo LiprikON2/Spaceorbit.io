@@ -18,6 +18,13 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
         }
     };
 
+    const addGatling = (slot) => {
+        const scene = getGame().scene.keys.MainScene;
+        if (scene) {
+            scene.player.weapons.createGatling(slot);
+        }
+    };
+
     const setVolume = (key, newValue) => {
         const soundManager = getGame().scene.keys.MainScene.soundManager;
         const isValidKey =
@@ -132,6 +139,15 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                         </Button>
                         <Button className="addWeapon" onClick={() => addLaser(2)}>
                             Add: Weapon slot 3 - Laser
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addGatling(0)}>
+                            Add: Weapon slot 1 - Gatling Gun
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addGatling(1)}>
+                            Add: Weapon slot 2 - Gatling Gun
+                        </Button>
+                        <Button className="addWeapon" onClick={() => addGatling(2)}>
+                            Add: Weapon slot 3 - Gatling Gun
                         </Button>
                     </div>
                 </div>

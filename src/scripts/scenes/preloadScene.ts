@@ -20,6 +20,10 @@ export default class PreloadScene extends Phaser.Scene {
             frameWidth: 95,
             frameHeight: 68,
         });
+        this.load.spritesheet("gatling", "assets/weapons/gatling/projectile.webp", {
+            frameWidth: 119,
+            frameHeight: 115,
+        });
         // Effects
         // TODO is it better to use power of 2?
         this.load.spritesheet("particles", "assets/effects/particles_1080x1080.png", {
@@ -48,6 +52,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
         this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");
         this.load.audio("laser_sound_3", "assets/weapons/lasers/laser3_short.mp3");
+        this.load.audio("gatling_sound_1", "assets/weapons/gatling/lmg_1.mp3");
         this.load.audio("exhaust_sound_1", "assets/ships/thrusters_1.mp3");
         this.load.audio("hit_sound_1", "assets/ships/metal_hit_1.mp3");
         this.load.audio("hit_sound_2", "assets/ships/metal_hit_2.mp3");

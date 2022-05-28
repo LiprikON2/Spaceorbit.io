@@ -11,28 +11,35 @@ export default class Weapons {
         y: number;
         type: string;
         id: number;
-        fireRate: number;
+        cooldownTime: number;
         lastFired: number;
+        projectileVelocity: number;
+        projectileDamage: number;
+        projectileScale: { x: number; y: number };
     }[];
 
     constructor(scene, ship, weaponOrigins) {
         this.scene = scene;
         this.ship = ship;
-        // Sort by x value, from lowest to highest; add type, id, fireRate
+        // Sort by x value, from lowest to highest
         this.weaponSlots = weaponOrigins
             .sort(({ x: a }, { x: b }) => a - b)
             .map((origin, index) => ({
                 ...origin,
                 type: "empty",
                 id: index,
-                fireRate: 0,
+                cooldownTime: 0,
                 lastFired: -Infinity,
+                projectileVelocity: 0,
+                projectileDamage: 0,
+                projectileScale: { x: 1, y: 1 },
             }));
         this.scene.soundManager.addSounds("laser", [
             "laser_sound_2",
             "laser_sound_1",
             "laser_sound_3",
         ]);
+        this.scene.soundManager.addSounds("gatling", ["gatling_sound_1"]);
 
         const middleSlot = Math.floor((this.weaponSlots.length - 1) / 2);
         this.createLaser(middleSlot);
@@ -40,7 +47,22 @@ export default class Weapons {
 
     createLaser(slot) {
         this.weaponSlots[slot].type = "laser";
-        this.weaponSlots[slot].fireRate = 600;
+        this.weaponSlots[slot].cooldownTime = 600;
+        this.weaponSlots[slot].projectileVelocity = 5000;
+        this.weaponSlots[slot].projectileDamage = 1000;
+        this.weaponSlots[slot].projectileScale = { x: 3, y: 1 };
+
+        // DPS = 1000 * (1000 / 600) = 1666 damage per second
+    }
+
+    createGatling(slot) {
+        this.weaponSlots[slot].type = "gatling";
+        this.weaponSlots[slot].cooldownTime = 100;
+        this.weaponSlots[slot].projectileVelocity = 1200;
+        this.weaponSlots[slot].projectileDamage = 200;
+        this.weaponSlots[slot].projectileScale = { x: 0.4, y: 0.4 };
+
+        // DPS = 166 * (1000 / 100) = 2000 damage per second
     }
 
     getInstalledWeapons(type) {
@@ -49,15 +71,17 @@ export default class Weapons {
 
     primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
         this.fireAll("laser", time, cursor);
+        this.fireAll("gatling", time, cursor);
     }
     fireAll(type, time, cursor?: { cursorX: number; cursorY: number }) {
         let playedSound = false;
         const weapons = this.getInstalledWeapons(type);
+        const toAddShipMomentum = type === "gatling";
 
         weapons.forEach((weapon) => {
-            if (time - weapon.lastFired > weapon.fireRate) {
+            if (time - weapon.lastFired > weapon.cooldownTime) {
                 // Check if enough time passed since last shot
-                this.shootProjectile(weapon, false, cursor);
+                this.shootProjectile(weapon, toAddShipMomentum, cursor);
                 // Update cooldown
                 this.weaponSlots[weapon.id].lastFired = time;
                 // Play the apropriate sound one time, regardless of the amount of weapons
@@ -79,7 +103,7 @@ export default class Weapons {
         addShipMomentum = false,
         cursor?: { cursorX: number; cursorY: number }
     ) {
-        const projectileVelocity = 5000;
+        const projectileVelocity = weapon.projectileVelocity;
         const projectileDistance = 900000;
         const projectileLifespan = projectileDistance / projectileVelocity;
 
@@ -125,11 +149,12 @@ export default class Weapons {
             velocityY = -Math.cos(rotation) * projectileVelocity;
         }
 
+        console.log("weapon.type", weapon.type);
         const laserBeam = this.scene.physics.add
             .sprite(offsetX, offsetY, weapon.type, 0)
             .setRotation(rotation - Math.PI / 2)
-            .setScale(3, 1);
-        laserBeam.name = weapon.type;
+            .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
+        laserBeam.weapon = weapon;
 
         const hitboxSize = 2;
         laserBeam
