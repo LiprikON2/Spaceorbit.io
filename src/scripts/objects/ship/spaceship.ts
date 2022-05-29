@@ -259,12 +259,14 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const angle = this.rotation;
         this.body.velocity.setToPolar(angle, this.getSpeed());
         this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+        this.exhausts.startExhaust();
     }
     // Move left relative to the ship rotation, instead of to the screen's left side
     moveLeftRelative() {
         const angle = this.rotation + Math.PI;
         this.body.velocity.setToPolar(angle, this.getSpeed());
         this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+        this.exhausts.startExhaust();
     }
 
     primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
