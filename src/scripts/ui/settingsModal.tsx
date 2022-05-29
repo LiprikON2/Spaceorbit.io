@@ -8,7 +8,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {
         const scene = getGame().scene.keys.MainScene;
         if (scene) {
-            scene.player.exhaust.createExhaust();
+            scene.player.exhausts.createExhaust();
         }
     };
     const addLaser = (slot) => {

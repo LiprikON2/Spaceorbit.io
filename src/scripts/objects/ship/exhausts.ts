@@ -1,4 +1,4 @@
-export default class Exhaust {
+export default class Exhausts {
     scene;
     ship;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];

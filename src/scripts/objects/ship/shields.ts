@@ -1,4 +1,4 @@
-export default class Shield extends Phaser.Physics.Arcade.Sprite {
+export default class Shields extends Phaser.Physics.Arcade.Sprite {
     scene;
     ship;
     UUID;

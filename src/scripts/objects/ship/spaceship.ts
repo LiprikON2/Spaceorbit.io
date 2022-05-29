@@ -1,7 +1,7 @@
 import Explosion from "./explosion";
-import Exhaust from "./exhaust";
+import Exhausts from "./exhausts";
 import Weapons from "./weapons";
-import Shield from "./shield";
+import Shields from "./shields";
 
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth: number;
@@ -12,10 +12,10 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     baseSpecs;
     sounds;
     status;
-    exhaust: Exhaust;
+    exhausts: Exhausts;
     rotateTo;
     weapons;
-    shield;
+    shields;
     UUID;
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
@@ -41,7 +41,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.baseSpecs.hitboxRadius);
 
-        this.exhaust = new Exhaust(scene, this, this.modules.exhaustOrigins);
+        this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
         this.weapons = new Weapons(scene, this, this.modules.weaponOrigins);
         this.enemies = enemies;
 
@@ -49,15 +49,15 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
         this.UUID = Phaser.Utils.String.UUID();
 
-        this.shield = new Shield(this.scene, this);
+        this.shields = new Shields(this.scene, this);
         // @ts-ignore
         this.body.onWorldBounds = true;
         // Prevents shield from running away when player hit world bounds
         // TODO get ship by id, instead of spawning bunch of event listeners
         this.scene.physics.world.on("worldbounds", (body) => {
             if (body.gameObject.UUID === this.UUID) {
-                this.shield.x = this.x;
-                this.shield.y = this.y;
+                this.shields.x = this.x;
+                this.shields.y = this.y;
             }
         });
     }
@@ -65,7 +65,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getSpeed() {
         // Each additional engine gives 20% speed boost
         const speed = this.baseSpecs.speed;
-        const countOfAdditionalEngines = this.exhaust.exhaustCount - 1;
+        const countOfAdditionalEngines = this.exhausts.exhaustCount - 1;
 
         const finalSpeed = 0.2 * speed * countOfAdditionalEngines + speed;
         return finalSpeed;
@@ -82,13 +82,13 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
-            this.shield.getHit();
+            this.shields.getHit();
 
             this.status.shields -= projectile.weapon.projectileDamage;
 
             if (this.status.shields <= 0) {
                 this.status.shields = 0;
-                this.shield.disable();
+                this.shields.disable();
             }
         } else {
             // Damage to the hull
@@ -126,15 +126,15 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
         this.y = y;
-        this.shield.x = x;
-        this.shield.y = y;
+        this.shields.x = x;
+        this.shields.y = y;
         this.status.health = this.baseSpecs.health;
         this.status.shields = 10000; // todo
 
         this.scene.physics.add.existing(this);
-        this.scene.physics.add.existing(this.shield);
-        this.shield.active = true;
-        this.shield.visible = true;
+        this.scene.physics.add.existing(this.shields);
+        this.shields.active = true;
+        this.shields.visible = true;
         this.active = true;
     }
 
@@ -142,42 +142,42 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, cursorX, cursorY) + Math.PI / 2;
 
         this.rotateTo.rotateTo(Phaser.Math.RadToDeg(rotation), 0, this.getSpeed());
-        this.exhaust.updateExhaustPosition();
+        this.exhausts.updateExhaustPosition();
     }
 
     resetMovement() {
         this.setVelocity(0);
-        this.shield.setVelocity(0);
+        this.shields.setVelocity(0);
     }
     stoppedMoving() {
-        this.exhaust.stopExhaust();
+        this.exhausts.stopExhaust();
     }
     moveUp() {
         if (this.active) {
             this.setVelocityY(-this.getSpeed());
-            this.shield.setVelocityY(-this.getSpeed());
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(-this.getSpeed());
+            this.exhausts.startExhaust();
         }
     }
     moveDown() {
         if (this.active) {
             this.setVelocityY(this.getSpeed());
-            this.shield.setVelocityY(this.getSpeed());
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(this.getSpeed());
+            this.exhausts.startExhaust();
         }
     }
     moveLeft() {
         if (this.active) {
             this.setVelocityX(-this.getSpeed());
-            this.shield.setVelocityX(-this.getSpeed());
-            this.exhaust.startExhaust();
+            this.shields.setVelocityX(-this.getSpeed());
+            this.exhausts.startExhaust();
         }
     }
     moveRight() {
         if (this.active) {
             this.setVelocityX(this.getSpeed());
-            this.shield.setVelocityX(this.getSpeed());
-            this.exhaust.startExhaust();
+            this.shields.setVelocityX(this.getSpeed());
+            this.exhausts.startExhaust();
         }
     }
 
@@ -185,36 +185,36 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         if (this.active) {
             this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.exhausts.startExhaust();
         }
     }
     moveUpLeft() {
         if (this.active) {
             this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.exhausts.startExhaust();
         }
     }
     moveDownRight() {
         if (this.active) {
             this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.exhausts.startExhaust();
         }
     }
     moveDownLeft() {
         if (this.active) {
             this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
             this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shield.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.exhaust.startExhaust();
+            this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            this.exhausts.startExhaust();
         }
     }
 
