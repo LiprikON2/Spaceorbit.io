@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, NumberInput } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
 import {
     ArrowsMinimize,
@@ -72,6 +72,20 @@ const App = () => {
         }
     };
 
+    // TEMP
+
+    const sendMobs = (e) => {
+        e.preventDefault();
+        const scene = getGame().scene.keys.MainScene;
+        if (scene) {
+            scene.mobManager.mobs[index].moveTo(x, y);
+        }
+    };
+
+    const [x, setx] = useState(120);
+    const [y, sety] = useState(120);
+    const [index, setIndex] = useState(0);
+
     return (
         // init && (
         <MantineProvider theme={{ colorScheme: "dark" }} children>
@@ -101,6 +115,30 @@ const App = () => {
                     >
                         {effectsIcon ? <VolumeOff /> : <Volume />}
                     </Button>
+                    <form onSubmit={sendMobs}>
+                        <NumberInput
+                            onChange={(value) => setIndex(value)}
+                            defaultValue={index}
+                            placeholder="Mob Index"
+                            label="Mob Index"
+                            required
+                        />
+                        <NumberInput
+                            onChange={(value) => setx(value)}
+                            defaultValue={x}
+                            placeholder="x"
+                            label="x"
+                            required
+                        />
+                        <NumberInput
+                            onChange={(value) => sety(value)}
+                            defaultValue={y}
+                            placeholder="y"
+                            label="y"
+                            required
+                        />
+                        <Button type="submit">Send mobs</Button>
+                    </form>
                 </div>
                 <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
                     {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}

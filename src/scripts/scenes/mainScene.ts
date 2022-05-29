@@ -2,17 +2,19 @@ import Spaceship from "../objects/ship/spaceship";
 import InputManager from "../inputManager";
 import SoundManager from "../soundManager";
 import GenericText from "../objects/genericText";
+import MobManager from "../mobManager";
 
 export default class MainScene extends Phaser.Scene {
     inputManager;
     soundManager;
+    mobManager;
     player;
     background;
     backgroundDict = {};
     screen;
     emitter;
-    mobs: Spaceship[] = [];
     debugText;
+    mobs = [];
 
     constructor() {
         super({ key: "MainScene" });
@@ -21,8 +23,9 @@ export default class MainScene extends Phaser.Scene {
     create() {
         // Init sound manager
         this.soundManager = new SoundManager(this);
+        this.mobManager = new MobManager(this, this.player);
 
-        this.player = new Spaceship(this, 400, 400, "F5S4", this.mobs, 100);
+        this.player = new Spaceship(this, 400, 400, "F5S4", this.mobManager.mobs, 100);
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
 
@@ -45,8 +48,8 @@ export default class MainScene extends Phaser.Scene {
             1,
             180
         );
-        this.spawnMobs(20);
         this.debugText = new GenericText(this, this.player).setDepth(1000);
+        this.mobManager.spawnMobs(20);
     }
 
     getRandomPositionOnMap(margin = 300) {
@@ -55,21 +58,15 @@ export default class MainScene extends Phaser.Scene {
         const randomX = Phaser.Math.Between(margin, maxX - margin);
         const randomY = Phaser.Math.Between(margin, maxY - margin);
 
+        console.log("maxX", maxX, maxY);
+
         return { x: randomX, y: randomY };
     }
 
     update(time, delta) {
         this.inputManager.update(time, delta);
         this.debugText.update();
-    }
-    spawnMobs(count) {
-        const mobsToSpawn = count - this.mobs.length;
-        for (let i = 0; i < mobsToSpawn; i++) {
-            const { x, y } = this.getRandomPositionOnMap();
-            const mob = new Spaceship(this, x, y, "F5S4", [this.player]);
-            // const mob = new Spaceship(this, 1000, 800, "F5S4", [this.player]);
-            this.mobs.push(mob);
-        }
+        this.mobManager.update();
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {

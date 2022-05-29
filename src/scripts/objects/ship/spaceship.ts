@@ -13,7 +13,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     sounds;
     status;
     exhausts: Exhausts;
-    rotateTo;
+    rotateToPlugin;
+    moveToPlugin;
     weapons;
     shields;
     UUID;
@@ -46,7 +47,9 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.enemies = enemies;
 
         // @ts-ignore
-        this.rotateTo = scene.plugins.get("rexRotateTo").add(this);
+        this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
+        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
+        this.moveToPlugin.on("complete", () => this.stoppedMoving());
         this.UUID = Phaser.Utils.String.UUID();
 
         this.shields = new Shields(this.scene, this);
@@ -113,6 +116,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     explode() {
         this.disableBody(true, false);
+        this.moveToPlugin.stop();
+        this.shields.moveToPlugin.stop();
 
         new Explosion(this.scene, this.x, this.y, this.depth, {
             double: true,
@@ -136,13 +141,28 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.shields.active = true;
         this.shields.visible = true;
         this.active = true;
+        this.stoppedMoving();
     }
 
     lookAtPoint(cursorX, cursorY) {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, cursorX, cursorY) + Math.PI / 2;
 
-        this.rotateTo.rotateTo(Phaser.Math.RadToDeg(rotation), 0, this.getSpeed());
+        this.rotateTo(rotation);
+    }
+
+    rotateTo(rotation) {
+        this.rotateToPlugin.rotateTo(Phaser.Math.RadToDeg(rotation), 0, this.getSpeed());
         this.exhausts.updateExhaustPosition();
+    }
+
+    moveTo(x, y) {
+        const speed = this.getSpeed();
+        this.moveToPlugin.setSpeed(speed);
+
+        this.moveToPlugin.moveTo(x, y);
+        this.shields.moveTo(x, y);
+        this.exhausts.startExhaust();
+        this.lookAtPoint(x, y);
     }
 
     resetMovement() {
@@ -183,37 +203,52 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     moveUpRight() {
         if (this.active) {
-            this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            const angle = -Math.PI / 4;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveUpLeft() {
         if (this.active) {
-            this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+
+            const angle = -Math.PI / 4 - Math.PI / 2;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveDownRight() {
         if (this.active) {
-            this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
+
+            const angle = Math.PI / 4;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveDownLeft() {
         if (this.active) {
-            this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
+            // this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
+
+            const angle = Math.PI / 4 + Math.PI / 2;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
@@ -225,6 +260,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     getRotatedPoint(point, absolute = false) {
+        // The center of the ship is xOy
         // Distance from center of a ship to a point on a ship; Corresponds to Y
         const R = Phaser.Math.Distance.Between(this.halfWidth, this.halfHeight, point.x, point.y);
 

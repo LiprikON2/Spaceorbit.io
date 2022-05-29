@@ -3,6 +3,7 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
     ship;
     UUID;
     lastHit: number = -Infinity;
+    moveToPlugin;
     tweenFade;
     constructor(scene, ship) {
         super(scene, ship.x, ship.y, "shield");
@@ -33,6 +34,13 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
         });
         this.scene.soundManager.addSounds("shield", ["shield_sound_1"]);
         this.scene.soundManager.addSounds("shield_down", ["shield_down_sound_1"]);
+
+        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
+    }
+
+    moveTo(x, y) {
+        this.moveToPlugin.setSpeed(this.ship.getSpeed());
+        this.moveToPlugin.moveTo(x, y);
     }
 
     getHit() {

@@ -32,7 +32,7 @@ export default class InputManager {
 
         const secondaryShootBtn = this.keys.SPACE;
         secondaryShootBtn.on("down", () => {
-            this.scene.mobs.forEach((mob) => mob.primaryFire(this.time));
+            this.scene.mobManager.mobs.forEach((mob) => mob.primaryFire(this.time));
         });
     }
 

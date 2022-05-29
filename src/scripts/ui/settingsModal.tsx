@@ -1,5 +1,5 @@
 import { Divider, Modal, SegmentedControl, Slider, Title } from "@mantine/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { getGame } from "../game";
 import Button from "./components/button";
