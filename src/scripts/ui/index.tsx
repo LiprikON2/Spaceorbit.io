@@ -25,7 +25,7 @@ const App = () => {
         defaultValue: {
             masterVolume: 1,
             effectsVolume: 0.1,
-            musicVolume: 0.1,
+            musicVolume: 0.05,
             musicMute: false,
             effectsMute: false,
             graphicsSettings: 1,

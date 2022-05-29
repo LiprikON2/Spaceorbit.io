@@ -57,7 +57,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("hit_sound_1", "assets/ships/metal_hit_1.mp3");
         this.load.audio("hit_sound_2", "assets/ships/metal_hit_2.mp3");
         this.load.audio("explosion_sound_1", "assets/ships/explosion_3.mp3");
-        this.load.audio("shield_sound_1", "assets/ships/space shield sounds - 3.mp3");
+        this.load.audio("shield_sound_1", "assets/ships/shield_hit.mp3");
         this.load.audio("shield_down_sound_1", "assets/ships/shield_powerdown.mp3");
 
         // Music

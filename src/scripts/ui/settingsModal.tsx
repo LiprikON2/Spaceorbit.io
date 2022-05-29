@@ -77,17 +77,17 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                         <Slider
                             className="slider"
                             color="cyan"
-                            label={(value) => `${(value * 1000).toFixed(0)}%`}
+                            label={(value) => `${(value * 2000).toFixed(0)}%`}
                             marks={[
                                 { value: 0, label: "0%" },
-                                { value: 0.025, label: "25%" },
-                                { value: 0.05, label: "50%" },
-                                { value: 0.075, label: "75%" },
-                                { value: 0.1, label: "100%" },
+                                { value: 0.0125, label: "25%" },
+                                { value: 0.025, label: "50%" },
+                                { value: 0.0375, label: "75%" },
+                                { value: 0.05, label: "100%" },
                             ]}
                             min={0}
-                            max={0.1}
-                            step={0.001}
+                            max={0.05}
+                            step={0.0005}
                             onChangeEnd={(value) => setVolume("musicVolume", value)}
                             defaultValue={settings.musicVolume}
                         />
