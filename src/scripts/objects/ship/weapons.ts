@@ -169,7 +169,7 @@ export default class Weapons {
                 enemy.getHit(projectile);
                 projectile.destroy();
             });
-            this.scene.physics.add.overlap(enemy.shield, projectile, () => {
+            this.scene.physics.add.overlap(enemy.shields, projectile, () => {
                 if (enemy.status.shields > 0) {
                     enemy.getHit(projectile);
                     projectile.destroy();

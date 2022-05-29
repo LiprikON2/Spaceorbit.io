@@ -70,11 +70,15 @@ export default class SoundManager {
             this.sounds[type] = keys.map((key) => this.scene.sound.add(key));
         }
     }
-    addMusic(musicPlaylist, override = false) {
+    addMusic(musicPlaylist, play = false, override = false) {
         if (override) {
             this.musicPlaylist = musicPlaylist;
         } else {
             this.musicPlaylist = this.musicPlaylist.concat(musicPlaylist);
+        }
+
+        if (play) {
+            this.scene.sound.once(Phaser.Sound.Events.UNLOCKED, () => this.playMusic());
         }
     }
 
