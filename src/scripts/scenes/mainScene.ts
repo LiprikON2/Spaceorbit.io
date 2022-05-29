@@ -20,10 +20,11 @@ export default class MainScene extends Phaser.Scene {
         super({ key: "MainScene" });
     }
 
+    // TODO use polyfill or something to prevent game from stopping requesting animation frames on blur
     create() {
         // Init sound manager
         this.soundManager = new SoundManager(this);
-        this.mobManager = new MobManager(this, this.player);
+        this.mobManager = new MobManager(this);
 
         this.player = new Spaceship(this, 400, 400, "F5S4", this.mobManager.mobs, 100);
         // Init input manager
@@ -49,7 +50,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(20);
+        this.mobManager.spawnMobs(20, [this.player]);
     }
 
     getRandomPositionOnMap(margin = 300) {
@@ -58,15 +59,13 @@ export default class MainScene extends Phaser.Scene {
         const randomX = Phaser.Math.Between(margin, maxX - margin);
         const randomY = Phaser.Math.Between(margin, maxY - margin);
 
-        console.log("maxX", maxX, maxY);
-
         return { x: randomX, y: randomY };
     }
 
     update(time, delta) {
         this.inputManager.update(time, delta);
         this.debugText.update();
-        this.mobManager.update();
+        this.mobManager.update(time, delta);
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {

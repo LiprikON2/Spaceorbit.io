@@ -18,6 +18,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     weapons;
     shields;
     UUID;
+
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
 
@@ -116,8 +117,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     explode() {
         this.disableBody(true, false);
-        this.moveToPlugin.stop();
-        this.shields.moveToPlugin.stop();
+        this.resetMovement();
 
         new Explosion(this.scene, this.x, this.y, this.depth, {
             double: true,
@@ -162,12 +162,13 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.moveToPlugin.moveTo(x, y);
         this.shields.moveTo(x, y);
         this.exhausts.startExhaust();
-        this.lookAtPoint(x, y);
     }
 
     resetMovement() {
         this.setVelocity(0);
         this.shields.setVelocity(0);
+        this.moveToPlugin.stop();
+        this.shields.moveToPlugin.stop();
     }
     stoppedMoving() {
         this.exhausts.stopExhaust();
@@ -253,13 +254,26 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
+    // Move right relative to the ship rotation, instead of to the screen's right side
+    moveRightRelative() {
+        const angle = this.rotation;
+        this.body.velocity.setToPolar(angle, this.getSpeed());
+        this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+    }
+    // Move left relative to the ship rotation, instead of to the screen's left side
+    moveLeftRelative() {
+        const angle = this.rotation + Math.PI;
+        this.body.velocity.setToPolar(angle, this.getSpeed());
+        this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+    }
+
     primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
         if (this.active) {
             this.weapons.primaryFire(time, cursor);
         }
     }
 
-    getRotatedPoint(point, absolute = false) {
+    getRotatedPoint(point, absolute = false, rotation = this.rotation) {
         // The center of the ship is xOy
         // Distance from center of a ship to a point on a ship; Corresponds to Y
         const R = Phaser.Math.Distance.Between(this.halfWidth, this.halfHeight, point.x, point.y);
@@ -276,12 +290,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         let offsetY;
         if (absolute) {
             // If needed absolute coordinates, use current position of a ship in a world as a circle origin
-            offsetX = R * Math.cos(this.rotation + additionalRotation) + this.x;
-            offsetY = R * Math.sin(this.rotation + additionalRotation) + this.y;
+            offsetX = R * Math.cos(rotation + additionalRotation) + this.x;
+            offsetY = R * Math.sin(rotation + additionalRotation) + this.y;
         } else {
             // Otherwise use relative to the sprite coordinates
-            offsetX = R * Math.cos(this.rotation + additionalRotation);
-            offsetY = R * Math.sin(this.rotation + additionalRotation);
+            offsetX = R * Math.cos(rotation + additionalRotation);
+            offsetY = R * Math.sin(rotation + additionalRotation);
         }
         return { offsetX, offsetY };
     }

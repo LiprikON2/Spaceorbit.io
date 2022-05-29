@@ -5,7 +5,6 @@ export default class Weapons {
     exhaustCount = 0;
     // delay = 1000/fps
     primaryFireRate = 600;
-    lastFired = -Infinity;
     weaponSlots: {
         x: number;
         y: number;

@@ -3,14 +3,25 @@ import { PhaserNavMeshPlugin } from "phaser-navmesh";
 import { NavMesh } from "navmesh";
 import Spaceship from "./objects/ship/spaceship";
 
+enum Direction {
+    Left,
+    Right,
+    Still,
+}
+
 export default class MobManager {
     scene;
-    player;
     mobs: Spaceship[] = [];
+    isWandering: boolean = true;
+    isReadyToFire: boolean = false;
+    isSleeping: boolean = false;
+    enemyTarget; // TODO move to the dedicated AI class
+    readyToFireEvent;
+    sleepEvent;
 
-    constructor(scene, player) {
+    preferedMovement: Direction = 0;
+    constructor(scene) {
         this.scene = scene;
-        this.player = player;
 
         // ship.x = 2500;
         // ship.y = 1000;
@@ -48,15 +59,98 @@ export default class MobManager {
         // this.spawnMobs(20);
     }
 
-    spawnMobs(count) {
+    sleep(time = 4000) {
+        // Usefull for doing some things only once in a while
+        if (!this.sleepEvent) {
+            this.sleepEvent = this.scene.time.delayedCall(time, () => {
+                this.isSleeping = !this.isSleeping;
+                this.sleepEvent.destroy();
+                this.sleepEvent = null;
+                this.preferedMovement = Phaser.Math.Between(0, 2);
+            });
+        }
+    }
+
+    spawnMobs(count, mobEnemies) {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
-            const mob = new Spaceship(this.scene, x, y, "F5S4", [this.player]);
+            const mob = new Spaceship(this.scene, x, y, "F5S4", mobEnemies);
             this.mobs.push(mob);
         }
     }
-    update() {
-        this.mobs.forEach((mob) => mob.exhausts.updateExhaustPosition());
+    update(time, delta) {
+        this.sleep();
+        console.log("this.preferedMovement", this.preferedMovement);
+
+        this.mobs.forEach((mob) => {
+            mob.exhausts.updateExhaustPosition();
+
+            if (this.isWandering && !this.isSleeping) {
+                const closestEnemy = this.scene.physics.closest(mob, mob.enemies);
+                const dist = Phaser.Math.Distance.BetweenPoints(mob, closestEnemy);
+                if (dist < 1000) {
+                    this.isWandering = false;
+                    this.enemyTarget = closestEnemy;
+                }
+            }
+
+            if (this.enemyTarget) {
+                const { x, y } = this.enemyTarget;
+                const dist = Phaser.Math.Distance.BetweenPoints(mob, this.enemyTarget);
+
+                // Shooting logic
+                mob.lookAtPoint(x, y);
+
+                if (this.isReadyToFire && dist < 900) {
+                    // Fire
+                    mob.primaryFire(time);
+                } else if (!this.readyToFireEvent) {
+                    // Prepare to fire
+                    this.readyToFireEvent = this.scene.time.delayedCall(1500, () => {
+                        // this.readyToFireEvent.hasDispatched = false;
+                        this.isReadyToFire = true;
+                    });
+                }
+
+                // Movement logic
+                mob.resetMovement();
+
+                if (!this.isSleeping) {
+                    if (dist < 2000 && dist > 700) {
+                        // I need to be closer
+                        const jitterX = Phaser.Math.Between(-25, 25);
+                        const jitterY = Phaser.Math.Between(-25, 25);
+
+                        mob.moveTo(x + jitterX, y + jitterY);
+                    } else if (dist < 700 && dist > 400) {
+                        // Perfect, stay still
+
+                        // Now I act according to my preference
+                        if (this.preferedMovement === Direction.Left) {
+                            mob.moveLeftRelative();
+                        } else if (this.preferedMovement === Direction.Right) {
+                            mob.moveRightRelative();
+                        }
+                    } else if (dist < 400) {
+                        // Too close; I need to back away
+                        const mirrorX = -(x - mob.x) + mob.x;
+                        const mirrorY = -(y - mob.y) + mob.y;
+                        mob.moveTo(mirrorX, mirrorY);
+                    } else {
+                        // Target got away
+                        mob.resetMovement();
+                        mob.stoppedMoving();
+
+                        // TODO catch target died event
+                        this.enemyTarget = null;
+                        this.readyToFireEvent.destroy();
+                        this.readyToFireEvent = null;
+                        this.isWandering = true;
+                        this.isReadyToFire = false;
+                    }
+                }
+            }
+        });
     }
 }

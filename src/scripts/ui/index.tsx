@@ -76,9 +76,10 @@ const App = () => {
 
     const sendMobs = (e) => {
         e.preventDefault();
-        const scene = getGame().scene.keys.MainScene;
-        if (scene) {
-            scene.mobManager.mobs[index].moveTo(x, y);
+        const mobs = getGame().scene?.keys?.MainScene?.mobManager?.mobs;
+        if (mobs?.length - 1 >= index) {
+            mobs[index].moveTo(x, y);
+            mobs[index].lookAtPoint(x, y);
         }
     };
 
