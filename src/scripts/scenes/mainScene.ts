@@ -50,7 +50,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(20, [this.player]);
+        this.mobManager.spawnMobs(10, [this.player]);
     }
 
     getRandomPositionOnMap(margin = 300) {

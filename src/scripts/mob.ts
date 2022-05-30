@@ -10,9 +10,9 @@ enum Direction {
 }
 
 export default class Mob extends Spaceship {
-    isWandering: boolean = true;
     isReadyToFire: boolean = false;
     isSleeping: boolean = false;
+    isAggresive: boolean = true;
 
     enemyTarget;
     readyToFireEvent;
@@ -39,20 +39,47 @@ export default class Mob extends Spaceship {
         }
     }
 
+    // Returns random point which is at least margin away from the world boundaries
+    // and differs in +/- step from current x and y position
+    getNextPoint(margin = 300, step = 1000) {
+        const worldMinWidth = margin;
+        const worldMinHeight = margin;
+        const worldMaxWidth = this.scene.physics.world.bounds.width - margin;
+        const worldMaxHeight = this.scene.physics.world.bounds.height - margin;
+
+        const maxX = Math.min(this.x + step, worldMaxWidth);
+        const minX = Math.max(this.x - step, worldMinWidth);
+        const maxY = Math.min(this.y + step, worldMaxHeight);
+        const minY = Math.max(this.y - step, worldMinHeight);
+
+        const x = Phaser.Math.Between(minX, maxX);
+        const y = Phaser.Math.Between(minY, maxY);
+
+        return { x, y };
+    }
+
     update(time, delta) {
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
 
-        if (this.isWandering && !this.isSleeping) {
+        // If it is wandering
+        if (!this.enemyTarget && !this.isSleeping) {
             const closestEnemy = this.scene.physics.closest(this, this.enemies);
             // @ts-ignore
             const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
-            if (dist < 1000) {
-                this.isWandering = false;
+            // Aggro on the closest enemy
+            if (this.isAggresive && dist < 1000) {
                 this.enemyTarget = closestEnemy;
+            }
+
+            if (!this.moveToPlugin.isRunning) {
+                const { x, y } = this.getNextPoint();
+                this.moveTo(x, y);
+                this.lookAtPoint(x, y);
             }
         }
 
+        // If it is aggroed on someone
         if (this.enemyTarget) {
             const { x, y } = this.enemyTarget;
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.enemyTarget);
@@ -105,7 +132,6 @@ export default class Mob extends Spaceship {
                     this.enemyTarget = null;
                     this.readyToFireEvent.destroy();
                     this.readyToFireEvent = null;
-                    this.isWandering = true;
                     this.isReadyToFire = false;
                 }
             } else {
