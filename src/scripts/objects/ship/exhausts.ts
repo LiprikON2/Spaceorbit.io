@@ -27,13 +27,12 @@ export default class Exhausts {
         this.ship = ship;
         // Sort by x value, from lowest to highest
         this.exhaustOrigins = exhaustOrigins.sort(({ x: a }, { x: b }) => a - b);
-        // this.scene.soundManager.addSounds("exhaust", ["exhaust_sound_1"]); //TODO
 
-        this.createExhaust();
+        this.createExhaust(true);
         this.updateExhaustPosition();
     }
 
-    createExhaust() {
+    createExhaust(silent = false) {
         const hasEmptyEngineSlot = this.exhaustCount + 1 <= this.exhaustOrigins.length;
         if (hasEmptyEngineSlot) {
             this.exhaustCount++;
@@ -58,6 +57,9 @@ export default class Exhausts {
             });
 
             this.exhaustEmitters.push(exhaustEmitter);
+        }
+        if (!silent) {
+            this.initExhaustSound();
         }
     }
     getPattern() {
@@ -85,34 +87,31 @@ export default class Exhausts {
     // Init exhaust sound and tween
     initExhaustSound() {
         // The exhaust sound is constantly playing, tween just changes the volume
-        this.scene.soundManager.playLoop("exhaust_sound_1", this.ship.UUID, {
-            sourceX: this.ship.x,
-            sourceY: this.ship.y,
-            volume: 0,
-            pitchPower: this.getEngineCount(),
-            loop: true,
+        this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.name, {
+            maxVolume: 0.2,
+            pitchPower: this.getEngineCount() - 1,
         });
         this.isSoundInit = true;
     }
 
+    isRunning() {
+        return this.exhaustEmitters[0].on;
+    }
+
     stopExhaust() {
-        if (this.exhaustEmitters[0].on) {
+        if (this.isRunning()) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.stop());
             if (this.isSoundInit) {
-                // this.scene.soundManager.fadeOut("exhaust", 0.08);
-                // this.scene.soundManager.fadeOut("exhaust", 1);
-                this.scene.soundManager.loopingSounds[this.ship.UUID].volume = 0;
+                this.scene.soundManager.fadeOutLooping(this.ship.name);
             }
         }
     }
 
     startExhaust() {
-        if (!this.exhaustEmitters[0].on) {
+        if (!this.isRunning()) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.start());
             if (this.isSoundInit) {
-                // this.scene.soundManager.fadeIn("exhaust", 0.08);
-                // this.scene.soundManager.fadeIn("exhaust", 1);
-                this.scene.soundManager.loopingSounds[this.ship.UUID].volume = 1;
+                this.scene.soundManager.fadeInLooping(this.ship.name);
             }
         }
     }

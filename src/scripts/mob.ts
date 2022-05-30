@@ -101,7 +101,7 @@ export default class Mob extends Spaceship {
             // Movement logic
             this.resetMovement();
 
-            if (dist < 2000 && dist > 700) {
+            if ((dist < 2000 && dist > 900) || (dist < 900 && dist > 700 && !this.isSleeping)) {
                 // I need to be closer
                 const jitterX = Phaser.Math.Between(-25, 25);
                 const jitterY = Phaser.Math.Between(-25, 25);
@@ -122,7 +122,7 @@ export default class Mob extends Spaceship {
                 const mirrorX = -(x - this.x) + this.x;
                 const mirrorY = -(y - this.y) + this.y;
                 this.moveTo(mirrorX, mirrorY);
-            } else if (dist > 2000) {
+            } else if (dist >= 2000) {
                 // Target got away
                 this.resetMovement();
                 this.stoppedMoving();

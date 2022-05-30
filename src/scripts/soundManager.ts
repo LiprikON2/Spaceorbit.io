@@ -61,34 +61,9 @@ export default class SoundManager {
             this.music.mute = this.options.musicMute;
             this.music.volume = this.options.masterVolume * this.options.musicVolume;
         }
-    }
-
-    updateLooping() {
-        Object.entries(this.loopingSounds).forEach((entry) => {
-            const [UUID, value] = entry;
-            const source = this.scene.children.getByName(UUID);
-            let distanceToSoundSource = 0;
-            if (source) {
-                distanceToSoundSource = Phaser.Math.Distance.Between(
-                    this.player.x,
-                    this.player.y,
-                    source.x,
-                    source.y
-                );
-            }
-
-            const proximityVolume = this.normalizeVolume(
-                distanceToSoundSource,
-                // @ts-ignore
-
-                value.config.maxVolume
-            );
-
-            const finalVolume =
-                this.options.masterVolume * this.options.effectsVolume * proximityVolume;
-
-            console.log(proximityVolume, finalVolume);
-            this.loopingSounds[UUID].sound.volume = finalVolume;
+        Object.keys(this.loopingSounds).forEach((UUID) => {
+            const soundObj = this.loopingSounds[UUID];
+            soundObj.sound.mute = this.options.effectsMute;
         });
     }
 
@@ -112,20 +87,6 @@ export default class SoundManager {
         if (play) {
             this.scene.sound.once(Phaser.Sound.Events.UNLOCKED, () => this.playMusic());
         }
-    }
-
-    fadeOut(type, volume = 1, index = 0) {
-        const sound = this.sounds[type][index];
-        const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
-
-        this.soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
-    }
-
-    fadeIn(type, volume = 1, index = 0) {
-        const sound = this.sounds[type][index];
-        const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
-
-        this.soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
     }
 
     // https://phaser.discourse.group/t/sound-in-particular-place/2547/2
@@ -199,36 +160,83 @@ export default class SoundManager {
         }
     }
 
-    playLoop(key, UUID, options?) {
+    // Like music, but also is affected by proximity
+    playLooping(key, UUID, options?) {
         const defaults = {
-            sourceX: 0,
-            sourceY: 0,
-            volume: 0,
-            maxVolume: 0.08,
+            maxVolume: 1,
             pitchPower: 0,
-            loop: true,
-            checkDistance: true,
         };
-        const { sourceX, sourceY, volume, maxVolume, pitchPower, checkDistance } = Object.assign(
-            {},
-            defaults,
-            options
-        );
+        const { maxVolume, pitchPower } = Object.assign({}, defaults, options);
 
         // The more pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
         const config = {
             detune: pitch,
-            volume,
-            maxVolume,
+            volume: 0,
             mute: this.options.effectsMute,
         };
 
         if (!this.loopingSounds[UUID]) {
-            this.loopingSounds[UUID].sound = this.scene.sound.add(key);
-            this.loopingSounds[UUID].config = config;
+            this.loopingSounds[UUID] = {
+                sound: this.scene.sound.add(key),
+                settings: {
+                    config,
+                    maxVolume,
+                    proximityVolume: 0,
+                    isSilent: true,
+                },
+            };
         }
-        this.loopingSounds[UUID].play(config);
+        this.loopingSounds[UUID].sound.play(config);
+    }
+
+    fadeOutLooping(UUID) {
+        const { sound, settings } = this.loopingSounds[UUID];
+        const finalVolume = settings.proximityVolume;
+
+        this.soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
+        settings.isSilent = true;
+    }
+    fadeInLooping(UUID) {
+        const { sound, settings } = this.loopingSounds[UUID];
+        const finalVolume = settings.proximityVolume;
+
+        this.soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
+        settings.isSilent = false;
+    }
+
+    updateLooping() {
+        Object.keys(this.loopingSounds).forEach((UUID) => {
+            const soundObj = this.loopingSounds[UUID];
+            const soundSource = this.scene.children.getByName(UUID);
+
+            let distanceToSoundSource = 0;
+            if (soundSource) {
+                distanceToSoundSource = Phaser.Math.Distance.Between(
+                    this.player.x,
+                    this.player.y,
+                    soundSource.x,
+                    soundSource.y
+                );
+            }
+
+            const proximityVolume = this.normalizeVolume(
+                distanceToSoundSource,
+                // @ts-ignore
+                soundObj.settings.maxVolume
+            );
+
+            const finalVolume =
+                this.options.masterVolume * this.options.effectsVolume * proximityVolume;
+
+            soundObj.settings.proximityVolume = finalVolume;
+
+            const isFading = soundObj.sound?._fade?._isRunning;
+
+            if (!isFading && !soundObj.settings.isSilent) {
+                soundObj.sound.volume = finalVolume;
+            }
+        });
     }
 
     playMusic(trackIndex = -1) {

@@ -51,6 +51,8 @@ export default class MobManager {
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
             const mob = new Mob(this.scene, x, y, "F5S4", mobEnemies);
+            // Needed to be called when soundManager knows about player, and player knows about soundManager
+            mob.exhausts.initExhaustSound();
             this.mobs.push(mob);
         }
     }

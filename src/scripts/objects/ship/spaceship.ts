@@ -109,6 +109,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     explode() {
         this.disableBody(true, false);
         this.resetMovement();
+        this.emit("dead", this.name);
 
         new Explosion(this.scene, this.x, this.y, this.depth, {
             double: true,
@@ -195,10 +196,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     moveUpRight() {
         if (this.active) {
-            // this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
             const angle = -Math.PI / 4;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -207,11 +204,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     moveUpLeft() {
         if (this.active) {
-            // this.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityY(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-
             const angle = -Math.PI / 4 - Math.PI / 2;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -220,11 +212,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     moveDownRight() {
         if (this.active) {
-            // this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityX(this.getSpeed() * Math.cos(Math.PI / 4));
-
             const angle = Math.PI / 4;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -233,11 +220,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
     moveDownLeft() {
         if (this.active) {
-            // this.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityY(this.getSpeed() * Math.cos(Math.PI / 4));
-            // this.shields.setVelocityX(-this.getSpeed() * Math.cos(Math.PI / 4));
-
             const angle = Math.PI / 4 + Math.PI / 2;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());

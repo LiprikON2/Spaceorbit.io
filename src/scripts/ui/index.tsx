@@ -74,18 +74,31 @@ const App = () => {
 
     // TEMP
 
+    // const sendMobs = (e) => {
+    //     e.preventDefault();
+    //     const mobs = getGame().scene?.keys?.MainScene?.mobManager?.mobs;
+    //     if (mobs?.length - 1 >= index) {
+    //         mobs[index].moveTo(x, y);
+    //         mobs[index].lookAtPoint(x, y);
+    //     }
+    // };
     const sendMobs = (e) => {
         e.preventDefault();
-        const mobs = getGame().scene?.keys?.MainScene?.mobManager?.mobs;
-        if (mobs?.length - 1 >= index) {
-            mobs[index].moveTo(x, y);
-            mobs[index].lookAtPoint(x, y);
-        }
+        const scene = getGame().scene.keys.MainScene;
+        const mobManager = scene?.mobManager;
+        const player = scene?.player;
+        const mobs = mobManager?.mobs;
+        mobManager.spawnMobs(mobsCount, [player]);
+
+        mobs.forEach((mob) => {
+            mob.moveTo(x, y);
+            mob.lookAtPoint(x, y);
+        });
     };
 
     const [x, setx] = useState(120);
     const [y, sety] = useState(120);
-    const [index, setIndex] = useState(0);
+    const [mobsCount, setMobsCount] = useState(0);
 
     return (
         // init && (
@@ -116,29 +129,28 @@ const App = () => {
                     >
                         {effectsIcon ? <VolumeOff /> : <Volume />}
                     </Button>
+                    {/* TEMP */}
                     <form onSubmit={sendMobs}>
                         <NumberInput
-                            onChange={(value) => setIndex(value)}
-                            defaultValue={index}
-                            placeholder="Mob Index"
-                            label="Mob Index"
-                            required
+                            onChange={(value) => setMobsCount(value)}
+                            defaultValue={mobsCount}
+                            placeholder="You better not put 1000..."
+                            label="Mobs Count"
                         />
                         <NumberInput
                             onChange={(value) => setx(value)}
                             defaultValue={x}
                             placeholder="x"
                             label="x"
-                            required
                         />
                         <NumberInput
                             onChange={(value) => sety(value)}
                             defaultValue={y}
                             placeholder="y"
                             label="y"
-                            required
                         />
-                        <Button type="submit">Send mobs</Button>
+                        <br />
+                        <Button type="submit">Send mobs at x, y</Button>
                     </form>
                 </div>
                 <Button className="fullscreen" isSquare={true} onClick={toggleFullscreen}>
