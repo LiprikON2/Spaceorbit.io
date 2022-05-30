@@ -22,7 +22,6 @@ export default class MainScene extends Phaser.Scene {
 
     // TODO use polyfill or something to prevent game from stopping requesting animation frames on blur
     create() {
-        // Init sound manager
         this.soundManager = new SoundManager(this);
         this.mobManager = new MobManager(this);
 
@@ -50,7 +49,21 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(10, [this.player]);
+        this.mobManager.spawnMobs(1, [this.player]);
+
+        // Prevents shield from running away when ship hits the world bounds
+        this.physics.world.on("worldbounds", (body) => {
+            const UUID = body.gameObject.name.length >= 36 ? body.gameObject.name : undefined;
+            if (UUID) {
+                const collidingShip = this.children.getByName(UUID);
+                if (collidingShip) {
+                    // @ts-ignore
+                    collidingShip.shields.x = collidingShip.x;
+                    // @ts-ignore
+                    collidingShip.shields.y = collidingShip.y;
+                }
+            }
+        });
     }
 
     getRandomPositionOnMap(margin = 300) {
@@ -66,6 +79,7 @@ export default class MainScene extends Phaser.Scene {
         this.inputManager.update(time, delta);
         this.debugText.update();
         this.mobManager.update(time, delta);
+        this.soundManager.updateLooping();
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {

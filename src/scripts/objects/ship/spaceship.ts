@@ -17,7 +17,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     moveToPlugin;
     weapons;
     shields;
-    UUID;
 
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
@@ -51,19 +50,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
         this.moveToPlugin.on("complete", () => this.stoppedMoving());
-        this.UUID = Phaser.Utils.String.UUID();
+        this.setName(Phaser.Utils.String.UUID());
 
         this.shields = new Shields(this.scene, this);
         // @ts-ignore
         this.body.onWorldBounds = true;
-        // Prevents shield from running away when player hit world bounds
-        // TODO get ship by id, instead of spawning bunch of event listeners
-        this.scene.physics.world.on("worldbounds", (body) => {
-            if (body.gameObject.UUID === this.UUID) {
-                this.shields.x = this.x;
-                this.shields.y = this.y;
-            }
-        });
     }
 
     getSpeed() {
@@ -83,7 +74,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
     getHit(projectile) {
-        console.log(this.status.shields, this.status.health);
+        // console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
             this.shields.getHit();

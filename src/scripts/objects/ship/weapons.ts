@@ -172,6 +172,7 @@ export default class Weapons {
                 if (enemy.status.shields > 0) {
                     enemy.getHit(projectile);
                     projectile.destroy();
+                    // console.log(projectile);
                 }
             });
         });

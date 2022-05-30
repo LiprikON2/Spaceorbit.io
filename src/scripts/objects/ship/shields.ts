@@ -1,7 +1,6 @@
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
     scene;
     ship;
-    UUID;
     lastHit: number = -Infinity;
     moveToPlugin;
     tweenFade;
@@ -12,7 +11,7 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
 
         this.scene = scene;
         this.ship = ship;
-        this.UUID = ship.UUID;
+        this.setName(ship.name + "-shield");
         const scale = 0.7;
         const shieldHitboxRadius = (ship.baseSpecs.hitboxRadius / 0.7) * 1.5;
         this.setOrigin(0.5)

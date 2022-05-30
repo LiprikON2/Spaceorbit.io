@@ -1,6 +1,3 @@
-import { PhaserNavMeshPlugin } from "phaser-navmesh";
-
-import { NavMesh } from "navmesh";
 import Spaceship from "./objects/ship/spaceship";
 
 enum Direction {
@@ -67,6 +64,9 @@ export default class Mob extends Spaceship {
             const closestEnemy = this.scene.physics.closest(this, this.enemies);
             // @ts-ignore
             const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
+
+            // TODO emit "got shot by" event to aggro on the shooter
+
             // Aggro on the closest enemy
             if (this.isAggresive && dist < 1000) {
                 this.enemyTarget = closestEnemy;
@@ -101,39 +101,36 @@ export default class Mob extends Spaceship {
             // Movement logic
             this.resetMovement();
 
-            if (!this.isSleeping) {
-                if (dist < 2000 && dist > 700) {
-                    // I need to be closer
-                    const jitterX = Phaser.Math.Between(-25, 25);
-                    const jitterY = Phaser.Math.Between(-25, 25);
+            if (dist < 2000 && dist > 700) {
+                // I need to be closer
+                const jitterX = Phaser.Math.Between(-25, 25);
+                const jitterY = Phaser.Math.Between(-25, 25);
 
-                    this.moveTo(x + jitterX, y + jitterY);
-                } else if (dist < 700 && dist > 400) {
-                    // Perfect, stay still
-                    // Now I act according to my preference
-                    if (this.preferedMovement === Direction.Left) {
-                        this.moveLeftRelative();
-                    } else if (this.preferedMovement === Direction.Right) {
-                        this.moveRightRelative();
-                    } else {
-                        this.stoppedMoving();
-                    }
-                } else if (dist < 400) {
-                    // Too close; I need to back away
-                    const mirrorX = -(x - this.x) + this.x;
-                    const mirrorY = -(y - this.y) + this.y;
-                    this.moveTo(mirrorX, mirrorY);
+                this.moveTo(x + jitterX, y + jitterY);
+            } else if (dist < 700 && dist > 400 && !this.isSleeping) {
+                // Perfect, stay still
+                // Now I act according to my preference
+                if (this.preferedMovement === Direction.Left) {
+                    this.moveLeftRelative();
+                } else if (this.preferedMovement === Direction.Right) {
+                    this.moveRightRelative();
                 } else {
-                    // Target got away
-                    this.resetMovement();
                     this.stoppedMoving();
-
-                    // TODO catch target died event
-                    this.enemyTarget = null;
-                    this.readyToFireEvent.destroy();
-                    this.readyToFireEvent = null;
-                    this.isReadyToFire = false;
                 }
+            } else if (dist < 400 && !this.isSleeping) {
+                // Too close; I need to back away
+                const mirrorX = -(x - this.x) + this.x;
+                const mirrorY = -(y - this.y) + this.y;
+                this.moveTo(mirrorX, mirrorY);
+            } else if (dist > 2000) {
+                // Target got away
+                this.resetMovement();
+                this.stoppedMoving();
+
+                this.enemyTarget = null;
+                this.readyToFireEvent.destroy();
+                this.readyToFireEvent = null;
+                this.isReadyToFire = false;
             } else {
                 this.stoppedMoving();
             }

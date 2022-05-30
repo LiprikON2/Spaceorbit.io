@@ -17,6 +17,8 @@ export default class SoundManager {
     musicPlaylist: string[] = [];
     music;
     soundFade;
+    loopingSounds = {};
+
     constructor(scene, options?: SoundManagerConfig) {
         const localStorageSettings = scene.game.settings;
         const {
@@ -61,8 +63,38 @@ export default class SoundManager {
         }
     }
 
+    updateLooping() {
+        Object.entries(this.loopingSounds).forEach((entry) => {
+            const [UUID, value] = entry;
+            const source = this.scene.children.getByName(UUID);
+            let distanceToSoundSource = 0;
+            if (source) {
+                distanceToSoundSource = Phaser.Math.Distance.Between(
+                    this.player.x,
+                    this.player.y,
+                    source.x,
+                    source.y
+                );
+            }
+
+            const proximityVolume = this.normalizeVolume(
+                distanceToSoundSource,
+                // @ts-ignore
+
+                value.config.maxVolume
+            );
+
+            const finalVolume =
+                this.options.masterVolume * this.options.effectsVolume * proximityVolume;
+
+            console.log(proximityVolume, finalVolume);
+            this.loopingSounds[UUID].sound.volume = finalVolume;
+        });
+    }
+
     makeTarget(player) {
         this.player = player;
+        this.player.exhausts.initExhaustSound();
     }
 
     addSounds(type, keys) {
@@ -83,19 +115,17 @@ export default class SoundManager {
     }
 
     fadeOut(type, volume = 1, index = 0) {
-        const soundFade = this.scene.plugins.get("rexSoundFade");
         const sound = this.sounds[type][index];
         const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
 
-        soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
+        this.soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
     }
 
     fadeIn(type, volume = 1, index = 0) {
-        const soundFade = this.scene.plugins.get("rexSoundFade");
         const sound = this.sounds[type][index];
         const finalVolume = volume * this.options.effectsVolume * this.options.masterVolume;
 
-        soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
+        this.soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
     }
 
     // https://phaser.discourse.group/t/sound-in-particular-place/2547/2
@@ -118,7 +148,6 @@ export default class SoundManager {
             mainIndex,
             volume,
             pitchPower,
-            loop,
             random,
             rareDistribution,
             checkDistance,
@@ -145,7 +174,6 @@ export default class SoundManager {
                 detune: pitch,
                 volume: finalVolume,
                 mute: this.options.effectsMute,
-                loop,
             };
 
             if (random) {
@@ -157,15 +185,50 @@ export default class SoundManager {
                 // Makes first (main) sound more likely to be played
                 if (randomSound < rareDistribution - soundsCount - 1) {
                     // Play main sound
-                    this.sounds[type][mainIndex].play(config);
+                    const chosenSound = this.sounds[type][mainIndex];
+                    this.scene.sound.play(chosenSound.key, config);
                 } else {
                     // Play rare sound
-                    this.sounds[type][randomSound % soundsCount].play(config);
+                    const chosenSound = this.sounds[type][randomSound % soundsCount];
+                    this.scene.sound.play(chosenSound.key, config);
                 }
             } else {
-                const s = this.sounds[type][mainIndex].play(config);
+                const chosenSound = this.sounds[type][mainIndex];
+                this.scene.sound.play(chosenSound.key, config);
             }
         }
+    }
+
+    playLoop(key, UUID, options?) {
+        const defaults = {
+            sourceX: 0,
+            sourceY: 0,
+            volume: 0,
+            maxVolume: 0.08,
+            pitchPower: 0,
+            loop: true,
+            checkDistance: true,
+        };
+        const { sourceX, sourceY, volume, maxVolume, pitchPower, checkDistance } = Object.assign(
+            {},
+            defaults,
+            options
+        );
+
+        // The more pitch power is, the 'heavier' the sound is
+        const pitch = Math.max(pitchPower * -200, -2000);
+        const config = {
+            detune: pitch,
+            volume,
+            maxVolume,
+            mute: this.options.effectsMute,
+        };
+
+        if (!this.loopingSounds[UUID]) {
+            this.loopingSounds[UUID].sound = this.scene.sound.add(key);
+            this.loopingSounds[UUID].config = config;
+        }
+        this.loopingSounds[UUID].play(config);
     }
 
     playMusic(trackIndex = -1) {
