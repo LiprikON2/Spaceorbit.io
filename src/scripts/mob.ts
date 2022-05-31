@@ -16,6 +16,7 @@ export default class Mob extends Spaceship {
     sleepEvent;
     preferedMovement: Direction = 0;
     reactionTime: number;
+    jitter: { x: number; y: number } = { x: 0, y: 0 };
 
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture, enemies, depth);
@@ -32,6 +33,9 @@ export default class Mob extends Spaceship {
 
                 const enumLength = Object.keys(Direction).length / 2;
                 this.preferedMovement = Phaser.Math.Between(0, enumLength - 1);
+                const jitter = 25;
+                this.jitter.x = Phaser.Math.Between(-jitter, jitter);
+                this.jitter.y = Phaser.Math.Between(-jitter, jitter);
             });
         }
     }
@@ -103,10 +107,8 @@ export default class Mob extends Spaceship {
 
             if ((dist < 2000 && dist > 900) || (dist < 900 && dist > 700 && !this.isSleeping)) {
                 // I need to be closer
-                const jitterX = Phaser.Math.Between(-25, 25);
-                const jitterY = Phaser.Math.Between(-25, 25);
 
-                this.moveTo(x + jitterX, y + jitterY);
+                this.moveTo(x + this.jitter.x, y + this.jitter.y);
             } else if (dist < 700 && dist > 400 && !this.isSleeping) {
                 // Perfect, stay still
                 // Now I act according to my preference

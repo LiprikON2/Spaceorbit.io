@@ -15,7 +15,7 @@ body,
         "volumeControls . . . . . . . . . . fullscreen"
         ". . . . . . . . . . . ."
         ". . . . . . . . . . . ."
-        "addEngine . . . . . . . . . . .";
+        "outfitting . . . . . . . . . . .";
 
     pointer-events: none;
 }
@@ -50,6 +50,10 @@ body,
 .fullscreen {
     grid-area: fullscreen;
     justify-self: end;
+}
+.outfitting {
+    grid-area: outfitting;
+    align-self: end;
 }
 /* .addEngine {
     grid-area: addEngine;

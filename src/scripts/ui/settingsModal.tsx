@@ -45,11 +45,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                 className="modal"
                 opened={opened}
                 onClose={onClose}
-                title={
-                    <>
-                        <Title order={4}>Game Settings</Title>
-                    </>
-                }
+                title={<Title order={4}>Game Settings</Title>}
             >
                 <Divider my="sm" />
                 <div className="group group-vertical">

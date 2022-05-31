@@ -134,25 +134,20 @@ export default class MainScene extends Phaser.Scene {
             .setOrigin(0, 0)
             .setScrollFactor(parallax);
 
-        this.physics.world.setBounds(0, 0, boundsSize.width, boundsSize.height);
+        // TODO solve magic numbers
+        this.physics.world.setBounds(0, 0, boundsSize.width - 500, boundsSize.height - 700);
 
         this.updateRootBackground(color);
     }
 
     // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
     // Scrolling factor doesn't adjust the collision boundaries,
-    //  so they need to be adjusted manually
+    // so they need to be adjusted manually
     getScrollingFactorCollisionAdjustment(
         parallax,
         textureWidth,
         textureHeight
-    ): [
-        {
-            x: number;
-            y: number;
-        },
-        any
-    ] {
+    ): [{ x: number; y: number }, { width: number; height: number }] {
         var csx = this.cameras.main.scrollX;
         var csy = this.cameras.main.scrollY;
 

@@ -41,6 +41,7 @@
     "dependencies": {
         "@capacitor/core": "^3.5.1",
         "@capacitor/ios": "^3.5.1",
+        "@dnd-kit/core": "^6.0.3",
         "@mantine/core": "^4.2.6",
         "@mantine/hooks": "^4.2.6",
         "navmesh": "^2.3.1",
