@@ -99,7 +99,12 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                 onClose={onClose}
                 title={<Title order={4}>Game Settings</Title>}
             >
-                <Tabs active={activeTab} onTabChange={setActiveTab} children={undefined}>
+                <Tabs
+                    active={activeTab}
+                    onTabChange={setActiveTab}
+                    color="cyan"
+                    children={undefined}
+                >
                     <Tabs.Tab label="Audio">
                         <div className="group group-vertical">
                             <div className="group group-vertical">

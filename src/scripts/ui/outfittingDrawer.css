@@ -1,0 +1,30 @@
+.inventory {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 5rem);
+    justify-content: center;
+    gap: 1rem;
+
+    margin-block: 2rem;
+    margin-inline: 1rem;
+}
+
+.inventory-slot {
+    font-size: 0.8rem;
+    padding: 0.25rem;
+    width: 4rem;
+    height: 4rem;
+
+    border-radius: 6px;
+    background: hsl(225, 7%, 13%);
+    box-shadow: 5px 5px 13px #0e0e10, -5px -5px 13px #26282c;
+}
+
+.inventory-item {
+    width: 4rem;
+    height: 4rem;
+}
+
+.inventory-item * {
+    width: 100%;
+    height: 100%;
+}
