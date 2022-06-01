@@ -33,6 +33,8 @@ export default class Mob extends Spaceship {
 
                 const enumLength = Object.keys(Direction).length / 2;
                 this.preferedMovement = Phaser.Math.Between(0, enumLength - 1);
+
+                // TODO adjust
                 const jitter = 25;
                 this.jitter.x = Phaser.Math.Between(-jitter, jitter);
                 this.jitter.y = Phaser.Math.Between(-jitter, jitter);
@@ -62,6 +64,8 @@ export default class Mob extends Spaceship {
     update(time, delta) {
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
+        let hasMoved = false;
+        // TODO they may get stuck in on the boundaries
 
         // If it is wandering
         if (!this.enemyTarget && !this.isSleeping) {
@@ -80,6 +84,7 @@ export default class Mob extends Spaceship {
                 const { x, y } = this.getNextPoint();
                 this.moveTo(x, y);
                 this.lookAtPoint(x, y);
+                hasMoved = true;
             }
         }
 
@@ -109,33 +114,33 @@ export default class Mob extends Spaceship {
                 // I need to be closer
 
                 this.moveTo(x + this.jitter.x, y + this.jitter.y);
+                hasMoved = true;
             } else if (dist < 700 && dist > 400 && !this.isSleeping) {
                 // Perfect, stay still
                 // Now I act according to my preference
                 if (this.preferedMovement === Direction.Left) {
                     this.moveLeftRelative();
+                    hasMoved = true;
                 } else if (this.preferedMovement === Direction.Right) {
                     this.moveRightRelative();
-                } else {
-                    this.stoppedMoving();
+                    hasMoved = true;
                 }
             } else if (dist < 400 && !this.isSleeping) {
                 // Too close; I need to back away
                 const mirrorX = -(x - this.x) + this.x;
                 const mirrorY = -(y - this.y) + this.y;
                 this.moveTo(mirrorX, mirrorY);
+                hasMoved = true;
             } else if (dist >= 2000) {
                 // Target got away
                 this.resetMovement();
-                this.stoppedMoving();
 
                 this.enemyTarget = null;
                 this.readyToFireEvent.destroy();
                 this.readyToFireEvent = null;
                 this.isReadyToFire = false;
-            } else {
-                this.stoppedMoving();
             }
         }
+        if (!hasMoved) this.stoppedMoving();
     }
 }

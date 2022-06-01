@@ -7,7 +7,11 @@ export default class InputManager {
     time = 0;
     frameTime = 0;
     rotateTo;
+    touchControls = { joystickObj: { joystick: null } };
     constructor(scene, player, zoom = 1) {
+        const localStorageSettings = scene.game.settings;
+        const { enableTouchControls = false } = localStorageSettings;
+
         this.scene = scene;
         this.player = player;
         this.zoom = zoom;
@@ -34,6 +38,40 @@ export default class InputManager {
         secondaryShootBtn.on("down", () => {
             this.scene.mobManager.mobs.forEach((mob) => mob.primaryFire(this.time));
         });
+
+        this.initTouchControls(enableTouchControls);
+    }
+    initTouchControls(enableTouchControls) {
+        const baseJoystick = this.scene.add.image(0, 0, "joystick_1").setDepth(1000);
+        const thumbJoystick = this.scene.add.image(0, 0, "joystick_2").setDepth(1000);
+
+        const joystick = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
+            x: Number(this.scene.game.config.width) * 0.15,
+            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.15,
+            radius: 100,
+            base: baseJoystick,
+            thumb: thumbJoystick,
+            enable: enableTouchControls,
+            fixed: true,
+        });
+        joystick.setVisible(enableTouchControls);
+
+        joystick.on("update", () => {
+            const force = Math.min(1, Math.floor(joystick.force) / 100);
+            const angle = Math.floor(joystick.angle * 100) / 100;
+            this.player.setMove(angle, force);
+        });
+
+        this.touchControls.joystickObj = { joystick };
+    }
+    toggleTouchControls() {
+        const { joystick } = this.touchControls.joystickObj;
+        if (joystick) {
+            // @ts-ignore
+            joystick.toggleVisible();
+            // @ts-ignore
+            joystick.toggleEnable();
+        }
     }
 
     getMousePosition() {
@@ -47,7 +85,6 @@ export default class InputManager {
     update(time, delta) {
         this.frameTime += delta;
         this.time = time;
-        this.player.resetMovement();
 
         // Key bindings
         const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
@@ -59,6 +96,10 @@ export default class InputManager {
         const { cursorX, cursorY } = this.getMousePosition();
 
         let hasMoved = false;
+
+        this.player.resetMovement();
+        hasMoved = this.player.move();
+
         // Movement
         if (upBtn && !leftBtn && !downBtn && !rightBtn) {
             this.player.moveUp();

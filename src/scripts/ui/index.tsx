@@ -20,6 +20,13 @@ import SettingsModal from "./settingsModal";
 import "./index.css";
 import OutfittingDrawer from "./outfittingDrawer";
 
+function isTouchDevice() {
+    return (
+        // @ts-ignore
+        "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0
+    );
+}
+
 const App = () => {
     const [settings, setSettings] = useLocalStorage({
         key: "settings",
@@ -30,6 +37,7 @@ const App = () => {
             musicMute: false,
             effectsMute: false,
             graphicsSettings: 1,
+            enableTouchControls: isTouchDevice(),
         },
     });
     const [fullscreenIcon, toggleFullscreenIcon] = useToggle(false, [false, true]);
@@ -71,7 +79,8 @@ const App = () => {
         const player = getGame().scene.keys.MainScene.player;
         if (player) {
             toggleSettingsModal();
-            player.active = !player.active;
+            // todo this will enable you to shoot and move in dying animation
+            player.active = settingsModal;
         }
     };
     // TEMP
@@ -96,8 +105,8 @@ const App = () => {
         if (player) {
             player.x = x;
             player.y = y;
-            player.shield.x = x;
-            player.shield.y = y;
+            player.shields.x = x;
+            player.shields.y = y;
         }
     };
 

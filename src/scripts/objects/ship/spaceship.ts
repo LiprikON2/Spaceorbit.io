@@ -17,6 +17,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     moveToPlugin;
     weapons;
     shields;
+    lastMoveInput: { rotation: number; force: number } = { rotation: 0, force: 0 };
 
     constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
@@ -111,6 +112,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.resetMovement();
         this.emit("dead", this.name);
 
+        // TODO add variety ("explosion patterns")
         new Explosion(this.scene, this.x, this.y, this.depth, {
             double: true,
         });
@@ -166,28 +168,28 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.exhausts.stopExhaust();
     }
     moveUp() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             this.setVelocityY(-this.getSpeed());
             this.shields.setVelocityY(-this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveDown() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             this.setVelocityY(this.getSpeed());
             this.shields.setVelocityY(this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveLeft() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             this.setVelocityX(-this.getSpeed());
             this.shields.setVelocityX(-this.getSpeed());
             this.exhausts.startExhaust();
         }
     }
     moveRight() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             this.setVelocityX(this.getSpeed());
             this.shields.setVelocityX(this.getSpeed());
             this.exhausts.startExhaust();
@@ -195,7 +197,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     moveUpRight() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -203,7 +205,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
     moveUpLeft() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4 - Math.PI / 2;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -211,7 +213,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
     moveDownRight() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -219,7 +221,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
     }
     moveDownLeft() {
-        if (this.active) {
+        if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4 + Math.PI / 2;
             this.body.velocity.setToPolar(angle, this.getSpeed());
             this.shields.body.velocity.setToPolar(angle, this.getSpeed());
@@ -229,17 +231,44 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     // Move right relative to the ship rotation, instead of to the screen's right side
     moveRightRelative() {
-        const angle = this.rotation;
-        this.body.velocity.setToPolar(angle, this.getSpeed());
-        this.shields.body.velocity.setToPolar(angle, this.getSpeed());
-        this.exhausts.startExhaust();
+        if (this.active && !this.isUsingJoystick()) {
+            const angle = this.rotation;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+            this.exhausts.startExhaust();
+        }
     }
     // Move left relative to the ship rotation, instead of to the screen's left side
     moveLeftRelative() {
-        const angle = this.rotation + Math.PI;
-        this.body.velocity.setToPolar(angle, this.getSpeed());
-        this.shields.body.velocity.setToPolar(angle, this.getSpeed());
-        this.exhausts.startExhaust();
+        if (this.active && !this.isUsingJoystick()) {
+            const angle = this.rotation + Math.PI;
+            this.body.velocity.setToPolar(angle, this.getSpeed());
+            this.shields.body.velocity.setToPolar(angle, this.getSpeed());
+            this.exhausts.startExhaust();
+        }
+    }
+    isUsingJoystick() {
+        return this.lastMoveInput.force !== 0;
+    }
+    // For using virtual omni-directional joystick
+    move() {
+        let hasMoved = false;
+        if (this.active && this.isUsingJoystick()) {
+            const rotation = this.lastMoveInput.rotation;
+            const speed = this.getSpeed() * this.lastMoveInput.force;
+
+            this.body.velocity.setToPolar(rotation, speed);
+            this.shields.body.velocity.setToPolar(rotation, speed);
+            this.exhausts.startExhaust();
+            hasMoved = true;
+        }
+
+        return hasMoved;
+    }
+
+    setMove(angle, force) {
+        this.lastMoveInput.rotation = Phaser.Math.DegToRad(angle);
+        this.lastMoveInput.force = force;
     }
 
     primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {

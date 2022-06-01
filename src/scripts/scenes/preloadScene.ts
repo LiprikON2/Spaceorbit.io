@@ -48,6 +48,10 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 512,
         });
 
+        // UI
+        this.load.image("joystick_1", "assets/ui/joystick_1.svg");
+        this.load.image("joystick_2", "assets/ui/joystick_2.svg");
+
         // Sound Effects
         this.load.audio("laser_sound_1", "assets/weapons/lasers/laser1_short.mp3");
         this.load.audio("laser_sound_2", "assets/weapons/lasers/laser2_short.mp3");

@@ -1,10 +1,12 @@
 import "phaser";
 import MainScene from "./scenes/mainScene";
+import PreloadScene from "./scenes/preloadScene";
+
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
 import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
-import PreloadScene from "./scenes/preloadScene";
+import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -59,6 +61,11 @@ const config = {
             {
                 key: "rexMoveTo",
                 plugin: MoveToPlugin,
+                start: true,
+            },
+            {
+                key: "rexVirtualJoystick",
+                plugin: VirtualJoystickPlugin,
                 start: true,
             },
         ],
