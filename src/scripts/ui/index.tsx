@@ -12,7 +12,6 @@ import {
     VolumeOff,
     Settings,
 } from "tabler-icons-react";
-import { DndContext } from "@dnd-kit/core";
 
 import "./index.css";
 import { createGame, getGame } from "../game";
@@ -86,44 +85,42 @@ const App = () => {
 
     return (
         <MantineProvider theme={{ colorScheme: "dark" }} children>
-            <DndContext>
-                <div id="UI">
-                    <SettingsModal
-                        settings={settings}
-                        setSettings={setSettings}
-                        opened={settingsModal}
-                        onClose={toggleSettings}
-                    />
+            <div id="UI">
+                <SettingsModal
+                    settings={settings}
+                    setSettings={setSettings}
+                    opened={settingsModal}
+                    onClose={toggleSettings}
+                />
 
-                    <div className="volumeControls group">
-                        <Button isSquare={true} onClick={toggleSettings}>
-                            <Settings />
-                        </Button>
-                        <Button
-                            className="musicMute"
-                            isSquare={true}
-                            onClick={() => toggleMute("musicMute")}
-                        >
-                            {musicIcon ? <MusicOff /> : <Music />}
-                        </Button>
-                        <Button
-                            className="effectsMute"
-                            isSquare={true}
-                            onClick={() => toggleMute("effectsMute")}
-                        >
-                            {effectsIcon ? <VolumeOff /> : <Volume />}
-                        </Button>
-                    </div>
-
-                    <div className="fullscreen group">
-                        <Button isSquare={true} onClick={toggleFullscreen}>
-                            {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
-                        </Button>
-                    </div>
-
-                    <OutfittingDrawer />
+                <div className="volumeControls group">
+                    <Button isSquare={true} onClick={toggleSettings}>
+                        <Settings />
+                    </Button>
+                    <Button
+                        className="musicMute"
+                        isSquare={true}
+                        onClick={() => toggleMute("musicMute")}
+                    >
+                        {musicIcon ? <MusicOff /> : <Music />}
+                    </Button>
+                    <Button
+                        className="effectsMute"
+                        isSquare={true}
+                        onClick={() => toggleMute("effectsMute")}
+                    >
+                        {effectsIcon ? <VolumeOff /> : <Volume />}
+                    </Button>
                 </div>
-            </DndContext>
+
+                <div className="fullscreen group">
+                    <Button isSquare={true} onClick={toggleFullscreen}>
+                        {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
+                    </Button>
+                </div>
+
+                <OutfittingDrawer />
+            </div>
         </MantineProvider>
     );
 };
