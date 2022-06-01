@@ -1,4 +1,14 @@
-import { Divider, Modal, SegmentedControl, Slider, Switch, Tabs, Title } from "@mantine/core";
+import {
+    Divider,
+    Modal,
+    NumberInput,
+    SegmentedControl,
+    Slider,
+    Space,
+    Switch,
+    Tabs,
+    Title,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
 
@@ -47,9 +57,40 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
             handleTouchControls.toggle();
         }
     };
-    console.log("th", settings.enableTouchControls);
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
     const [activeTab, setActiveTab] = useState(0);
+
+    // TEMP
+
+    const sendMobs = (e) => {
+        e.preventDefault();
+        const scene = getGame().scene.keys.MainScene;
+        const mobManager = scene?.mobManager;
+        const player = scene?.player;
+        const mobs = mobManager?.mobs;
+        mobManager.spawnMobs(mobsCount, [player]);
+
+        mobs.forEach((mob) => {
+            mob.moveTo(x, y);
+            mob.lookAtPoint(x, y);
+        });
+    };
+
+    const teleport = () => {
+        const player = getGame().scene.keys.MainScene?.player;
+
+        if (player) {
+            player.x = x;
+            player.y = y;
+            player.shields.x = x;
+            player.shields.y = y;
+        }
+    };
+
+    const [x, setx] = useState(120);
+    const [y, sety] = useState(120);
+    const [mobsCount, setMobsCount] = useState(0);
+
     return (
         <>
             <Modal
@@ -175,6 +216,34 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                     Add: Weapon slot 3 - Gatling Gun
                                 </Button>
                             </div>
+                        </div>
+                    </Tabs.Tab>
+                    <Tabs.Tab label="Cheats">
+                        <div className="group group-vertical">
+                            <form onSubmit={sendMobs}>
+                                <NumberInput
+                                    onChange={(value) => setMobsCount(value)}
+                                    defaultValue={mobsCount}
+                                    placeholder="You better not put 1000..."
+                                    label="Mobs Count"
+                                />
+                                <NumberInput
+                                    onChange={(value) => setx(value)}
+                                    defaultValue={x}
+                                    placeholder="x"
+                                    label="x"
+                                />
+                                <NumberInput
+                                    onChange={(value) => sety(value)}
+                                    defaultValue={y}
+                                    placeholder="y"
+                                    label="y"
+                                />
+                                <Space h="md" />
+                                <Button type="submit">Send mobs at x, y</Button>
+                                <Space h="md" />
+                                <Button onClick={teleport}>Teleport to x, y</Button>
+                            </form>
                         </div>
                     </Tabs.Tab>
                 </Tabs>

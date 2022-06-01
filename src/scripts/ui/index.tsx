@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 
-import { MantineProvider, NumberInput, Space } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
 import {
     ArrowsMinimize,
@@ -14,10 +14,10 @@ import {
 } from "tabler-icons-react";
 import { DndContext } from "@dnd-kit/core";
 
+import "./index.css";
 import { createGame, getGame } from "../game";
 import Button from "./components/button";
 import SettingsModal from "./settingsModal";
-import "./index.css";
 import OutfittingDrawer from "./outfittingDrawer";
 
 const isTouchDevice = () => {
@@ -83,36 +83,6 @@ const App = () => {
             player.active = settingsModal;
         }
     };
-    // TEMP
-
-    const sendMobs = (e) => {
-        e.preventDefault();
-        const scene = getGame().scene.keys.MainScene;
-        const mobManager = scene?.mobManager;
-        const player = scene?.player;
-        const mobs = mobManager?.mobs;
-        mobManager.spawnMobs(mobsCount, [player]);
-
-        mobs.forEach((mob) => {
-            mob.moveTo(x, y);
-            mob.lookAtPoint(x, y);
-        });
-    };
-
-    const teleport = () => {
-        const player = getGame().scene.keys.MainScene?.player;
-
-        if (player) {
-            player.x = x;
-            player.y = y;
-            player.shields.x = x;
-            player.shields.y = y;
-        }
-    };
-
-    const [x, setx] = useState(120);
-    const [y, sety] = useState(120);
-    const [mobsCount, setMobsCount] = useState(0);
 
     return (
         <MantineProvider theme={{ colorScheme: "dark" }} children>
@@ -143,31 +113,6 @@ const App = () => {
                         >
                             {effectsIcon ? <VolumeOff /> : <Volume />}
                         </Button>
-                        {/* TEMP */}
-                        <form onSubmit={sendMobs}>
-                            <NumberInput
-                                onChange={(value) => setMobsCount(value)}
-                                defaultValue={mobsCount}
-                                placeholder="You better not put 1000..."
-                                label="Mobs Count"
-                            />
-                            <NumberInput
-                                onChange={(value) => setx(value)}
-                                defaultValue={x}
-                                placeholder="x"
-                                label="x"
-                            />
-                            <NumberInput
-                                onChange={(value) => sety(value)}
-                                defaultValue={y}
-                                placeholder="y"
-                                label="y"
-                            />
-                            <Space h="md" />
-                            <Button type="submit">Send mobs at x, y</Button>
-                            <Space h="md" />
-                            <Button onClick={teleport}>Teleport to x, y</Button>
-                        </form>
                     </div>
 
                     <div className="fullscreen group">
