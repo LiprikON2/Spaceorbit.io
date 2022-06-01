@@ -47,7 +47,8 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
             handleTouchControls.toggle();
         }
     };
-    const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControlss);
+    console.log("th", settings.enableTouchControls);
+    const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
     const [activeTab, setActiveTab] = useState(0);
     return (
         <>

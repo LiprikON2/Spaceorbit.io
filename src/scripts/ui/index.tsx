@@ -20,12 +20,12 @@ import SettingsModal from "./settingsModal";
 import "./index.css";
 import OutfittingDrawer from "./outfittingDrawer";
 
-function isTouchDevice() {
+const isTouchDevice = () => {
     return (
         // @ts-ignore
         "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0
     );
-}
+};
 
 const App = () => {
     const [settings, setSettings] = useLocalStorage({
