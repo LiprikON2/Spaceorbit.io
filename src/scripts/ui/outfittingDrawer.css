@@ -1,3 +1,7 @@
+.scroller {
+    height: 100%;
+    overflow-y: auto;
+}
 .inventory {
     display: grid;
     grid-template-columns: repeat(auto-fit, 5rem);
@@ -22,9 +26,11 @@
 .inventory-item {
     width: 4rem;
     height: 4rem;
+    cursor: pointer;
 }
 
-.inventory-item * {
+.inventory-item .item-indicator,
+.inventory-item .item-avatar {
     width: 100%;
     height: 100%;
 }
