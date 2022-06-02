@@ -1,8 +1,6 @@
 export default class Weapons {
     scene;
     ship;
-    exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
-    exhaustCount = 0;
     // delay = 1000/fps
     primaryFireRate = 600;
     weaponSlots: {
@@ -15,11 +13,14 @@ export default class Weapons {
         projectileVelocity: number;
         projectileDamage: number;
         projectileScale: { x: number; y: number };
+        multiplier: number;
     }[];
 
-    constructor(scene, ship, weaponOrigins) {
+    multiplier = 1;
+    constructor(scene, ship, weaponOrigins, multiplier?) {
         this.scene = scene;
         this.ship = ship;
+        this.multiplier = multiplier;
         // Sort by x value, from lowest to highest
         this.weaponSlots = weaponOrigins
             .sort(({ x: a }, { x: b }) => a - b)
@@ -44,12 +45,30 @@ export default class Weapons {
         this.createLaser(middleSlot);
     }
 
+    placeWeapon(type, slot) {
+        let doesFit = false;
+        if (slot <= this.weaponSlots.length - 1) {
+            if (type === "laser") {
+                this.createLaser(slot);
+                doesFit = true;
+            } else if (type === "gatling") {
+                this.createGatling(slot);
+                doesFit = true;
+            } else if (type === null) {
+                this.clearSlot(slot);
+            }
+        }
+
+        return doesFit;
+    }
+
     createLaser(slot) {
         this.weaponSlots[slot].type = "laser";
         this.weaponSlots[slot].cooldownTime = 600;
         this.weaponSlots[slot].projectileVelocity = 5000;
         this.weaponSlots[slot].projectileDamage = 1000;
         this.weaponSlots[slot].projectileScale = { x: 3, y: 1 };
+        this.weaponSlots[slot].multiplier = this.multiplier;
 
         // DPS = 1000 * (1000 / 600) = 1666 damage per second
     }
@@ -60,8 +79,13 @@ export default class Weapons {
         this.weaponSlots[slot].projectileVelocity = 1200;
         this.weaponSlots[slot].projectileDamage = 200;
         this.weaponSlots[slot].projectileScale = { x: 0.4, y: 0.4 };
+        this.weaponSlots[slot].multiplier = this.multiplier;
 
         // DPS = 166 * (1000 / 100) = 2000 damage per second
+    }
+
+    clearSlot(slot) {
+        this.weaponSlots[slot].type = "";
     }
 
     getInstalledWeapons(type) {

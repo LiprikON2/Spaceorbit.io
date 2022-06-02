@@ -1,7 +1,7 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 
-const DraggableItem = ({ children, id }) => {
+const DraggableItem = ({ children, id, ...rest }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id,
     });
@@ -12,7 +12,14 @@ const DraggableItem = ({ children, id }) => {
         : undefined;
 
     return (
-        <div class="inventory-item" ref={setNodeRef} style={style} {...listeners} {...attributes}>
+        <div
+            className="inventory-item"
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            {...rest}
+        >
             {children}
         </div>
     );

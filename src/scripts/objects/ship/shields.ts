@@ -52,13 +52,14 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
             });
         }
     }
-    disable() {
-        // TODO crack sound
+    crack(silent = false) {
         this.disableBody(true, true);
-        this.scene.soundManager.play("shield_down", {
-            sourceX: this.x,
-            sourceY: this.y,
-            volume: 0.3,
-        });
+        if (!silent) {
+            this.scene.soundManager.play("shield_down", {
+                sourceX: this.x,
+                sourceY: this.y,
+                volume: 0.3,
+            });
+        }
     }
 }

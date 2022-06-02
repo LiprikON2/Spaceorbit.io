@@ -46,8 +46,8 @@ export default class InputManager {
         const thumbJoystick = this.scene.add.image(0, 0, "joystick_2").setDepth(1000);
 
         const joystick = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
-            x: Number(this.scene.game.config.width) * 0.15,
-            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.15,
+            x: Number(this.scene.game.config.height) * 0.25,
+            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.25,
             radius: 100,
             base: baseJoystick,
             thumb: thumbJoystick,

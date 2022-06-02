@@ -8,63 +8,105 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfHeight: number;
 
     enemies: Spaceship[];
-    modules;
-    baseSpecs;
-    sounds;
-    status;
+    modules: { exhaustOrigins: any; weaponOrigins: any };
+    baseSpecs: { health: number; hitboxRadius: number; speed: number };
+    status: { shields: number; health: number };
     exhausts: Exhausts;
+    weapons: Weapons;
+    shields: Shields;
+    lastMoveInput: { rotation: number; force: number } = { rotation: 0, force: 0 };
     rotateToPlugin;
     moveToPlugin;
-    weapons;
-    shields;
-    lastMoveInput: { rotation: number; force: number } = { rotation: 0, force: 0 };
+    outfit;
 
-    constructor(scene, x, y, atlasTexture, enemies: Spaceship[] = [], depth = 10) {
+    constructor(scene, x, y, atlasTexture, outfit, enemies: Spaceship[] = [], depth = 10) {
         super(scene, x, y, atlasTexture);
 
+        this.outfit = outfit;
         const atlas = scene.textures.get(atlasTexture);
         const scale = atlas.customData["meta"].scale;
-        this.baseSpecs = atlas.customData["meta"].baseSpecs;
-        this.modules = atlas.customData["meta"].modules;
+        const damageMultiplier = outfit.multipliers.damage;
 
+        this.modules = atlas.customData["meta"].modules;
+        this.baseSpecs = atlas.customData["meta"].baseSpecs;
+        this.status = {
+            health: this.getMaxHealth(),
+            shields: this.getMaxShields(),
+        };
+
+        // Phaser stuff
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        // @ts-ignore
+        this.body.onWorldBounds = true;
 
         this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
+        this.setName(Phaser.Utils.String.UUID());
         this.setScale(scale);
 
-        this.status = { health: this.baseSpecs.health, shields: 10000 };
-
-        // Add ship sounds
+        // Sounds
         // @ts-ignore
         this.scene.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
 
+        // Dimentions
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.baseSpecs.hitboxRadius);
 
+        // Modules
         this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
-        this.weapons = new Weapons(scene, this, this.modules.weaponOrigins);
+        this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, damageMultiplier);
+        this.shields = new Shields(scene, this);
+
         this.enemies = enemies;
 
+        // Movement plugins
         // @ts-ignore
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
         this.moveToPlugin.on("complete", () => this.stoppedMoving());
-        this.setName(Phaser.Utils.String.UUID());
 
-        this.shields = new Shields(this.scene, this);
-        // @ts-ignore
-        this.body.onWorldBounds = true;
+        this.reoutfit();
+        if (this.status.shields === 0) this.shields.crack(true);
+    }
+
+    reoutfit() {
+        let extraItems: string[] = [];
+
+        const weapons = this.outfit.weapons ?? [];
+        weapons.forEach((weapon, index) => {
+            const doesFit = this.weapons.placeWeapon(weapon, index);
+            if (!doesFit && weapon !== null) {
+                extraItems.push(weapon);
+                weapons[index] = null;
+            }
+        });
+
+        const engines = this.outfit.engines ?? [];
+        engines.forEach((engine, index) => {
+            const doesFit = this.exhausts.placeEngine(engine, index);
+            if (!doesFit && engine !== null) {
+                extraItems.push(engine);
+                engines[index] = null;
+            }
+        });
+
+        const inventory = this.outfit.inventory ?? [];
+        inventory.concat(extraItems);
+    }
+
+    getOutfit() {
+        return this.outfit;
     }
 
     getSpeed() {
         // Each additional engine gives 20% speed boost
         const speed = this.baseSpecs.speed;
-        const countOfAdditionalEngines = this.exhausts.exhaustCount - 1;
+        const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
+        const speedMultiplier = this.outfit.multipliers.speed;
 
-        const finalSpeed = 0.2 * speed * countOfAdditionalEngines + speed;
-        return finalSpeed;
+        const shipSpeed = speed + 0.2 * speed * countOfAdditionalEngines;
+        return shipSpeed * speedMultiplier;
     }
 
     setCircularHitbox(hitboxRadius) {
@@ -75,16 +117,18 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
     getHit(projectile) {
-        // console.log(this.status.shields, this.status.health);
+        const damageMultiplier = projectile.weapon.multiplier;
+        const damage = projectile.weapon.projectileDamage * damageMultiplier;
+        console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
             this.shields.getHit();
 
-            this.status.shields -= projectile.weapon.projectileDamage;
+            this.status.shields -= damage;
 
             if (this.status.shields <= 0) {
                 this.status.shields = 0;
-                this.shields.disable();
+                this.shields.crack();
             }
         } else {
             // Damage to the hull
@@ -99,7 +143,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.setTint(0xee4824);
             this.scene.time.delayedCall(200, () => this.clearTint());
 
-            this.status.health -= projectile.weapon.projectileDamage;
+            this.status.health -= damage;
 
             if (this.status.health <= 0) {
                 this.status.health = 0;
@@ -110,7 +154,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     explode() {
         this.disableBody(true, false);
         this.resetMovement();
-        this.emit("dead", this.name);
+        this.emit("dead", this.name); // todo
 
         // TODO add variety ("explosion patterns")
         new Explosion(this.scene, this.x, this.y, this.depth, {
@@ -120,6 +164,15 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
+    getMaxHealth() {
+        const healthMultiplier = this.outfit.multipliers.health;
+        return this.baseSpecs.health * healthMultiplier;
+    }
+    getMaxShields() {
+        const shieldsMultiplier = this.outfit.multipliers.shields;
+        return 10000 * shieldsMultiplier;
+    }
+
     respawn() {
         // @ts-ignore
         const { x, y } = this.scene.getRandomPositionOnMap();
@@ -127,8 +180,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.y = y;
         this.shields.x = x;
         this.shields.y = y;
-        this.status.health = this.baseSpecs.health;
-        this.status.shields = 10000; // todo
+        this.status.health = this.getMaxHealth();
+        this.status.shields = this.getMaxShields();
 
         this.scene.physics.add.existing(this);
         this.scene.physics.add.existing(this.shields);
@@ -136,6 +189,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.shields.visible = true;
         this.active = true;
         this.stoppedMoving();
+        if (this.status.shields === 0) this.shields.crack(true);
     }
 
     lookAtPoint(cursorX, cursorY) {

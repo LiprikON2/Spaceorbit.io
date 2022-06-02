@@ -3,7 +3,6 @@ export default class Exhausts {
     ship;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
     exhaustOrigins: { x: number; y: number }[];
-    exhaustCount = 0;
     isSoundInit = false;
     // Since origins are sorted in increasing order, we ensure symmetry by using a particular pattern of activation engines
     // "have N engine slots": list of indices when have 1 of them installed, have 2 engines installed, have 3 engines...
@@ -32,10 +31,24 @@ export default class Exhausts {
         this.updateExhaustPosition();
     }
 
+    placeEngine(type, slot) {
+        let doesFit = false;
+        if (slot <= this.getSlotCount() - 1) {
+            if (type === "engine") {
+                this.createExhaust();
+                doesFit = true;
+            } else if (type === null) {
+                this.removeExhaust();
+            }
+        }
+
+        return doesFit;
+    }
+
     createExhaust(silent = false) {
-        const hasEmptyEngineSlot = this.exhaustCount + 1 <= this.exhaustOrigins.length;
+        const hasEmptyEngineSlot = this.getEngineCount() + 1 <= this.getSlotCount();
+
         if (hasEmptyEngineSlot) {
-            this.exhaustCount++;
             const exhaustParticles = this.scene.add
                 .particles("exhaust")
                 .setDepth(this.ship.depth - 1);
@@ -58,15 +71,23 @@ export default class Exhausts {
 
             this.exhaustEmitters.push(exhaustEmitter);
         }
-        if (!silent) {
+        if (!silent && !this.isSoundInit) {
             this.initExhaustSound();
         }
     }
-    getPattern() {
-        const countOfEngineSlots = this.exhaustOrigins.length;
-        const countOfEngines = this.exhaustCount;
+    removeExhaust() {
+        let didRemove = false;
+        const willHaveAtLeastOneEngine = this.getEngineCount() >= 2;
 
-        const pattern = this.exhaustOriginCountPattern[countOfEngineSlots][countOfEngines - 1];
+        if (willHaveAtLeastOneEngine) {
+            this.exhaustEmitters.pop();
+            didRemove = true;
+        }
+        return didRemove;
+    }
+    getPattern() {
+        const pattern =
+            this.exhaustOriginCountPattern[this.getSlotCount()][this.getEngineCount() - 1];
 
         return pattern;
     }
@@ -84,12 +105,15 @@ export default class Exhausts {
     getEngineCount() {
         return this.exhaustEmitters.length;
     }
+    getSlotCount() {
+        return this.exhaustOrigins.length;
+    }
     // Init exhaust sound and tween
     initExhaustSound() {
         // The exhaust sound is constantly playing, tween just changes the volume
         this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.name, {
             maxVolume: 0.2,
-            pitchPower: this.getEngineCount() - 1,
+            pitchPower: this.exhaustEmitters.length - 1,
         });
         this.isSoundInit = true;
     }

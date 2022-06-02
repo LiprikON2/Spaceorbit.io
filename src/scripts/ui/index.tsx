@@ -44,10 +44,6 @@ const App = () => {
     const [effectsIcon, toggleEffectsIcon] = useToggle(settings.effectsMute, [false, true]);
     const [settingsModal, toggleSettingsModal] = useToggle(false, [false, true]);
 
-    useLayoutEffect(() => {
-        const canvasElem = document.querySelector("canvas");
-    }, []);
-
     useEffect(() => {
         createGame(settings);
     }, []);

@@ -22,6 +22,12 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
             scene.player.exhausts.createExhaust();
         }
     };
+    const removeEngine = () => {
+        const scene = getGame().scene.keys.MainScene;
+        if (scene) {
+            scene.player.exhausts.removeExhaust();
+        }
+    };
     const addLaser = (slot) => {
         const scene = getGame().scene.keys.MainScene;
         if (scene) {
@@ -201,6 +207,9 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 <Title order={6}>Modules</Title>
                                 <Button className="addEngine" onClick={addEngine}>
                                     Add: Engine
+                                </Button>
+                                <Button className="addEngine" onClick={removeEngine}>
+                                    Remove: Engine
                                 </Button>
                                 <Button className="addWeapon" onClick={() => addLaser(0)}>
                                     Add: Weapon slot 1 - Laser

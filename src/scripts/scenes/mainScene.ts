@@ -25,7 +25,15 @@ export default class MainScene extends Phaser.Scene {
         this.soundManager = new SoundManager(this);
         this.mobManager = new MobManager(this);
 
-        this.player = new Spaceship(this, 400, 400, "F5S4", this.mobManager.mobs, 100);
+        this.player = new Spaceship(
+            this,
+            400,
+            400,
+            "F5S4",
+            this.getPlayerKit(),
+            this.mobManager.mobs,
+            100
+        );
         // Init input manager
         this.inputManager = new InputManager(this, this.player);
 
@@ -64,6 +72,15 @@ export default class MainScene extends Phaser.Scene {
                 }
             }
         });
+    }
+
+    getPlayerKit() {
+        return {
+            weapons: ["laser", null, "laser", "gatling"],
+            engines: ["engine", "engine"],
+            inventory: [],
+            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
+        };
     }
 
     getRandomPositionOnMap(margin = 300) {

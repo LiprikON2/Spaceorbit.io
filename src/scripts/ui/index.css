@@ -39,6 +39,9 @@ body,
     gap: 1rem;
     row-gap: 2rem;
 }
+input[type="checkbox"] {
+    cursor: pointer;
+}
 
 /* Indentation for nested groups */
 .group-vertical > .group-vertical {
