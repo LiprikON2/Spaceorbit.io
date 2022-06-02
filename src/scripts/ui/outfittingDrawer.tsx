@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avatar, Divider, Drawer, Indicator, ScrollArea, Space, Title } from "@mantine/core";
-import { useDisclosure, useId, useListState } from "@mantine/hooks";
+import { useDisclosure, useId, useListState, useSetState } from "@mantine/hooks";
 import { Tool } from "tabler-icons-react";
 import { useDroppable, useDraggable, DndContext } from "@dnd-kit/core";
 
@@ -15,88 +15,100 @@ const OutfittingDrawer = () => {
     const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
 
     // TODO fix image flickering onDrop (react rerender)
-    const WeaponItem = ({ name = "weapon", id }) => {
-        const uuid = useId(id);
+    // TODO fix z-index mess
+    const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
+        const getLabel = () => {
+            if (inventoryType === "weapons") return "Wpn";
+            else if (inventoryType === "engines") return "Eng";
+            else if (inventoryType === "inventory") return " ";
+        };
+
+        const getColor = () => {
+            if (inventoryType === "weapons") return "red";
+            else if (inventoryType === "engines") return "yellow";
+            else if (inventoryType === "inventory") return undefined;
+        };
+
         return (
-            <DraggableItem id={`${name}-${uuid}`} children={undefined}>
+            <DroppableInventory data={{ inventoryType, slotIndex, isEmpty }}>
+                {children ?? (
+                    <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
+                        {getLabel()}
+                    </Avatar>
+                )}
+            </DroppableInventory>
+        );
+    };
+    const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
+        return (
+            <DraggableItem data={{ inventoryType, slotIndex, itemName, itemType, label, color }}>
                 <Indicator
                     className="item-indicator"
-                    inline
                     position="bottom-start"
-                    label="Wpn"
-                    color="red"
+                    label={label}
+                    color={color}
                     size={16}
                     withBorder
+                    inline
                 >
-                    <Avatar className="item-avatar" size="lg" src="assets/inventory/laser.jpg" />
+                    <Avatar
+                        className="item-avatar"
+                        size="lg"
+                        src={`assets/inventory/${itemName}.jpg`}
+                    />
                 </Indicator>
             </DraggableItem>
         );
-    };
-    const EngineItem = ({ name = "engine", id }) => {
-        const uuid = useId(id);
-
-        return (
-            <DraggableItem id={`${name}-${uuid}`} children={undefined}>
-                <Indicator
-                    className="item-indicator"
-                    inline
-                    position="bottom-start"
-                    label="Eng"
-                    color="yellow"
-                    size={16}
-                    withBorder
-                >
-                    <Avatar className="item-avatar" size="lg" src="assets/inventory/engine.jpg" />
-                </Indicator>
-            </DraggableItem>
-        );
-    };
-
-    const slots = {
-        engineSlots: { size: 3 },
-        weaponSlots: { size: 3 },
-        // moduleSlots: { size: 1 },
-        inventorySlots: { size: 36 },
     };
 
     const handleDragEnd = (event) => {
-        const { over } = event;
+        const { over, active } = event;
 
-        // If dropped in a slot
-        if (over) {
-            // The dropee
-            const [type, slotKey, index] = event.active.id.split("-");
-            // Dropped to
-            const [newType, newSlotKey, newIndex] = over.id.split("-");
+        // If item dropped in an empty slot
+        if (over && over?.data?.current?.isEmpty) {
+            // Dropped to slot
+            const { inventoryType, slotIndex, isEmpty } = over.data.current;
+            // The dropeé item
+            const {
+                inventoryType: prevInventoryType,
+                slotIndex: prevSlotIndex,
+                itemName,
+                itemType,
+                label,
+                color,
+            } = active.data.current;
 
-            // console.log(type, slotKey, index);
-            console.log(newType, newSlotKey, newIndex);
-            // TODO this
-            const toInventory = newSlotKey === slotKey || newSlotKey === "inventorySlot";
+            const sameSlot = inventoryType === prevInventoryType && slotIndex === prevSlotIndex;
 
-            // TODO rerender doesnt happen immideately after ...as always
-            if (newType === "empty" && toInventory) {
-                if (newSlotKey === "weaponSlots") {
-                    //@ts-ignore
-                    handleWeapons.setItem(newIndex, type);
-                } else if (newSlotKey === "engineSlots") {
-                    //@ts-ignore
-                    handleEngines.setItem(newIndex, type);
-                } else if (newSlotKey === "inventorySlots") {
-                    //@ts-ignore
-                    handleInventory.setItem(newIndex, type);
-                }
+            // If item can be placed there
+            if ((itemType === inventoryType || inventoryType === "inventory") && !sameSlot) {
+                const updatedInventory = [...outfit[inventoryType]];
+                // Target slot
+                updatedInventory[slotIndex] = { itemName, itemType, label, color };
 
-                if (slotKey === "weaponSlots") {
-                    //@ts-ignore
-                    handleWeapons.setItem(index, null);
-                } else if (slotKey === "engineSlots") {
-                    //@ts-ignore
-                    handleEngines.setItem(index, null);
-                } else if (slotKey === "inventorySlots") {
-                    //@ts-ignore
-                    handleInventory.setItem(index, null);
+                // If moved inside the same inventory
+                if (prevInventoryType === inventoryType) {
+                    // Prev slot
+                    updatedInventory[prevSlotIndex] = {
+                        itemName: null,
+                        itemType: null,
+                        label: null,
+                        color: null,
+                    };
+                    setOutfit({ [inventoryType]: updatedInventory });
+                } else {
+                    const updatedPrevInventory = [...outfit[prevInventoryType]];
+                    // Prev slot
+                    updatedPrevInventory[prevSlotIndex] = {
+                        itemName: null,
+                        itemType: null,
+                        label: null,
+                        color: null,
+                    };
+                    setOutfit({
+                        [prevInventoryType]: updatedPrevInventory,
+                        [inventoryType]: updatedInventory,
+                    });
                 }
                 reoutfit();
             }
@@ -106,43 +118,61 @@ const OutfittingDrawer = () => {
     const reoutfit = () => {
         const scene = getGame().scene.keys.MainScene;
         const player = scene?.player;
-        const outfit = player?.getOutfit();
-        if (outfit) {
-            const newOutfit = {
-                weapons,
-                engines,
-                inventory,
-                multipliers,
-            };
-            player.outfit = newOutfit; // todo make it verify before accepting changes
+        const activeOutfit = player?.getOutfit();
+        if (activeOutfit) {
+            player.outfit = outfit; // todo make it verify before accepting changes
             player.reoutfit();
         }
     };
-    const [weapons, handleWeapons] = useListState([]);
-    const [engines, handleEngines] = useListState([]);
-    const [inventory, handleInventory] = useListState([]);
-    const [multipliers, handleMultipliers] = useListState([]);
+    const [outfit, setOutfit] = useSetState({});
 
     const openOutfitting = () => {
         const scene = getGame().scene.keys.MainScene;
-        const outfit = scene?.player?.getOutfit();
-        if (outfit) {
+        const activeOutfit = scene?.player?.getOutfit();
+        if (activeOutfit) {
             handleOpenOutfitting.open();
-            handleWeapons.setState(() => outfit.weapons);
-            handleEngines.setState(() => outfit.engines);
-            handleInventory.setState(() => outfit.inventory);
-            handleMultipliers.setState(() => outfit.multipliers);
 
-            console.log("outfit", outfit);
+            setOutfit(activeOutfit);
+            console.log("outfit", activeOutfit);
         }
     };
-    const getItem = (type, slotId) => {
-        if (type === "laser" || type === "gatling") {
-            return <WeaponItem name={type} id={slotId} />;
-        } else if (type === "engine") {
-            return <EngineItem name={type} id={slotId} />;
-        }
-    };
+
+    const mapInventory = (inventoryType) =>
+        outfit?.[inventoryType]?.map((item, index) => {
+            let slots: any = [];
+            // @ts-ignore
+            const { itemName, itemType, label, color } = item ?? {
+                itemName: null,
+                itemType: null,
+                label: null,
+                color: null,
+            };
+
+            const isEmpty = itemName === null;
+            const slot = (
+                <InventorySlot
+                    inventoryType={inventoryType}
+                    slotIndex={index}
+                    isEmpty={isEmpty}
+                    // @ts-ignore
+                    key={`${inventoryType}-${index}}`}
+                >
+                    {!isEmpty ? (
+                        <InventoryItem
+                            inventoryType={inventoryType}
+                            slotIndex={index}
+                            itemName={itemName}
+                            itemType={itemType}
+                            label={label}
+                            color={color}
+                        />
+                    ) : null}
+                </InventorySlot>
+            );
+            slots.push(slot);
+
+            return <React.Fragment key={`${inventoryType}-${index}`}>{slots}</React.Fragment>;
+        });
 
     return (
         <DndContext onDragEnd={handleDragEnd} autoScroll={false}>
@@ -164,48 +194,9 @@ const OutfittingDrawer = () => {
                 <Divider my="sm" />
                 <ScrollArea className="scroller">
                     <div className="inventory">
-                        {Object.entries(slots).map(([slotKey, value]) => {
-                            let subSlots: any = [];
-                            for (let i = 0; i < value.size; i++) {
-                                const slotId = `${slotKey}-${i}`;
-
-                                let type;
-                                if (slotKey === "weaponSlots") {
-                                    if (weapons?.[i]) {
-                                        type = weapons[i];
-                                    }
-                                } else if (slotKey === "engineSlots") {
-                                    if (engines?.[i]) {
-                                        type = engines[i];
-                                    }
-                                } else if (slotKey === "inventorySlots") {
-                                    if (inventory?.[i]) {
-                                        type = inventory[i];
-                                    }
-                                }
-
-                                let item;
-                                if (type) {
-                                    item = getItem(type, slotId);
-                                } else {
-                                    type = "empty";
-                                }
-
-                                const subSlot = (
-                                    <DroppableInventory
-                                        key={`${type}-${slotId}`}
-                                        id={`${type}-${slotId}`}
-                                        children={undefined}
-                                    >
-                                        {item ?? `(${type}-${slotId})`}
-                                    </DroppableInventory>
-                                );
-
-                                subSlots.push(subSlot);
-                            }
-
-                            return <React.Fragment key={slotKey}>{subSlots}</React.Fragment>;
-                        })}
+                        {mapInventory("weapons")}
+                        {mapInventory("engines")}
+                        {mapInventory("inventory")}
                     </div>
                 </ScrollArea>
             </Drawer>

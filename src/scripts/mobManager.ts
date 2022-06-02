@@ -64,10 +64,10 @@ export default class MobManager {
 
     getMobKit(type?) {
         return {
-            weapons: [null, "laser", null],
-            engines: [null],
+            weapons: [null, { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" }],
+            engines: [{ itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" }],
             inventory: [],
-            multipliers: { speed: 0.5, health: 0.3, shields: 0, damage: 0.5 },
         };
+        // multipliers: { speed: 0.5, health: 0.3, shields: 0, damage: 0.5 },
     }
 }

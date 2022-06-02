@@ -1,0 +1,154 @@
+{
+    "document": {
+        "id": "doc",
+        "name": "New Document",
+        "version": 15.3,
+        "pages": {
+            "page": {
+                "id": "page",
+                "name": "Page 1",
+                "childIndex": 1,
+                "shapes": {
+                    "3de7c18c-fd62-47ae-14bc-773d3036df83": {
+                        "id": "3de7c18c-fd62-47ae-14bc-773d3036df83",
+                        "type": "rectangle",
+                        "name": "Rectangle",
+                        "parentId": "page",
+                        "childIndex": 1,
+                        "point": [
+                            315.33,
+                            259.33
+                        ],
+                        "size": [
+                            198.34,
+                            198.34
+                        ],
+                        "rotation": 0,
+                        "style": {
+                            "color": "black",
+                            "size": "small",
+                            "isFilled": false,
+                            "dash": "draw",
+                            "scale": 1
+                        },
+                        "label": "",
+                        "labelPoint": [
+                            0.5,
+                            0.5
+                        ]
+                    },
+                    "a8c67baf-f10c-468a-20c6-ce688a6f9389": {
+                        "id": "a8c67baf-f10c-468a-20c6-ce688a6f9389",
+                        "type": "text",
+                        "name": "Text",
+                        "parentId": "page",
+                        "childIndex": 2,
+                        "point": [
+                            329.5,
+                            208.33
+                        ],
+                        "rotation": 0,
+                        "text": "Item",
+                        "style": {
+                            "color": "black",
+                            "size": "small",
+                            "isFilled": false,
+                            "dash": "draw",
+                            "scale": 1,
+                            "font": "script",
+                            "textAlign": "middle"
+                        }
+                    },
+                    "0ed0cded-4a9d-40ee-3a26-346e080d7dfe": {
+                        "id": "0ed0cded-4a9d-40ee-3a26-346e080d7dfe",
+                        "type": "rectangle",
+                        "name": "Rectangle",
+                        "parentId": "page",
+                        "childIndex": 3,
+                        "point": [
+                            602.67,
+                            143.33
+                        ],
+                        "size": [
+                            377,
+                            367.67
+                        ],
+                        "rotation": 0,
+                        "style": {
+                            "color": "black",
+                            "size": "small",
+                            "isFilled": false,
+                            "dash": "draw",
+                            "scale": 1
+                        },
+                        "label": "",
+                        "labelPoint": [
+                            0.5,
+                            0.5
+                        ]
+                    },
+                    "b6cdb69d-f910-4ba0-0927-2b062712ee5d": {
+                        "id": "b6cdb69d-f910-4ba0-0927-2b062712ee5d",
+                        "type": "text",
+                        "name": "Text",
+                        "parentId": "page",
+                        "childIndex": 4,
+                        "point": [
+                            616.83,
+                            90.33
+                        ],
+                        "rotation": 0,
+                        "text": "Slot",
+                        "style": {
+                            "color": "black",
+                            "size": "small",
+                            "isFilled": false,
+                            "dash": "draw",
+                            "scale": 1,
+                            "font": "script",
+                            "textAlign": "middle"
+                        }
+                    },
+                    "43070502-ae4b-4b3e-26e4-c47475981c11": {
+                        "id": "43070502-ae4b-4b3e-26e4-c47475981c11",
+                        "type": "text",
+                        "name": "Text",
+                        "parentId": "page",
+                        "childIndex": 5,
+                        "point": [
+                            155.5,
+                            488.34
+                        ],
+                        "rotation": 0,
+                        "text": "type: weapon | engine | extra\nname: laser | gatling | engin\nslotKey: weaponSlot | engineSlot | inventorySlot\nslotIndex: 0 | 1 | ... | 999",
+                        "style": {
+                            "color": "black",
+                            "size": "small",
+                            "isFilled": false,
+                            "dash": "draw",
+                            "scale": 1,
+                            "font": "script",
+                            "textAlign": "start"
+                        }
+                    }
+                },
+                "bindings": {}
+            }
+        },
+        "pageStates": {
+            "page": {
+                "id": "page",
+                "selectedIds": [],
+                "camera": {
+                    "point": [
+                        0,
+                        0
+                    ],
+                    "zoom": 1
+                }
+            }
+        },
+        "assets": {}
+    },
+    "assets": {}
+}

@@ -37,7 +37,7 @@ export default class Exhausts {
             if (type === "engine") {
                 this.createExhaust();
                 doesFit = true;
-            } else if (type === null) {
+            } else if (!type) {
                 this.removeExhaust();
             }
         }

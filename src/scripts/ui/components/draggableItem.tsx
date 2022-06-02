@@ -1,9 +1,13 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
+import { useId } from "@mantine/hooks";
 
-const DraggableItem = ({ children, id, ...rest }) => {
+const DraggableItem = ({ children = undefined, data, id = undefined, ...rest }) => {
+    const uuid = useId(id);
+
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id,
+        id: uuid,
+        data,
     });
     const style = transform
         ? {

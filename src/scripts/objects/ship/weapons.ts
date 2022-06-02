@@ -26,7 +26,7 @@ export default class Weapons {
             .sort(({ x: a }, { x: b }) => a - b)
             .map((origin, index) => ({
                 ...origin,
-                type: "empty",
+                type: null,
                 id: index,
                 cooldownTime: 0,
                 lastFired: -Infinity,
@@ -41,20 +41,31 @@ export default class Weapons {
         ]);
         this.scene.soundManager.addSounds("gatling", ["gatling_sound_1"]);
 
-        const middleSlot = Math.floor((this.weaponSlots.length - 1) / 2);
+        const middleSlot = Math.floor((this.getSlotCount() - 1) / 2);
         this.createLaser(middleSlot);
+    }
+
+    getSlotCount() {
+        return this.weaponSlots.length;
+    }
+
+    getWeaponCount() {
+        return this.weaponSlots.filter((slot) => slot.type !== null).length;
+    }
+    getWeaponsOfType(type) {
+        return this.weaponSlots.filter((slot) => slot.type === type);
     }
 
     placeWeapon(type, slot) {
         let doesFit = false;
-        if (slot <= this.weaponSlots.length - 1) {
+        if (slot <= this.getSlotCount() - 1) {
             if (type === "laser") {
                 this.createLaser(slot);
                 doesFit = true;
             } else if (type === "gatling") {
                 this.createGatling(slot);
                 doesFit = true;
-            } else if (type === null) {
+            } else if (!type) {
                 this.clearSlot(slot);
             }
         }
@@ -88,17 +99,13 @@ export default class Weapons {
         this.weaponSlots[slot].type = "";
     }
 
-    getInstalledWeapons(type) {
-        return this.weaponSlots.filter((slot) => slot.type === type);
-    }
-
     primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
         this.fireAll("laser", time, cursor);
         this.fireAll("gatling", time, cursor);
     }
     fireAll(type, time, cursor?: { cursorX: number; cursorY: number }) {
         let playedSound = false;
-        const weapons = this.getInstalledWeapons(type);
+        const weapons = this.getWeaponsOfType(type);
         const toAddShipMomentum = type === "gatling";
 
         weapons.forEach((weapon) => {

@@ -76,10 +76,17 @@ export default class MainScene extends Phaser.Scene {
 
     getPlayerKit() {
         return {
-            weapons: ["laser", null, "laser", "gatling"],
-            engines: ["engine", "engine"],
+            weapons: [
+                { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
+                null, // todo change to object with null values
+                { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
+                { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
+            ],
+            engines: [
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+            ],
             inventory: [],
-            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
         };
     }
 

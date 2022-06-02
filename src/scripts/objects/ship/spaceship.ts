@@ -10,7 +10,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     enemies: Spaceship[];
     modules: { exhaustOrigins: any; weaponOrigins: any };
     baseSpecs: { health: number; hitboxRadius: number; speed: number };
-    status: { shields: number; health: number };
+    status: {
+        shields: number;
+        health: number;
+        multipliers: { speed: number; health: number; shields: number; damage: number };
+    };
     exhausts: Exhausts;
     weapons: Weapons;
     shields: Shields;
@@ -25,14 +29,16 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.outfit = outfit;
         const atlas = scene.textures.get(atlasTexture);
         const scale = atlas.customData["meta"].scale;
-        const damageMultiplier = outfit.multipliers.damage;
 
         this.modules = atlas.customData["meta"].modules;
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.status = {
-            health: this.getMaxHealth(),
-            shields: this.getMaxShields(),
+            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
+            health: 0,
+            shields: 0,
         };
+        this.status.health = this.getMaxHealth();
+        this.status.shields = this.getMaxShields();
 
         // Phaser stuff
         scene.add.existing(this);
@@ -54,6 +60,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.setCircularHitbox(this.baseSpecs.hitboxRadius);
 
         // Modules
+        const damageMultiplier = this.status.multipliers.damage;
         this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
         this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, damageMultiplier);
         this.shields = new Shields(scene, this);
@@ -71,28 +78,50 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     reoutfit() {
-        let extraItems: string[] = [];
+        let extraItems: any[] = [];
+
+        console.log("this", this.outfit);
 
         const weapons = this.outfit.weapons ?? [];
         weapons.forEach((weapon, index) => {
-            const doesFit = this.weapons.placeWeapon(weapon, index);
+            const doesFit = this.weapons.placeWeapon(weapon?.itemName, index);
             if (!doesFit && weapon !== null) {
                 extraItems.push(weapon);
-                weapons[index] = null;
+                weapons.splice(index);
             }
         });
+        if (this.weapons.getWeaponCount() >= weapons.length) {
+            const emptySlotsToAdd = this.weapons.getWeaponCount() - weapons.length;
+
+            const emptySlots = Array(emptySlotsToAdd).fill(null);
+            this.outfit.weapons = weapons.concat(emptySlots);
+        }
 
         const engines = this.outfit.engines ?? [];
         engines.forEach((engine, index) => {
-            const doesFit = this.exhausts.placeEngine(engine, index);
+            const doesFit = this.exhausts.placeEngine(engine?.itemName, index);
             if (!doesFit && engine !== null) {
                 extraItems.push(engine);
-                engines[index] = null;
+                engines.splice(index);
             }
         });
+        if (this.exhausts.getEngineCount() >= engines.length) {
+            const emptySlotsToAdd = this.exhausts.getEngineCount() - engines.length;
 
-        const inventory = this.outfit.inventory ?? [];
-        inventory.concat(extraItems);
+            const emptySlots = Array(emptySlotsToAdd).fill(null);
+
+            this.outfit.engines = engines.concat(emptySlots);
+        }
+
+        const inventorySize = 36;
+        this.outfit.inventory = extraItems;
+        if (inventorySize >= this.outfit.inventory.length) {
+            const emptySlotsToAdd = inventorySize - this.outfit.inventory.length;
+
+            const emptySlots = Array(emptySlotsToAdd).fill(null);
+
+            this.outfit.inventory = this.outfit.inventory.concat(emptySlots);
+        }
     }
 
     getOutfit() {
@@ -103,7 +132,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         // Each additional engine gives 20% speed boost
         const speed = this.baseSpecs.speed;
         const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
-        const speedMultiplier = this.outfit.multipliers.speed;
+        const speedMultiplier = this.status.multipliers.speed;
 
         const shipSpeed = speed + 0.2 * speed * countOfAdditionalEngines;
         return shipSpeed * speedMultiplier;
@@ -165,11 +194,11 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     getMaxHealth() {
-        const healthMultiplier = this.outfit.multipliers.health;
+        const healthMultiplier = this.status.multipliers.health;
         return this.baseSpecs.health * healthMultiplier;
     }
     getMaxShields() {
-        const shieldsMultiplier = this.outfit.multipliers.shields;
+        const shieldsMultiplier = this.status.multipliers.shields;
         return 10000 * shieldsMultiplier;
     }
 
