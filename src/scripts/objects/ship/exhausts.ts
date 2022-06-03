@@ -42,11 +42,19 @@ export default class Exhausts {
             }
         }
 
+        console.log(slot, "<=", this.getSlotCount() - 1, type, doesFit);
         return doesFit;
     }
 
     createExhaust(silent = false) {
         const hasEmptyEngineSlot = this.getEngineCount() + 1 <= this.getSlotCount();
+        console.log(
+            this.getEngineCount() + 1,
+            "<=",
+            this.getSlotCount(),
+            "hasEmptyEngineSlot",
+            hasEmptyEngineSlot
+        );
 
         if (hasEmptyEngineSlot) {
             const exhaustParticles = this.scene.add
@@ -87,7 +95,7 @@ export default class Exhausts {
     }
     getPattern() {
         const pattern =
-            this.exhaustOriginCountPattern[this.getSlotCount()][this.getEngineCount() - 1];
+            this.exhaustOriginCountPattern[this.getSlotCount() + 1][this.getEngineCount() - 1];
 
         return pattern;
     }
@@ -106,14 +114,14 @@ export default class Exhausts {
         return this.exhaustEmitters.length;
     }
     getSlotCount() {
-        return this.exhaustOrigins.length;
+        return this.exhaustOrigins.length - 1;
     }
     // Init exhaust sound and tween
     initExhaustSound() {
         // The exhaust sound is constantly playing, tween just changes the volume
         this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.name, {
-            maxVolume: 0.2,
-            pitchPower: this.exhaustEmitters.length - 1,
+            maxVolume: 0.3,
+            pitchPower: this.getEngineCount() - 1,
         });
         this.isSoundInit = true;
     }

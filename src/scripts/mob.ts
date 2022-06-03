@@ -18,8 +18,17 @@ export default class Mob extends Spaceship {
     reactionTime: number;
     jitter: { x: number; y: number } = { x: 0, y: 0 };
 
-    constructor(scene, x, y, atlasTexture, outfit, enemies: Spaceship[] = [], depth = 10) {
-        super(scene, x, y, atlasTexture, outfit, enemies, depth);
+    constructor(
+        scene,
+        x,
+        y,
+        atlasTexture,
+        outfit,
+        multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
+        enemies: Spaceship[] = [],
+        depth = 10
+    ) {
+        super(scene, x, y, atlasTexture, outfit, multipliers, enemies, depth);
         this.reactionTime = Phaser.Math.Between(2500, 4500);
     }
 

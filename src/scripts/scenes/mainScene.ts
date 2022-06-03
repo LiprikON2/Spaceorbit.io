@@ -31,6 +31,7 @@ export default class MainScene extends Phaser.Scene {
             400,
             "F5S4",
             this.getPlayerKit(),
+            undefined,
             this.mobManager.mobs,
             100
         );
@@ -57,7 +58,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(0, [this.player]);
+        this.mobManager.spawnMobs(5, [this.player]);
 
         // Prevents shield from running away when ship hits the world bounds
         this.physics.world.on("worldbounds", (body) => {
@@ -82,11 +83,18 @@ export default class MainScene extends Phaser.Scene {
                 { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
                 { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
             ],
-            engines: [
+            engines: [null, null],
+            inventory: [
+                null,
+                null,
+                null,
+                null,
                 { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
                 { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
+                { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
+                { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
             ],
-            inventory: [],
         };
     }
 

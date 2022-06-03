@@ -44,6 +44,7 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
 
     getHit() {
         if (!this.tweenFade.isPlaying()) {
+            console.log("shit hit");
             this.tweenFade.play();
             this.scene.soundManager.play("shield", {
                 sourceX: this.x,

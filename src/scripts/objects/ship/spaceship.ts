@@ -23,7 +23,16 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     moveToPlugin;
     outfit;
 
-    constructor(scene, x, y, atlasTexture, outfit, enemies: Spaceship[] = [], depth = 10) {
+    constructor(
+        scene,
+        x,
+        y,
+        atlasTexture,
+        outfit,
+        multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
+        enemies: Spaceship[] = [],
+        depth = 10
+    ) {
         super(scene, x, y, atlasTexture);
 
         this.outfit = outfit;
@@ -33,7 +42,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.modules = atlas.customData["meta"].modules;
         this.baseSpecs = atlas.customData["meta"].baseSpecs;
         this.status = {
-            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
+            multipliers,
             health: 0,
             shields: 0,
         };
@@ -80,7 +89,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     reoutfit() {
         let extraItems: any[] = [];
 
-        console.log("this", this.outfit);
+        console.table(this.outfit);
 
         const weapons = this.outfit.weapons ?? [];
         weapons.forEach((weapon, index) => {
@@ -102,24 +111,25 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             const doesFit = this.exhausts.placeEngine(engine?.itemName, index);
             if (!doesFit && engine !== null) {
                 extraItems.push(engine);
-                engines.splice(index);
+                engines.splice(index); // bug
             }
         });
-        if (this.exhausts.getEngineCount() >= engines.length) {
-            const emptySlotsToAdd = this.exhausts.getEngineCount() - engines.length;
+        const auxiliaryEngineSize = this.exhausts.getEngineCount();
+        if (auxiliaryEngineSize >= engines.length) {
+            const emptySlotsToAdd = auxiliaryEngineSize - engines.length;
 
             const emptySlots = Array(emptySlotsToAdd).fill(null);
-
             this.outfit.engines = engines.concat(emptySlots);
         }
 
+        console.log("this after eng", this.outfit);
+
         const inventorySize = 36;
-        this.outfit.inventory = extraItems;
+        this.outfit.inventory = this.outfit.inventory.concat(extraItems);
         if (inventorySize >= this.outfit.inventory.length) {
             const emptySlotsToAdd = inventorySize - this.outfit.inventory.length;
 
             const emptySlots = Array(emptySlotsToAdd).fill(null);
-
             this.outfit.inventory = this.outfit.inventory.concat(emptySlots);
         }
     }

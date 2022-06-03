@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, Divider, Drawer, Indicator, ScrollArea, Space, Title } from "@mantine/core";
-import { useDisclosure, useId, useListState, useSetState } from "@mantine/hooks";
+import { useDidUpdate, useDisclosure, useId, useListState, useSetState } from "@mantine/hooks";
 import { Tool } from "tabler-icons-react";
 import { useDroppable, useDraggable, DndContext } from "@dnd-kit/core";
 
@@ -89,28 +89,17 @@ const OutfittingDrawer = () => {
                 // If moved inside the same inventory
                 if (prevInventoryType === inventoryType) {
                     // Prev slot
-                    updatedInventory[prevSlotIndex] = {
-                        itemName: null,
-                        itemType: null,
-                        label: null,
-                        color: null,
-                    };
+                    updatedInventory[prevSlotIndex] = null;
                     setOutfit({ [inventoryType]: updatedInventory });
                 } else {
                     const updatedPrevInventory = [...outfit[prevInventoryType]];
                     // Prev slot
-                    updatedPrevInventory[prevSlotIndex] = {
-                        itemName: null,
-                        itemType: null,
-                        label: null,
-                        color: null,
-                    };
+                    updatedPrevInventory[prevSlotIndex] = null;
                     setOutfit({
                         [prevInventoryType]: updatedPrevInventory,
                         [inventoryType]: updatedInventory,
                     });
                 }
-                reoutfit();
             }
         }
     };
@@ -126,6 +115,10 @@ const OutfittingDrawer = () => {
     };
     const [outfit, setOutfit] = useSetState({});
 
+    useDidUpdate(() => {
+        reoutfit();
+    }, [outfit]);
+
     const openOutfitting = () => {
         const scene = getGame().scene.keys.MainScene;
         const activeOutfit = scene?.player?.getOutfit();
@@ -133,7 +126,6 @@ const OutfittingDrawer = () => {
             handleOpenOutfitting.open();
 
             setOutfit(activeOutfit);
-            console.log("outfit", activeOutfit);
         }
     };
 

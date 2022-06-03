@@ -50,7 +50,15 @@ export default class MobManager {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
-            const mob = new Mob(this.scene, x, y, "F5S4", this.getMobKit(), mobEnemies);
+            const mob = new Mob(
+                this.scene,
+                x,
+                y,
+                "F5S4",
+                this.getMobKit("normal"),
+                this.getMobMultiplier("normal"),
+                mobEnemies
+            );
             // Needed to be called when soundManager knows about player, and player knows about soundManager
             mob.exhausts.initExhaustSound();
             this.mobs.push(mob);
@@ -62,12 +70,23 @@ export default class MobManager {
         });
     }
 
-    getMobKit(type?) {
-        return {
-            weapons: [null, { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" }],
-            engines: [{ itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" }],
-            inventory: [],
-        };
-        // multipliers: { speed: 0.5, health: 0.3, shields: 0, damage: 0.5 },
+    getMobKit(type) {
+        if (type === "normal") {
+            return {
+                weapons: [
+                    null,
+                    { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
+                    null,
+                ],
+                engines: [null, null],
+                inventory: [],
+            };
+        }
+    }
+
+    getMobMultiplier(type) {
+        if (type === "normal") {
+            return { speed: 0.3, health: 0.3, shields: 0.3, damage: 0.3 };
+        }
     }
 }
