@@ -1,12 +1,18 @@
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { useId } from "@mantine/hooks";
 
-const DroppableInventory = ({ data, id = undefined, children = undefined, ...rest }) => {
-    const uuid = useId(id);
-
+const DroppableInventory = ({
+    data,
+    id,
+    children = undefined,
+    ...rest
+}: {
+    data?: Object;
+    id: any;
+    children?: any | undefined;
+}) => {
     const { isOver, setNodeRef } = useDroppable({
-        id: uuid,
+        id,
         data,
     });
     const style = {

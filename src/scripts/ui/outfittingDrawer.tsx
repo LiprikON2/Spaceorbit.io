@@ -10,56 +10,62 @@ import DroppableInventory from "./components/droppableInventory";
 
 import "./outfittingDrawer.css";
 import { getGame } from "../game";
+const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
+    const getLabel = () => {
+        if (inventoryType === "weapons") return "Wpn";
+        else if (inventoryType === "engines") return "Eng";
+        else if (inventoryType === "inventory") return " ";
+    };
+
+    const getColor = () => {
+        if (inventoryType === "weapons") return "red";
+        else if (inventoryType === "engines") return "yellow";
+        else if (inventoryType === "inventory") return undefined;
+    };
+
+    return (
+        <DroppableInventory
+            data={{ inventoryType, slotIndex, isEmpty }}
+            id={[inventoryType, slotIndex].join("-")}
+        >
+            {children ?? (
+                <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
+                    {getLabel()}
+                </Avatar>
+            )}
+        </DroppableInventory>
+    );
+};
+
+const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
+    return (
+        <DraggableItem
+            data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
+            id={[inventoryType, slotIndex, itemName, itemType].join("-")}
+        >
+            <Indicator
+                className="item-indicator"
+                position="bottom-start"
+                label={label}
+                color={color}
+                size={16}
+                withBorder
+                inline
+            >
+                <Avatar
+                    className="item-avatar"
+                    size="lg"
+                    src={`assets/inventory/${itemName}.jpg`}
+                />
+            </Indicator>
+        </DraggableItem>
+    );
+};
 
 const OutfittingDrawer = () => {
     const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
 
-    // TODO fix image flickering onDrop (react rerender)
     // TODO fix z-index mess
-    const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
-        const getLabel = () => {
-            if (inventoryType === "weapons") return "Wpn";
-            else if (inventoryType === "engines") return "Eng";
-            else if (inventoryType === "inventory") return " ";
-        };
-
-        const getColor = () => {
-            if (inventoryType === "weapons") return "red";
-            else if (inventoryType === "engines") return "yellow";
-            else if (inventoryType === "inventory") return undefined;
-        };
-
-        return (
-            <DroppableInventory data={{ inventoryType, slotIndex, isEmpty }}>
-                {children ?? (
-                    <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
-                        {getLabel()}
-                    </Avatar>
-                )}
-            </DroppableInventory>
-        );
-    };
-    const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
-        return (
-            <DraggableItem data={{ inventoryType, slotIndex, itemName, itemType, label, color }}>
-                <Indicator
-                    className="item-indicator"
-                    position="bottom-start"
-                    label={label}
-                    color={color}
-                    size={16}
-                    withBorder
-                    inline
-                >
-                    <Avatar
-                        className="item-avatar"
-                        size="lg"
-                        src={`assets/inventory/${itemName}.jpg`}
-                    />
-                </Indicator>
-            </DraggableItem>
-        );
-    };
 
     const handleDragEnd = (event) => {
         const { over, active } = event;
@@ -88,13 +94,15 @@ const OutfittingDrawer = () => {
 
                 // If moved inside the same inventory
                 if (prevInventoryType === inventoryType) {
-                    // Prev slot
+                    // Clear prev slot
                     updatedInventory[prevSlotIndex] = null;
+                    // Update new slot
                     setOutfit({ [inventoryType]: updatedInventory });
                 } else {
                     const updatedPrevInventory = [...outfit[prevInventoryType]];
-                    // Prev slot
+                    // Clear prev slot
                     updatedPrevInventory[prevSlotIndex] = null;
+                    // Update new slot
                     setOutfit({
                         [prevInventoryType]: updatedPrevInventory,
                         [inventoryType]: updatedInventory,
