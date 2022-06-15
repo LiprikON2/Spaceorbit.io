@@ -89,7 +89,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     reoutfit() {
         let extraItems: any[] = [];
 
-        console.table(this.outfit);
+        // console.table(this.outfit);
 
         const weapons = this.outfit.weapons ?? [];
         weapons.forEach((weapon, index) => {
@@ -121,8 +121,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             const emptySlots = Array(emptySlotsToAdd).fill(null);
             this.outfit.engines = engines.concat(emptySlots);
         }
-
-        console.log("this after eng", this.outfit);
 
         const inventorySize = 36;
         this.outfit.inventory = this.outfit.inventory.concat(extraItems);

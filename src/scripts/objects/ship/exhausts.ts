@@ -42,19 +42,19 @@ export default class Exhausts {
             }
         }
 
-        console.log(slot, "<=", this.getSlotCount() - 1, type, doesFit);
+        // console.log(slot, "<=", this.getSlotCount() - 1, type, doesFit);
         return doesFit;
     }
 
     createExhaust(silent = false) {
         const hasEmptyEngineSlot = this.getEngineCount() + 1 <= this.getSlotCount();
-        console.log(
-            this.getEngineCount() + 1,
-            "<=",
-            this.getSlotCount(),
-            "hasEmptyEngineSlot",
-            hasEmptyEngineSlot
-        );
+        // console.log(
+        //     this.getEngineCount() + 1,
+        //     "<=",
+        //     this.getSlotCount(),
+        //     "hasEmptyEngineSlot",
+        //     hasEmptyEngineSlot
+        // );
 
         if (hasEmptyEngineSlot) {
             const exhaustParticles = this.scene.add

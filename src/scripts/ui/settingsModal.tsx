@@ -1,15 +1,6 @@
-import {
-    Divider,
-    Modal,
-    NumberInput,
-    SegmentedControl,
-    Space,
-    Switch,
-    Tabs,
-    Title,
-} from "@mantine/core";
+import { Modal, NumberInput, SegmentedControl, Space, Switch, Tabs, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { getGame } from "../game";
 import Button from "./components/button";

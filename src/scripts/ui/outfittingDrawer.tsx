@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Avatar, Divider, Drawer, Indicator, ScrollArea, Space, Title } from "@mantine/core";
-import { useDidUpdate, useDisclosure, useId, useListState, useSetState } from "@mantine/hooks";
+import React, { useState } from "react";
+import { Avatar, Divider, Drawer, Indicator, ScrollArea, Title } from "@mantine/core";
+import { useDidUpdate, useDisclosure, useSetState } from "@mantine/hooks";
 import { Tool } from "tabler-icons-react";
-import { useDroppable, useDraggable, DndContext } from "@dnd-kit/core";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
 
 import Button from "./components/button";
 import DraggableItem from "./components/draggableItem";
@@ -23,11 +23,12 @@ const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined
         else if (inventoryType === "inventory") return undefined;
     };
 
+    const getId = () => {
+        const id = [inventoryType, slotIndex].join("-");
+        return id;
+    };
     return (
-        <DroppableInventory
-            data={{ inventoryType, slotIndex, isEmpty }}
-            id={[inventoryType, slotIndex].join("-")}
-        >
+        <DroppableInventory data={{ inventoryType, slotIndex, isEmpty }} id={getId()}>
             {children ?? (
                 <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
                     {getLabel()}
@@ -42,6 +43,7 @@ const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, co
         <DraggableItem
             data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
             id={[inventoryType, slotIndex, itemName, itemType].join("-")}
+            fixInPlace={true}
         >
             <Indicator
                 className="item-indicator"
@@ -65,13 +67,19 @@ const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, co
 const OutfittingDrawer = () => {
     const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
 
-    // TODO fix z-index mess
-
+    const handleDragStart = (event) => {
+        const { active } = event;
+        if (active) {
+            const { inventoryType, slotIndex } = active.data.current;
+            setActiveId({ inventoryType, index: slotIndex });
+        }
+    };
     const handleDragEnd = (event) => {
         const { over, active } = event;
+        const isEmpty = over?.data?.current?.isEmpty;
 
         // If item dropped in an empty slot
-        if (over && over?.data?.current?.isEmpty) {
+        if (over && isEmpty) {
             // Dropped to slot
             const { inventoryType, slotIndex, isEmpty } = over.data.current;
             // The dropeé item
@@ -92,22 +100,23 @@ const OutfittingDrawer = () => {
                 // Target slot
                 updatedInventory[slotIndex] = { itemName, itemType, label, color };
 
-                // If moved inside the same inventory
-                if (prevInventoryType === inventoryType) {
+                // If moved to the same inventory
+                if (prevInventoryType === inventoryType && isEmpty) {
                     // Clear prev slot
                     updatedInventory[prevSlotIndex] = null;
-                    // Update new slot
+                    // Update target slot
                     setOutfit({ [inventoryType]: updatedInventory });
                 } else {
                     const updatedPrevInventory = [...outfit[prevInventoryType]];
                     // Clear prev slot
                     updatedPrevInventory[prevSlotIndex] = null;
-                    // Update new slot
+                    // Update target slot
                     setOutfit({
                         [prevInventoryType]: updatedPrevInventory,
                         [inventoryType]: updatedInventory,
                     });
                 }
+                setActiveId({ inventoryType: null, index: null });
             }
         }
     };
@@ -139,43 +148,74 @@ const OutfittingDrawer = () => {
 
     const mapInventory = (inventoryType) =>
         outfit?.[inventoryType]?.map((item, index) => {
-            let slots: any = [];
-            // @ts-ignore
-            const { itemName, itemType, label, color } = item ?? {
-                itemName: null,
-                itemType: null,
-                label: null,
-                color: null,
-            };
+            return mapSlot(inventoryType, index);
 
-            const isEmpty = itemName === null;
-            const slot = (
-                <InventorySlot
-                    inventoryType={inventoryType}
-                    slotIndex={index}
-                    isEmpty={isEmpty}
-                    // @ts-ignore
-                    key={`${inventoryType}-${index}}`}
-                >
-                    {!isEmpty ? (
-                        <InventoryItem
-                            inventoryType={inventoryType}
-                            slotIndex={index}
-                            itemName={itemName}
-                            itemType={itemType}
-                            label={label}
-                            color={color}
-                        />
-                    ) : null}
-                </InventorySlot>
-            );
-            slots.push(slot);
+            // // @ts-ignore
+            // const { itemName, itemType, label, color } = item ?? {
+            //     itemName: null,
+            //     itemType: null,
+            //     label: null,
+            //     color: null,
+            // };
 
-            return <React.Fragment key={`${inventoryType}-${index}`}>{slots}</React.Fragment>;
+            // const isEmpty = itemName === null;
+            // return (
+            //     <InventorySlot
+            //         inventoryType={inventoryType}
+            //         slotIndex={index}
+            //         isEmpty={isEmpty}
+            //         // @ts-ignore
+            //         key={`${inventoryType}-${index}}`}
+            //     >
+            //         {!isEmpty ? (
+            //             <InventoryItem
+            //                 inventoryType={inventoryType}
+            //                 slotIndex={index}
+            //                 itemName={itemName}
+            //                 itemType={itemType}
+            //                 label={label}
+            //                 color={color}
+            //             />
+            //         ) : null}
+            //     </InventorySlot>
+            // );
         });
+    const [activeId, setActiveId] = useState({ inventoryType: null, index: 0 });
 
+    const mapSlot = (inventoryType, index, isOverlay = false) => {
+        const item = outfit[inventoryType][index];
+        // @ts-ignore
+        const { itemName, itemType, label, color } = item ?? {
+            itemName: null,
+            itemType: null,
+            label: null,
+            color: null,
+        };
+
+        const isEmpty = itemName === null;
+        return (
+            <InventorySlot
+                inventoryType={inventoryType}
+                slotIndex={index}
+                isEmpty={isEmpty}
+                // @ts-ignore
+                key={(isOverlay ? "overlay-" : "") + `${inventoryType}-${index}`}
+            >
+                {!isEmpty ? (
+                    <InventoryItem
+                        inventoryType={inventoryType}
+                        slotIndex={index}
+                        itemName={itemName}
+                        itemType={itemType}
+                        label={label}
+                        color={color}
+                    />
+                ) : null}
+            </InventorySlot>
+        );
+    };
     return (
-        <DndContext onDragEnd={handleDragEnd} autoScroll={false}>
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
             <div className="outfitting group">
                 <Indicator inline label="New" color="cyan" size={16} withBorder>
                     <Button isSquare={true} onClick={openOutfitting}>
@@ -198,6 +238,9 @@ const OutfittingDrawer = () => {
                         {mapInventory("engines")}
                         {mapInventory("inventory")}
                     </div>
+                    <DragOverlay>
+                        {activeId.inventoryType && mapSlot(activeId.inventoryType, activeId.index)}
+                    </DragOverlay>
                 </ScrollArea>
             </Drawer>
         </DndContext>

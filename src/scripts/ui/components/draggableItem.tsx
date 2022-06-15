@@ -1,20 +1,27 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 
-const DraggableItem = ({ children = undefined, data, id, ...rest }) => {
+const DraggableItem = ({ children = undefined, fixInPlace = false, data, id, ...rest }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id,
+        id: fixInPlace ? id + "-fixed" : id,
         data,
     });
     const style = transform
         ? {
-              transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-              zIndex: 10,
+              filter: "brightness(50%)",
           }
-        : {
-              position: "relative",
-              zIndex: 10,
-          };
+        : undefined;
+    // const style =
+    //     transform && !fixInPlace
+    //         ? {
+    //               position: "relative",
+    //               transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    //               zIndex: 1,
+    //           }
+    //         : {
+    //               position: "relative",
+    //               zIndex: "auto",
+    //           };
 
     return (
         <div
