@@ -3,7 +3,6 @@ import {
     Modal,
     NumberInput,
     SegmentedControl,
-    Slider,
     Space,
     Switch,
     Tabs,
@@ -14,6 +13,7 @@ import React, { useEffect, useState } from "react";
 
 import { getGame } from "../game";
 import Button from "./components/button";
+import Slider from "./components/slider";
 
 const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {
@@ -114,57 +114,24 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                     <Tabs.Tab label="Audio">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
-                                <Title order={6}>Master Volume</Title>
                                 <Slider
-                                    className="slider"
-                                    color="cyan"
-                                    label={(value) => `${(value * 100).toFixed(0)}%`}
-                                    marks={[
-                                        { value: 0, label: "0%" },
-                                        { value: 0.25, label: "25%" },
-                                        { value: 0.5, label: "50%" },
-                                        { value: 0.75, label: "75%" },
-                                        { value: 1, label: "100%" },
-                                    ]}
+                                    title="Master Volume"
                                     min={0}
                                     max={1}
-                                    step={0.01}
                                     onChangeEnd={(value) => setVolume("masterVolume", value)}
                                     defaultValue={settings.masterVolume}
                                 />
-                                <Title order={6}>Music Volume</Title>
                                 <Slider
-                                    className="slider"
-                                    color="cyan"
-                                    label={(value) => `${(value * 2000).toFixed(0)}%`}
-                                    marks={[
-                                        { value: 0, label: "0%" },
-                                        { value: 0.0125, label: "25%" },
-                                        { value: 0.025, label: "50%" },
-                                        { value: 0.0375, label: "75%" },
-                                        { value: 0.05, label: "100%" },
-                                    ]}
+                                    title="Music Volume"
                                     min={0}
-                                    max={0.05}
-                                    step={0.0005}
+                                    max={0.025}
                                     onChangeEnd={(value) => setVolume("musicVolume", value)}
                                     defaultValue={settings.musicVolume}
                                 />
-                                <Title order={6}>Effects Volume</Title>
                                 <Slider
-                                    className="slider"
-                                    color="cyan"
-                                    label={(value) => `${(value * 1000).toFixed(0)}%`}
-                                    marks={[
-                                        { value: 0, label: "0%" },
-                                        { value: 0.025, label: "25%" },
-                                        { value: 0.05, label: "50%" },
-                                        { value: 0.075, label: "75%" },
-                                        { value: 0.1, label: "100%" },
-                                    ]}
+                                    title="Effects Volume"
                                     min={0}
                                     max={0.1}
-                                    step={0.001}
                                     onChangeEnd={(value) => setVolume("effectsVolume", value)}
                                     defaultValue={settings.effectsVolume}
                                 />

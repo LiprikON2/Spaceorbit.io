@@ -79,7 +79,7 @@ export default class MainScene extends Phaser.Scene {
         return {
             weapons: [
                 { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
-                null, // todo change to object with null values
+                null,
                 { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
                 { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
             ],
@@ -167,6 +167,7 @@ export default class MainScene extends Phaser.Scene {
             .setScrollFactor(parallax);
 
         // TODO solve magic numbers
+        // TODO make it obvious when you hit world bounds
         this.physics.world.setBounds(0, 0, boundsSize.width - 500, boundsSize.height - 700);
 
         this.updateRootBackground(color);

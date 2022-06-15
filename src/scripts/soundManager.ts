@@ -24,7 +24,7 @@ export default class SoundManager {
         const {
             masterVolume = 1,
             effectsVolume = 0.1,
-            musicVolume = 0.05,
+            musicVolume = 0.025,
             effectsMute = false,
             musicMute = false,
         } = localStorageSettings;
