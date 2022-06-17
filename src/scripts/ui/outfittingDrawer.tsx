@@ -71,7 +71,7 @@ const OutfittingDrawer = () => {
         const { active } = event;
         if (active) {
             const { inventoryType, slotIndex } = active.data.current;
-            setActiveId({ inventoryType, index: slotIndex });
+            setDraggedItem({ inventoryType, index: slotIndex });
         }
     };
     const handleDragEnd = (event) => {
@@ -116,7 +116,7 @@ const OutfittingDrawer = () => {
                         [inventoryType]: updatedInventory,
                     });
                 }
-                setActiveId({ inventoryType: null, index: null });
+                setDraggedItem({ inventoryType: null, index: null });
             }
         }
     };
@@ -147,40 +147,9 @@ const OutfittingDrawer = () => {
     };
 
     const mapInventory = (inventoryType) =>
-        outfit?.[inventoryType]?.map((item, index) => {
-            return mapSlot(inventoryType, index);
+        outfit?.[inventoryType]?.map((item, index) => mapSlot(inventoryType, index));
 
-            // // @ts-ignore
-            // const { itemName, itemType, label, color } = item ?? {
-            //     itemName: null,
-            //     itemType: null,
-            //     label: null,
-            //     color: null,
-            // };
-
-            // const isEmpty = itemName === null;
-            // return (
-            //     <InventorySlot
-            //         inventoryType={inventoryType}
-            //         slotIndex={index}
-            //         isEmpty={isEmpty}
-            //         // @ts-ignore
-            //         key={`${inventoryType}-${index}}`}
-            //     >
-            //         {!isEmpty ? (
-            //             <InventoryItem
-            //                 inventoryType={inventoryType}
-            //                 slotIndex={index}
-            //                 itemName={itemName}
-            //                 itemType={itemType}
-            //                 label={label}
-            //                 color={color}
-            //             />
-            //         ) : null}
-            //     </InventorySlot>
-            // );
-        });
-    const [activeId, setActiveId] = useState({ inventoryType: null, index: 0 });
+    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, index: 0 });
 
     const mapSlot = (inventoryType, index, isOverlay = false) => {
         const item = outfit[inventoryType][index];
@@ -239,7 +208,8 @@ const OutfittingDrawer = () => {
                         {mapInventory("inventory")}
                     </div>
                     <DragOverlay>
-                        {activeId.inventoryType && mapSlot(activeId.inventoryType, activeId.index)}
+                        {draggedItem.inventoryType &&
+                            mapSlot(draggedItem.inventoryType, draggedItem.index)}
                     </DragOverlay>
                 </ScrollArea>
             </Drawer>
