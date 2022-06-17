@@ -2,6 +2,7 @@ import Explosion from "./explosion";
 import Exhausts from "./exhausts";
 import Weapons from "./weapons";
 import Shields from "./shields";
+import Outfitting from "./outfitting";
 
 export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth: number;
@@ -21,7 +22,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     lastMoveInput: { rotation: number; force: number } = { rotation: 0, force: 0 };
     rotateToPlugin;
     moveToPlugin;
-    outfit;
+    outfitting;
 
     constructor(
         scene,
@@ -35,7 +36,6 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     ) {
         super(scene, x, y, atlasTexture);
 
-        this.outfit = outfit;
         const atlas = scene.textures.get(atlasTexture);
         const scale = atlas.customData["meta"].scale;
 
@@ -73,6 +73,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
         this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, damageMultiplier);
         this.shields = new Shields(scene, this);
+        this.outfitting = new Outfitting(scene, this, outfit);
 
         this.enemies = enemies;
 
@@ -82,68 +83,17 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
         this.moveToPlugin.on("complete", () => this.stoppedMoving());
 
-        this.reoutfit();
         if (this.status.shields === 0) this.shields.crack(true);
     }
 
-    reoutfit() {
-        let extraItems: any[] = [];
-
-        let weapons = this.outfit.weapons ?? [];
-        weapons = weapons.filter((weapon, index) => {
-            const doesFit = this.weapons.placeWeapon(weapon?.itemName, index);
-            const isExtraItem = !doesFit && weapon !== null;
-            if (isExtraItem) {
-                extraItems.push(weapon);
-            }
-            return !isExtraItem;
-        });
-        // Fill empty slots with null
-        if (this.weapons.getWeaponCount() >= weapons.length) {
-            const emptySlotsToAdd = this.weapons.getWeaponCount() - weapons.length;
-
-            const emptySlots = Array(emptySlotsToAdd).fill(null);
-            this.outfit.weapons = weapons.concat(emptySlots);
-        }
-
-        let engines = this.outfit.engines ?? [];
-        engines = engines.filter((engine, index) => {
-            const doesFit = this.exhausts.placeEngine(engine?.itemName, index);
-            const isExtraItem = !doesFit && engine !== null;
-            if (isExtraItem) {
-                extraItems.push(engine);
-            }
-            return !isExtraItem;
-        });
-        const auxiliaryEngineSize = this.exhausts.getSlotCount() - 1;
-        if (auxiliaryEngineSize >= engines.length) {
-            const emptySlotsToAdd = auxiliaryEngineSize - engines.length;
-
-            const emptySlots = Array(emptySlotsToAdd).fill(null);
-            this.outfit.engines = engines.concat(emptySlots);
-        }
-
-        const inventorySize = 36;
-        this.outfit.inventory = this.outfit.inventory.concat(extraItems);
-        if (inventorySize >= this.outfit.inventory.length) {
-            const emptySlotsToAdd = inventorySize - this.outfit.inventory.length;
-
-            const emptySlots = Array(emptySlotsToAdd).fill(null);
-            this.outfit.inventory = this.outfit.inventory.concat(emptySlots);
-        }
-    }
-
-    getOutfit() {
-        return this.outfit;
-    }
-
     getSpeed() {
-        // Each additional engine gives 20% speed boost
+        const speedBoost = 0.2;
         const speed = this.baseSpecs.speed;
         const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
         const speedMultiplier = this.status.multipliers.speed;
 
-        const shipSpeed = speed + 0.2 * speed * countOfAdditionalEngines;
+        // Each additional engine gives 20% speed boost
+        const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
         return shipSpeed * speedMultiplier;
     }
 

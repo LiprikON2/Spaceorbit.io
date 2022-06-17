@@ -123,10 +123,9 @@ const OutfittingDrawer = () => {
     const reoutfit = () => {
         const scene = getGame().scene.keys.MainScene;
         const player = scene?.player;
-        const activeOutfit = player?.getOutfit();
+        const activeOutfit = player?.outfitting.getOutfit();
         if (activeOutfit) {
-            player.outfit = outfit; // todo make it verify before accepting changes
-            player.reoutfit();
+            player.outfitting.reoutfit(outfit);
         }
     };
     const [outfit, setOutfit] = useSetState({});
@@ -137,7 +136,7 @@ const OutfittingDrawer = () => {
 
     const openOutfitting = () => {
         const scene = getGame().scene.keys.MainScene;
-        const activeOutfit = scene?.player?.getOutfit();
+        const activeOutfit = scene?.player?.outfitting?.getOutfit();
         if (activeOutfit) {
             handleOpenOutfitting.open();
 
