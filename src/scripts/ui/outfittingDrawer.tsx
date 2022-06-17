@@ -43,7 +43,6 @@ const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, co
         <DraggableItem
             data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
             id={[inventoryType, slotIndex, itemName, itemType].join("-")}
-            fixInPlace={true}
         >
             <Indicator
                 className="item-indicator"
@@ -147,11 +146,11 @@ const OutfittingDrawer = () => {
     };
 
     const mapInventory = (inventoryType) =>
-        outfit?.[inventoryType]?.map((item, index) => mapSlot(inventoryType, index));
+        outfit?.[inventoryType]?.map((_, index) => mapSlot(inventoryType, index));
 
     const [draggedItem, setDraggedItem] = useState({ inventoryType: null, index: 0 });
 
-    const mapSlot = (inventoryType, index, isOverlay = false) => {
+    const mapSlot = (inventoryType, index) => {
         const item = outfit[inventoryType][index];
         // @ts-ignore
         const { itemName, itemType, label, color } = item ?? {
@@ -168,7 +167,7 @@ const OutfittingDrawer = () => {
                 slotIndex={index}
                 isEmpty={isEmpty}
                 // @ts-ignore
-                key={(isOverlay ? "overlay-" : "") + `${inventoryType}-${index}`}
+                key={`${inventoryType}-${index}`}
             >
                 {!isEmpty ? (
                     <InventoryItem
@@ -184,7 +183,7 @@ const OutfittingDrawer = () => {
         );
     };
     return (
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
+        <>
             <div className="outfitting group">
                 <Indicator inline label="New" color="cyan" size={16} withBorder>
                     <Button isSquare={true} onClick={openOutfitting}>
@@ -202,18 +201,24 @@ const OutfittingDrawer = () => {
             >
                 <Divider my="sm" />
                 <ScrollArea className="scroller">
-                    <div className="inventory">
-                        {mapInventory("weapons")}
-                        {mapInventory("engines")}
-                        {mapInventory("inventory")}
-                    </div>
-                    <DragOverlay>
-                        {draggedItem.inventoryType &&
-                            mapSlot(draggedItem.inventoryType, draggedItem.index)}
-                    </DragOverlay>
+                    <DndContext
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        autoScroll={false}
+                    >
+                        <div className="inventory">
+                            {mapInventory("weapons")}
+                            {mapInventory("engines")}
+                            {mapInventory("inventory")}
+                        </div>
+                        <DragOverlay>
+                            {draggedItem.inventoryType &&
+                                mapSlot(draggedItem.inventoryType, draggedItem.index)}
+                        </DragOverlay>
+                    </DndContext>
                 </ScrollArea>
             </Drawer>
-        </DndContext>
+        </>
     );
 };
 
