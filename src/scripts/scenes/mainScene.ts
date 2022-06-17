@@ -58,7 +58,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(5, [this.player]);
+        this.mobManager.spawnMobs(0, [this.player]);
 
         // Prevents shield from running away when ship hits the world bounds
         this.physics.world.on("worldbounds", (body) => {

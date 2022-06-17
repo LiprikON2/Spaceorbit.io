@@ -89,16 +89,16 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     reoutfit() {
         let extraItems: any[] = [];
 
-        // console.table(this.outfit);
-
-        const weapons = this.outfit.weapons ?? [];
-        weapons.forEach((weapon, index) => {
+        let weapons = this.outfit.weapons ?? [];
+        weapons = weapons.filter((weapon, index) => {
             const doesFit = this.weapons.placeWeapon(weapon?.itemName, index);
-            if (!doesFit && weapon !== null) {
+            const isExtraItem = !doesFit && weapon !== null;
+            if (isExtraItem) {
                 extraItems.push(weapon);
-                weapons.splice(index);
             }
+            return !isExtraItem;
         });
+        // Fill empty slots with null
         if (this.weapons.getWeaponCount() >= weapons.length) {
             const emptySlotsToAdd = this.weapons.getWeaponCount() - weapons.length;
 
@@ -106,15 +106,16 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             this.outfit.weapons = weapons.concat(emptySlots);
         }
 
-        const engines = this.outfit.engines ?? [];
-        engines.forEach((engine, index) => {
+        let engines = this.outfit.engines ?? [];
+        engines = engines.filter((engine, index) => {
             const doesFit = this.exhausts.placeEngine(engine?.itemName, index);
-            if (!doesFit && engine !== null) {
+            const isExtraItem = !doesFit && engine !== null;
+            if (isExtraItem) {
                 extraItems.push(engine);
-                engines.splice(index); // bug
             }
+            return !isExtraItem;
         });
-        const auxiliaryEngineSize = this.exhausts.getEngineCount();
+        const auxiliaryEngineSize = this.exhausts.getSlotCount() - 1;
         if (auxiliaryEngineSize >= engines.length) {
             const emptySlotsToAdd = auxiliaryEngineSize - engines.length;
 

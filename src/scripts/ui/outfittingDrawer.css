@@ -10,6 +10,7 @@
 
     margin-block: 2rem;
     margin-inline: 1rem;
+    user-select: none;
 }
 
 .inventory-slot {
