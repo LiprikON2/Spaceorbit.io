@@ -1,19 +1,19 @@
 export default class Outfitting {
     scene;
     ship;
-    outfit;
+    #outfit;
 
     constructor(scene, ship, outfit) {
         this.scene = scene;
         this.ship = ship;
-        this.outfit = outfit;
+        this.#outfit = outfit;
 
         this.reoutfit();
     }
 
     reoutfit(newOutfit?) {
         if (newOutfit && this.isValidOutfit(newOutfit)) {
-            this.outfit = newOutfit;
+            this.#outfit = newOutfit;
         }
         const extraWeapons = this.updateWeapons();
         const extraEngines = this.updateEngines();
@@ -28,13 +28,13 @@ export default class Outfitting {
     }
 
     getOutfit() {
-        return this.outfit;
+        return this.#outfit;
     }
 
     updateWeapons() {
         let extraWeapons: any[] = [];
 
-        let weapons = this.outfit.weapons ?? [];
+        let weapons = this.#outfit.weapons ?? [];
         weapons = weapons.filter((weapon, index) => {
             const doesFit = this.ship.weapons.placeWeapon(weapon?.itemName, index);
             const isExtraItem = !doesFit && weapon !== null;
@@ -43,14 +43,14 @@ export default class Outfitting {
             }
             return !isExtraItem;
         });
-        this.outfit.weapons = this.fillEmptySlots(weapons, this.ship.weapons.getWeaponCount());
+        this.#outfit.weapons = this.fillEmptySlots(weapons, this.ship.weapons.getWeaponCount());
 
         return extraWeapons;
     }
     updateEngines() {
         let extraEngines: any[] = [];
 
-        let engines = this.outfit.engines ?? [];
+        let engines = this.#outfit.engines ?? [];
         engines = engines.filter((engine, index) => {
             const doesFit = this.ship.exhausts.placeEngine(engine?.itemName, index);
             const isExtraItem = !doesFit && engine !== null;
@@ -60,14 +60,14 @@ export default class Outfitting {
             return !isExtraItem;
         });
         const auxiliaryEngineSize = this.ship.exhausts.getSlotCount() - 1;
-        this.outfit.engines = this.fillEmptySlots(engines, auxiliaryEngineSize);
+        this.#outfit.engines = this.fillEmptySlots(engines, auxiliaryEngineSize);
         return extraEngines;
     }
     updateInventory(extraItems) {
         const inventorySize = 36;
-        let inventory = this.outfit.inventory;
+        let inventory = this.#outfit.inventory;
         inventory = inventory.concat(extraItems);
-        this.outfit.inventory = this.fillEmptySlots(inventory, inventorySize);
+        this.#outfit.inventory = this.fillEmptySlots(inventory, inventorySize);
     }
 
     fillEmptySlots(array, upToCount) {

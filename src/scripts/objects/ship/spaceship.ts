@@ -107,7 +107,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     getHit(projectile) {
         const damageMultiplier = projectile.weapon.multiplier;
         const damage = projectile.weapon.projectileDamage * damageMultiplier;
-        console.log(this.status.shields, this.status.health);
+        // console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
             this.shields.getHit();

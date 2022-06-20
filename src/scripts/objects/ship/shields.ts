@@ -1,3 +1,4 @@
+import debounce from "lodash/debounce";
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
     scene;
     ship;
@@ -42,18 +43,20 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
         this.moveToPlugin.moveTo(x, y);
     }
 
-    getHit() {
-        // TODO sometimes its doesnt trigger animation
-        if (!this.tweenFade.isPlaying()) {
-            // console.log("hit");
-            this.tweenFade.play();
-            this.scene.soundManager.play("shield", {
-                sourceX: this.x,
-                sourceY: this.y,
-                volume: 1,
-            });
-        }
-    }
+    getHit = debounce(
+        () => {
+            if (!this.tweenFade.isPlaying()) {
+                this.tweenFade.play();
+                this.scene.soundManager.play("shield", {
+                    sourceX: this.x,
+                    sourceY: this.y,
+                    volume: 1,
+                });
+            }
+        },
+        200,
+        { leading: true }
+    );
     crack(silent = false) {
         this.disableBody(true, true);
         if (!silent) {

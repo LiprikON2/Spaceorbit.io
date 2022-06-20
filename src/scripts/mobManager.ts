@@ -86,7 +86,7 @@ export default class MobManager {
 
     getMobMultiplier(type) {
         if (type === "normal") {
-            return { speed: 0.3, health: 0.3, shields: 0.3, damage: 0.3 };
+            return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
         }
     }
 }

@@ -148,6 +148,7 @@ export default class Mob extends Spaceship {
                 this.readyToFireEvent.destroy();
                 this.readyToFireEvent = null;
                 this.isReadyToFire = false;
+                // TODO forget target on death
             }
         }
         if (!hasMoved) this.stoppedMoving();
