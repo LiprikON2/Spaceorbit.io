@@ -42,7 +42,6 @@ export default class Exhausts {
             }
         }
 
-        // console.log(slot, "<=", this.getSlotCount() - 1, type, doesFit);
         return doesFit;
     }
 
@@ -50,7 +49,6 @@ export default class Exhausts {
         const hasEmptyEngineSlot = this.getEngineCount() <= this.getSlotCount();
 
         if (hasEmptyEngineSlot) {
-            console.log("Create fr");
             const exhaustParticles = this.scene.add
                 .particles("exhaust")
                 .setDepth(this.ship.depth - 1);
@@ -82,7 +80,6 @@ export default class Exhausts {
         const willHaveAtLeastOneEngineAfterwards = this.getEngineCount() >= 2;
 
         if (willHaveAtLeastOneEngineAfterwards) {
-            console.log("Remove fr");
             this.exhaustEmitters.pop();
             didRemove = true;
         }
