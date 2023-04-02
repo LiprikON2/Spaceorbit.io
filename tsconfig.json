@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "target": "ES2015",
-    "module": "ES2015",
+    "target": "es6",
+    "module": "es6",
 
     "strict": true,
     "esModuleInterop": true,
@@ -17,6 +17,7 @@
 
     "moduleResolution": "node",
     "lib": ["dom", "esnext"]
+    // "lib": ["es5", "dom"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

@@ -9,7 +9,7 @@ const DroppableInventory = ({
 }: {
     data?: Object;
     id: any;
-    children?: any | undefined;
+    children?: any;
 }) => {
     const { isOver, setNodeRef } = useDroppable({
         id,

@@ -1,8 +1,8 @@
 {
-    "name": "phaser-project-template",
+    "name": "spaceorbit",
     "version": "3.55.2",
-    "description": "Phaser 3 starter template with TypeScript and webpack.",
-    "homepage": "https://github.com/yandeu/phaser-project-template#readme",
+    "description": "",
+    "homepage": "",
     "main": "index.js",
     "scripts": {
         "start": "webpack serve --config webpack/webpack.dev.js",
@@ -10,7 +10,9 @@
         "bundle": "npm run build",
         "serve": "serve dist",
         "format": "prettier --check src/scripts/**",
-        "format:write": "prettier --write src/scripts/**"
+        "format:write": "prettier --write src/scripts/**",
+        "studio": "npx cap open android",
+        "dev-android": "npm run build && npx cap run android --target Pixel_6_Pro_API_33"
     },
     "keywords": [
         "Phaser",
@@ -18,17 +20,8 @@
         "Phaser3",
         "html5 game",
         "TypeScript",
-        "webpack",
-        "starter"
+        "webpack"
     ],
-    "author": {
-        "name": "Yannick Deubel",
-        "url": "https://github.com/yandeu"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/yandeu/phaser-project-template.git"
-    },
     "template": {
         "name": "phaser-project-template",
         "url": "https://github.com/yandeu/phaser-project-template",
@@ -39,27 +32,27 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@capacitor/core": "^3.5.1",
-        "@capacitor/ios": "^3.5.1",
-        "@dnd-kit/core": "^6.0.3",
+        "@capacitor/android": "^4.7.3",
+        "@capacitor/core": "^4.7.3",
+        "@dnd-kit/core": "^6.0.8",
         "@mantine/core": "^4.2.6",
         "@mantine/hooks": "^4.2.6",
         "lodash": "^4.17.21",
         "navmesh": "^2.3.1",
         "phaser": "^3.55.2",
         "phaser-navmesh": "^2.3.1",
-        "phaser3-rex-plugins": "^1.1.69",
+        "phaser3-rex-plugins": "^1.1.84",
         "react": "^18.1.0",
         "react-dom": "^18.1.0",
         "tabler-icons-react": "^1.48.0"
     },
     "devDependencies": {
-        "@capacitor/cli": "^3.5.1",
+        "@capacitor/cli": "^4.7.3",
         "@yandeu/prettier-config": "^0.0.3",
         "copy-webpack-plugin": "^10.1.0",
-        "css-loader": "^6.7.1",
+        "css-loader": "^6.7.3",
         "html-webpack-plugin": "^5.5.0",
-        "javascript-obfuscator": "^4.0.0",
+        "javascript-obfuscator": "^4.0.2",
         "mini-css-extract-plugin": "^2.6.0",
         "prettier": "^2.5.1",
         "rimraf": "^3.0.2",
@@ -70,7 +63,7 @@
         "webpack-cli": "^4.9.1",
         "webpack-dev-server": "^4.6.0",
         "webpack-merge": "^5.8.0",
-        "webpack-obfuscator": "^3.5.0",
+        "webpack-obfuscator": "^3.5.1",
         "workbox-webpack-plugin": "^6.4.2"
     }
 }

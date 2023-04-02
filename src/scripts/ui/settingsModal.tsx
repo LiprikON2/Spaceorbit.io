@@ -2,39 +2,39 @@ import { Modal, NumberInput, SegmentedControl, Space, Switch, Tabs, Title } from
 import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
 
-import { getGame } from "../game";
+import { game } from "../game";
 import Button from "./components/button";
 import Slider from "./components/slider";
 
 const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {
-        const scene = getGame().scene.keys.MainScene;
+        const scene = game.scene.keys.MainScene;
         if (scene) {
             scene.player.exhausts.createExhaust();
         }
     };
     const removeEngine = () => {
-        const scene = getGame().scene.keys.MainScene;
+        const scene = game.scene.keys.MainScene;
         if (scene) {
             scene.player.exhausts.removeExhaust();
         }
     };
     const addLaser = (slot) => {
-        const scene = getGame().scene.keys.MainScene;
+        const scene = game.scene.keys.MainScene;
         if (scene) {
             scene.player.weapons.createLaser(slot);
         }
     };
 
     const addGatling = (slot) => {
-        const scene = getGame().scene.keys.MainScene;
+        const scene = game.scene.keys.MainScene;
         if (scene) {
             scene.player.weapons.createGatling(slot);
         }
     };
 
     const setVolume = (key, newValue) => {
-        const soundManager = getGame().scene.keys.MainScene.soundManager;
+        const soundManager = game.scene.keys.MainScene.soundManager;
         const isValidKey =
             key === "masterVolume" || key === "musicVolume" || key === "effectsVolume";
 
@@ -48,7 +48,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     };
 
     const toggleTouchControls = () => {
-        const inputManager = getGame().scene.keys.MainScene.inputManager;
+        const inputManager = game.scene.keys.MainScene.inputManager;
         if (inputManager) {
             inputManager.toggleTouchControls();
             handleTouchControls.toggle();
@@ -61,7 +61,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
 
     const sendMobs = (e) => {
         e.preventDefault();
-        const scene = getGame().scene.keys.MainScene;
+        const scene = game.scene.keys.MainScene;
         const mobManager = scene?.mobManager;
         const player = scene?.player;
         const mobs = mobManager?.mobs;
@@ -74,7 +74,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     };
 
     const teleport = () => {
-        const player = getGame().scene.keys.MainScene?.player;
+        const player = game.scene.keys.MainScene?.player;
 
         if (player) {
             player.x = x;

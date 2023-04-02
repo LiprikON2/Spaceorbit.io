@@ -14,7 +14,7 @@ import {
 } from "tabler-icons-react";
 
 import "./index.css";
-import { createGame, getGame } from "../game";
+import { createGame, game } from "../game";
 import Button from "./components/button";
 import SettingsModal from "./settingsModal";
 import OutfittingDrawer from "./outfittingDrawer";
@@ -49,7 +49,7 @@ const App = () => {
     }, []);
 
     const toggleMute = (key) => {
-        const soundManager = getGame().scene.keys.MainScene.soundManager;
+        const soundManager = game.scene.keys.MainScene.soundManager;
         const isValidKey = key === "musicMute" || key === "effectsMute";
 
         if (soundManager && isValidKey) {
@@ -71,7 +71,7 @@ const App = () => {
         toggleFullscreenIcon();
     };
     const toggleSettings = () => {
-        const player = getGame().scene.keys.MainScene.player;
+        const player = game.scene.keys.MainScene.player;
         if (player) {
             toggleSettingsModal();
             // todo this will enable you to shoot and move in dying animation
