@@ -131,6 +131,3 @@ const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "
 events.forEach((event) => {
     container!.addEventListener(event, (e) => e.stopPropagation());
 });
-function useRef(arg0: null) {
-    throw new Error("Function not implemented.");
-}
