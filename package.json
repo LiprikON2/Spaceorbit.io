@@ -7,7 +7,6 @@
     "scripts": {
         "start": "webpack serve --config webpack/webpack.dev.js",
         "build": "rimraf dist && webpack --config webpack/webpack.prod.js",
-        "bundle": "npm run build",
         "prod": "serve dist",
         "studio": "npx cap sync && npx cap open android",
         "studio-build": "npm run build && npx cap sync && npx cap open android",
@@ -30,6 +29,9 @@
     "engines": {
         "node": ">=12"
     },
+    "browserslist": [
+        "chrome > 50 and chrome <= 60"
+    ],
     "license": "MIT",
     "dependencies": {
         "@capacitor/android": "^4.7.3",
@@ -50,14 +52,21 @@
     "devDependencies": {
         "@capacitor/cli": "^4.7.3",
         "@yandeu/prettier-config": "^0.0.3",
+        "autoprefixer": "^10.4.14",
+        "browserslist": "^4.21.8",
         "copy-webpack-plugin": "^10.1.0",
         "css-loader": "^6.7.3",
         "html-webpack-plugin": "^5.5.0",
         "javascript-obfuscator": "^4.0.2",
         "mini-css-extract-plugin": "^2.6.0",
+        "postcss": "^8.4.24",
+        "postcss-loader": "^7.3.3",
+        "postcss-nested": "^6.0.1",
+        "postcss-preset-env": "^8.4.2",
         "prettier": "^2.5.1",
         "rimraf": "^3.0.2",
         "serve": "^13.0.2",
+        "style-loader": "^3.3.3",
         "ts-loader": "^9.2.6",
         "typescript": "^4.5.3",
         "webpack": "^5.65.0",
