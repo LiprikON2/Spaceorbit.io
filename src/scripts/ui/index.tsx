@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import React, { useEffect, useLayoutEffect } from "react";
+import "core-js/actual";
 
 import { MantineProvider } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
@@ -80,7 +81,7 @@ const App = () => {
     };
 
     return (
-        <MantineProvider theme={{ colorScheme: "dark" }} children>
+        <MantineProvider theme={{ colorScheme: "light" }} children>
             <div id="UI">
                 <SettingsModal
                     settings={settings}

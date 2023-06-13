@@ -11,8 +11,8 @@
         "serve": "serve dist",
         "format": "prettier --check src/scripts/**",
         "format:write": "prettier --write src/scripts/**",
-        "studio": "npx cap open android",
-        "dev-android": "npm run build && npx cap run android --target Pixel_6_Pro_API_33"
+        "studio": "npx cap sync && npx cap open android",
+        "emulator": "npm run build && npx cap run android --target Pixel_6_Pro_API_33"
     },
     "keywords": [
         "Phaser",
@@ -37,6 +37,7 @@
         "@dnd-kit/core": "^6.0.8",
         "@mantine/core": "^4.2.6",
         "@mantine/hooks": "^4.2.6",
+        "core-js": "^3.31.0",
         "lodash": "^4.17.21",
         "navmesh": "^2.3.1",
         "phaser": "^3.55.2",
