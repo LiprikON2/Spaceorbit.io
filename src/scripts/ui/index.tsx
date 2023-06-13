@@ -81,7 +81,7 @@ const App = () => {
     };
 
     return (
-        <MantineProvider theme={{ colorScheme: "light" }} children>
+        <MantineProvider theme={{ colorScheme: "dark" }} children>
             <div id="UI">
                 <SettingsModal
                     settings={settings}
