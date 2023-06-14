@@ -1,9 +1,9 @@
-import { createRoot } from "react-dom/client";
-import React, { useEffect, useLayoutEffect } from "react";
 import "core-js/actual";
-
-import { MantineProvider } from "@mantine/core";
+import { createRoot } from "react-dom/client";
+import React, { useEffect, useState } from "react";
+import { MantineProvider, Text, Stack } from "@mantine/core";
 import { useToggle, useLocalStorage } from "@mantine/hooks";
+import { Device } from "@capacitor/device";
 import {
     ArrowsMinimize,
     Maximize,
@@ -45,8 +45,16 @@ const App = () => {
     const [effectsIcon, toggleEffectsIcon] = useToggle(settings.effectsMute, [false, true]);
     const [settingsModal, toggleSettingsModal] = useToggle(false, [false, true]);
 
+    const [deviceInfo, setDeviceInfo] = useState("");
+    const logDeviceInfo = async () => {
+        const info = await Device.getInfo();
+        setDeviceInfo(info);
+    };
+
     useEffect(() => {
         createGame(settings);
+
+        logDeviceInfo();
     }, []);
 
     const toggleMute = (key) => {
@@ -82,7 +90,7 @@ const App = () => {
 
     return (
         <MantineProvider theme={{ colorScheme: "dark" }} children>
-            <div id="UI">
+            <div id="ui">
                 <SettingsModal
                     settings={settings}
                     setSettings={setSettings}
@@ -116,6 +124,13 @@ const App = () => {
                     </Button>
                 </div>
 
+                <Stack className="info group">
+                    {Object.entries(deviceInfo).map(([key, value]) => (
+                        <Text key={key} color="white" size="xs">
+                            {`${key}: ${value}`}
+                        </Text>
+                    ))}
+                </Stack>
                 <OutfittingDrawer />
             </div>
         </MantineProvider>

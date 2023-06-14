@@ -9,7 +9,7 @@ const Button = ({
     color = "gray",
     size = "lg",
     className = "",
-    children = {},
+    children = null,
     ...rest
 }) => {
     return (

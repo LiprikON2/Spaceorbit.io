@@ -29,13 +29,11 @@
     "engines": {
         "node": ">=12"
     },
-    "browserslist": [
-        "chrome > 50 and chrome <= 60"
-    ],
     "license": "MIT",
     "dependencies": {
         "@capacitor/android": "^4.7.3",
         "@capacitor/core": "^4.7.3",
+        "@capacitor/device": "^4.1.0",
         "@dnd-kit/core": "^6.0.8",
         "@mantine/core": "^4.2.6",
         "@mantine/hooks": "^4.2.6",

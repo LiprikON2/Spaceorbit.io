@@ -1,17 +1,10 @@
 /* html,
 body,
-#UI {
+#ui {
     overflow: hidden;
 } */
 
-/* TODELETE */
-@custom-selector :--heading h1, h2, h3, h4, h5, h6;
-
-:--heading {
-    font-size: 1000rem;
-}
-
-#UI {
+#ui {
     width: 100vw;
     height: 100vh;
 
@@ -22,12 +15,12 @@ body,
         "volumeControls . . . . . . . . . . fullscreen"
         ". . . . . . . . . . . ."
         ". . . . . . . . . . . ."
-        "outfitting . . . . . . . . . . .";
+        "outfitting . . . . . . . . . . info";
 
     pointer-events: none;
 }
 
-#UI > * {
+#ui > * {
     margin: 1rem;
     pointer-events: auto;
 }
@@ -71,3 +64,10 @@ input[type="checkbox"] {
     grid-area: addEngine;
     align-self: end;
 } */
+
+.info {
+    grid-area: info;
+    align-self: end;
+    gap: 0;
+    min-width: 14rem;
+}
