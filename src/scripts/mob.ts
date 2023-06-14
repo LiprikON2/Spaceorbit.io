@@ -14,7 +14,7 @@ export default class Mob extends Spaceship {
     enemyTarget;
     readyToFireEvent;
     sleepEvent;
-    preferedMovement: Direction = 0;
+    preferedMovement = Direction.Left;
     reactionTime: number;
     jitter: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -25,10 +25,11 @@ export default class Mob extends Spaceship {
         atlasTexture,
         outfit,
         multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
+        name = "",
         enemies: Spaceship[] = [],
         depth = 10
     ) {
-        super(scene, x, y, atlasTexture, outfit, multipliers, enemies, depth);
+        super(scene, x, y, atlasTexture, outfit, multipliers, name, enemies, depth);
         this.reactionTime = Phaser.Math.Between(2500, 4500);
     }
 
@@ -71,6 +72,7 @@ export default class Mob extends Spaceship {
     }
 
     update(time, delta) {
+        super.update(time, delta);
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
         let hasMoved = false;

@@ -8,9 +8,13 @@ export default class InputManager {
     frameTime = 0;
     rotateTo;
     touchControls = { joystickObj: { joystick: null } };
+    isTouchMode = false;
+
     constructor(scene, player, zoom = 1) {
         const localStorageSettings = scene.game.settings;
-        const { enableTouchControls = false } = localStorageSettings;
+        const { enableTouchControls } = localStorageSettings;
+        // TODO: rename enableTouchControls -> isTouchMode
+        this.isTouchMode = enableTouchControls ?? this.isTouchMode;
 
         this.scene = scene;
         this.player = player;
@@ -39,22 +43,28 @@ export default class InputManager {
             this.scene.mobManager.mobs.forEach((mob) => mob.primaryFire(this.time));
         });
 
-        this.initTouchControls(enableTouchControls);
+        this.scene.input.on("clickTarget", (sprite) => {
+            console.log("clickTarget", sprite);
+            sprite.followText.setText("[" + sprite.followText.text + "]");
+        });
+
+        this.initTouchControls();
     }
-    initTouchControls(enableTouchControls) {
+    initTouchControls() {
         const baseJoystick = this.scene.add.image(0, 0, "joystick_1").setDepth(1000);
         const thumbJoystick = this.scene.add.image(0, 0, "joystick_2").setDepth(1000);
 
+        this.scene.input.addPointer(1);
         const joystick = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
             x: Number(this.scene.game.config.height) * 0.25,
             y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.25,
             radius: 100,
             base: baseJoystick,
             thumb: thumbJoystick,
-            enable: enableTouchControls,
+            enable: this.isTouchMode,
             fixed: true,
         });
-        joystick.setVisible(enableTouchControls);
+        joystick.setVisible(this.isTouchMode);
 
         joystick.on("update", () => {
             const force = Math.min(1, Math.floor(joystick.force) / 100);
@@ -72,13 +82,17 @@ export default class InputManager {
             // @ts-ignore
             joystick.toggleEnable();
         }
+        this.isTouchMode = !this.isTouchMode;
     }
 
-    getMousePosition() {
+    getPointerPosition() {
         // Updates mouse worldX, worldY manually, since when camera moves but cursor doesn't it doesn't update them
         this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
-        const cursorX = this.scene.input.mousePointer.worldX;
-        const cursorY = this.scene.input.mousePointer.worldY;
+        const cursorX = this.scene.input.activePointer.worldX;
+        const cursorY = this.scene.input.activePointer.worldY;
+
+        // console.log("cursorX, cursorY", cursorX, cursorY);
+
         return { cursorX, cursorY };
     }
 
@@ -93,7 +107,7 @@ export default class InputManager {
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
 
-        const { cursorX, cursorY } = this.getMousePosition();
+        const { cursorX, cursorY } = this.getPointerPosition();
 
         let hasMoved = false;
 

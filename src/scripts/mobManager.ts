@@ -57,6 +57,7 @@ export default class MobManager {
                 "F5S4",
                 this.getMobKit("normal"),
                 this.getMobMultiplier("normal"),
+                "Enemy",
                 mobEnemies
             );
             // Needed to be called when soundManager knows about player, and player knows about soundManager

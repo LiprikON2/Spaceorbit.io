@@ -23,6 +23,8 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     rotateToPlugin;
     moveToPlugin;
     outfitting;
+    followText;
+    name;
 
     constructor(
         scene,
@@ -31,6 +33,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         atlasTexture,
         outfit,
         multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
+        name = "",
         enemies: Spaceship[] = [],
         depth = 10
     ) {
@@ -67,6 +70,17 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.baseSpecs.hitboxRadius);
+        // Enables pointerdown events
+        this.setInteractive();
+        this.on("pointerdown", () => {
+            this.scene.input.emit("clickTarget", this);
+        });
+
+        // Text
+        this.followText = this.scene.add
+            .text(-999, -999, name, { fontSize: "2rem" })
+            .setAlign("center")
+            .setOrigin(0.5);
 
         // Modules
         const damageMultiplier = this.status.multipliers.damage;
@@ -344,5 +358,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
             offsetY = R * Math.sin(rotation + additionalRotation);
         }
         return { offsetX, offsetY };
+    }
+
+    update(time, delta) {
+        this.followText.setPosition(
+            this.body.position.x + this.baseSpecs.hitboxRadius,
+            this.body.position.y + this.baseSpecs.hitboxRadius * 3.5 + 20
+        );
     }
 }

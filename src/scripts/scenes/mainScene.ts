@@ -19,12 +19,10 @@ export default class MainScene extends Phaser.Scene {
     constructor() {
         super({ key: "MainScene" });
     }
-
     // TODO use polyfill or something to prevent game from stopping requesting animation frames on blur
     create() {
         this.soundManager = new SoundManager(this);
         this.mobManager = new MobManager(this);
-
         this.player = new Spaceship(
             this,
             400,
@@ -32,6 +30,7 @@ export default class MainScene extends Phaser.Scene {
             "F5S4",
             this.getPlayerKit(),
             undefined,
+            "Player",
             this.mobManager.mobs,
             100
         );
@@ -112,6 +111,7 @@ export default class MainScene extends Phaser.Scene {
         this.debugText.update();
         this.mobManager.update(time, delta);
         this.soundManager.updateLooping();
+        this.player.update();
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {

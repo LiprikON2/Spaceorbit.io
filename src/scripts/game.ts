@@ -70,6 +70,9 @@ const config = {
             },
         ],
     },
+    input: {
+        gamepad: true,
+    },
 };
 
 export let game;
