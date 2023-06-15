@@ -1,11 +1,11 @@
-# Spaceorbit-server
+# SpaceOrbit-server
 
 ## Running without Docker
 
 Create `.env` file with the following content:
 
 ```bash
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./data/dev.db"
 
 JWT_ACCESS_SECRET=SECRET123
 JWT_REFRESH_SECRET=ANOTHER_SECRET123
@@ -59,7 +59,7 @@ Server available at http://localhost:3010
 ### Server API
 
 <details>
-    <summary>Unfold to see the list of all API Routes of Spaceorbit-server</summary>
+    <summary>Unfold to see the list of all API Routes of SpaceOrbit-server</summary>
 
     GET /users
     POST /users

@@ -11,17 +11,27 @@ datasource db {
 }
 
 model User {
-    id            String         @id @unique @default(uuid())
-    email         String         @unique
-    password      String
-    firstName     String?
-    lastName      String?
-    phoneNumber   String?
-    role          String?
-    salary        Int?
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
+    id        String   @id @unique @default(uuid())
+    username  String   @unique
+    email     String   @unique
+    password  String
+    map       String   @default("1-1")
+    x         Float    @default(0.0)
+    y         Float    @default(0.0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     refreshTokens RefreshToken[]
+    Loadout       Loadout[]
+}
+
+model Loadout {
+    id        String   @id @unique @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
 }
 
 model RefreshToken {

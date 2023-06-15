@@ -4,6 +4,11 @@ body,
     overflow: hidden;
 } */
 
+/* TODO add focus-active outline for tabbing */
+*:focus {
+    outline: 0 !important;
+}
+
 #ui {
     width: 100vw;
     height: 100vh;
@@ -13,9 +18,9 @@ body,
     grid-template-rows: repeat(auto-fit, 1fr);
     grid-template-areas:
         "volumeControls . . . . . . . . . . fullscreen"
+        ". . . . . . . . . . . info"
         ". . . . . . . . . . . ."
-        ". . . . . . . . . . . ."
-        "outfitting . . . . . . . . . . info";
+        "outfitting . . . . . . . . . . profile";
 
     pointer-events: none;
 }
@@ -64,6 +69,12 @@ input[type="checkbox"] {
     grid-area: addEngine;
     align-self: end;
 } */
+
+.profile {
+    grid-area: profile;
+    align-self: end;
+    justify-self: end;
+}
 
 .info {
     grid-area: info;

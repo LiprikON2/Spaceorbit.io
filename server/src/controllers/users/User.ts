@@ -80,7 +80,7 @@ class UserController extends BaseController {
 
     register = async (req: express.Request, res: express.Response) => {
         const { body } = req;
-
+        console.log("req body", body);
         try {
             const user = await this.userService.create(body);
 

@@ -12,12 +12,15 @@ import {
     Volume,
     VolumeOff,
     Settings,
+    User,
 } from "tabler-icons-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./index.css";
 import { createGame, game } from "../game";
 import Button from "./components/button";
 import SettingsModal from "./settingsModal";
+import ProfileModal from "./profileModal";
 import OutfittingDrawer from "./outfittingDrawer";
 
 const isTouchDevice = () => {
@@ -26,6 +29,8 @@ const isTouchDevice = () => {
         "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0
     );
 };
+
+const queryClient = new QueryClient();
 
 const App = () => {
     const [settings, setSettings] = useLocalStorage({
@@ -44,6 +49,7 @@ const App = () => {
     const [musicIcon, toggleMusicIcon] = useToggle(settings.musicMute, [false, true]);
     const [effectsIcon, toggleEffectsIcon] = useToggle(settings.effectsMute, [false, true]);
     const [settingsModal, toggleSettingsModal] = useToggle(false, [false, true]);
+    const [profileModal, toggleProfileModal] = useToggle(false, [false, true]);
 
     const [deviceInfo, setDeviceInfo] = useState("");
     const logDeviceInfo = async () => {
@@ -87,52 +93,74 @@ const App = () => {
             player.active = settingsModal;
         }
     };
+    const toggleProfile = () => {
+        const player = game.scene.keys.MainScene.player;
+        if (player) {
+            toggleProfileModal();
+            // todo this will enable you to shoot and move in dying animation
+            player.active = profileModal;
+        }
+    };
 
     return (
         <MantineProvider theme={{ colorScheme: "dark" }} children>
-            <div id="ui">
-                <SettingsModal
-                    settings={settings}
-                    setSettings={setSettings}
-                    opened={settingsModal}
-                    onClose={toggleSettings}
-                />
+            <QueryClientProvider client={queryClient}>
+                <div id="ui">
+                    <SettingsModal
+                        settings={settings}
+                        setSettings={setSettings}
+                        opened={settingsModal}
+                        onClose={toggleSettings}
+                    />
 
-                <div className="volumeControls group">
-                    <Button isSquare={true} onClick={toggleSettings}>
-                        <Settings />
-                    </Button>
-                    <Button
-                        className="musicMute"
-                        isSquare={true}
-                        onClick={() => toggleMute("musicMute")}
-                    >
-                        {musicIcon ? <MusicOff /> : <Music />}
-                    </Button>
-                    <Button
-                        className="effectsMute"
-                        isSquare={true}
-                        onClick={() => toggleMute("effectsMute")}
-                    >
-                        {effectsIcon ? <VolumeOff /> : <Volume />}
-                    </Button>
+                    <div className="volumeControls group">
+                        <Button isSquare={true} onClick={toggleSettings}>
+                            <Settings />
+                        </Button>
+                        <Button
+                            className="musicMute"
+                            isSquare={true}
+                            onClick={() => toggleMute("musicMute")}
+                        >
+                            {musicIcon ? <MusicOff /> : <Music />}
+                        </Button>
+                        <Button
+                            className="effectsMute"
+                            isSquare={true}
+                            onClick={() => toggleMute("effectsMute")}
+                        >
+                            {effectsIcon ? <VolumeOff /> : <Volume />}
+                        </Button>
+                    </div>
+
+                    <div className="fullscreen group">
+                        <Button isSquare={true} onClick={toggleFullscreen}>
+                            {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
+                        </Button>
+                    </div>
+
+                    <ProfileModal
+                        queryClient={queryClient}
+                        opened={profileModal}
+                        onClose={toggleProfile}
+                    />
+
+                    <div className="profile group">
+                        <Button isSquare={true} onClick={toggleProfile}>
+                            <User />
+                        </Button>
+                    </div>
+
+                    <Stack className="info group">
+                        {Object.entries(deviceInfo).map(([key, value]) => (
+                            <Text key={key} color="white" size="xs">
+                                {`${key}: ${value}`}
+                            </Text>
+                        ))}
+                    </Stack>
+                    <OutfittingDrawer />
                 </div>
-
-                <div className="fullscreen group">
-                    <Button isSquare={true} onClick={toggleFullscreen}>
-                        {fullscreenIcon ? <ArrowsMinimize /> : <Maximize />}
-                    </Button>
-                </div>
-
-                <Stack className="info group">
-                    {Object.entries(deviceInfo).map(([key, value]) => (
-                        <Text key={key} color="white" size="xs">
-                            {`${key}: ${value}`}
-                        </Text>
-                    ))}
-                </Stack>
-                <OutfittingDrawer />
-            </div>
+            </QueryClientProvider>
         </MantineProvider>
     );
 };
