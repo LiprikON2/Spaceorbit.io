@@ -82,8 +82,9 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         });
 
         // Text
+        // TODO make a display class
+        // TODO use `Nine Slice Game Object` to display hp
         this.nick = nick;
-        // TODO: make a display class
         this.followText = this.scene.add
             .text(-999, -999, nick, { fontSize: "2rem" })
             .setAlign("center")
@@ -212,6 +213,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
     respawn() {
         this.breakOffTargeting();
+        this.setTarget();
         // @ts-ignore
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
