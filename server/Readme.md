@@ -1,5 +1,31 @@
 # Spaceorbit-server
 
+## Running without Docker
+
+Create `.env` file with the following content:
+
+```bash
+DATABASE_URL="file:./dev.db"
+
+JWT_ACCESS_SECRET=SECRET123
+JWT_REFRESH_SECRET=ANOTHER_SECRET123
+```
+
+```bash
+npm install
+```
+
+```bash
+npm run migrate
+```
+
+```bash
+npm run dev
+```
+
+- Server available at http://localhost:3010
+
+
 ## Running in Docker
 > [Dockerfile](./Dockerfile)
 
@@ -26,25 +52,9 @@ docker run -t -i -p 3010:3010 \
 
 - Server available at http://localhost:3010
 
-## Running without Docker
-
-```bash
-sh run.sh install
-```
-
-```bash
-sh run.sh migrate
-```
-
-```bash
-sh run.sh
-```
-
-- Server available at http://localhost:3010
 
 
-## Structure
-> Repository design pattern
+
 
 
 ### Server API
@@ -74,7 +84,8 @@ sh run.sh
     GET /endpoints
 </details>
 
-  
+### Project structure
+> Repository design pattern
 
 - Server entry point at [/src/core/app.ts](./src/core/app.ts)
 - Models are defined at [/src/db/schema.prisma](./src/db/schema.prisma)
