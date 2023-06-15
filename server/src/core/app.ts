@@ -16,7 +16,7 @@ app.use(express.json());
 /* Handle json body parsing errors */
 app.use(bodyParserErrorHandler());
 
-app.use(logger("Main"));
+app.use(logger("server"));
 
 app.use(correctContentType);
 

@@ -1,23 +1,20 @@
 # Spaceorbit-server
 
 ## Running in Docker
-
-
-### Main Microservice
 > [Dockerfile](./Dockerfile)
 
-#### Dockerfile -> Image
+### Dockerfile -> Image
 
 ```bash
 docker build --tag spaceorbit-server:1.0 .
 ```
 
-#### Image -> Container
+### Image -> Container
 
 ```bash
 docker run -t -i -p 3010:3010 \
-    --rm --name main \
-    --volume dbMain:/container/src/db/data \
+    --rm --name spaceorbit \
+    --volume spaceorbitDB:/container/src/db/data \
     spaceorbit-server:1.0
 ```
 
@@ -53,7 +50,7 @@ sh run.sh
 ### Server API
 
 <details>
-    <summary>Unfold to see the list of all API Routes of Main Microservice</summary>
+    <summary>Unfold to see the list of all API Routes of Spaceorbit-server</summary>
 
     GET /users
     POST /users
