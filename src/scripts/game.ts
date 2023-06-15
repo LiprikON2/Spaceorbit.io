@@ -7,6 +7,7 @@ import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
 import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
+import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -66,6 +67,11 @@ const config = {
             {
                 key: "rexVirtualJoystick",
                 plugin: VirtualJoystickPlugin,
+                start: true,
+            },
+            {
+                key: "rexButton",
+                plugin: ButtonPlugin,
                 start: true,
             },
         ],

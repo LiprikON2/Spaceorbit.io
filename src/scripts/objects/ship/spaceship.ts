@@ -24,7 +24,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     moveToPlugin;
     outfitting;
     followText;
+    nick;
     name;
+
+    target: Spaceship | null;
+    targetedBy: Spaceship[] = [];
+    toggleFire = false;
 
     constructor(
         scene,
@@ -33,7 +38,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         atlasTexture,
         outfit,
         multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
-        name = "",
+        nick = "",
         enemies: Spaceship[] = [],
         depth = 10
     ) {
@@ -77,10 +82,14 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         });
 
         // Text
+        this.nick = nick;
+        // TODO: make a display class
         this.followText = this.scene.add
-            .text(-999, -999, name, { fontSize: "2rem" })
+            .text(-999, -999, nick, { fontSize: "2rem" })
             .setAlign("center")
-            .setOrigin(0.5);
+            .setOrigin(0.5)
+            .setAlpha(1)
+            .setDepth(this.depth + 5);
 
         // Modules
         const damageMultiplier = this.status.multipliers.damage;
@@ -95,7 +104,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         // @ts-ignore
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
-        this.moveToPlugin.on("complete", () => this.stoppedMoving());
+        this.moveToPlugin.on("complete", () => this.onStopMoving());
 
         if (this.status.shields === 0) this.shields.crack(true);
     }
@@ -166,6 +175,32 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
+    setTarget(target: Spaceship | null = null) {
+        const prevTarget = this.target;
+
+        if (target !== prevTarget && target !== this) {
+            if (prevTarget) {
+                const { followText } = prevTarget;
+                followText.setText(followText.text.slice(1, -1));
+                prevTarget.targetedBy = prevTarget.targetedBy.filter(
+                    (targetee) => targetee !== this
+                );
+                this.toggleFire = false;
+            }
+
+            if (target) {
+                target.followText.setText("[" + target.followText.text + "]");
+                target.targetedBy.push(this);
+            }
+            this.target = target;
+        }
+    }
+
+    breakOffTargeting() {
+        this.targetedBy.forEach((targetee) => targetee.setTarget());
+        this.targetedBy = [];
+    }
+
     getMaxHealth() {
         const healthMultiplier = this.status.multipliers.health;
         return this.baseSpecs.health * healthMultiplier;
@@ -176,6 +211,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
     }
 
     respawn() {
+        this.breakOffTargeting();
         // @ts-ignore
         const { x, y } = this.scene.getRandomPositionOnMap();
         this.x = x;
@@ -190,7 +226,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.shields.active = true;
         this.shields.visible = true;
         this.active = true;
-        this.stoppedMoving();
+        this.onStopMoving();
         if (this.status.shields === 0) this.shields.crack(true);
     }
 
@@ -198,6 +234,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, cursorX, cursorY) + Math.PI / 2;
 
         this.rotateTo(rotation);
+    }
+
+    toggleAttack() {
+        if (this.target) {
+            this.toggleFire = !this.toggleFire;
+        }
     }
 
     rotateTo(rotation) {
@@ -220,7 +262,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.moveToPlugin.stop();
         this.shields.moveToPlugin.stop();
     }
-    stoppedMoving() {
+    onStopMoving() {
         this.exhausts.stopExhaust();
     }
     moveUp() {
@@ -359,11 +401,14 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         }
         return { offsetX, offsetY };
     }
-
-    update(time, delta) {
+    updateTextPos() {
         this.followText.setPosition(
             this.body.position.x + this.baseSpecs.hitboxRadius,
             this.body.position.y + this.baseSpecs.hitboxRadius * 3.5 + 20
         );
+    }
+
+    update(time, delta) {
+        this.updateTextPos();
     }
 }

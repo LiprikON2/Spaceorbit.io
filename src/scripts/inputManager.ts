@@ -6,8 +6,7 @@ export default class InputManager {
     heldKeys = {};
     time = 0;
     frameTime = 0;
-    rotateTo;
-    touchControls = { joystickObj: { joystick: null } };
+    touchControls = { joystick: null, virtualBtn: null };
     isTouchMode = false;
 
     constructor(scene, player, zoom = 1) {
@@ -38,22 +37,22 @@ export default class InputManager {
             scene.cameras.main.setZoom(this.zoom);
         });
 
-        const secondaryShootBtn = this.keys.SPACE;
-        secondaryShootBtn.on("down", () => {
-            this.scene.mobManager.mobs.forEach((mob) => mob.primaryFire(this.time));
-        });
+        this.scene.input.on("clickTarget", (target) => this.player.setTarget(target));
 
-        this.scene.input.on("clickTarget", (sprite) => {
-            console.log("clickTarget", sprite);
-            sprite.followText.setText("[" + sprite.followText.text + "]");
-        });
+        // TODO fix CTRL
+        // const toggleShootTargetBtn = this.keys.CTRL;
+        const toggleShootTargetBtn = this.keys.SPACE;
+
+        toggleShootTargetBtn.on("down", () => this.player.toggleAttack());
 
         this.initTouchControls();
     }
     initTouchControls() {
         const baseJoystick = this.scene.add.image(0, 0, "joystick_1").setDepth(1000);
         const thumbJoystick = this.scene.add.image(0, 0, "joystick_2").setDepth(1000);
+        const thumbBtn = this.scene.add.image(0, 0, "joystick_2").setDepth(1000);
 
+        // TODO multitouch
         this.scene.input.addPointer(1);
         const joystick = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
             x: Number(this.scene.game.config.height) * 0.25,
@@ -68,20 +67,42 @@ export default class InputManager {
 
         joystick.on("update", () => {
             const force = Math.min(1, Math.floor(joystick.force) / 100);
-            const angle = Math.floor(joystick.angle * 100) / 100;
-            this.player.setMove(angle, force);
+            const rotationDegree = Math.floor(joystick.angle * 100) / 100;
+            this.player.setMove(rotationDegree, force);
+            if (!this.player.toggleFire) {
+                this.player.rotateTo(Phaser.Math.DegToRad(rotationDegree + 90));
+            }
         });
 
-        this.touchControls.joystickObj = { joystick };
+        this.touchControls.joystick = joystick;
+
+        const virtualBtn = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
+            x: Number(this.scene.game.config.width) * 0.75,
+            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.25,
+            radius: 100,
+            base: this.scene.add.rectangle(-999, -999),
+            thumb: thumbBtn,
+            enable: false,
+            fixed: true,
+        });
+        virtualBtn.setVisible(this.isTouchMode);
+
+        virtualBtn.on("pointerdown", () => this.player.toggleAttack());
+        this.touchControls.virtualBtn = virtualBtn;
     }
     toggleTouchControls() {
-        const { joystick } = this.touchControls.joystickObj;
+        const { joystick, virtualBtn } = this.touchControls;
         if (joystick) {
             // @ts-ignore
             joystick.toggleVisible();
             // @ts-ignore
             joystick.toggleEnable();
         }
+        if (virtualBtn) {
+            // @ts-ignore
+            virtualBtn.toggleVisible();
+        }
+
         this.isTouchMode = !this.isTouchMode;
     }
 
@@ -107,46 +128,63 @@ export default class InputManager {
         const downBtn = this.keys.S.isDown || this.keys.DOWN.isDown;
         const primaryShootBtn = this.scene.input.activePointer.isDown;
 
-        const { cursorX, cursorY } = this.getPointerPosition();
+        const isClickInCanvas =
+            primaryShootBtn && this.scene.input.activePointer.downElement.tagName === "CANVAS";
+        const isAutotargeting = this.player.toggleFire && this.player.target;
 
-        let hasMoved = false;
+        // Targeting
+        let cursorX, cursorY;
+        if (isAutotargeting) {
+            const { x, y } = this.player.target;
+            cursorX = x;
+            cursorY = y;
+        } else if (!this.isTouchMode) {
+            // Don't track cursor if in touch mode
+            ({ cursorX, cursorY } = this.getPointerPosition());
+        }
+
+        let haveMoved = false;
 
         this.player.resetMovement();
-        hasMoved = this.player.move();
+        haveMoved = this.player.move();
 
         // Movement
         if (upBtn && !leftBtn && !downBtn && !rightBtn) {
             this.player.moveUp();
-            hasMoved = true;
+            haveMoved = true;
         } else if (!upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveLeft();
-            hasMoved = true;
+            haveMoved = true;
         } else if (!upBtn && !leftBtn && downBtn && !rightBtn) {
             this.player.moveDown();
-            hasMoved = true;
+            haveMoved = true;
         } else if (!upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveRight();
-            hasMoved = true;
+            haveMoved = true;
         } else if (upBtn && leftBtn && !downBtn && !rightBtn) {
             this.player.moveUpLeft();
-            hasMoved = true;
+            haveMoved = true;
         } else if (upBtn && !leftBtn && !downBtn && rightBtn) {
             this.player.moveUpRight();
-            hasMoved = true;
+            haveMoved = true;
         } else if (!upBtn && leftBtn && downBtn && !rightBtn) {
             this.player.moveDownLeft();
-            hasMoved = true;
+            haveMoved = true;
         } else if (!upBtn && !leftBtn && downBtn && rightBtn) {
             this.player.moveDownRight();
-            hasMoved = true;
+            haveMoved = true;
         }
-        if (!hasMoved) this.player.stoppedMoving();
+        if (!haveMoved) this.player.onStopMoving();
 
         // Shooting
-        if (primaryShootBtn && this.scene.input.activePointer.downElement.tagName === "CANVAS") {
+        if (isClickInCanvas) {
             this.player.primaryFire(time, { cursorX, cursorY });
+        } else if (isAutotargeting) {
+            const dist = Phaser.Math.Distance.BetweenPoints(this.player, this.player.target);
+            if (dist < 900) {
+                this.player.primaryFire(time, { cursorX, cursorY });
+            }
         }
-
-        this.player.lookAtPoint(cursorX, cursorY);
+        if (cursorX && cursorY) this.player.lookAtPoint(cursorX, cursorY);
     }
 }

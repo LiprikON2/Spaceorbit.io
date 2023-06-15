@@ -11,7 +11,6 @@ export default class Mob extends Spaceship {
     isSleeping: boolean = false;
     isAggresive: boolean = true;
 
-    enemyTarget;
     readyToFireEvent;
     sleepEvent;
     preferedMovement = Direction.Left;
@@ -25,11 +24,11 @@ export default class Mob extends Spaceship {
         atlasTexture,
         outfit,
         multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
-        name = "",
+        nick = "",
         enemies: Spaceship[] = [],
         depth = 10
     ) {
-        super(scene, x, y, atlasTexture, outfit, multipliers, name, enemies, depth);
+        super(scene, x, y, atlasTexture, outfit, multipliers, nick, enemies, depth);
         this.reactionTime = Phaser.Math.Between(2500, 4500);
     }
 
@@ -75,12 +74,12 @@ export default class Mob extends Spaceship {
         super.update(time, delta);
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
-        let hasMoved = false;
+        let haveMoved = false;
         // TODO they may get stuck in on the boundaries
 
         // If it is wandering
-        if (!this.enemyTarget && !this.isSleeping) {
-            const closestEnemy = this.scene.physics.closest(this, this.enemies);
+        if (!this.target && !this.isSleeping) {
+            const closestEnemy = this.scene.physics.closest(this, this.enemies) as Spaceship;
             // @ts-ignore
             const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
 
@@ -88,21 +87,21 @@ export default class Mob extends Spaceship {
 
             // Aggro on the closest enemy
             if (this.isAggresive && dist < 1000) {
-                this.enemyTarget = closestEnemy;
+                this.setTarget(closestEnemy);
             }
 
             if (!this.moveToPlugin.isRunning) {
                 const { x, y } = this.getNextPoint();
                 this.moveTo(x, y);
                 this.lookAtPoint(x, y);
-                hasMoved = true;
+                haveMoved = true;
             }
         }
 
         // If it is aggroed on someone
-        if (this.enemyTarget) {
-            const { x, y } = this.enemyTarget;
-            const dist = Phaser.Math.Distance.BetweenPoints(this, this.enemyTarget);
+        if (this.target) {
+            const { x, y } = this.target;
+            const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
 
             // Shooting logic
             this.lookAtPoint(x, y);
@@ -125,34 +124,34 @@ export default class Mob extends Spaceship {
                 // I need to be closer
 
                 this.moveTo(x + this.jitter.x, y + this.jitter.y);
-                hasMoved = true;
+                haveMoved = true;
             } else if (dist < 700 && dist > 400 && !this.isSleeping) {
                 // Perfect, stay still
                 // Now I act according to my preference
                 if (this.preferedMovement === Direction.Left) {
                     this.moveLeftRelative();
-                    hasMoved = true;
+                    haveMoved = true;
                 } else if (this.preferedMovement === Direction.Right) {
                     this.moveRightRelative();
-                    hasMoved = true;
+                    haveMoved = true;
                 }
             } else if (dist < 400 && !this.isSleeping) {
                 // Too close; I need to back away
                 const mirrorX = -(x - this.x) + this.x;
                 const mirrorY = -(y - this.y) + this.y;
                 this.moveTo(mirrorX, mirrorY);
-                hasMoved = true;
+                haveMoved = true;
             } else if (dist >= 2000) {
                 // Target got away
                 this.resetMovement();
 
-                this.enemyTarget = null;
+                this.setTarget();
                 this.readyToFireEvent.destroy();
                 this.readyToFireEvent = null;
                 this.isReadyToFire = false;
                 // TODO forget target on death
             }
         }
-        if (!hasMoved) this.stoppedMoving();
+        if (!haveMoved) this.onStopMoving();
     }
 }
