@@ -1,9 +1,8 @@
 // TODO
 const backendUrl = "http://192.168.1.246:3010";
 
-export const getFromBackend = async (pathSegments: string[] = [], dropToken = false) => {
+export const getFromBackend = async (pathSegments: string[] = [], token = "") => {
     const path = pathSegments.join("/");
-    const token = dropToken ? null : getToken();
 
     const res = await fetch(`${backendUrl}/${path}`, {
         method: "GET",
@@ -12,7 +11,7 @@ export const getFromBackend = async (pathSegments: string[] = [], dropToken = fa
             Accept: "application/json",
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-            ...(token && { Authorization: `Token ${token}` }),
+            ...(token && { Authorization: `Bearer ${token}` }),
         },
     });
 
@@ -21,15 +20,8 @@ export const getFromBackend = async (pathSegments: string[] = [], dropToken = fa
     return { json: await res.json(), ok: res.ok };
 };
 
-export const postToBackend = async (
-    pathSegments = [],
-    method = "POST",
-    body = {},
-    dropToken = false
-) => {
+export const postToBackend = async (pathSegments = [], method = "POST", body = {}, token = "") => {
     let path = pathSegments.join("/");
-
-    const token = dropToken ? null : getToken();
 
     const res = await fetch(`${backendUrl}/${path}`, {
         method,
@@ -37,7 +29,7 @@ export const postToBackend = async (
             Accept: "application/json",
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-            ...(token && { Authorization: `Token ${token}` }),
+            ...(token && { Authorization: `Bearer ${token}` }),
         },
         credentials: "same-origin",
         body: JSON.stringify(body),
@@ -51,17 +43,17 @@ export const postToBackend = async (
     return { json, ok: res.ok };
 };
 
-export const getLocalStorageToken = () => {
-    return JSON.parse(localStorage.getItem("token")!);
-};
-export const getSessionStorageToken = () => {
-    return JSON.parse(sessionStorage.getItem("token")!);
-};
+// export const getLocalStorageToken = () => {
+//     return JSON.parse(localStorage.getItem("token")!);
+// };
+// export const getSessionStorageToken = () => {
+//     return JSON.parse(sessionStorage.getItem("token")!);
+// };
 
-export const getToken = () => {
-    return getSessionStorageToken() ?? getLocalStorageToken();
-};
+// export const getToken = () => {
+//     return getSessionStorageToken() ?? getLocalStorageToken();
+// };
 
-export const setSessionStorageToken = (token) => {
-    sessionStorage.setItem("token", JSON.stringify(token));
-};
+// export const setSessionStorageToken = (token) => {
+//     sessionStorage.setItem("token", JSON.stringify(token));
+// };

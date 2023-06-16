@@ -149,7 +149,7 @@ class UserController extends BaseController {
             const savedRefreshToken = await this.authService.getRefreshTokenById(jwtId!);
 
             if (!savedRefreshToken || savedRefreshToken.revoked === true) {
-                res.status(401).json({
+                res.status(403).json({
                     message: "Unauthorized",
                 });
                 return;
@@ -157,7 +157,7 @@ class UserController extends BaseController {
 
             const hashedToken = hashToken(refreshToken);
             if (hashedToken !== savedRefreshToken.hashedToken) {
-                res.status(401).json({
+                res.status(403).json({
                     message: "Unauthorized",
                 });
                 return;
@@ -165,7 +165,7 @@ class UserController extends BaseController {
 
             const user = await this.userService.getById(userId);
             if (!user) {
-                res.status(401).json({
+                res.status(403).json({
                     message: "Unauthorized",
                 });
                 return;
@@ -198,14 +198,14 @@ class UserController extends BaseController {
 
             const user = await this.userService.getById(userId);
             if (!user) {
-                res.status(401).json({
+                res.status(403).json({
                     message: "Unauthorized",
                 });
                 return;
             }
 
-            const userWithoutPass = this.userService.exclude(user, ["password"]);
-            res.status(200).json(userWithoutPass);
+            const userWithoutIdOrPass = this.userService.exclude(user, ["password", "id"]);
+            res.status(200).json(userWithoutIdOrPass);
         } catch (error) {
             this.handleError(error, res, `Failed to fetch ${this.name}`);
         }
