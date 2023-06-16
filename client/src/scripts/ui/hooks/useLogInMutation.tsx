@@ -1,5 +1,4 @@
 import { useIsMutating, useMutation } from "@tanstack/react-query";
-import React from "react";
 import { postToBackend } from "../../backend/api";
 import { useSessionStorage } from "@mantine/hooks";
 

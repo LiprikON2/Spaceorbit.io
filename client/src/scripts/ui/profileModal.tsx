@@ -20,17 +20,15 @@ const ProfileModal = ({ queryClient, opened, onClose }) => {
     const { data: me, status: meStatus, remove: meRemove } = useGetMe(accessToken);
     const [showLogIn, setShowLogIn] = useState(false);
 
-    console.log("meStatus", meStatus, "me", me);
-
-    useEffect(() => {
-        if (accessToken) {
-            console.log("logged in", accessToken);
-        } else if (refreshToken) {
-            console.log("timed out", refreshToken);
-        } else {
-            console.log("logged out");
-        }
-    }, [accessToken]);
+    // useEffect(() => {
+    //     if (accessToken) {
+    //         console.log("logged in", accessToken);
+    //     } else if (refreshToken) {
+    //         console.log("timed out", refreshToken);
+    //     } else {
+    //         console.log("logged out");
+    //     }
+    // }, [accessToken]);
 
     const handleLogout = () => {
         setAccessToken("");
