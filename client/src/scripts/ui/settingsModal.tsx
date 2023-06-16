@@ -100,9 +100,17 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                     active={activeTab}
                     onTabChange={setActiveTab}
                     color="cyan"
+                    defaultValue="audio"
                     children={undefined}
                 >
-                    <Tabs.Tab label="Audio">
+                    <Tabs.List>
+                        <Tabs.Tab value="audio">Audio</Tabs.Tab>
+                        <Tabs.Tab value="graphics">Graphics</Tabs.Tab>
+                        <Tabs.Tab value="controls">Controls</Tabs.Tab>
+                        <Tabs.Tab value="ship">Ship</Tabs.Tab>
+                        <Tabs.Tab value="cheats">Cheats</Tabs.Tab>
+                    </Tabs.List>
+                    <Tabs.Panel value="audio">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
                                 <Slider
@@ -128,8 +136,8 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 />
                             </div>
                         </div>
-                    </Tabs.Tab>
-                    <Tabs.Tab label="Graphics">
+                    </Tabs.Panel>
+                    <Tabs.Panel value="graphics">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
                                 <Title order={6}>General</Title>
@@ -146,8 +154,8 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 />
                             </div>
                         </div>
-                    </Tabs.Tab>
-                    <Tabs.Tab label="Controls">
+                    </Tabs.Panel>
+                    <Tabs.Panel value="controls">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
                                 <Title order={6}>Mobile</Title>
@@ -158,8 +166,8 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 />
                             </div>
                         </div>
-                    </Tabs.Tab>
-                    <Tabs.Tab label="Ship">
+                    </Tabs.Panel>
+                    <Tabs.Panel value="ship">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
                                 <Title order={6}>Modules</Title>
@@ -189,8 +197,8 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 </Button>
                             </div>
                         </div>
-                    </Tabs.Tab>
-                    <Tabs.Tab label="Cheats">
+                    </Tabs.Panel>
+                    <Tabs.Panel value="cheats">
                         <div className="group group-vertical">
                             <form onSubmit={sendMobs}>
                                 <NumberInput
@@ -217,7 +225,7 @@ const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 <Button onClick={teleport}>Teleport to x, y</Button>
                             </form>
                         </div>
-                    </Tabs.Tab>
+                    </Tabs.Panel>
                 </Tabs>
             </Modal>
         </>

@@ -45,11 +45,14 @@ const App = () => {
             enableTouchControls: isTouchDevice(),
         },
     });
-    const [fullscreenIcon, toggleFullscreenIcon] = useToggle(false, [false, true]);
-    const [musicIcon, toggleMusicIcon] = useToggle(settings.musicMute, [false, true]);
-    const [effectsIcon, toggleEffectsIcon] = useToggle(settings.effectsMute, [false, true]);
-    const [settingsModal, toggleSettingsModal] = useToggle(false, [false, true]);
-    const [profileModal, toggleProfileModal] = useToggle(false, [false, true]);
+    const [fullscreenIcon, toggleFullscreenIcon] = useToggle([false, true]);
+    const [musicIcon, toggleMusicIcon] = useToggle([settings.musicMute, !settings.musicMute]);
+    const [effectsIcon, toggleEffectsIcon] = useToggle([
+        settings.effectsMute,
+        !settings.effectsMute,
+    ]);
+    const [settingsModal, toggleSettingsModal] = useToggle([false, true]);
+    const [profileModal, toggleProfileModal] = useToggle([false, true]);
 
     const [deviceInfo, setDeviceInfo] = useState("");
     const logDeviceInfo = async () => {
