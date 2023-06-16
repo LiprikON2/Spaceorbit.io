@@ -1,10 +1,12 @@
-import { Modal, TextInput, PasswordInput, Space, Stack, Title } from "@mantine/core";
-import React, { useState } from "react";
-import { useMutation, useIsMutating } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
-import { getFromBackend, postToBackend } from "../backend/api";
+import { Modal, TextInput, PasswordInput, Space, Stack, Title } from "@mantine/core";
+import { useSessionStorage } from "@mantine/hooks";
+import { useMutation, useIsMutating } from "@tanstack/react-query";
 
+import { getFromBackend, postToBackend } from "../backend/api";
 import Button from "./components/button";
+import NonFieldErrors from "./components/nonFieldErrors";
 
 const signUp = async (body) => await postToBackend(["users", "register"] as any, "POST", body);
 
@@ -21,14 +23,33 @@ const ProfileModal = ({ queryClient, opened, onClose }) => {
         },
     });
 
+    const [accessToken, setAccessToken] = useSessionStorage({
+        key: "accessToken",
+        defaultValue: "",
+    });
+    const [refreshToken, setRefreshToken] = useSessionStorage({
+        key: "refreshToken",
+        defaultValue: "",
+    });
+
+    const [nonFieldErrors, setNonFieldErrors] = useState("");
+    const handleError = (message) => {
+        setNonFieldErrors([message]);
+    };
+
     const isUserMutating = useIsMutating("user" as any);
 
     const signUpMutation = useMutation(signUp as any, {
         onSuccess: ({ json, ok }) => {
             if (ok) {
                 queryClient.invalidateQueries("users");
+                const { accessToken, refreshToken } = json;
+                setAccessToken(accessToken);
+                setRefreshToken(refreshToken);
+
                 // closeModal();
             } else {
+                handleError(json.message);
                 // handleFieldErrors(json["field_errors"]);
             }
         },
@@ -36,6 +57,16 @@ const ProfileModal = ({ queryClient, opened, onClose }) => {
 
         retry: 0,
     });
+
+    useEffect(() => {
+        if (accessToken) {
+            console.log("logged in", accessToken);
+        } else if (refreshToken) {
+            console.log("timed out", refreshToken);
+        } else {
+            console.log("logged out");
+        }
+    }, [accessToken]);
 
     const handleSignUp = (fields, event) => {
         const isLoggedIn = false; // TODO
@@ -52,8 +83,9 @@ const ProfileModal = ({ queryClient, opened, onClose }) => {
                 onClose={onClose}
                 title={<Title order={4}>Sign Up</Title>}
             >
-                <form onSubmit={form.onSubmit(handleSignUp)}>
+                <form onSubmit={form.onSubmit(handleSignUp, (a, b) => console.log("a", a, "b", b))}>
                     <Stack>
+                        <NonFieldErrors errors={nonFieldErrors} />
                         <TextInput
                             placeholder="user123"
                             label="Username"

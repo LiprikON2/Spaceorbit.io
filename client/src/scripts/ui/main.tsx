@@ -16,7 +16,7 @@ import {
 } from "tabler-icons-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import "./index.css";
+import "./main.css";
 import { createGame, game } from "../game";
 import Button from "./components/button";
 import SettingsModal from "./settingsModal";
