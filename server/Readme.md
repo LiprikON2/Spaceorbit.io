@@ -56,7 +56,7 @@ docker run -t -i -p 3010:3010 \
 Server available at http://localhost:3010
 
 
-### Server API
+## Server API
 
 <details>
     <summary>Unfold to see the list of all API Routes of SpaceOrbit-server</summary>
@@ -83,7 +83,44 @@ Server available at http://localhost:3010
     GET /endpoints
 </details>
 
-### Project structure
+
+### JWT 
+
+[src/controllers/users/User.ts](src/controllers/users/User.ts#L81)
+
+[src/services/auth/Auth.ts](src/services/auth/Auth.ts)
+
+[src/utils/jwt.ts](src/utils/jwt.ts)
+
+#### Authentication
+> - **Refresh Token** ― allows for acquirement of more **Access Tokens**
+>   - Valid for **8 hours** 
+>   - Requires check against db per use
+>   - Revocation is immediate
+> - **Access Token** ― provides access to protected routes
+>   - Valid for **5 minutes**
+>   - Does **not** require check against db per use
+>   - Revocation is **not** immediate: users could still use **Access Token** for up to 5 minutes even with revoked **Refresh Token**
+
+
+![](https://i.imgur.com/stVMxbO.png)
+
+#### Using access token
+
+![](https://i.imgur.com/bryP2ZC.png)
+
+
+#### Refreshing both tokens
+
+![](https://i.imgur.com/02YeBgh.png)
+
+
+#### Logout
+
+Logout is achieved by clearing tokens from local/session storage on the client
+
+
+## Project structure
 > Repository design pattern
 
 - Server entry point at [/src/core/app.ts](./src/core/app.ts)
