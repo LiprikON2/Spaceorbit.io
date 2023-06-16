@@ -61,24 +61,24 @@ Server available at http://localhost:3010
 <details>
     <summary>Unfold to see the list of all API Routes of SpaceOrbit-server</summary>
 
-    GET /users
-    POST /users
-
-    GET /users/:id
-    PATCH /users/:id
-    DELETE /users/:id
-
     POST /users/register
 
     POST /users/login
 
     POST /users/refreshToken
 
-    POST /users/me
+    GET /users/me
 
     POST /users/resetPassword
 
     GET /users/resetPassword/:id
+
+    GET /users
+    POST /users
+
+    GET /users/:id
+    PATCH /users/:id
+    DELETE /users/:id
 
     GET /endpoints
 </details>
