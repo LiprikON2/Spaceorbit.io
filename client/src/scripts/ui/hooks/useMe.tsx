@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { FetchError, getFromBackend } from "../../backend/api";
 import { useDidUpdate, useSessionStorage } from "@mantine/hooks";
+
+import { FetchError, getFromBackend } from "../../backend/api";
 import { useRefreshToken } from ".";
 
 const getMe = async (accessToken) => await getFromBackend(["users", "me"], accessToken);

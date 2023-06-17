@@ -211,11 +211,13 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         return 10000 * shieldsMultiplier;
     }
 
-    respawn() {
+    respawn(x?, y?) {
         this.breakOffTargeting();
         this.setTarget();
-        // @ts-ignore
-        const { x, y } = this.scene.getRandomPositionOnMap();
+        if (typeof x === "undefined" || typeof y === "undefined") {
+            // @ts-ignore
+            ({ x, y } = this.scene.getRandomPositionOnMap());
+        }
         this.x = x;
         this.y = y;
         this.shields.x = x;

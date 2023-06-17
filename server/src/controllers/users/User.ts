@@ -204,8 +204,8 @@ class UserController extends BaseController {
                 return;
             }
 
-            const userWithoutIdOrPass = this.userService.exclude(user, ["password", "id"]);
-            res.status(200).json(userWithoutIdOrPass);
+            const userWithoutPass = this.userService.exclude(user, ["password"]);
+            res.status(200).json(userWithoutPass);
         } catch (error) {
             this.handleError(error, res, `Failed to fetch ${this.name}`);
         }

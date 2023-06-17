@@ -23,7 +23,12 @@ const ProfileModal = ({ queryClient, opened, onClose }) => {
                 }
             >
                 {isLoggedIn ? (
-                    <Profile me={me} meStatus={meStatus} handleLogout={logout} />
+                    <Profile
+                        queryClient={queryClient}
+                        me={me}
+                        meStatus={meStatus}
+                        handleLogout={logout}
+                    />
                 ) : showLogIn ? (
                     <LogInForm queryClient={queryClient} setShowLogIn={setShowLogIn} />
                 ) : (

@@ -1,12 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
 
-const Profile = ({ me, meStatus, handleLogout }) => {
-    // TODO
-    const handleSave = () => {};
-    const handleLoad = () => {};
+import { game } from "../../game";
+import NonFieldErrors from "./nonFieldErrors";
+import useSaveMutation from "../hooks/useSaveMutation";
+import { useSessionStorage } from "@mantine/hooks";
+
+const Profile = ({ queryClient, me, meStatus, handleLogout }) => {
+    const [accessToken, setAccessToken] = useSessionStorage({
+        key: "accessToken",
+        defaultValue: "",
+    });
+
+    const handleSave = () => {
+        const player = game.scene.keys.MainScene?.player;
+        if (player && accessToken) {
+            const { x, y } = player;
+            save(me.id, { x, y }, accessToken);
+        }
+    };
+    const handleLoad = () => {
+        const player = game.scene.keys.MainScene?.player;
+
+        if (player) {
+            player.respawn(me.x, me.y);
+            player.followText.setText(me.username);
+        }
+    };
+    const [nonFieldErrors, setNonFieldErrors] = useState("");
+
+    const save = useSaveMutation(queryClient, setNonFieldErrors);
+
     return (
         <Stack>
+            <NonFieldErrors errors={nonFieldErrors} />
             {meStatus === "success" ? (
                 <>
                     <Text>Username: {me.username}</Text>

@@ -56,7 +56,14 @@ docker run -t -i -p 3010:3010 \
 Server available at http://localhost:3010
 
 
+## ER Diagram
+
+![](https://i.imgur.com/eIVdZDj.png)
+
 ## Server API
+
+<br/>
+
 
 <details>
     <summary>Unfold to see the list of all API Routes of SpaceOrbit-server</summary>
@@ -83,6 +90,7 @@ Server available at http://localhost:3010
     GET /endpoints
 </details>
 
+<br/>
 
 ### JWT 
 
@@ -105,7 +113,7 @@ Server available at http://localhost:3010
 
 ![](https://i.imgur.com/stVMxbO.png)
 
-#### Using access token
+#### Using access token on protected routes
 
 ![](https://i.imgur.com/bryP2ZC.png)
 
