@@ -1,4 +1,3 @@
-import React from "react";
 import { useIsMutating, useMutation } from "@tanstack/react-query";
 
 import { postToBackend } from "../../backend/api";

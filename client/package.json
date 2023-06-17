@@ -11,7 +11,8 @@
         "studio": "npx cap sync && npx cap open android",
         "studio-build": "npm run build && npx cap sync && npx cap open android",
         "emulator": "npm run build && npx cap run android --target Pixel_6_Pro_API_33",
-        "quest": "npm run build && npx cap run android --target 1WMHHB63B02031"
+        "quest": "npx cap run android --target 1WMHHB63B02031",
+        "quest-build": "npm run build && npx cap run android --target 1WMHHB63B02031"
     },
     "keywords": [
         "Phaser",

@@ -80,5 +80,7 @@ input[type="checkbox"] {
     grid-area: info;
     align-self: end;
     gap: 0;
-    min-width: 14rem;
+    min-width: 12rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
 }
