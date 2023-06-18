@@ -1,9 +1,9 @@
+import "core-js/actual";
+import React, { useEffect, useState } from "react";
 import { Device } from "@capacitor/device";
 import { MantineProvider, Stack, Text } from "@mantine/core";
 import { useLocalStorage, useToggle } from "@mantine/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "core-js/actual";
-import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
     ArrowsMinimize,
@@ -17,10 +17,8 @@ import {
 } from "tabler-icons-react";
 
 import { game, createGame } from "~/game";
-import Button from "./components/button";
-import OutfittingDrawer from "./outfittingDrawer";
-import ProfileModal from "./profileModal";
-import SettingsModal from "./settingsModal";
+import Button from "~/components/button";
+import { OutfittingDrawer, ProfileModal, SettingsModal } from "~/components/modals";
 import "./main.css";
 
 const isTouchDevice = () => {

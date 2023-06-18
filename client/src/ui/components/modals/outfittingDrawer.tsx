@@ -4,9 +4,9 @@ import { useDidUpdate, useDisclosure, useSetState } from "@mantine/hooks";
 import { Tool } from "tabler-icons-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 
-import Button from "./components/button";
-import DraggableItem from "./components/draggableItem";
-import DroppableInventory from "./components/droppableInventory";
+import Button from "~/components/button";
+import DraggableItem from "~/components/draggableItem";
+import DroppableInventory from "~/components/droppableInventory";
 import { game } from "~/game";
 import "./outfittingDrawer.css";
 

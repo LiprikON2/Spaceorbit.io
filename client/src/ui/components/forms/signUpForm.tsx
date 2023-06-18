@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useForm } from "@mantine/form";
 import { TextInput, PasswordInput, Space, Stack, Anchor } from "@mantine/core";
 
-import Button from "../components/button";
-import NonFieldErrors from "../components/nonFieldErrors";
-import { useSignUpMutation } from "../hooks";
+import Button from "~/components/button";
+import { NonFieldErrors } from "~/components/forms";
+import { useSignUpMutation } from "~/hooks";
 
 const signUpForm = ({ queryClient, setShowLogIn }) => {
     const form = useForm({

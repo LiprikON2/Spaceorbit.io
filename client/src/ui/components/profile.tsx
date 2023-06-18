@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
+import { useSessionStorage } from "@mantine/hooks";
 
 import { game } from "~/game";
-import NonFieldErrors from "./nonFieldErrors";
+import { NonFieldErrors } from "~/components/forms";
 import { useSaveMutation } from "~/hooks";
-import { useSessionStorage } from "@mantine/hooks";
 
 const Profile = ({ queryClient, me, meStatus, handleLogout }) => {
     const [accessToken, setAccessToken] = useSessionStorage({

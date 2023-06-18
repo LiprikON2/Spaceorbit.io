@@ -3,8 +3,8 @@ import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
 
 import { game } from "~/game";
-import Button from "./components/button";
-import Slider from "./components/slider";
+import Button from "~/components/button";
+import Slider from "~/components/inputs/slider";
 
 const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {

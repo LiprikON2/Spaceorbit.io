@@ -13,17 +13,13 @@ module.exports = {
     resolve: {
         extensions: [".ts", ".tsx", ".js"],
         alias: {
-            // "~/game": path.resolve(__dirname, "../src/game/scripts/scenes"),
-            // TEST: path.resolve(__dirname, "src/game/scripts/scenes"),
-
             "~/game": path.resolve(__dirname, "../src/game/scripts"),
             "~/hooks": path.resolve(__dirname, "../src/ui/hooks"),
             "~/backend": path.resolve(__dirname, "../src/backend/"),
             "~/scenes": path.resolve(__dirname, "../src/game/scripts/scenes"),
             "~/managers": path.resolve(__dirname, "../src/game/scripts/managers"),
             "~/objects": path.resolve(__dirname, "../src/game/scripts/objects"),
-
-            // "~/ui": path.resolve(__dirname, "../src/ui/"),
+            "~/components": path.resolve(__dirname, "../src/ui/components"),
         },
     },
     module: {

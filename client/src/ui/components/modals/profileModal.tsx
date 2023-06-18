@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Modal, Title } from "@mantine/core";
 
 import { useMe } from "~/hooks";
-import SignUpForm from "./components/signUpForm";
-import LogInForm from "./components/logInForm";
-import Profile from "./components/profile";
+import SignUpForm from "~/components/forms/signUpForm";
+import LogInForm from "~/components/forms/logInForm";
+import Profile from "~/components/profile";
 
 const ProfileModal = ({ queryClient, opened, onClose }) => {
     const { me, meStatus, isLoggedIn, logout } = useMe();
