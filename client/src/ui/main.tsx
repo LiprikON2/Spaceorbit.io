@@ -17,8 +17,12 @@ import {
 } from "tabler-icons-react";
 
 import { game, createGame } from "~/game";
-import Button from "~/components/button";
-import { OutfittingDrawer, ProfileModal, SettingsModal } from "~/components/modals";
+import { Button } from "~/ui/components";
+import { OutfittingDrawer } from "./scenes/OutfittingDrawer";
+import { ProfileModal } from "./scenes/ProfileModal";
+import { SettingsModal } from "./scenes/SettingsModal";
+
+// import { Outfitting, ProfileModal, SettingsModal } from "~/components/modals";
 import "./main.css";
 
 const isTouchDevice = () => {

@@ -21,18 +21,15 @@
         "paths": {
             "~/game": ["./src/game/scripts/index"],
             "~/game/*": ["./src/game/scripts/*"],
-            "~/backend": ["./src/backend/index"],
-            "~/backend/*": ["./src/backend/*"],
-            "~/hooks": ["./src/ui/hooks/index"],
-            "~/hooks/*": ["./src/ui/hooks/*"],
             "~/scenes": ["./src/game/scripts/scenes/index"],
             "~/scenes/*": ["./src/game/scripts/scenes/*"],
             "~/managers": ["./src/game/scripts/managers/index"],
             "~/managers/*": ["./src/game/scripts/managers/*"],
             "~/objects": ["./src/game/scripts/objects/index"],
             "~/objects/*": ["./src/game/scripts/objects/*"],
-            "~/components": ["./src/ui/components/index"],
-            "~/components/*": ["./src/ui/components/*"]
+
+            "~/ui": ["./src/ui/index"],
+            "~/ui/*": ["./src/ui/*"]
         }
     },
     "include": ["src/**/*"],

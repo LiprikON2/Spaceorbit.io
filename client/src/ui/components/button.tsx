@@ -3,7 +3,7 @@ import { Button as MantineButton, ButtonVariant, MantineSize } from "@mantine/co
 
 import "./button.css";
 
-const Button = ({
+export const Button = ({
     isSquare = false,
     variant = "outline",
     color = "gray",
@@ -26,5 +26,3 @@ const Button = ({
         </>
     );
 };
-
-export default Button;
