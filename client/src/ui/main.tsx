@@ -1,27 +1,27 @@
-import "core-js/actual";
-import { createRoot } from "react-dom/client";
-import React, { useEffect, useState } from "react";
-import { MantineProvider, Text, Stack } from "@mantine/core";
-import { useToggle, useLocalStorage } from "@mantine/hooks";
 import { Device } from "@capacitor/device";
+import { MantineProvider, Stack, Text } from "@mantine/core";
+import { useLocalStorage, useToggle } from "@mantine/hooks";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "core-js/actual";
+import React, { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import {
     ArrowsMinimize,
     Maximize,
     Music,
     MusicOff,
-    Volume,
-    VolumeOff,
     Settings,
     User,
+    Volume,
+    VolumeOff,
 } from "tabler-icons-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import "./main.css";
-import { createGame, game } from "../game";
+import { game, createGame } from "~/game";
 import Button from "./components/button";
-import SettingsModal from "./settingsModal";
-import ProfileModal from "./profileModal";
 import OutfittingDrawer from "./outfittingDrawer";
+import ProfileModal from "./profileModal";
+import SettingsModal from "./settingsModal";
+import "./main.css";
 
 const isTouchDevice = () => {
     return (

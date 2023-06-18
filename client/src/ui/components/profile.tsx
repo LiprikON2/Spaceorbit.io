@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
 
-import { game } from "../../game";
+import { game } from "~/game";
 import NonFieldErrors from "./nonFieldErrors";
-import useSaveMutation from "../hooks/useSaveMutation";
+import { useSaveMutation } from "~/hooks";
 import { useSessionStorage } from "@mantine/hooks";
 
 const Profile = ({ queryClient, me, meStatus, handleLogout }) => {

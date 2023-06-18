@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { postToBackend } from "../../backend/api";
+import { postToBackend } from "~/backend";
 
 const getRefreshToken = async (refreshToken, test) =>
     await postToBackend(["users", "refreshToken"] as any, "POST", { refreshToken });

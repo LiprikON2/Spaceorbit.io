@@ -1,8 +1,5 @@
-import Spaceship from "../objects/ship/spaceship";
-import InputManager from "../inputManager";
-import SoundManager from "../soundManager";
-import GenericText from "../objects/genericText";
-import MobManager from "../mobManager";
+import { InputManager, MobManager, SoundManager } from "~/managers";
+import { Spaceship, GenericText } from "~/objects";
 
 export default class MainScene extends Phaser.Scene {
     inputManager;

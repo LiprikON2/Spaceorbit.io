@@ -2,7 +2,7 @@ import { Modal, NumberInput, SegmentedControl, Space, Switch, Tabs, Title } from
 import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
 
-import { game } from "../game";
+import { game } from "~/game";
 import Button from "./components/button";
 import Slider from "./components/slider";
 

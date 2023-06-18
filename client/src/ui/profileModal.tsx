@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Title } from "@mantine/core";
 
-import { useMe } from "./hooks";
+import { useMe } from "~/hooks";
 import SignUpForm from "./components/signUpForm";
 import LogInForm from "./components/logInForm";
 import Profile from "./components/profile";

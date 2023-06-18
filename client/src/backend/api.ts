@@ -1,5 +1,5 @@
 // TODO
-const backendUrl = "http://192.168.1.246:3010";
+export const backendUrl = "http://192.168.1.246:3010";
 
 // https://github.com/TanStack/query/discussions/562
 export class FetchError extends Error {
@@ -53,18 +53,3 @@ export const postToBackend = async (pathSegments = [], method = "POST", body = {
     if (res.status === 204) return { json: {}, ok: res.ok };
     return { json, ok: res.ok };
 };
-
-// export const getLocalStorageToken = () => {
-//     return JSON.parse(localStorage.getItem("token")!);
-// };
-// export const getSessionStorageToken = () => {
-//     return JSON.parse(sessionStorage.getItem("token")!);
-// };
-
-// export const getToken = () => {
-//     return getSessionStorageToken() ?? getLocalStorageToken();
-// };
-
-// export const setSessionStorageToken = (token) => {
-//     sessionStorage.setItem("token", JSON.stringify(token));
-// };

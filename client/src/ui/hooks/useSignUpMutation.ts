@@ -1,10 +1,11 @@
 import { useIsMutating, useMutation } from "@tanstack/react-query";
-import { postToBackend } from "../../backend/api";
 import { useSessionStorage } from "@mantine/hooks";
 
-const logIn = async (body) => await postToBackend(["users", "login"] as any, "POST", body);
+import { postToBackend } from "~/backend";
 
-const useLogInMutation = (queryClient, setErrros) => {
+const signUp = async (body) => await postToBackend(["users", "register"] as any, "POST", body);
+
+const useSignUpMutation = (queryClient, setErrors) => {
     const [accessToken, setAccessToken] = useSessionStorage({
         key: "accessToken",
         defaultValue: "",
@@ -14,20 +15,20 @@ const useLogInMutation = (queryClient, setErrros) => {
         defaultValue: "",
     });
 
-    const logInMutation = useMutation(logIn as any, {
+    const signUpMutation = useMutation(signUp as any, {
         onSuccess: ({ json, ok }) => {
             if (ok) {
                 queryClient.invalidateQueries("users");
                 const { accessToken, refreshToken } = json;
                 setAccessToken(accessToken);
                 setRefreshToken(refreshToken);
-                setErrros([]);
+                setErrors([]);
             } else {
-                setErrros([json.message]);
+                setErrors([json.message]);
             }
         },
         onError: (error) => {
-            setErrros(["Unable to reach the server"]);
+            setErrors(["Unable to reach the server"]);
         },
 
         useErrorBoundary: false,
@@ -36,13 +37,13 @@ const useLogInMutation = (queryClient, setErrros) => {
 
     const isUserMutating = useIsMutating("user" as any);
 
-    const handleLogIn = (fields) => {
+    const handleSignUp = (fields) => {
         if (!isUserMutating) {
-            logInMutation.mutate(fields);
+            signUpMutation.mutate(fields);
         }
     };
 
-    return handleLogIn;
+    return handleSignUp;
 };
 
-export default useLogInMutation;
+export default useSignUpMutation;

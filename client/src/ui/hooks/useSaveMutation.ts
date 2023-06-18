@@ -1,6 +1,6 @@
 import { useIsMutating, useMutation } from "@tanstack/react-query";
 
-import { postToBackend } from "../../backend/api";
+import { postToBackend } from "~/backend";
 
 const save = async ([id, body, accessToken]) =>
     await postToBackend(["users", id] as any, "PATCH", body, accessToken);

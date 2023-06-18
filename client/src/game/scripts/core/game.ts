@@ -1,13 +1,12 @@
 import "phaser";
-import MainScene from "./scenes/mainScene";
-import PreloadScene from "./scenes/preloadScene";
-
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
 import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
+
+import { MainScene, PreloadScene } from "~/scenes";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -23,7 +22,7 @@ const DEFAULT_HEIGHT = 1080;
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
 
-const config = {
+export const gameConfig = {
     type: Phaser.AUTO,
     transparent: true,
     scale: {
@@ -83,6 +82,6 @@ const config = {
 
 export let game;
 export const createGame = (settings?) => {
-    game = new Phaser.Game(config);
+    game = new Phaser.Game(gameConfig);
     game.settings = settings;
 };

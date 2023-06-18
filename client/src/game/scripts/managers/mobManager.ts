@@ -1,7 +1,6 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
-
 // import { NavMesh } from "navmesh";
-import Mob from "./mob";
+import { Mob } from "~/objects";
 
 export default class MobManager {
     scene;
@@ -60,6 +59,7 @@ export default class MobManager {
                 "Enemy",
                 mobEnemies
             );
+            // TODO make it into emit event
             // Needed to be called when soundManager knows about player, and player knows about soundManager
             mob.exhausts.initExhaustSound();
             this.mobs.push(mob);

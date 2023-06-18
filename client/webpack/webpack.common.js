@@ -4,8 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
-    // entry: ["./src/scripts/game.ts"],
-    entry: ["./src/scripts/ui/main.tsx"],
+    entry: ["./src/ui/main.tsx"],
     output: {
         path: path.resolve(__dirname, "../dist"),
         filename: "[name].bundle.js",
@@ -13,6 +12,19 @@ module.exports = {
     },
     resolve: {
         extensions: [".ts", ".tsx", ".js"],
+        alias: {
+            // "~/game": path.resolve(__dirname, "../src/game/scripts/scenes"),
+            // TEST: path.resolve(__dirname, "src/game/scripts/scenes"),
+
+            "~/game": path.resolve(__dirname, "../src/game/scripts"),
+            "~/hooks": path.resolve(__dirname, "../src/ui/hooks"),
+            "~/backend": path.resolve(__dirname, "../src/backend/"),
+            "~/scenes": path.resolve(__dirname, "../src/game/scripts/scenes"),
+            "~/managers": path.resolve(__dirname, "../src/game/scripts/managers"),
+            "~/objects": path.resolve(__dirname, "../src/game/scripts/objects"),
+
+            // "~/ui": path.resolve(__dirname, "../src/ui/"),
+        },
     },
     module: {
         rules: [
@@ -59,7 +71,7 @@ module.exports = {
         new HtmlWebpackPlugin({ gameName: "Spaceorbit.io", template: "src/index.html" }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: "src/assets", to: "assets" },
+                { from: "src/game/assets", to: "assets" },
                 { from: "pwa", to: "" },
                 { from: "src/favicon.ico", to: "" },
             ],
