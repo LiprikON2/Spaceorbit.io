@@ -14,9 +14,9 @@ const StyledDraggableItem = styled("div", {
     cursor: "pointer",
 })) as FC;
 
-export const DraggableItem = ({ data, id, ...rest }) => {
+export const DraggableItem = ({ data, itemId, ...rest }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id,
+        id: itemId,
         data,
     });
 

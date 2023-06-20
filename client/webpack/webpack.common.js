@@ -11,12 +11,24 @@ module.exports = {
         chunkFilename: "[name].chunk.js",
     },
     resolve: {
-        extensions: [".ts", ".tsx", ".js"],
+        extensions: [
+            ".ts",
+            ".tsx",
+            ".js",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".svg",
+            ".webp",
+            ".mp3",
+            ".json",
+        ],
         alias: {
             "~/game": path.resolve(__dirname, "../src/game/scripts"),
             "~/scenes": path.resolve(__dirname, "../src/game/scripts/scenes"),
             "~/managers": path.resolve(__dirname, "../src/game/scripts/managers"),
             "~/objects": path.resolve(__dirname, "../src/game/scripts/objects"),
+            "~/assets": path.resolve(__dirname, "../src/game/assets"),
 
             "~/ui": path.resolve(__dirname, "../src/ui"),
         },
@@ -46,6 +58,10 @@ module.exports = {
                         loader: "postcss-loader",
                     },
                 ],
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg|webp|mp3|json)$/i,
+                type: "asset/resource",
             },
         ],
     },

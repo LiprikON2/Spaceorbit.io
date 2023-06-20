@@ -32,6 +32,6 @@
             "~/ui/*": ["./src/ui/*"]
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "typings/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -1,6 +1,6 @@
 import React from "react";
-import { Avatar } from "@mantine/core";
 
+import { Icon } from "../../components";
 import { DroppableSlot } from "./components";
 
 export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
@@ -20,11 +20,7 @@ export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = un
 
     return (
         <DroppableSlot data={{ inventoryType, slotIndex, isEmpty }} slotId={getSlotId()}>
-            {children ?? (
-                <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
-                    {getLabel()}
-                </Avatar>
-            )}
+            {children ?? <Icon color={getColor()}>{getLabel()}</Icon>}
         </DroppableSlot>
     );
 };

@@ -1,13 +1,16 @@
 import React from "react";
-import { Avatar, Indicator } from "@mantine/core";
+import { Indicator } from "@mantine/core";
 
 import { DraggableItem } from "./components";
+import { Icon } from "../../components";
 
 export const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
+    const getItemId = () => [inventoryType, slotIndex, itemName, itemType].join("-");
+
     return (
         <DraggableItem
             data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
-            id={[inventoryType, slotIndex, itemName, itemType].join("-")}
+            itemId={getItemId()}
         >
             <Indicator
                 className="item-indicator"
@@ -18,11 +21,7 @@ export const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, la
                 withBorder
                 inline
             >
-                <Avatar
-                    className="item-avatar"
-                    size="lg"
-                    src={`assets/inventory/${itemName}.jpg`}
-                />
+                <Icon itemName={itemName} />
             </Indicator>
         </DraggableItem>
     );
