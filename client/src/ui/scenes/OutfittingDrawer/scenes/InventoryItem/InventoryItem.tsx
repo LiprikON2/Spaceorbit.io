@@ -4,6 +4,11 @@ import { Indicator } from "@mantine/core";
 import { DraggableItem } from "./components";
 import { Icon } from "../../components";
 
+const indicatorStyle = {
+    width: "100%",
+    height: "100%",
+};
+
 export const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
     const getItemId = () => [inventoryType, slotIndex, itemName, itemType].join("-");
 
@@ -13,7 +18,7 @@ export const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, la
             itemId={getItemId()}
         >
             <Indicator
-                className="item-indicator"
+                style={indicatorStyle}
                 position="bottom-start"
                 label={label}
                 color={color}
