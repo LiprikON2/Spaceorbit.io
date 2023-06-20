@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar } from "@mantine/core";
 
-import { DroppableInventory } from "./components";
+import { DroppableSlot } from "./components";
 
 export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
     const getLabel = () => {
@@ -16,17 +16,15 @@ export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = un
         else if (inventoryType === "inventory") return undefined;
     };
 
-    const getId = () => {
-        const id = [inventoryType, slotIndex].join("-");
-        return id;
-    };
+    const getSlotId = () => [inventoryType, slotIndex].join("-");
+
     return (
-        <DroppableInventory data={{ inventoryType, slotIndex, isEmpty }} id={getId()}>
+        <DroppableSlot data={{ inventoryType, slotIndex, isEmpty }} slotId={getSlotId()}>
             {children ?? (
                 <Avatar src={null} className="item-avatar" size="lg" color={getColor()}>
                     {getLabel()}
                 </Avatar>
             )}
-        </DroppableInventory>
+        </DroppableSlot>
     );
 };

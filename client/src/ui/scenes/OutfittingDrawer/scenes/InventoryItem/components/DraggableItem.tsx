@@ -23,7 +23,6 @@ export const DraggableItem = ({ data, id, ...rest }) => {
     return (
         <StyledDraggableItem
             ref={setNodeRef}
-            className="inventory-item"
             transform={transform}
             {...listeners}
             {...attributes}

@@ -1,1 +1,1 @@
-export * from "./DroppableInventory";
+export * from "./DroppableSlot";
