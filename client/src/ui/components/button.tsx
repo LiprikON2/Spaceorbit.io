@@ -1,28 +1,42 @@
 import React from "react";
-import { Button as MantineButton, ButtonVariant, MantineSize } from "@mantine/core";
+import {
+    Button as MantineButton,
+    useComponentDefaultProps,
+    createPolymorphicComponent,
+} from "@mantine/core";
+import type { ButtonProps as MantineButtonProps } from "@mantine/core";
+import styled from "@emotion/styled";
 
-import "./button.css";
+interface ButtonProps extends MantineButtonProps {
+    isSquare?: boolean;
+    onClick?: () => void;
+}
 
-export const Button = ({
-    isSquare = false,
-    variant = "outline",
-    color = "gray",
-    size = "lg",
-    className = "",
-    children = null,
-    ...rest
-}) => {
+const defaultProps: Partial<ButtonProps> = {
+    isSquare: false,
+    variant: "outline",
+    color: "gray",
+    size: "lg",
+};
+
+export const Button = (props: ButtonProps) => {
+    const { isSquare, variant, color, size, className, children, ...rest } =
+        useComponentDefaultProps("ButtonProps", defaultProps, props);
+
+    const _StyledButton = styled(MantineButton)`
+        ${isSquare &&
+        `
+            padding: 0;
+            aspect-ratio: 1 / 1;
+        `}
+    `;
+    const StyledButton = createPolymorphicComponent<"button", MantineButtonProps>(_StyledButton);
+
     return (
         <>
-            <MantineButton
-                variant={variant as ButtonVariant}
-                color={color}
-                size={size as MantineSize}
-                className={isSquare ? className + " square-button" : className}
-                {...rest}
-            >
+            <StyledButton variant={variant} color={color} size={size} {...rest}>
                 {children}
-            </MantineButton>
+            </StyledButton>
         </>
     );
 };

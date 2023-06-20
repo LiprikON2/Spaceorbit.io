@@ -2,7 +2,7 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 
 // TODO rename file
-const DroppableInventory = ({
+export const DroppableInventory = ({
     data,
     id,
     children = undefined,
@@ -27,5 +27,3 @@ const DroppableInventory = ({
         </div>
     );
 };
-
-export default DroppableInventory;

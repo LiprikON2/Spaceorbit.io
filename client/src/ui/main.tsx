@@ -132,6 +132,7 @@ const App = () => {
                         <Button
                             className="effectsMute"
                             isSquare={true}
+                            size="xl"
                             onClick={() => toggleMute("effectsMute")}
                         >
                             {effectsIcon ? <VolumeOff /> : <Volume />}
