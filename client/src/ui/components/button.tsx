@@ -6,6 +6,7 @@ import {
 } from "@mantine/core";
 import type { ButtonProps as MantineButtonProps } from "@mantine/core";
 import styled from "@emotion/styled";
+import { excludeProps } from "~/ui/services/excludeProps";
 
 interface ButtonProps extends MantineButtonProps {
     isSquare?: boolean;
@@ -19,24 +20,17 @@ const defaultProps: Partial<ButtonProps> = {
     size: "lg",
 };
 
-export const Button = (props: ButtonProps) => {
-    const { isSquare, variant, color, size, className, children, ...rest } =
-        useComponentDefaultProps("ButtonProps", defaultProps, props);
+const _StyledButton = styled(MantineButton, {
+    shouldForwardProp: excludeProps(["isSquare"]),
+})((props) => ({
+    padding: props.isSquare && 0,
+    aspectRatio: props.isSquare && 1 / 1,
+}));
 
-    const _StyledButton = styled(MantineButton)`
-        ${isSquare &&
-        `
-            padding: 0;
-            aspect-ratio: 1 / 1;
-        `}
-    `;
+export const Button = (props: ButtonProps) => {
+    const defaultedProps = useComponentDefaultProps("ButtonProps", defaultProps, props);
+
     const StyledButton = createPolymorphicComponent<"button", MantineButtonProps>(_StyledButton);
 
-    return (
-        <>
-            <StyledButton variant={variant} color={color} size={size} {...rest}>
-                {children}
-            </StyledButton>
-        </>
-    );
+    return <StyledButton {...defaultedProps} />;
 };

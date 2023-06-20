@@ -1,8 +1,7 @@
 import React from "react";
 import { Avatar } from "@mantine/core";
 
-import { DroppableInventory } from "../../components";
-import "./InventorySlot.css";
+import { DroppableInventory } from "./components";
 
 export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
     const getLabel = () => {

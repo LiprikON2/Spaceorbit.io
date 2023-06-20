@@ -1,39 +1,29 @@
 import React, { useState } from "react";
-import { Avatar, Divider, Drawer, Indicator, ScrollArea, Title } from "@mantine/core";
+import {
+    Divider,
+    Drawer,
+    Indicator,
+    ScrollArea,
+    ScrollAreaProps,
+    Title,
+    createPolymorphicComponent,
+} from "@mantine/core";
 import { useDidUpdate, useDisclosure, useSetState } from "@mantine/hooks";
 import { Tool } from "tabler-icons-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
+import styled from "@emotion/styled";
 
 import { game } from "~/game";
 import { Button } from "~/ui/components/button";
-import { DraggableItem } from "./components";
 import { InventorySlot } from "./scenes/InventorySlot";
+import { InventoryItem } from "./scenes/InventoryItem";
 import "./outfittingDrawer.css";
 
-const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
-    return (
-        <DraggableItem
-            data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
-            id={[inventoryType, slotIndex, itemName, itemType].join("-")}
-        >
-            <Indicator
-                className="item-indicator"
-                position="bottom-start"
-                label={label}
-                color={color}
-                size={16}
-                withBorder
-                inline
-            >
-                <Avatar
-                    className="item-avatar"
-                    size="lg"
-                    src={`assets/inventory/${itemName}.jpg`}
-                />
-            </Indicator>
-        </DraggableItem>
-    );
-};
+const _StyledScrollArea = styled(ScrollArea)`
+    height: 100%;
+    width: 100%;
+`;
+const StyledScrollArea = createPolymorphicComponent<"div", ScrollAreaProps>(_StyledScrollArea);
 
 export const OutfittingDrawer = () => {
     const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
@@ -171,7 +161,7 @@ export const OutfittingDrawer = () => {
                 size="lg"
             >
                 <Divider my="sm" />
-                <ScrollArea className="scroller">
+                <StyledScrollArea>
                     <DndContext
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
@@ -187,7 +177,7 @@ export const OutfittingDrawer = () => {
                                 mapSlot(draggedItem.inventoryType, draggedItem.index)}
                         </DragOverlay>
                     </DndContext>
-                </ScrollArea>
+                </StyledScrollArea>
             </Drawer>
         </>
     );
