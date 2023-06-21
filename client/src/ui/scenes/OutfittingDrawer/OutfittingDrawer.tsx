@@ -12,8 +12,9 @@ import { DndContext, DragOverlay } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
 import { game } from "~/game";
-import { InventorySlot } from "./scenes/InventorySlot";
-import { InventoryItem } from "./scenes/InventoryItem";
+
+import { InventorySection } from "./scenes/InventorySection";
+import { InventoryItem, InventorySlot, ItemSlot } from "./scenes/InventorySection/Scenes/ItemSlot";
 
 const _StyledScrollArea = styled(ScrollArea)`
     height: 100%;
@@ -21,16 +22,16 @@ const _StyledScrollArea = styled(ScrollArea)`
 `;
 const StyledScrollArea = createPolymorphicComponent<"div", ScrollAreaProps>(_StyledScrollArea);
 
-const StyledInventory = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 5rem);
-    justify-content: center;
-    gap: 1rem;
+// const StyledInventory = styled.div`
+//     display: grid;
+//     grid-template-columns: repeat(auto-fit, 5rem);
+//     justify-content: center;
+//     gap: 1rem;
 
-    margin-block: 2rem;
-    margin-inline: 1rem;
-    user-select: none;
-` as FC;
+//     margin-block: 2rem;
+//     margin-inline: 1rem;
+//     user-select: none;
+// ` as FC;
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
@@ -50,7 +51,8 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         const { active } = event;
         if (active) {
             const { inventoryType, slotIndex } = active.data.current;
-            setDraggedItem({ inventoryType, index: slotIndex });
+            // TODO remove inventoryType and slotIndex
+            setDraggedItem({ inventoryType, slotIndex, data: active.data.current });
         }
     };
 
@@ -117,10 +119,10 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         reoutfit();
     }, [outfit]);
 
-    const mapInventory = (inventoryType) =>
-        outfit?.[inventoryType]?.map((_, index) => mapSlot(inventoryType, index));
+    // const mapInventory = (inventoryType) =>
+    //     outfit?.[inventoryType]?.map((_, index) => mapSlot(inventoryType, index));
 
-    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, index: 0 });
+    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, slotIndex: 0 });
 
     const mapSlot = (inventoryType, index) => {
         const item = outfit[inventoryType][index];
@@ -154,11 +156,13 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
             </InventorySlot>
         );
     };
+
+    console.log("draggedItem", draggedItem);
     return (
         <Drawer
             opened={shouldBeOpened && didLoad}
             onClose={close}
-            title={<Title order={4}>Outfitting</Title>}
+            title={<Title order={2}>Outfitting</Title>}
             overlayOpacity={0}
             padding="xl"
             size="lg"
@@ -170,14 +174,29 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                     onDragEnd={handleDragEnd}
                     autoScroll={false}
                 >
-                    <StyledInventory>
+                    {outfit && (
+                        <>
+                            <InventorySection title="Weapons" type="weapons" outfit={outfit} />
+                            <InventorySection title="Engines" type="engines" outfit={outfit} />
+                            <InventorySection title="Inventory" type="inventory" outfit={outfit} />
+                        </>
+                    )}
+                    {/* <StyledInventory>
                         {mapInventory("weapons")}
                         {mapInventory("engines")}
                         {mapInventory("inventory")}
-                    </StyledInventory>
+                    </StyledInventory> */}
+
                     <DragOverlay>
-                        {draggedItem.inventoryType &&
-                            mapSlot(draggedItem.inventoryType, draggedItem.index)}
+                        {/* {draggedItem.inventoryType &&
+                            mapSlot(draggedItem.inventoryType, draggedItem.slotIndex)} */}
+                        {draggedItem.inventoryType && (
+                            <ItemSlot
+                                item={outfit[draggedItem.inventoryType][draggedItem.slotIndex]}
+                                index={draggedItem.slotIndex}
+                                inventoryType={draggedItem.inventoryType}
+                            />
+                        )}
                     </DragOverlay>
                 </DndContext>
             </StyledScrollArea>

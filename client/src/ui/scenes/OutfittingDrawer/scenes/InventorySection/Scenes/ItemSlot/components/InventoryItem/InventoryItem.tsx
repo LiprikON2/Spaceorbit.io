@@ -2,7 +2,7 @@ import React from "react";
 import { Indicator } from "@mantine/core";
 
 import { DraggableItem } from "./components";
-import { Icon } from "../../components";
+import { Icon } from "~/ui/scenes/OutfittingDrawer/components";
 
 const indicatorStyle = {
     width: "100%",
