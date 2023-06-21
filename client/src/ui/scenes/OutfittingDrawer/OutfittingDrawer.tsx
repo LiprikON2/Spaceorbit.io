@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import {
     Divider,
     Drawer,
@@ -24,6 +24,17 @@ const _StyledScrollArea = styled(ScrollArea)`
     width: 100%;
 `;
 const StyledScrollArea = createPolymorphicComponent<"div", ScrollAreaProps>(_StyledScrollArea);
+
+const StyledInventory = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 5rem);
+    justify-content: center;
+    gap: 1rem;
+
+    margin-block: 2rem;
+    margin-inline: 1rem;
+    user-select: none;
+` as FC;
 
 export const OutfittingDrawer = () => {
     const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
@@ -168,11 +179,11 @@ export const OutfittingDrawer = () => {
                         onDragEnd={handleDragEnd}
                         autoScroll={false}
                     >
-                        <div className="inventory">
+                        <StyledInventory>
                             {mapInventory("weapons")}
                             {mapInventory("engines")}
                             {mapInventory("inventory")}
-                        </div>
+                        </StyledInventory>
                         <DragOverlay>
                             {draggedItem.inventoryType &&
                                 mapSlot(draggedItem.inventoryType, draggedItem.index)}

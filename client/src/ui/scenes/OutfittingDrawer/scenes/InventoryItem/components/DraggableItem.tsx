@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
-import { excludeProps } from "~/ui/services/excludeProps";
+import { excludeProps } from "~/ui/services/styled";
 
 // TODO fix flickering on grabbing and letting go ("snapshots"?)
 const StyledDraggableItem = styled("div", {

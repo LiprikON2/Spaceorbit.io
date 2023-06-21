@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
-import { excludeProps } from "~/ui/services/excludeProps";
+import { excludeProps } from "~/ui/services/styled";
 
 // TODO Use 'CanDropHere' to color slots red
 // console.log("over", over?.data?.current?.inventoryType, "vs", data?.inventoryType);

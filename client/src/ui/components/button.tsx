@@ -6,7 +6,8 @@ import {
 } from "@mantine/core";
 import type { ButtonProps as MantineButtonProps } from "@mantine/core";
 import styled from "@emotion/styled";
-import { excludeProps } from "~/ui/services/excludeProps";
+
+import { excludeProps } from "~/ui/services/styled";
 
 interface ButtonProps extends MantineButtonProps {
     isSquare?: boolean;
