@@ -1,3 +1,3 @@
-import { game, gameConfig, createGame } from "./core/game";
+import { game, gameConfig } from "./core/game";
 
-export { game, gameConfig, createGame };
+export { game, gameConfig };

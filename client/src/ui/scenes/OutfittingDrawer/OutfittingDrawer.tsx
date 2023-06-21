@@ -35,12 +35,13 @@ export const OutfittingDrawer = () => {
             setDraggedItem({ inventoryType, index: slotIndex });
         }
     };
+
     const handleDragEnd = (event) => {
         const { over, active } = event;
         const isEmpty = over?.data?.current?.isEmpty;
 
-        // If item dropped in an empty slot
-        if (over && isEmpty) {
+        const droppedOverEmpty = over && isEmpty;
+        if (droppedOverEmpty) {
             // Dropped to slot
             const { inventoryType, slotIndex, isEmpty } = over.data.current;
             // The dropeé item
@@ -83,10 +84,9 @@ export const OutfittingDrawer = () => {
     };
 
     const reoutfit = () => {
-        const scene = game.scene.keys.MainScene;
-        const player = scene?.player;
+        const player = game.getPlayer();
         const activeOutfit = player?.outfitting.getOutfit();
-        if (activeOutfit) {
+        if (player && activeOutfit) {
             player.outfitting.reoutfit(outfit);
         }
     };
@@ -97,8 +97,8 @@ export const OutfittingDrawer = () => {
     }, [outfit]);
 
     const openOutfitting = () => {
-        const scene = game.scene.keys.MainScene;
-        const activeOutfit = scene?.player?.outfitting?.getOutfit();
+        const player = game.getPlayer();
+        const activeOutfit = player?.outfitting.getOutfit();
         if (activeOutfit) {
             handleOpenOutfitting.open();
 
@@ -127,8 +127,8 @@ export const OutfittingDrawer = () => {
                 inventoryType={inventoryType}
                 slotIndex={index}
                 isEmpty={isEmpty}
-                // @ts-ignore
-                key={`${inventoryType}-${index}`}
+                //@ts-ignore
+                key={[inventoryType, index].join("-")}
             >
                 {!isEmpty ? (
                     <InventoryItem
@@ -145,6 +145,7 @@ export const OutfittingDrawer = () => {
     };
     return (
         <>
+            {/* TODO move button to main */}
             <div className="outfitting group">
                 <Indicator inline label="New" color="cyan" size={16} withBorder>
                     <Button isSquare={true} onClick={openOutfitting}>
@@ -154,7 +155,7 @@ export const OutfittingDrawer = () => {
             </div>
             <Drawer
                 opened={openedOutfitting}
-                onClose={() => handleOpenOutfitting.close()}
+                onClose={handleOpenOutfitting.close}
                 title={<Title order={4}>Outfitting</Title>}
                 overlayOpacity={0}
                 padding="xl"

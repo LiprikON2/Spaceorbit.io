@@ -8,33 +8,33 @@ import { Slider } from "./components";
 
 export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {
-        const scene = game.scene.keys.MainScene;
-        if (scene) {
-            scene.player.exhausts.createExhaust();
+        const player = game.getPlayer();
+        if (player) {
+            player.exhausts.createExhaust();
         }
     };
     const removeEngine = () => {
-        const scene = game.scene.keys.MainScene;
-        if (scene) {
-            scene.player.exhausts.removeExhaust();
+        const player = game.getPlayer();
+        if (player) {
+            player.exhausts.removeExhaust();
         }
     };
     const addLaser = (slot) => {
-        const scene = game.scene.keys.MainScene;
-        if (scene) {
-            scene.player.weapons.createLaser(slot);
+        const player = game.getPlayer();
+        if (player) {
+            player.weapons.createLaser(slot);
         }
     };
 
     const addGatling = (slot) => {
-        const scene = game.scene.keys.MainScene;
-        if (scene) {
-            scene.player.weapons.createGatling(slot);
+        const player = game.getPlayer();
+        if (player) {
+            player.weapons.createGatling(slot);
         }
     };
 
     const setVolume = (key, newValue) => {
-        const soundManager = game.scene.keys.MainScene.soundManager;
+        const { soundManager } = game.getScene();
         const isValidKey =
             key === "masterVolume" || key === "musicVolume" || key === "effectsVolume";
 
@@ -48,7 +48,7 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     };
 
     const toggleTouchControls = () => {
-        const inputManager = game.scene.keys.MainScene.inputManager;
+        const { inputManager } = game.getScene();
         if (inputManager) {
             inputManager.toggleTouchControls();
             handleTouchControls.toggle();
@@ -57,14 +57,11 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
     const [activeTab, setActiveTab] = useState(0);
 
-    // TEMP
-
+    // TODELETE
     const sendMobs = (e) => {
         e.preventDefault();
-        const scene = game.scene.keys.MainScene;
-        const mobManager = scene?.mobManager;
-        const player = scene?.player;
-        const mobs = mobManager?.mobs;
+        const { mobManager, player } = game.getScene();
+        const mobs = mobManager.mobs;
         mobManager.spawnMobs(mobsCount, [player]);
 
         mobs.forEach((mob) => {
@@ -74,7 +71,7 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     };
 
     const teleport = () => {
-        const player = game.scene.keys.MainScene?.player;
+        const player = game.getPlayer();
 
         if (player) {
             player.x = x;

@@ -13,14 +13,14 @@ export const Me = ({ queryClient, me, meStatus, handleLogout }) => {
     });
 
     const handleSave = () => {
-        const player = game.scene.keys.MainScene?.player;
+        const player = game.getPlayer();
         if (player && accessToken) {
             const { x, y } = player;
             save(me.id, { x, y }, accessToken);
         }
     };
     const handleLoad = () => {
-        const player = game.scene.keys.MainScene?.player;
+        const player = game.getPlayer();
 
         if (player) {
             player.respawn(me.x, me.y);

@@ -7,7 +7,7 @@ import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-p
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 
 import { MainScene, PreloadScene } from "~/scenes";
-
+import type { Spaceship } from "~/objects";
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
 // const DEFAULT_WIDTH = 920;
@@ -80,8 +80,26 @@ export const gameConfig = {
     },
 };
 
-export let game;
-export const createGame = (settings?) => {
-    game = new Phaser.Game(gameConfig);
-    game.settings = settings;
-};
+class Game {
+    config;
+    game;
+
+    constructor(config) {
+        this.config = config;
+    }
+
+    init = (settings = {}) => {
+        this.game = new Phaser.Game(this.config);
+        this.game.settings = settings;
+    };
+
+    getScene = (): MainScene => {
+        return this.game.scene.keys.MainScene;
+    };
+
+    getPlayer = (): Spaceship | null => {
+        return this.getScene()?.player ?? null;
+    };
+}
+
+export const game = new Game(gameConfig);

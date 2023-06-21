@@ -16,7 +16,7 @@ import {
     VolumeOff,
 } from "tabler-icons-react";
 
-import { game, createGame } from "~/game";
+import { game } from "~/game";
 import { Button } from "~/ui/components";
 import { OutfittingDrawer } from "./scenes/OutfittingDrawer";
 import { ProfileModal } from "./scenes/ProfileModal";
@@ -63,13 +63,13 @@ const App = () => {
     };
 
     useEffect(() => {
-        createGame(settings);
+        game.init(settings);
 
         logDeviceInfo();
     }, []);
 
     const toggleMute = (key) => {
-        const soundManager = game.scene.keys.MainScene.soundManager;
+        const { soundManager } = game.getScene();
         const isValidKey = key === "musicMute" || key === "effectsMute";
 
         if (soundManager && isValidKey) {
@@ -91,7 +91,7 @@ const App = () => {
         toggleFullscreenIcon();
     };
     const toggleSettings = () => {
-        const player = game.scene.keys.MainScene.player;
+        const player = game.getPlayer();
         if (player) {
             toggleSettingsModal();
             // todo this will enable you to shoot and move in dying animation
@@ -99,7 +99,7 @@ const App = () => {
         }
     };
     const toggleProfile = () => {
-        const player = game.scene.keys.MainScene.player;
+        const player = game.getPlayer();
         if (player) {
             toggleProfileModal();
             // todo this will enable you to shoot and move in dying animation
