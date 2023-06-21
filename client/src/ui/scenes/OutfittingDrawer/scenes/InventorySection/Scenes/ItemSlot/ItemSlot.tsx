@@ -12,7 +12,7 @@ const emptyItem = {
 export const ItemSlot = ({ item = null, index, inventoryType, ...rest }) => {
     const { itemName, itemType, label, color } = item ?? emptyItem;
 
-    const isEmpty = itemName === null;
+    const isEmpty = item === null;
     return (
         <InventorySlot inventoryType={inventoryType} slotIndex={index} isEmpty={isEmpty}>
             {!isEmpty ? (

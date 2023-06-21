@@ -4,11 +4,6 @@ body,
     overflow: hidden;
 } */
 
-/* TODO add focus-active outline for tabbing */
-*:focus {
-    outline: 0 !important;
-}
-
 #ui {
     width: 100vw;
     height: 100vh;

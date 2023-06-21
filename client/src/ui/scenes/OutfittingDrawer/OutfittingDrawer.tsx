@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     Divider,
     Drawer,
@@ -12,26 +12,14 @@ import { DndContext, DragOverlay } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
 import { game } from "~/game";
-
 import { InventorySection } from "./scenes/InventorySection";
-import { InventoryItem, InventorySlot, ItemSlot } from "./scenes/InventorySection/Scenes/ItemSlot";
+import { ItemSlot } from "./scenes/InventorySection/Scenes/ItemSlot";
 
 const _StyledScrollArea = styled(ScrollArea)`
     height: 100%;
     width: 100%;
 `;
 const StyledScrollArea = createPolymorphicComponent<"div", ScrollAreaProps>(_StyledScrollArea);
-
-// const StyledInventory = styled.div`
-//     display: grid;
-//     grid-template-columns: repeat(auto-fit, 5rem);
-//     justify-content: center;
-//     gap: 1rem;
-
-//     margin-block: 2rem;
-//     margin-inline: 1rem;
-//     user-select: none;
-// ` as FC;
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
@@ -51,8 +39,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         const { active } = event;
         if (active) {
             const { inventoryType, slotIndex } = active.data.current;
-            // TODO remove inventoryType and slotIndex
-            setDraggedItem({ inventoryType, slotIndex, data: active.data.current });
+            setDraggedItem({ inventoryType, slotIndex });
         }
     };
 
@@ -101,7 +88,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                     // Update target slot
                     setOutfit({ [inventoryType]: updatedInventory });
                 }
-                setDraggedItem({ inventoryType: null, index: null });
+                setDraggedItem({ inventoryType: null, slotIndex: null });
             }
         }
     };
@@ -119,45 +106,8 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         reoutfit();
     }, [outfit]);
 
-    // const mapInventory = (inventoryType) =>
-    //     outfit?.[inventoryType]?.map((_, index) => mapSlot(inventoryType, index));
+    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, slotIndex: null });
 
-    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, slotIndex: 0 });
-
-    const mapSlot = (inventoryType, index) => {
-        const item = outfit[inventoryType][index];
-        // @ts-ignore
-        const { itemName, itemType, label, color } = item ?? {
-            itemName: null,
-            itemType: null,
-            label: null,
-            color: null,
-        };
-
-        const isEmpty = itemName === null;
-        return (
-            <InventorySlot
-                inventoryType={inventoryType}
-                slotIndex={index}
-                isEmpty={isEmpty}
-                //@ts-ignore
-                key={[inventoryType, index].join("-")}
-            >
-                {!isEmpty ? (
-                    <InventoryItem
-                        inventoryType={inventoryType}
-                        slotIndex={index}
-                        itemName={itemName}
-                        itemType={itemType}
-                        label={label}
-                        color={color}
-                    />
-                ) : null}
-            </InventorySlot>
-        );
-    };
-
-    console.log("draggedItem", draggedItem);
     return (
         <Drawer
             opened={shouldBeOpened && didLoad}
@@ -181,15 +131,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                             <InventorySection title="Inventory" type="inventory" outfit={outfit} />
                         </>
                     )}
-                    {/* <StyledInventory>
-                        {mapInventory("weapons")}
-                        {mapInventory("engines")}
-                        {mapInventory("inventory")}
-                    </StyledInventory> */}
-
                     <DragOverlay>
-                        {/* {draggedItem.inventoryType &&
-                            mapSlot(draggedItem.inventoryType, draggedItem.slotIndex)} */}
                         {draggedItem.inventoryType && (
                             <ItemSlot
                                 item={outfit[draggedItem.inventoryType][draggedItem.slotIndex]}
