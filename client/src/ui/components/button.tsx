@@ -16,9 +16,6 @@ interface ButtonProps extends MantineButtonProps {
 
 const defaultProps: Partial<ButtonProps> = {
     isSquare: false,
-    variant: "outline",
-    color: "gray",
-    size: "lg",
 };
 
 const _StyledButton = styled(MantineButton, {
