@@ -94,7 +94,7 @@ class Game {
     };
 
     getScene = (): MainScene => {
-        return this.game.scene.keys.MainScene;
+        return this.game?.scene?.keys?.MainScene ?? null;
     };
 
     getPlayer = (): Spaceship | null => {

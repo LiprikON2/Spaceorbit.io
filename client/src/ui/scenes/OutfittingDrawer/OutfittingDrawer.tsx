@@ -1,23 +1,19 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import {
     Divider,
     Drawer,
-    Indicator,
     ScrollArea,
     ScrollAreaProps,
     Title,
     createPolymorphicComponent,
 } from "@mantine/core";
-import { useDidUpdate, useDisclosure, useSetState } from "@mantine/hooks";
-import { Tool } from "tabler-icons-react";
+import { useDidUpdate, useSetState } from "@mantine/hooks";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
 import { game } from "~/game";
-import { Button } from "~/ui/components/button";
 import { InventorySlot } from "./scenes/InventorySlot";
 import { InventoryItem } from "./scenes/InventoryItem";
-import "./outfittingDrawer.css";
 
 const _StyledScrollArea = styled(ScrollArea)`
     height: 100%;
@@ -36,8 +32,19 @@ const StyledInventory = styled.div`
     user-select: none;
 ` as FC;
 
-export const OutfittingDrawer = () => {
-    const [openedOutfitting, handleOpenOutfitting] = useDisclosure(false);
+export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
+    const [didLoad, setDidLoad] = useState(false);
+
+    useDidUpdate(() => {
+        if (!didLoad) {
+            const player = game.getPlayer();
+            const activeOutfit = player?.outfitting.getOutfit();
+            if (activeOutfit) {
+                setDidLoad(() => true);
+                setOutfit(activeOutfit);
+            }
+        }
+    }, [shouldBeOpened]);
 
     const handleDragStart = (event) => {
         const { active } = event;
@@ -51,13 +58,14 @@ export const OutfittingDrawer = () => {
         const { over, active } = event;
         const isEmpty = over?.data?.current?.isEmpty;
 
-        const droppedOverEmpty = over && isEmpty;
-        if (droppedOverEmpty) {
+        const didDropOverEmpty = over && isEmpty;
+        if (didDropOverEmpty) {
             // Dropped to slot
-            const { inventoryType, slotIndex, isEmpty } = over.data.current;
+            const { inventoryType, slotIndex } = over.data.current;
+
             // The dropeé item
             const {
-                inventoryType: prevInventoryType,
+                inventoryType: prevInvType,
                 slotIndex: prevSlotIndex,
                 itemName,
                 itemType,
@@ -65,29 +73,31 @@ export const OutfittingDrawer = () => {
                 color,
             } = active.data.current;
 
-            const sameSlot = inventoryType === prevInventoryType && slotIndex === prevSlotIndex;
+            const isNotSameSlot = inventoryType !== prevInvType || slotIndex !== prevSlotIndex;
+            const areInvTypesCompatible =
+                inventoryType === itemType || inventoryType === "inventory";
 
-            // If item can be placed there
-            if ((itemType === inventoryType || inventoryType === "inventory") && !sameSlot) {
+            const canBePlacedHere = areInvTypesCompatible && isNotSameSlot;
+            if (canBePlacedHere) {
                 const updatedInventory = [...outfit[inventoryType]];
                 // Target slot
                 updatedInventory[slotIndex] = { itemName, itemType, label, color };
 
-                // If moved to the same inventory
-                if (prevInventoryType === inventoryType && isEmpty) {
-                    // Clear prev slot
-                    updatedInventory[prevSlotIndex] = null;
-                    // Update target slot
-                    setOutfit({ [inventoryType]: updatedInventory });
-                } else {
-                    const updatedPrevInventory = [...outfit[prevInventoryType]];
+                const didInvTypeChange = prevInvType !== inventoryType;
+                if (didInvTypeChange) {
+                    const updatedPrevInventory = [...outfit[prevInvType]];
                     // Clear prev slot
                     updatedPrevInventory[prevSlotIndex] = null;
                     // Update target slot
                     setOutfit({
-                        [prevInventoryType]: updatedPrevInventory,
+                        [prevInvType]: updatedPrevInventory,
                         [inventoryType]: updatedInventory,
                     });
+                } else {
+                    // Clear prev slot
+                    updatedInventory[prevSlotIndex] = null;
+                    // Update target slot
+                    setOutfit({ [inventoryType]: updatedInventory });
                 }
                 setDraggedItem({ inventoryType: null, index: null });
             }
@@ -106,16 +116,6 @@ export const OutfittingDrawer = () => {
     useDidUpdate(() => {
         reoutfit();
     }, [outfit]);
-
-    const openOutfitting = () => {
-        const player = game.getPlayer();
-        const activeOutfit = player?.outfitting.getOutfit();
-        if (activeOutfit) {
-            handleOpenOutfitting.open();
-
-            setOutfit(activeOutfit);
-        }
-    };
 
     const mapInventory = (inventoryType) =>
         outfit?.[inventoryType]?.map((_, index) => mapSlot(inventoryType, index));
@@ -155,42 +155,32 @@ export const OutfittingDrawer = () => {
         );
     };
     return (
-        <>
-            {/* TODO move button to main */}
-            <div className="outfitting group">
-                <Indicator inline label="New" color="cyan" size={16} withBorder>
-                    <Button isSquare={true} onClick={openOutfitting}>
-                        <Tool />
-                    </Button>
-                </Indicator>
-            </div>
-            <Drawer
-                opened={openedOutfitting}
-                onClose={handleOpenOutfitting.close}
-                title={<Title order={4}>Outfitting</Title>}
-                overlayOpacity={0}
-                padding="xl"
-                size="lg"
-            >
-                <Divider my="sm" />
-                <StyledScrollArea>
-                    <DndContext
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                        autoScroll={false}
-                    >
-                        <StyledInventory>
-                            {mapInventory("weapons")}
-                            {mapInventory("engines")}
-                            {mapInventory("inventory")}
-                        </StyledInventory>
-                        <DragOverlay>
-                            {draggedItem.inventoryType &&
-                                mapSlot(draggedItem.inventoryType, draggedItem.index)}
-                        </DragOverlay>
-                    </DndContext>
-                </StyledScrollArea>
-            </Drawer>
-        </>
+        <Drawer
+            opened={shouldBeOpened && didLoad}
+            onClose={close}
+            title={<Title order={4}>Outfitting</Title>}
+            overlayOpacity={0}
+            padding="xl"
+            size="lg"
+        >
+            <Divider my="sm" />
+            <StyledScrollArea>
+                <DndContext
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    autoScroll={false}
+                >
+                    <StyledInventory>
+                        {mapInventory("weapons")}
+                        {mapInventory("engines")}
+                        {mapInventory("inventory")}
+                    </StyledInventory>
+                    <DragOverlay>
+                        {draggedItem.inventoryType &&
+                            mapSlot(draggedItem.inventoryType, draggedItem.index)}
+                    </DragOverlay>
+                </DndContext>
+            </StyledScrollArea>
+        </Drawer>
     );
 };

@@ -1,8 +1,8 @@
 import "core-js/actual";
 import React, { useEffect, useState } from "react";
 import { Device } from "@capacitor/device";
-import { MantineProvider, Stack, Text } from "@mantine/core";
-import { useLocalStorage, useToggle } from "@mantine/hooks";
+import { Indicator, MantineProvider, Stack, Text } from "@mantine/core";
+import { useDisclosure, useLocalStorage, useToggle } from "@mantine/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
 import {
@@ -11,6 +11,7 @@ import {
     Music,
     MusicOff,
     Settings,
+    Tool,
     User,
     Volume,
     VolumeOff,
@@ -55,6 +56,8 @@ const App = () => {
     ]);
     const [settingsModal, toggleSettingsModal] = useToggle([false, true]);
     const [profileModal, toggleProfileModal] = useToggle([false, true]);
+    const [outfittingDrawer, { close: closeOutfittngDrawer, toggle: toggleOutfittngDrawer }] =
+        useDisclosure(false);
 
     const [deviceInfo, setDeviceInfo] = useState("");
     const logDeviceInfo = async () => {
@@ -111,13 +114,6 @@ const App = () => {
         <MantineProvider theme={{ colorScheme: "dark" }} children>
             <QueryClientProvider client={queryClient}>
                 <div id="ui">
-                    <SettingsModal
-                        settings={settings}
-                        setSettings={setSettings}
-                        opened={settingsModal}
-                        onClose={toggleSettings}
-                    />
-
                     <div className="volumeControls group">
                         <Button isSquare={true} onClick={toggleSettings}>
                             <Settings />
@@ -137,6 +133,12 @@ const App = () => {
                             {effectsIcon ? <VolumeOff /> : <Volume />}
                         </Button>
                     </div>
+                    <SettingsModal
+                        settings={settings}
+                        setSettings={setSettings}
+                        opened={settingsModal}
+                        onClose={toggleSettings}
+                    />
 
                     <div className="fullscreen group">
                         <Button isSquare={true} onClick={toggleFullscreen}>
@@ -144,17 +146,16 @@ const App = () => {
                         </Button>
                     </div>
 
-                    <ProfileModal
-                        queryClient={queryClient}
-                        opened={profileModal}
-                        onClose={toggleProfile}
-                    />
-
                     <div className="profile group">
                         <Button isSquare={true} onClick={toggleProfile}>
                             <User />
                         </Button>
                     </div>
+                    <ProfileModal
+                        queryClient={queryClient}
+                        opened={profileModal}
+                        onClose={toggleProfile}
+                    />
 
                     <Stack className="info group">
                         {Object.entries(deviceInfo).map(([key, value]) => (
@@ -163,7 +164,19 @@ const App = () => {
                             </Text>
                         ))}
                     </Stack>
-                    <OutfittingDrawer />
+
+                    <div className="outfitting group">
+                        <Indicator inline label="New" color="cyan" size={16} withBorder>
+                            <Button isSquare={true} onClick={toggleOutfittngDrawer}>
+                                <Tool />
+                            </Button>
+                        </Indicator>
+                    </div>
+
+                    <OutfittingDrawer
+                        shouldBeOpened={outfittingDrawer}
+                        close={closeOutfittngDrawer}
+                    />
                 </div>
             </QueryClientProvider>
         </MantineProvider>
