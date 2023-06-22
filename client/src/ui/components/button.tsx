@@ -20,9 +20,10 @@ const defaultProps: Partial<ButtonProps> = {
 
 const _StyledButton = styled(MantineButton, {
     shouldForwardProp: excludeProps(["isSquare"]),
-})((props) => ({
-    padding: props.isSquare && 0,
-    aspectRatio: props.isSquare && 1 / 1,
+})(({ isSquare }) => ({
+    padding: isSquare && 0,
+    aspectRatio: isSquare && 1 / 1,
+    borderWidth: "2px",
 }));
 
 export const Button = (props: ButtonProps) => {

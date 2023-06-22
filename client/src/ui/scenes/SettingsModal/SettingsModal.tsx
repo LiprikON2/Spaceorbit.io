@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import { game } from "~/game";
 import { Button } from "~/ui/components";
-import { Slider } from "./components";
+import { SliderInput } from "./components";
 
 export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
     const addEngine = () => {
@@ -110,21 +110,21 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                     <Tabs.Panel value="audio">
                         <div className="group group-vertical">
                             <div className="group group-vertical">
-                                <Slider
+                                <SliderInput
                                     title="Master Volume"
                                     min={0}
                                     max={1}
                                     onChangeEnd={(value) => setVolume("masterVolume", value)}
                                     defaultValue={settings.masterVolume}
                                 />
-                                <Slider
+                                <SliderInput
                                     title="Music Volume"
                                     min={0}
                                     max={0.025}
                                     onChangeEnd={(value) => setVolume("musicVolume", value)}
                                     defaultValue={settings.musicVolume}
                                 />
-                                <Slider
+                                <SliderInput
                                     title="Effects Volume"
                                     min={0}
                                     max={0.1}

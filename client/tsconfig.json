@@ -17,7 +17,6 @@
 
         "moduleResolution": "node",
         "lib": ["dom", "esnext"],
-        // "lib": ["es5", "dom"]
         "paths": {
             "~/game": ["./src/game/scripts/index"],
             "~/game/*": ["./src/game/scripts/*"],

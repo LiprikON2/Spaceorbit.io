@@ -21,12 +21,8 @@ import { ProfileModal } from "./scenes/ProfileModal";
 import { SettingsModal } from "./scenes/SettingsModal";
 import "./App.css";
 
-const isTouchDevice = () => {
-    return (
-        // @ts-ignore
-        "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0
-    );
-};
+const isTouchDevice = () =>
+    "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator["msMaxTouchPoints"] > 0;
 
 export const App = ({ queryClient }) => {
     const [settings, setSettings] = useLocalStorage({
@@ -60,7 +56,6 @@ export const App = ({ queryClient }) => {
 
     useEffect(() => {
         game.init(settings);
-
         logDeviceInfo();
     }, []);
 

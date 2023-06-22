@@ -1,7 +1,7 @@
-import { Title, Slider as MantineSlider } from "@mantine/core";
+import { Title, Slider } from "@mantine/core";
 import React from "react";
 
-export const Slider = ({
+export const SliderInput = ({
     className = "slider",
     color = "cyan",
     title,
@@ -13,7 +13,7 @@ export const Slider = ({
     return (
         <>
             <Title order={6}>{title}</Title>
-            <MantineSlider
+            <Slider
                 className={className}
                 color={color}
                 label={(value) => `${(value * 100 * (1 / max)).toFixed(0)}%`}
