@@ -6,7 +6,7 @@ import { Button } from "~/ui/components";
 import { NonFieldErrors } from "../../components";
 import { useRegisterMutation } from "./hooks";
 
-export const Register = ({ queryClient, setShowLogIn }) => {
+export const Register = ({ setShowLogIn }) => {
     const form = useForm({
         initialValues: {
             email: "",
@@ -22,9 +22,7 @@ export const Register = ({ queryClient, setShowLogIn }) => {
     });
     const [nonFieldErrors, setNonFieldErrors] = useState("");
 
-    const handleSignUp = useRegisterMutation(queryClient, (errors) =>
-        setNonFieldErrors([...errors])
-    );
+    const handleSignUp = useRegisterMutation((errors) => setNonFieldErrors([...errors]));
 
     return (
         <form onSubmit={form.onSubmit(handleSignUp)}>

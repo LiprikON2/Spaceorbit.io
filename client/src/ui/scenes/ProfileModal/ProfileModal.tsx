@@ -6,7 +6,7 @@ import { Login } from "./scenes/Login";
 import { Me } from "./scenes/Me";
 import { useProfile } from "./hooks";
 
-export const ProfileModal = ({ queryClient, opened, onClose }) => {
+export const ProfileModal = ({ opened, onClose }) => {
     const { me, meStatus, isLoggedIn, logout } = useProfile();
     const [showLogIn, setShowLogIn] = useState(true);
 
@@ -23,16 +23,11 @@ export const ProfileModal = ({ queryClient, opened, onClose }) => {
                 }
             >
                 {isLoggedIn ? (
-                    <Me
-                        queryClient={queryClient}
-                        me={me}
-                        meStatus={meStatus}
-                        handleLogout={logout}
-                    />
+                    <Me me={me} meStatus={meStatus} handleLogout={logout} />
                 ) : showLogIn ? (
-                    <Login queryClient={queryClient} setShowLogIn={setShowLogIn} />
+                    <Login setShowLogIn={setShowLogIn} />
                 ) : (
-                    <Register queryClient={queryClient} setShowLogIn={setShowLogIn} />
+                    <Register setShowLogIn={setShowLogIn} />
                 )}
             </Modal>
         </>

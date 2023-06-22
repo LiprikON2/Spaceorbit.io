@@ -6,7 +6,7 @@ import { Button } from "~/ui/components";
 import { NonFieldErrors } from "../../components";
 import { useLoginMutation } from "./hooks";
 
-export const Login = ({ queryClient, setShowLogIn }) => {
+export const Login = ({ setShowLogIn }) => {
     const form = useForm({
         initialValues: {
             email: "",
@@ -21,7 +21,7 @@ export const Login = ({ queryClient, setShowLogIn }) => {
 
     const [nonFieldErrors, setNonFieldErrors] = useState("");
 
-    const handleLogIn = useLoginMutation(queryClient, (errors) => setNonFieldErrors([...errors]));
+    const handleLogIn = useLoginMutation((errors) => setNonFieldErrors([...errors]));
 
     return (
         <form onSubmit={form.onSubmit(handleLogIn)}>

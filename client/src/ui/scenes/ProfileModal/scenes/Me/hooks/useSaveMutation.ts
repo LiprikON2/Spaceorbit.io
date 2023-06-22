@@ -1,15 +1,17 @@
-import { useIsMutating, useMutation } from "@tanstack/react-query";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { postToBackend } from "~/ui/services/api";
 
 const save = async ([id, body, accessToken]) =>
     await postToBackend(["users", id] as any, "PATCH", body, accessToken);
 
-export const useSaveMutation = (queryClient, setErrros) => {
+export const useSaveMutation = (setErrros) => {
+    const queryClient = useQueryClient();
+
     const logInMutation = useMutation(save as any, {
         onSuccess: ({ json, ok }) => {
             if (ok) {
-                queryClient.invalidateQueries("users");
+                queryClient.invalidateQueries({ queryKey: ["me"] });
             } else {
                 setErrros([json.message]);
             }

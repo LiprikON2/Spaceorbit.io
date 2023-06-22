@@ -41,7 +41,7 @@ root.render(
         children
     >
         <QueryClientProvider client={queryClient}>
-            <App queryClient={queryClient} />
+            <App />
         </QueryClientProvider>
     </MantineProvider>
 );

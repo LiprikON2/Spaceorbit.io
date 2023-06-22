@@ -6,7 +6,7 @@ import { game } from "~/game";
 import { NonFieldErrors } from "../../components";
 import { useSaveMutation } from "./hooks";
 
-export const Me = ({ queryClient, me, meStatus, handleLogout }) => {
+export const Me = ({ me, meStatus, handleLogout }) => {
     const [accessToken, setAccessToken] = useSessionStorage({
         key: "accessToken",
         defaultValue: "",
@@ -29,7 +29,7 @@ export const Me = ({ queryClient, me, meStatus, handleLogout }) => {
     };
     const [nonFieldErrors, setNonFieldErrors] = useState("");
 
-    const save = useSaveMutation(queryClient, setNonFieldErrors);
+    const save = useSaveMutation(setNonFieldErrors);
 
     return (
         <Stack>

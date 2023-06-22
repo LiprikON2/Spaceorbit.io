@@ -1,11 +1,13 @@
-import { useIsMutating, useMutation } from "@tanstack/react-query";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSessionStorage } from "@mantine/hooks";
 
 import { postToBackend } from "~/ui/services/api";
 
 const signUp = async (body) => await postToBackend(["users", "register"] as any, "POST", body);
 
-export const useRegisterMutation = (queryClient, setErrors) => {
+export const useRegisterMutation = (setErrors) => {
+    const queryClient = useQueryClient();
+
     const [accessToken, setAccessToken] = useSessionStorage({
         key: "accessToken",
         defaultValue: "",
@@ -18,7 +20,7 @@ export const useRegisterMutation = (queryClient, setErrors) => {
     const useRegisterMutation = useMutation(signUp as any, {
         onSuccess: ({ json, ok }) => {
             if (ok) {
-                queryClient.invalidateQueries("users");
+                queryClient.invalidateQueries({ queryKey: ["me"] });
                 const { accessToken, refreshToken } = json;
                 setAccessToken(accessToken);
                 setRefreshToken(refreshToken);

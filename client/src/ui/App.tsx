@@ -24,7 +24,7 @@ import "./App.css";
 const isTouchDevice = () =>
     "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator["msMaxTouchPoints"] > 0;
 
-export const App = ({ queryClient }) => {
+export const App = () => {
     const [settings, setSettings] = useLocalStorage({
         key: "settings",
         defaultValue: {
@@ -137,7 +137,7 @@ export const App = ({ queryClient }) => {
                     <User />
                 </Button>
             </div>
-            <ProfileModal queryClient={queryClient} opened={profileModal} onClose={toggleProfile} />
+            <ProfileModal opened={profileModal} onClose={toggleProfile} />
 
             <Stack className="info group">
                 {Object.entries(deviceInfo).map(([key, value]) => (
