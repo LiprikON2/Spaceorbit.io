@@ -41,6 +41,9 @@
 
         <title><%= htmlWebpackPlugin.options.gameName %></title>
         <style>
+            :root {
+                color-scheme: dark;
+            }
             html,
             body {
                 height: 100%;
@@ -51,12 +54,8 @@
             }
             #ui {
                 position: absolute;
-                top: 0;
-                left: 0;
+                inset: 0;
                 z-index: 1;
-            }
-            :focus-visible {
-                outline: none;
             }
         </style>
 

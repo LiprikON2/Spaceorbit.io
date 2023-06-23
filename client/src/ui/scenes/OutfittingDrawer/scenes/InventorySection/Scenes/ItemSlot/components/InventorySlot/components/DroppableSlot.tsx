@@ -18,7 +18,6 @@ const StyledDroppableSlot = styled.div<StyledDroppableSlotProps>`
     border-radius: 6px;
     background: hsl(225, 7%, 13%);
     box-shadow: 5px 5px 13px #0e0e10, -5px -5px 13px #26282c;
-
     filter: ${({ $isOver }) => $isOver && "brightness(80%)"};
 `;
 

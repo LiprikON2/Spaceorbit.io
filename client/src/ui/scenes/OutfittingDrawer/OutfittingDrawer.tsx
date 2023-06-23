@@ -1,25 +1,11 @@
 import React, { useState } from "react";
-import {
-    Divider,
-    Drawer,
-    ScrollArea,
-    ScrollAreaProps,
-    Title,
-    createPolymorphicComponent,
-} from "@mantine/core";
+import { Divider, Drawer, Title } from "@mantine/core";
 import { useDidUpdate, useSetState } from "@mantine/hooks";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
-import styled from "@emotion/styled";
 
 import { game } from "~/game";
 import { InventorySection } from "./scenes/InventorySection";
-import { ItemSlot } from "./scenes/InventorySection/Scenes/ItemSlot";
-
-const _StyledScrollArea = styled(ScrollArea)`
-    height: 100%;
-    width: 100%;
-`;
-const StyledScrollArea = createPolymorphicComponent<"div", ScrollAreaProps>(_StyledScrollArea);
+import { InventoryItem } from "./scenes/InventorySection/Scenes/ItemSlot/components/InventoryItem";
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
@@ -38,8 +24,8 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const handleDragStart = (event) => {
         const { active } = event;
         if (active) {
-            const { inventoryType, slotIndex } = active.data.current;
-            setDraggedItem({ inventoryType, slotIndex });
+            const currentDraggedItem = active.data.current;
+            setDraggedItem(currentDraggedItem);
         }
     };
 
@@ -88,7 +74,8 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                     // Update target slot
                     setOutfit({ [inventoryType]: updatedInventory });
                 }
-                setDraggedItem({ inventoryType: null, slotIndex: null });
+                const currentDraggedItem = active.data.current;
+                setDraggedItem(currentDraggedItem);
             }
         }
     };
@@ -106,42 +93,75 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         reoutfit();
     }, [outfit]);
 
-    const [draggedItem, setDraggedItem] = useState({ inventoryType: null, slotIndex: null });
+    const [draggedItem, setDraggedItem] = useState<any>(null);
 
     return (
-        <Drawer
-            opened={shouldBeOpened && didLoad}
-            onClose={close}
-            title={<Title order={2}>Outfitting</Title>}
-            overlayProps={{ opacity: 0 }}
-            padding="xl"
-            size="lg"
-        >
-            <Divider my="sm" />
-            <StyledScrollArea>
-                <DndContext
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                    autoScroll={false}
-                >
-                    {outfit && (
-                        <>
-                            <InventorySection title="Weapons" type="weapons" outfit={outfit} />
-                            <InventorySection title="Engines" type="engines" outfit={outfit} />
-                            <InventorySection title="Inventory" type="inventory" outfit={outfit} />
-                        </>
-                    )}
-                    <DragOverlay>
-                        {draggedItem.inventoryType && draggedItem.slotIndex && (
-                            <ItemSlot
-                                item={outfit[draggedItem.inventoryType][draggedItem.slotIndex]}
-                                index={draggedItem.slotIndex}
-                                inventoryType={draggedItem.inventoryType}
-                            />
+        <Drawer.Root opened={shouldBeOpened && didLoad} onClose={close} padding="xl" size="md">
+            <Drawer.Overlay opacity={0} />
+            <Drawer.Content>
+                <Drawer.Header>
+                    <Title order={2}>Outfitting</Title>
+                    <Drawer.CloseButton />
+                </Drawer.Header>
+                <Drawer.Body>
+                    <DndContext
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        autoScroll={false}
+                    >
+                        {outfit && (
+                            <>
+                                <InventorySection title="Weapons" type="weapons" outfit={outfit} />
+                                <InventorySection title="Engines" type="engines" outfit={outfit} />
+                                <InventorySection
+                                    title="Inventory"
+                                    type="inventory"
+                                    outfit={outfit}
+                                />
+                            </>
                         )}
-                    </DragOverlay>
-                </DndContext>
-            </StyledScrollArea>
-        </Drawer>
+                        <DragOverlay>
+                            {draggedItem && (
+                                <InventoryItem
+                                    inventoryType={draggedItem.inventoryType}
+                                    slotIndex={draggedItem.slotIndex}
+                                    itemName={draggedItem.itemName}
+                                    itemType={draggedItem.itemType}
+                                    label={draggedItem.label}
+                                    color={draggedItem.color}
+                                />
+                            )}
+                        </DragOverlay>
+                    </DndContext>
+                </Drawer.Body>
+            </Drawer.Content>
+        </Drawer.Root>
+        // <Drawer
+        //     opened={shouldBeOpened && didLoad}
+        //     onClose={close}
+        //     title={<Title order={2}>Outfitting</Title>}
+        //     overlayProps={{ opacity: 0 }}
+        //     padding="xl"
+        //     size="md"
+        // >
+        //     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
+        //         {outfit && (
+        //             <>
+        //                 <InventorySection title="Weapons" type="weapons" outfit={outfit} />
+        //                 <InventorySection title="Engines" type="engines" outfit={outfit} />
+        //                 <InventorySection title="Inventory" type="inventory" outfit={outfit} />
+        //             </>
+        //         )}
+        //         <DragOverlay>
+        //             {draggedItem.inventoryType && draggedItem.slotIndex && (
+        //                 <ItemSlot
+        //                     item={outfit[draggedItem.inventoryType][draggedItem.slotIndex]}
+        //                     index={draggedItem.slotIndex}
+        //                     inventoryType={draggedItem.inventoryType}
+        //                 />
+        //             )}
+        //         </DragOverlay>
+        //     </DndContext>
+        // </Drawer>
     );
 };
