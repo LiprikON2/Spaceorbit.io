@@ -20,7 +20,7 @@ export const Register = ({ setShowLogIn }) => {
             password: fields.password.length === 0 ? "Please, enter your password" : null,
         }),
     });
-    const [nonFieldErrors, setNonFieldErrors] = useState("");
+    const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 
     const handleSignUp = useRegisterMutation((errors) => setNonFieldErrors([...errors]));
 

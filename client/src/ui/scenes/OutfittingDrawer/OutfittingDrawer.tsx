@@ -113,7 +113,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
             opened={shouldBeOpened && didLoad}
             onClose={close}
             title={<Title order={2}>Outfitting</Title>}
-            overlayOpacity={0}
+            overlayProps={{ opacity: 0 }}
             padding="xl"
             size="lg"
         >
@@ -132,7 +132,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                         </>
                     )}
                     <DragOverlay>
-                        {draggedItem.inventoryType && (
+                        {draggedItem.inventoryType && draggedItem.slotIndex && (
                             <ItemSlot
                                 item={outfit[draggedItem.inventoryType][draggedItem.slotIndex]}
                                 index={draggedItem.slotIndex}

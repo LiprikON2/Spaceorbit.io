@@ -48,7 +48,7 @@ export const App = () => {
     const [outfittingDrawer, { close: closeOutfittngDrawer, toggle: toggleOutfittngDrawer }] =
         useDisclosure(false);
 
-    const [deviceInfo, setDeviceInfo] = useState("");
+    const [deviceInfo, setDeviceInfo] = useState({});
     const logDeviceInfo = async () => {
         const info = await Device.getInfo();
         setDeviceInfo(info);

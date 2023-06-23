@@ -55,7 +55,7 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
         }
     };
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
-    const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState<string | null>("audio");
 
     // TODELETE
     const sendMobs = (e) => {
@@ -94,11 +94,10 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                 title={<Title order={4}>Game Settings</Title>}
             >
                 <Tabs
-                    active={activeTab}
+                    value={activeTab}
                     onTabChange={setActiveTab}
                     color="cyan"
                     defaultValue="audio"
-                    children={undefined}
                 >
                     <Tabs.List>
                         <Tabs.Tab value="audio">Audio</Tabs.Tab>
@@ -141,9 +140,9 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 <SegmentedControl
                                     color="cyan"
                                     data={[
-                                        { label: "Low", value: 0.5 },
-                                        { label: "Medium", value: 0.75 },
-                                        { label: "High", value: 1 },
+                                        { label: "Low", value: "0.5" },
+                                        { label: "Medium", value: "0.75" },
+                                        { label: "High", value: "1" },
                                     ]}
                                     transitionDuration={0}
                                     value={settings.graphicsSettings}
@@ -199,19 +198,19 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                         <div className="group group-vertical">
                             <form onSubmit={sendMobs}>
                                 <NumberInput
-                                    onChange={(value) => setMobsCount(value)}
+                                    onChange={(value) => setMobsCount(Number(value))}
                                     defaultValue={mobsCount}
                                     placeholder="You better not put 1000..."
                                     label="Mobs Count"
                                 />
                                 <NumberInput
-                                    onChange={(value) => setx(value)}
+                                    onChange={(value) => setx(Number(value))}
                                     defaultValue={x}
                                     placeholder="x"
                                     label="x"
                                 />
                                 <NumberInput
-                                    onChange={(value) => sety(value)}
+                                    onChange={(value) => sety(Number(value))}
                                     defaultValue={y}
                                     placeholder="y"
                                     label="y"

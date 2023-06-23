@@ -3,7 +3,7 @@ import React from "react";
 import { Icon } from "~/ui/scenes/OutfittingDrawer/components";
 import { DroppableSlot } from "./components";
 
-export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children = undefined }) => {
+export const InventorySlot = ({ inventoryType, slotIndex, isEmpty, children }: any) => {
     const getLabel = () => {
         if (inventoryType === "weapons") return "Wpn";
         else if (inventoryType === "engines") return "Eng";

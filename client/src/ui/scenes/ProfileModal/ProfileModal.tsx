@@ -7,8 +7,8 @@ import { Me } from "./scenes/Me";
 import { useProfile } from "./hooks";
 
 export const ProfileModal = ({ opened, onClose }) => {
-    const { me, meStatus, isLoggedIn, logout } = useProfile();
-    const [showLogIn, setShowLogIn] = useState(true);
+    const { isLoggedIn, logout } = useProfile();
+    const [showLogIn, setShowLogIn] = useState<boolean>(true);
 
     return (
         <>
@@ -23,7 +23,7 @@ export const ProfileModal = ({ opened, onClose }) => {
                 }
             >
                 {isLoggedIn ? (
-                    <Me me={me} meStatus={meStatus} handleLogout={logout} />
+                    <Me onLogout={logout} />
                 ) : showLogIn ? (
                     <Login setShowLogIn={setShowLogIn} />
                 ) : (

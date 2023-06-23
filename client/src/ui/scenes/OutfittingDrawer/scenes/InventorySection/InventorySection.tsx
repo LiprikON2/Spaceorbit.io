@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { Title } from "@mantine/core";
 import styled from "@emotion/styled";
 
@@ -13,7 +13,7 @@ const StyledInventory = styled.div`
     margin-block: 2rem;
     margin-inline: 1rem;
     user-select: none;
-` as FC;
+`;
 
 export const InventorySection = ({ title, type, outfit }) => {
     const items = outfit[type];

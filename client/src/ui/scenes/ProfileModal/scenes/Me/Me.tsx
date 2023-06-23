@@ -5,8 +5,11 @@ import { useSessionStorage } from "@mantine/hooks";
 import { game } from "~/game";
 import { NonFieldErrors } from "../../components";
 import { useSaveMutation } from "./hooks";
+import { useProfile } from "../../hooks";
 
-export const Me = ({ me, meStatus, handleLogout }) => {
+export const Me = ({ onLogout }) => {
+    const { me, meStatus } = useProfile();
+
     const [accessToken, setAccessToken] = useSessionStorage({
         key: "accessToken",
         defaultValue: "",
@@ -30,7 +33,6 @@ export const Me = ({ me, meStatus, handleLogout }) => {
     const [nonFieldErrors, setNonFieldErrors] = useState("");
 
     const save = useSaveMutation(setNonFieldErrors);
-
     return (
         <Stack>
             <NonFieldErrors errors={nonFieldErrors} />
@@ -49,7 +51,7 @@ export const Me = ({ me, meStatus, handleLogout }) => {
             <Group>
                 <Button onClick={handleSave}>Save</Button>
                 <Button onClick={handleLoad}>Load</Button>
-                <Button onClick={handleLogout}>Log Out</Button>
+                <Button onClick={onLogout}>Log Out</Button>
             </Group>
         </Stack>
     );

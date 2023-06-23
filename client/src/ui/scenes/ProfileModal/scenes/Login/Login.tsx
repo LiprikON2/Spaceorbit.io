@@ -19,7 +19,7 @@ export const Login = ({ setShowLogIn }) => {
         }),
     });
 
-    const [nonFieldErrors, setNonFieldErrors] = useState("");
+    const [nonFieldErrors, setNonFieldErrors] = useState<string[]>([]);
 
     const handleLogIn = useLoginMutation((errors) => setNonFieldErrors([...errors]));
 

@@ -38,7 +38,6 @@ root.render(
                 },
             },
         }}
-        children
     >
         <QueryClientProvider client={queryClient}>
             <App />
