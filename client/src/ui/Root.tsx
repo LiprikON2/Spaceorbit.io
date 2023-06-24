@@ -36,6 +36,11 @@ root.render(
                         size: "lg",
                     },
                 },
+                Group: {
+                    defaultProps: {
+                        spacing: "xs",
+                    },
+                },
             },
         }}
     >
