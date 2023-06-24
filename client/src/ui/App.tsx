@@ -9,7 +9,6 @@ import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
 import { Right } from "./scenes/Right";
 import { useSettings } from "./hooks";
-import "./App.css";
 
 const StyledUI = styled.div`
     position: absolute;

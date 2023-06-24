@@ -11,7 +11,9 @@ export const SliderInput = ({
 }) => {
     return (
         <>
-            <Title order={6}>{title}</Title>
+            <Title order={4} size="h6">
+                {title}
+            </Title>
             <Slider
                 color={color}
                 label={(value) => `${(value * 100 * (1 / max)).toFixed(0)}%`}

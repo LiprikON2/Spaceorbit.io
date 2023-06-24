@@ -1,4 +1,15 @@
-import { Modal, NumberInput, SegmentedControl, Space, Switch, Tabs, Title } from "@mantine/core";
+import {
+    Container,
+    Group,
+    Modal,
+    NumberInput,
+    SegmentedControl,
+    Space,
+    Stack,
+    Switch,
+    Tabs,
+    Title,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
 
@@ -109,8 +120,9 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                 <Tabs.Tab value="cheats">Cheats</Tabs.Tab>
                             </Tabs.List>
                             <Tabs.Panel value="audio">
-                                <div className="group group-vertical">
-                                    <div className="group group-vertical">
+                                <Container>
+                                    <Stack>
+                                        <Title order={3}>Volume</Title>
                                         <SliderInput
                                             title="Master Volume"
                                             min={0}
@@ -136,13 +148,13 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                             }
                                             defaultValue={settings.effectsVolume}
                                         />
-                                    </div>
-                                </div>
+                                    </Stack>
+                                </Container>
                             </Tabs.Panel>
                             <Tabs.Panel value="graphics">
-                                <div className="group group-vertical">
-                                    <div className="group group-vertical">
-                                        <Title order={6}>General</Title>
+                                <Container>
+                                    <Stack>
+                                        <Title order={3}>General</Title>
                                         <SegmentedControl
                                             color="cyan"
                                             data={[
@@ -154,25 +166,25 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                             value={settings.graphicsSettings}
                                             onChange={handleGraphicSettings}
                                         />
-                                    </div>
-                                </div>
+                                    </Stack>
+                                </Container>
                             </Tabs.Panel>
                             <Tabs.Panel value="controls">
-                                <div className="group group-vertical">
-                                    <div className="group group-vertical">
-                                        <Title order={6}>Mobile</Title>
+                                <Container>
+                                    <Stack>
+                                        <Title order={3}>Mobile</Title>
                                         <Switch
                                             label="Enable touch controls"
                                             checked={touchControlChecked}
                                             onChange={toggleTouchControls}
                                         />
-                                    </div>
-                                </div>
+                                    </Stack>
+                                </Container>
                             </Tabs.Panel>
                             <Tabs.Panel value="ship">
-                                <div className="group group-vertical">
-                                    <div className="group group-vertical">
-                                        <Title order={6}>Modules</Title>
+                                <Container>
+                                    <Stack>
+                                        <Title order={3}>Modules</Title>
                                         <Button className="addEngine" onClick={addEngine}>
                                             Add: Engine
                                         </Button>
@@ -197,36 +209,40 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                         <Button className="addWeapon" onClick={() => addGatling(2)}>
                                             Add: Weapon slot 3 - Gatling Gun
                                         </Button>
-                                    </div>
-                                </div>
+                                    </Stack>
+                                </Container>
                             </Tabs.Panel>
                             <Tabs.Panel value="cheats">
-                                <div className="group group-vertical">
-                                    <form onSubmit={sendMobs}>
-                                        <NumberInput
-                                            onChange={(value) => setMobsCount(Number(value))}
-                                            defaultValue={mobsCount}
-                                            placeholder="You better not put 1000..."
-                                            label="Mobs Count"
-                                        />
-                                        <NumberInput
-                                            onChange={(value) => setx(Number(value))}
-                                            defaultValue={x}
-                                            placeholder="x"
-                                            label="x"
-                                        />
-                                        <NumberInput
-                                            onChange={(value) => sety(Number(value))}
-                                            defaultValue={y}
-                                            placeholder="y"
-                                            label="y"
-                                        />
-                                        <Space h="md" />
-                                        <Button type="submit">Send mobs at x, y</Button>
-                                        <Space h="md" />
-                                        <Button onClick={teleport}>Teleport to x, y</Button>
-                                    </form>
-                                </div>
+                                <Container>
+                                    <Stack>
+                                        <Title order={3}>General</Title>
+
+                                        <form onSubmit={sendMobs}>
+                                            <NumberInput
+                                                onChange={(value) => setMobsCount(Number(value))}
+                                                defaultValue={mobsCount}
+                                                placeholder="You better not put 1000..."
+                                                label="Mobs Count"
+                                            />
+                                            <NumberInput
+                                                onChange={(value) => setx(Number(value))}
+                                                defaultValue={x}
+                                                placeholder="x"
+                                                label="x"
+                                            />
+                                            <NumberInput
+                                                onChange={(value) => sety(Number(value))}
+                                                defaultValue={y}
+                                                placeholder="y"
+                                                label="y"
+                                            />
+                                            <Space h="md" />
+                                            <Button type="submit">Send mobs at x, y</Button>
+                                            <Space h="md" />
+                                            <Button onClick={teleport}>Teleport to x, y</Button>
+                                        </form>
+                                    </Stack>
+                                </Container>
                             </Tabs.Panel>
                         </Tabs>
                     </Modal.Body>
