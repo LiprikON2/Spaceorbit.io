@@ -1,6 +1,5 @@
 import {
     Container,
-    Group,
     Modal,
     NumberInput,
     SegmentedControl,
@@ -16,8 +15,17 @@ import React, { useState } from "react";
 import { game } from "~/game";
 import { Button } from "~/ui/components";
 import { SliderInput } from "./components";
+import { useSettings } from "~/ui/hooks";
 
-export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
+export const SettingsModal = ({ opened, onClose }) => {
+    const {
+        settings,
+        setMasterVolumeSetting,
+        setEffectsVolumeSetting,
+        setMusicVolumeSetting,
+        setGraphicsSettingsSetting,
+    } = useSettings();
+
     const addEngine = () => {
         const player = game.getPlayer();
         if (player) {
@@ -44,18 +52,24 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
         }
     };
 
-    const setVolume = (key, newValue) => {
+    const setVolume = (key, volume) => {
         const { soundManager } = game.getScene();
         const isValidKey =
             key === "masterVolume" || key === "musicVolume" || key === "effectsVolume";
 
         if (soundManager && isValidKey) {
-            soundManager.setVolume(key, newValue);
-            setSettings((pervSettings) => ({ ...pervSettings, [key]: newValue }));
+            soundManager.setVolume(key, volume);
+            if (key === "masterVolume") {
+                setMasterVolumeSetting(volume);
+            } else if (key === "musicVolume") {
+                setMusicVolumeSetting(volume);
+            } else if (key === "effectsVolume") {
+                setEffectsVolumeSetting(volume);
+            }
         }
     };
-    const handleGraphicSettings = (newValue) => {
-        setSettings((pervSettings) => ({ ...pervSettings, graphicsSettings: newValue }));
+    const handleGraphicSettings = (value) => {
+        setGraphicsSettingsSetting(value);
     };
 
     const toggleTouchControls = () => {
@@ -163,7 +177,7 @@ export const SettingsModal = ({ settings, setSettings, opened, onClose }) => {
                                                 { label: "High", value: "1" },
                                             ]}
                                             transitionDuration={0}
-                                            value={settings.graphicsSettings}
+                                            value={String(settings.graphicsSettings)}
                                             onChange={handleGraphicSettings}
                                         />
                                     </Stack>
