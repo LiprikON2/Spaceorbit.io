@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useToggle } from "@mantine/hooks";
 import { Volume, VolumeOff } from "tabler-icons-react";
 
-import { ToggleButton } from "../../components";
+import { ToggleButton } from "~/ui/components";
 import { useSettings } from "~/ui/hooks";
 import { game } from "~/game";
 
@@ -21,10 +21,6 @@ export const EffectsMuteBtn = () => {
             toggle();
         }
     };
-
-    useEffect(() => {
-        console.log("settings are actylly change", settings);
-    }, [settings]);
 
     return (
         <ToggleButton on={on} iconOn={<Volume />} iconOff={<VolumeOff />} onClick={handleClick} />

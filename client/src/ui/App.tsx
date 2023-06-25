@@ -8,7 +8,7 @@ import { TopRight } from "./scenes/TopRight";
 import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
 import { Right } from "./scenes/Right";
-import { useSettings } from "./hooks";
+import { syncSettingsToSession, useSettings } from "./hooks";
 
 const StyledUI = styled.div`
     position: absolute;
@@ -68,6 +68,9 @@ export const App = () => {
 
     useEffect(() => {
         game.init(settings);
+        const unsub = syncSettingsToSession();
+
+        return unsub;
     }, []);
 
     return (
