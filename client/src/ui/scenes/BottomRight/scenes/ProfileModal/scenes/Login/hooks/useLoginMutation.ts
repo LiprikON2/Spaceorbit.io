@@ -47,5 +47,3 @@ export const useLoginMutation = (setErrros) => {
 
     return handleLogIn;
 };
-
-export default useLoginMutation;
