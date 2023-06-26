@@ -42,7 +42,7 @@ const prod = {
             swSrc: path.resolve(__dirname, "../pwa/sw.js"),
             swDest: "sw.js",
             // PWA asset caching size limit (for offline)
-            maximumFileSizeToCacheInBytes: 5000000,
+            maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
         }),
     ],
 };
