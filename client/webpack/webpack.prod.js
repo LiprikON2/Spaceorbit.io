@@ -41,6 +41,8 @@ const prod = {
         new InjectManifest({
             swSrc: path.resolve(__dirname, "../pwa/sw.js"),
             swDest: "sw.js",
+            // PWA asset caching size limit (for offline)
+            maximumFileSizeToCacheInBytes: 5000000,
         }),
     ],
 };
