@@ -1,7 +1,9 @@
 const path = require("path");
-const { merge } = require("webpack-merge");
+const { merge, mergeWithCustomize, unique } = require("webpack-merge");
 const common = require("./webpack.common");
 const { InjectManifest } = require("workbox-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 // const WebpackObfuscator = require('webpack-obfuscator')
 
 const prod = {
@@ -30,11 +32,25 @@ const prod = {
         //   },
         //   ['vendors.*.js', 'sw.js']
         // ),
+        new HtmlWebpackPlugin({
+            gameName: "Spaceorbit.io",
+            template: "src/index.html",
+            dev: false,
+        }),
+
         new InjectManifest({
             swSrc: path.resolve(__dirname, "../pwa/sw.js"),
             swDest: "sw.js",
+            // PWA asset caching size limit (for offline)
+            maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
         }),
     ],
 };
 
-module.exports = merge(common, prod);
+module.exports = mergeWithCustomize({
+    customizeArray: unique(
+        "plugins",
+        ["HtmlWebpackPlugin"],
+        (plugin) => plugin.constructor && plugin.constructor.name
+    ),
+})(common, prod);

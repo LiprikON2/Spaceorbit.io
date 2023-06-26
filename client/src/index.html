@@ -57,14 +57,17 @@
         <noscript>Please enable javascript to continue using this application.</noscript>
 
         <!-- installs the serviceWorker -->
-        <!-- <script>
+        <% if (!htmlWebpackPlugin.options.dev){ %>
+        <script>
             if ("serviceWorker" in navigator) {
                 window.addEventListener("load", () => {
                     navigator.serviceWorker.register("./sw.js");
                 });
             }
-        </script> -->
+        </script>
+        <% } %>
     </head>
-    <body></body>
-    <div id="phaser-game"></div>
+    <body>
+        <div id="phaser-game" />
+    </body>
 </html>

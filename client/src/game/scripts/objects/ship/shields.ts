@@ -1,10 +1,12 @@
 import debounce from "lodash/debounce";
+
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
     scene;
     ship;
-    lastHit: number = -Infinity;
+    lastHit = -Infinity;
     moveToPlugin;
     tweenFade;
+
     constructor(scene, ship) {
         super(scene, ship.x, ship.y, "shield");
         scene.add.existing(this);
@@ -57,6 +59,7 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
         200,
         { leading: true }
     );
+
     crack(silent = false) {
         this.disableBody(true, true);
         if (!silent) {

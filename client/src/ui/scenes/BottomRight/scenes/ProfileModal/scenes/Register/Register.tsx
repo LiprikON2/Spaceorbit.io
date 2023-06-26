@@ -58,5 +58,3 @@ export const Register = ({ setShowLogIn, initEmailPass = {}, setInitEmailPass })
         </form>
     );
 };
-
-export default Register;
