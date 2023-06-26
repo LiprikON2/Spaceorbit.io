@@ -78,7 +78,7 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin(),
-        new HtmlWebpackPlugin({ gameName: "Spaceorbit.io", template: "src/index.html" }),
+        new HtmlWebpackPlugin({ gameName: "Spaceorbit.io", template: "src/index.html", dev: true }),
         new CopyWebpackPlugin({
             patterns: [
                 { from: "src/game/assets", to: "assets" },

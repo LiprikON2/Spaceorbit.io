@@ -1,13 +1,13 @@
 {
     "name": "spaceorbit",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "",
     "homepage": "",
     "main": "index.js",
     "scripts": {
         "start": "webpack serve --config webpack/webpack.dev.js",
         "dev": "npm start",
-        "build": "rimraf dist && webpack --config webpack/webpack.prod.js",
+        "prod-build": "rimraf dist && webpack --config webpack/webpack.prod.js",
         "prod": "serve dist",
         "studio": "npx cap sync && npx cap open android",
         "studio-build": "npm run build && npx cap sync && npx cap open android",
@@ -29,7 +29,7 @@
         "author": "Yannick Deubel (https://github.com/yandeu)"
     },
     "engines": {
-        "node": ">=12"
+        "node": "==20.3.1"
     },
     "license": "MIT",
     "dependencies": {
