@@ -1,7 +1,7 @@
-# if [[ -n $(git status -s) ]]; then
-#     echo "Commit changes before proceeding"
-#     exit 1
-# fi
+if [[ -n $(git status -s) ]]; then
+    echo "Commit changes before proceeding"
+    exit 1
+fi
 
 if ! command -v gh >/dev/null 2>&1; then
     echo "Couldn't find GitHub's CLI: 'gh'"
