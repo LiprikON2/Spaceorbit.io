@@ -1,12 +1,10 @@
-cd ..
-
 if [[ -n $(git status -s) ]]; then
     echo "Commit changes before proceeding"
     exit 1
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
-    echo "Couldn't find github CLI: 'gh'"
+    echo "Couldn't find GitHub's CLI: 'gh'"
     exit 1
 fi
 
@@ -55,6 +53,8 @@ choosen_version=$(echo -e "$option1\n$option2\n$option3\n$option4" | $gum choose
 echo $choosen_version
 
 npm pkg set version=$choosen_version
+
+../scripts/apk-build.sh
 
 apks=$(find ./releases -maxdepth 1 -name "*$choosen_version*")
 
