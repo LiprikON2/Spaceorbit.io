@@ -1,7 +1,7 @@
-if [[ -n $(git status -s) ]]; then
-    echo "Commit changes before proceeding"
-    exit 1
-fi
+# if [[ -n $(git status -s) ]]; then
+#     echo "Commit changes before proceeding"
+#     exit 1
+# fi
 
 if ! command -v gh >/dev/null 2>&1; then
     echo "Couldn't find GitHub's CLI: 'gh'"
@@ -16,19 +16,19 @@ case "$(uname -sr)" in
 
     Linux*)
         os='Linux'
-        gum=./gum
+        gum=./scripts/gum
     ;;
 
     CYGWIN*|MINGW*|MINGW32*|MSYS*)
         os='Windows'
-        gum=./gum.exe
+        gum=./scripts/gum.exe
 
     ;;
 
     *)
         echo "Couldn't determine th OS, defaulting to Linux"
         os='Linux'
-        gum=./gum
+        gum=./scripts/gum
     ;;
 esac
 
@@ -54,7 +54,7 @@ echo $choosen_version
 
 npm pkg set version=$choosen_version
 
-../scripts/apk-build.sh
+./scripts/apk-build.sh
 
 apks=$(find ./releases -maxdepth 1 -name "*$choosen_version*")
 
