@@ -13,9 +13,8 @@
         "studio-build": "npm run prod-build && npx cap sync && npx cap open android",
         "quest": "npx cap run android --target 1WMHHB63B02031",
         "quest-build": "npm run prod-build && npx cap run android --target 1WMHHB63B02031",
-        "apk-build": "sh apk-build.sh",
-        "apk-release": "sh apk-release.sh",
-        "release": "npm run apk-build && npm run apk-release"
+        "apk-build": "cd scripts && sh apk-build.sh",
+        "release": "npm run apk-build && cd scripts && sh release.sh"
     },
     "keywords": [
         "Phaser",
