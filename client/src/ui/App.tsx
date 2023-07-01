@@ -2,13 +2,13 @@ import React, { useEffect } from "react";
 import { Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
-import { game } from "~/game";
+import { syncSettingsToSession, useGame } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
 import { TopRight } from "./scenes/TopRight";
+import { Center } from "./scenes/Center";
+import { Right } from "./scenes/Right";
 import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
-import { Right } from "./scenes/Right";
-import { syncSettingsToSession, useSettings } from "./hooks";
 
 const StyledUI = styled.div`
     position: absolute;
@@ -22,14 +22,14 @@ const StyledUI = styled.div`
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(8, 1fr);
     grid-template-areas:
-        "top-l top-l top-l . . . . . .     . top-r top-r"
-        "    .     .     . . . . . . .     .     .     ."
-        "    .     .     . . . . . . .     .     .     ."
-        "    .     .     . . . . . . . right right right"
-        "    .     .     . . . . . . . right right right"
-        "    .     .     . . . . . . .     .     .     ."
-        "    .     .     . . . . . . .     .     .     ."
-        "bot-l bot-l bot-l . . . . . .     . bot-r bot-r";
+        "top-l top-l top-l .    .    .    .    . .     . top-r top-r"
+        "    .     .     . .    .    .    .    . .     .     .     ."
+        "    .     .     . . cent cent cent cent .     .     .     ."
+        "    .     .     . . cent cent cent cent . right right right"
+        "    .     .     . . cent cent cent cent . right right right"
+        "    .     .     . . cent cent cent cent .     .     .     ."
+        "    .     .     . .    .    .    .    . .     .     .     ."
+        "bot-l bot-l bot-l .    .    .    .    . .     . bot-r bot-r";
 
     & > * {
         margin: 1rem;
@@ -41,11 +41,30 @@ const StyledTopLeftGroup = styled(Group)`
     grid-area: top-l;
     justify-self: start;
     align-self: start;
+
+    display: flex;
+    flex-wrap: nowrap;
 `;
 const StyledTopRightGroup = styled(Group)`
     grid-area: top-r;
     justify-self: end;
     align-self: start;
+`;
+const StyledCenterGroup = styled(Group)`
+    grid-area: cent;
+    justify-self: stretch;
+    align-self: center;
+
+    display: flex;
+    flex-direction: column;
+    & > {
+        flex-grow: 1;
+    }
+`;
+const StyledRightGroup = styled(Group)`
+    grid-area: right;
+    justify-self: end;
+    align-self: center;
 `;
 const StyledBottomLeftGroup = styled(Group)`
     grid-area: bot-l;
@@ -57,29 +76,26 @@ const StyledBottomRightGroup = styled(Group)`
     justify-self: end;
     align-self: end;
 `;
-const StyledRightGroup = styled(Group)`
-    grid-area: right;
-    justify-self: end;
-    align-self: center;
-`;
 
 export const App = () => {
-    const { settings } = useSettings();
-
     useEffect(() => {
-        game.init(settings);
         const unsub = syncSettingsToSession();
-
         return unsub;
     }, []);
 
+    const {
+        mode,
+        computed: { isLoaded },
+    } = useGame();
+
     return (
         <StyledUI>
-            <TopLeft GroupComponent={StyledTopLeftGroup} />
-            <TopRight GroupComponent={StyledTopRightGroup} />
-            <BottomLeft GroupComponent={StyledBottomLeftGroup} />
-            <BottomRight GroupComponent={StyledBottomRightGroup} />
+            {isLoaded && <TopLeft GroupComponent={StyledTopLeftGroup} />}
+            {isLoaded && <TopRight GroupComponent={StyledTopRightGroup} />}
+            {mode === "mainMenu" && <Center GroupComponent={StyledCenterGroup} />}
             <Right GroupComponent={StyledRightGroup} />
+            {isLoaded && <BottomLeft GroupComponent={StyledBottomLeftGroup} />}
+            <BottomRight GroupComponent={StyledBottomRightGroup} />
         </StyledUI>
     );
 };

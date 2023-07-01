@@ -1,19 +1,22 @@
 import React, { useState } from "react";
-import { Divider, Drawer, Title } from "@mantine/core";
+import { Drawer, Title } from "@mantine/core";
 import { useDidUpdate, useSetState } from "@mantine/hooks";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 
-import { game } from "~/game";
 import { InventorySection } from "./scenes/InventorySection";
 import { InventoryItem } from "./scenes/InventorySection/scenes/ItemSlot/components/InventoryItem";
+import { useGame } from "~/ui/hooks";
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
+    const {
+        computed: { player },
+    } = useGame();
 
     useDidUpdate(() => {
         if (!didLoad) {
-            const player = game.getPlayer();
-            const activeOutfit = player?.outfitting.getOutfit();
+            // TODO: to not mutate state
+            const activeOutfit = player.outfitting.getOutfit();
             if (activeOutfit) {
                 setDidLoad(() => true);
                 setOutfit(activeOutfit);
@@ -81,9 +84,9 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     };
 
     const reoutfit = () => {
-        const player = game.getPlayer();
         const activeOutfit = player?.outfitting.getOutfit();
-        if (player && activeOutfit) {
+        if (activeOutfit) {
+            // TODO: to not mutate state
             player.outfitting.reoutfit(outfit);
         }
     };

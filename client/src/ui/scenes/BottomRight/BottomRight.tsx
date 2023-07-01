@@ -1,26 +1,36 @@
 import React from "react";
 import { useToggle } from "@mantine/hooks";
-import { User } from "tabler-icons-react";
+import { Home, User } from "tabler-icons-react";
 
-import { game } from "~/game";
 import { Button } from "~/ui/components";
 import { ProfileModal } from "./scenes/ProfileModal";
+import { useGame } from "~/ui/hooks";
 
 export const BottomRight = ({ GroupComponent }) => {
+    const {
+        loadMainMenu,
+        computed: { isLoaded, player },
+    } = useGame();
     const [openedProfileModal, toggleProfileModal] = useToggle([false, true]);
 
     const toggleProfile = () => {
-        const player = game.getPlayer();
-        if (player) {
-            toggleProfileModal();
+        toggleProfileModal();
+        if (isLoaded) {
             // todo this will enable you to shoot and move in dying animation
             player.active = openedProfileModal;
         }
     };
 
+    const handleLoadMainMenu = () => {
+        loadMainMenu();
+    };
+
     return (
         <>
             <GroupComponent>
+                <Button isSquare onClick={handleLoadMainMenu}>
+                    <Home />
+                </Button>
                 <Button isSquare onClick={toggleProfile}>
                     <User />
                 </Button>

@@ -48,6 +48,7 @@ const defaultSettings = {
     musicVolume: 0.05,
     graphicsSettings: 1,
     enableTouchControls: isTouchDevice(),
+    showDeviceInfo: false,
 };
 
 const key = "settings";

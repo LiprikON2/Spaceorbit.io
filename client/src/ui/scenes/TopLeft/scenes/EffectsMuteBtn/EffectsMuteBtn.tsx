@@ -3,23 +3,23 @@ import { useToggle } from "@mantine/hooks";
 import { Volume, VolumeOff } from "tabler-icons-react";
 
 import { ToggleButton } from "~/ui/components";
-import { useSettings } from "~/ui/hooks";
-import { game } from "~/game";
+import { useGame, useSettings } from "~/ui/hooks";
 
 const settingName = "effectsMute";
 
 export const EffectsMuteBtn = () => {
+    const {
+        computed: {
+            scene: { soundManager },
+        },
+    } = useGame();
     const { settings, toggleEffectsSetting } = useSettings();
     const [on, toggle] = useToggle([!settings[settingName], settings[settingName]]);
 
     const handleClick = () => {
-        const { soundManager } = game.getScene();
-
-        if (soundManager) {
-            soundManager.toggleMute(settingName);
-            toggleEffectsSetting();
-            toggle();
-        }
+        soundManager.toggleMute(settingName);
+        toggleEffectsSetting();
+        toggle();
     };
 
     return (

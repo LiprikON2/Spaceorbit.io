@@ -3,6 +3,8 @@ import { Device } from "@capacitor/device";
 import { Stack, Text } from "@mantine/core";
 import styled from "@emotion/styled";
 
+import { useSettings } from "~/ui/hooks";
+
 const StyledStack = styled(Stack)`
     gap: 0;
     min-width: 12rem;
@@ -11,6 +13,8 @@ const StyledStack = styled(Stack)`
 `;
 
 export const Right = ({ GroupComponent }) => {
+    const { settings } = useSettings();
+
     const [deviceInfo, setDeviceInfo] = useState({});
     const logDeviceInfo = async () => {
         const info = await Device.getInfo();
@@ -25,11 +29,12 @@ export const Right = ({ GroupComponent }) => {
         <>
             <GroupComponent>
                 <StyledStack>
-                    {Object.entries(deviceInfo).map(([key, value]) => (
-                        <Text key={key} color="white" size="xs">
-                            {`${key}: ${value}`}
-                        </Text>
-                    ))}
+                    {settings.showDeviceInfo &&
+                        Object.entries(deviceInfo).map(([key, value]) => (
+                            <Text key={key} color="white" size="xs">
+                                {`${key}: ${value}`}
+                            </Text>
+                        ))}
                 </StyledStack>
             </GroupComponent>
         </>

@@ -1,4 +1,5 @@
 import "phaser";
+import Phaser from "phaser";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
@@ -22,7 +23,7 @@ const DEFAULT_HEIGHT = 1080;
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
 
-export const gameConfig = {
+export const gameConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     transparent: true,
     scale: {
@@ -80,25 +81,40 @@ export const gameConfig = {
     },
 };
 
-class Game {
+export class Game {
     config;
-    game;
+    game: Phaser.Game;
 
     constructor(config) {
         this.config = config;
     }
 
-    init = (settings = {}) => {
-        this.game = new Phaser.Game(this.config);
-        this.game.settings = settings;
-    };
+    init = async (settings) => {
+        const whenIsBooted = new Promise((resolve) => {
+            this.game = new Phaser.Game({
+                ...this.config,
+                callbacks: { postBoot: () => resolve(true) },
+            });
+            this.game["settings"] = settings;
+        });
+        await whenIsBooted;
 
-    getScene = (): MainScene => {
-        return this.game?.scene?.keys?.MainScene ?? null;
-    };
+        const whenSceneCreated = new Promise((resolve) => {
+            const MainScene = this.game.scene.keys.MainScene as MainScene;
+            MainScene.events.on("create", resolve);
+        });
+        await whenSceneCreated;
 
-    getPlayer = (): Spaceship | null => {
-        return this.getScene()?.player ?? null;
+        return this;
+    };
+    get scene(): MainScene | null {
+        return (this.game?.scene?.keys?.MainScene as MainScene) ?? null;
+    }
+    get player(): Spaceship | null {
+        return this.scene?.player ?? null;
+    }
+    destroy = () => {
+        this.game.destroy(false);
     };
 }
 

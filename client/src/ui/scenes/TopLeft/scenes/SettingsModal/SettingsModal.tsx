@@ -12,12 +12,17 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
 
-import { game } from "~/game";
 import { Button } from "~/ui/components";
 import { SliderInput } from "./components";
-import { useSettings } from "~/ui/hooks";
+import { useGame, useSettings } from "~/ui/hooks";
 
 export const SettingsModal = ({ opened, onClose }) => {
+    const {
+        computed: {
+            player,
+            scene: { soundManager, inputManager, mobManager },
+        },
+    } = useGame();
     const {
         settings,
         setMasterVolumeSetting,
@@ -26,38 +31,25 @@ export const SettingsModal = ({ opened, onClose }) => {
         setGraphicsSettingsSetting,
     } = useSettings();
 
+    // TODELETE: Mutating state!
     const addEngine = () => {
-        const player = game.getPlayer();
-        if (player) {
-            player.exhausts.createExhaust();
-        }
+        player.exhausts.createExhaust();
     };
     const removeEngine = () => {
-        const player = game.getPlayer();
-        if (player) {
-            player.exhausts.removeExhaust();
-        }
+        player.exhausts.removeExhaust();
     };
     const addLaser = (slot) => {
-        const player = game.getPlayer();
-        if (player) {
-            player.weapons.createLaser(slot);
-        }
+        player.weapons.createLaser(slot);
     };
-
     const addGatling = (slot) => {
-        const player = game.getPlayer();
-        if (player) {
-            player.weapons.createGatling(slot);
-        }
+        player.weapons.createGatling(slot);
     };
 
     const setVolume = (key, volume) => {
-        const { soundManager } = game.getScene();
         const isValidKey =
             key === "masterVolume" || key === "musicVolume" || key === "effectsVolume";
 
-        if (soundManager && isValidKey) {
+        if (isValidKey) {
             soundManager.setVolume(key, volume);
             if (key === "masterVolume") {
                 setMasterVolumeSetting(volume);
@@ -73,20 +65,16 @@ export const SettingsModal = ({ opened, onClose }) => {
     };
 
     const toggleTouchControls = () => {
-        const { inputManager } = game.getScene();
-        if (inputManager) {
-            inputManager.toggleTouchControls();
-            handleTouchControls.toggle();
-        }
+        inputManager.toggleTouchControls();
+        handleTouchControls.toggle();
     };
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
     const [activeTab, setActiveTab] = useState<string | null>("audio");
 
-    // TODELETE
+    // TODELETE: Mutating state!
     const sendMobs = (e) => {
         e.preventDefault();
-        const { mobManager, player } = game.getScene();
-        const mobs = mobManager.mobs;
+        const { mobs } = mobManager;
         mobManager.spawnMobs(mobsCount, [player]);
 
         mobs.forEach((mob) => {
@@ -95,15 +83,12 @@ export const SettingsModal = ({ opened, onClose }) => {
         });
     };
 
+    // TODELETE: Mutating state!
     const teleport = () => {
-        const player = game.getPlayer();
-
-        if (player) {
-            player.x = x;
-            player.y = y;
-            player.shields.x = x;
-            player.shields.y = y;
-        }
+        player.x = x;
+        player.y = y;
+        player.shields.x = x;
+        player.shields.y = y;
     };
 
     const [x, setx] = useState(120);

@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
 import { useSessionStorage } from "@mantine/hooks";
 
-import { game } from "~/game";
 import { NonFieldErrors } from "../../components";
 import { useSaveMutation } from "./hooks";
 import { useProfile } from "../../hooks";
+import { useGame } from "~/ui/hooks";
 
 export const Me = ({ onLogout }) => {
     const { me, meStatus } = useProfile();
+    const {
+        computed: { isLoaded, player },
+    } = useGame();
 
     const [accessToken, setAccessToken] = useSessionStorage({
         key: "accessToken",
@@ -16,16 +19,13 @@ export const Me = ({ onLogout }) => {
     });
 
     const handleSave = () => {
-        const player = game.getPlayer();
-        if (player && accessToken) {
+        if (isLoaded && accessToken) {
             const { x, y } = player;
             save(me.id, { x, y }, accessToken);
         }
     };
     const handleLoad = () => {
-        const player = game.getPlayer();
-
-        if (player) {
+        if (isLoaded) {
             player.respawn(me.x, me.y);
             player.followText.setText(me.username);
         }
