@@ -19,8 +19,10 @@ const StyledUI = styled.div`
     pointer-events: none;
 
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(8, 1fr);
+    /* grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(8, 1fr); */
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
     grid-template-areas:
         "top-l top-l top-l .    .    .    .    . .     . top-r top-r"
         "    .     .     . .    .    .    .    . .     .     .     ."

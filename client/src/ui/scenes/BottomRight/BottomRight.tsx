@@ -10,7 +10,7 @@ export const BottomRight = ({ GroupComponent }) => {
     const {
         gameManager,
         loadMainMenu,
-        computed: { isLoaded },
+        computed: { isLoaded, isLoading },
     } = useGame();
     const [openedProfileModal, toggleProfileModal] = useToggle([false, true]);
 
@@ -38,9 +38,11 @@ export const BottomRight = ({ GroupComponent }) => {
                         <Home />
                     </Button>
                 )}
-                <Button isSquare onClick={toggleProfile}>
-                    <User />
-                </Button>
+                {!isLoading && (
+                    <Button isSquare onClick={toggleProfile}>
+                        <User />
+                    </Button>
+                )}
             </GroupComponent>
             <ProfileModal opened={openedProfileModal} onClose={toggleProfile} />
         </>

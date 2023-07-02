@@ -57,6 +57,14 @@ const theme: Partial<MantineTheme> = {
                 variant: "dots",
             },
         },
+        Modal: {
+            styles: {
+                inner: {
+                    paddingInline: "5vw",
+                    width: "calc(100% - 10vw)",
+                },
+            },
+        },
     },
     // TODO
     // headings: {
