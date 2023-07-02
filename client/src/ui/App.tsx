@@ -84,7 +84,6 @@ export const App = () => {
     }, []);
 
     const {
-        mode,
         computed: { isLoaded },
     } = useGame();
 

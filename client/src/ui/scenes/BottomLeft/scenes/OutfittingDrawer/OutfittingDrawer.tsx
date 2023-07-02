@@ -100,7 +100,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
 
     return (
         <Drawer.Root opened={shouldBeOpened && didLoad} onClose={close} padding="xl" size="md">
-            <Drawer.Overlay opacity={0} />
+            <Drawer.Overlay />
             <Drawer.Content>
                 <Drawer.Header>
                     <Title order={2}>Outfitting</Title>

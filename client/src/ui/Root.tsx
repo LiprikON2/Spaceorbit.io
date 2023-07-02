@@ -83,5 +83,5 @@ root.render(
 // https://github.com/photonstorm/phaser/issues/4447
 const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "touchcancel"];
 events.forEach((event) => {
-    container!.addEventListener(event, (e) => e.stopPropagation());
+    container.addEventListener(event, (e) => e.stopPropagation());
 });

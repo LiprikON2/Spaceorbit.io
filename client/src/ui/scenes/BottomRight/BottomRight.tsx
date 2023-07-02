@@ -8,17 +8,22 @@ import { useGame } from "~/ui/hooks";
 
 export const BottomRight = ({ GroupComponent }) => {
     const {
+        gameManager,
         loadMainMenu,
-        computed: { isLoaded, player },
+        computed: { isLoaded },
     } = useGame();
     const [openedProfileModal, toggleProfileModal] = useToggle([false, true]);
 
     const toggleProfile = () => {
-        toggleProfileModal();
         if (isLoaded) {
-            // todo this will enable you to shoot and move in dying animation
-            player.active = openedProfileModal;
+            if (openedProfileModal) {
+                gameManager.unlockInput();
+            } else {
+                gameManager.lockInput();
+            }
         }
+
+        toggleProfileModal();
     };
 
     const handleMainMenu = () => {

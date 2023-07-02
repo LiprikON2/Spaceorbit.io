@@ -7,14 +7,14 @@ import type { Spaceship } from "~/objects";
 import { GameExtended } from ".";
 import { gameConfig } from ".";
 
-interface Events {
+export interface OutEvents {
     loading: (report: { name: string; progress: number }) => void;
 }
 
 export class GameManager {
     config: Phaser.Types.Core.GameConfig;
     game: GameExtended;
-    emitter: Emitter<Events>;
+    emitter: Emitter<OutEvents>;
 
     constructor(config) {
         this.config = config;
@@ -26,7 +26,6 @@ export class GameManager {
     };
 
     init = async (settings) => {
-        console.log("Booting");
         const whenIsBooted = new Promise((resolve) => {
             this.game = new GameExtended(
                 {
@@ -38,8 +37,6 @@ export class GameManager {
             );
         });
         await whenIsBooted;
-        console.log("Booted");
-        console.log("Creating");
 
         const whenSceneCreated = new Promise((resolve) => {
             const MainScene = this.game.scene.keys.MainScene as MainScene;
@@ -47,18 +44,26 @@ export class GameManager {
         });
         await whenSceneCreated;
 
-        console.log("Created");
-
         return this;
     };
     initMultiplayer = async (settings) => {};
 
     // TODO use this when ui modals are opened
     lockInput = () => {
+        this.game.input.enabled = false;
         this.game.input.keyboard.enabled = false;
+        this.scene.input.enabled = false;
+        this.scene.input.keyboard.enabled = false;
+        // Prevents locked keys from sticking
+        this.scene.input.keyboard.resetKeys();
     };
     unlockInput = () => {
-        this.game.input.keyboard.enabled = false;
+        this.game.input.enabled = true;
+        this.game.input.keyboard.enabled = true;
+        this.scene.input.enabled = true;
+        this.scene.input.keyboard.enabled = true;
+        // Prevents locked keys from sticking
+        this.scene.input.keyboard.resetKeys();
     };
 
     get scene(): MainScene | null {

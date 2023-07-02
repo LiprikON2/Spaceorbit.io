@@ -9,15 +9,17 @@ import { MusicMuteBtn } from "./scenes/MusicMuteBtn";
 import { useGame } from "~/ui/hooks";
 
 export const TopLeft = ({ GroupComponent }) => {
-    const {
-        computed: { player },
-    } = useGame();
+    const { gameManager } = useGame();
     const [openedSettings, toggleSettingsModal] = useToggle([false, true]);
 
     const toggleSettings = () => {
+        if (openedSettings) {
+            gameManager.unlockInput();
+        } else {
+            gameManager.lockInput();
+        }
+
         toggleSettingsModal();
-        // todo this will enable you to shoot and move in dying animation
-        player.active = openedSettings;
     };
     return (
         <>

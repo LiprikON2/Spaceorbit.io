@@ -3,7 +3,6 @@ export default class InputManager {
     player;
     keys;
     zoom;
-    heldKeys = {};
     time = 0;
     frameTime = 0;
     touchControls = { joystick: null, virtualBtn: null };
