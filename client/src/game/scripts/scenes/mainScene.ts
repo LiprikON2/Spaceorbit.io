@@ -1,7 +1,9 @@
 import { InputManager, MobManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
+import type { GameExtended } from "~/game/core";
 
 export default class MainScene extends Phaser.Scene {
+    game: GameExtended;
     inputManager;
     soundManager;
     mobManager;

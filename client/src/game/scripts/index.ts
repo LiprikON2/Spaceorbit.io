@@ -1,3 +1,4 @@
-import { game, gameConfig } from "./core/game";
-
-export { game, gameConfig };
+export * from "./core";
+export * from "./managers";
+export * from "./objects";
+export * from "./scenes";

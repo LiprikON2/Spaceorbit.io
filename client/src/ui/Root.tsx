@@ -41,6 +41,13 @@ const theme: Partial<MantineTheme> = {
                 p: "xl",
             },
         },
+        Progress: {
+            defaultProps: {
+                color: "cyan",
+                size: "xl",
+                style: { width: "100%" },
+            },
+        },
     },
     // TODO
     // headings: {

@@ -1,4 +1,3 @@
-import "phaser";
 import Phaser from "phaser";
 import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
@@ -8,7 +7,7 @@ import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-p
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 
 import { MainScene, PreloadScene } from "~/scenes";
-import type { Spaceship } from "~/objects";
+
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
 // const DEFAULT_WIDTH = 920;
@@ -80,42 +79,3 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
         gamepad: true,
     },
 };
-
-export class Game {
-    config;
-    game: Phaser.Game;
-
-    constructor(config) {
-        this.config = config;
-    }
-
-    init = async (settings) => {
-        const whenIsBooted = new Promise((resolve) => {
-            this.game = new Phaser.Game({
-                ...this.config,
-                callbacks: { postBoot: () => resolve(true) },
-            });
-            this.game["settings"] = settings;
-        });
-        await whenIsBooted;
-
-        const whenSceneCreated = new Promise((resolve) => {
-            const MainScene = this.game.scene.keys.MainScene as MainScene;
-            MainScene.events.on("create", resolve);
-        });
-        await whenSceneCreated;
-
-        return this;
-    };
-    get scene(): MainScene | null {
-        return (this.game?.scene?.keys?.MainScene as MainScene) ?? null;
-    }
-    get player(): Spaceship | null {
-        return this.scene?.player ?? null;
-    }
-    destroy = () => {
-        this.game.destroy(false);
-    };
-}
-
-export const game = new Game(gameConfig);

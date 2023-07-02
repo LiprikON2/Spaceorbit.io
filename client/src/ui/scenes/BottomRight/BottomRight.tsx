@@ -21,16 +21,18 @@ export const BottomRight = ({ GroupComponent }) => {
         }
     };
 
-    const handleLoadMainMenu = () => {
+    const handleMainMenu = () => {
         loadMainMenu();
     };
 
     return (
         <>
             <GroupComponent>
-                <Button isSquare onClick={handleLoadMainMenu}>
-                    <Home />
-                </Button>
+                {isLoaded && (
+                    <Button isSquare onClick={handleMainMenu}>
+                        <Home />
+                    </Button>
+                )}
                 <Button isSquare onClick={toggleProfile}>
                     <User />
                 </Button>

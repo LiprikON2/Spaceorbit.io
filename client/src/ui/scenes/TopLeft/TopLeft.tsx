@@ -2,7 +2,6 @@ import React from "react";
 import { useToggle } from "@mantine/hooks";
 import { Settings } from "tabler-icons-react";
 
-import { game } from "~/game";
 import { Button } from "~/ui/components";
 import { SettingsModal } from "./scenes/SettingsModal";
 import { EffectsMuteBtn } from "./scenes/EffectsMuteBtn";

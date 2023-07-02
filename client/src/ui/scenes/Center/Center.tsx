@@ -1,31 +1,11 @@
 import React from "react";
 
-import { Button } from "~/ui/components";
-import { useGame, useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
+import { MainMenu } from "./scenes/MainMenu";
+import { Loading } from "./scenes/Loading";
 
 export const Center = ({ GroupComponent }) => {
-    const { settings } = useSettings();
-    const { mode, loadSingleplayer, loadMultiplayer } = useGame();
+    const { mode } = useGame();
 
-    const handleSingleplayer = () => {
-        if (mode === "mainMenu") {
-            loadSingleplayer(settings);
-        }
-    };
-    const handleMultiplayer = () => {
-        if (mode === "mainMenu") {
-            loadMultiplayer(settings);
-        }
-    };
-
-    return (
-        <GroupComponent>
-            <Button fullWidth onClick={handleSingleplayer}>
-                Singleplayer
-            </Button>
-            <Button fullWidth onClick={handleMultiplayer}>
-                Multiplayer
-            </Button>
-        </GroupComponent>
-    );
+    return <GroupComponent>{mode === "mainMenu" ? <MainMenu /> : <Loading />}</GroupComponent>;
 };

@@ -92,7 +92,7 @@ export const App = () => {
         <StyledUI>
             {isLoaded && <TopLeft GroupComponent={StyledTopLeftGroup} />}
             {isLoaded && <TopRight GroupComponent={StyledTopRightGroup} />}
-            {mode === "mainMenu" && <Center GroupComponent={StyledCenterGroup} />}
+            {!isLoaded && <Center GroupComponent={StyledCenterGroup} />}
             <Right GroupComponent={StyledRightGroup} />
             {isLoaded && <BottomLeft GroupComponent={StyledBottomLeftGroup} />}
             <BottomRight GroupComponent={StyledBottomRightGroup} />

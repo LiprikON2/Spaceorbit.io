@@ -3,11 +3,11 @@ import type { Spaceship } from "~/objects";
 import { produce } from "immer";
 import { create } from "zustand";
 
-import { game } from "~/game/core/game";
-import type { Game } from "~/game/core/game";
+import { gameManager } from "~/game/core/gameManager";
+import type { GameManager } from "~/game/core/gameManager";
 
 interface GameStore {
-    game: Game | null;
+    gameManager: GameManager | null;
     mode: "mainMenu" | "singleplayer" | "multiplayer";
     computed: {
         isLoading: boolean;
@@ -21,7 +21,7 @@ interface GameStore {
 }
 
 export const useGame = create<GameStore>((set, get) => ({
-    game: null,
+    gameManager: null,
     mode: "mainMenu",
 
     // https://github.com/pmndrs/zustand/issues/132
@@ -30,14 +30,14 @@ export const useGame = create<GameStore>((set, get) => ({
             return get().mode !== "mainMenu" && !get().computed.isLoaded;
         },
         get isLoaded() {
-            return !!get().game?.player;
+            return !!get().gameManager?.player;
         },
 
         get player() {
-            return get().game?.player;
+            return get().gameManager?.player;
         },
         get scene() {
-            return get().game?.scene;
+            return get().gameManager?.scene;
         },
     },
 
@@ -47,11 +47,11 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "singleplayer";
             })
         );
-        const singleplayerGame = await game.init(settings);
+        const singleplayerGame = await gameManager.init(settings);
 
         set(
             produce((state) => {
-                state.game = singleplayerGame;
+                state.gameManager = singleplayerGame;
             })
         );
     },
@@ -61,18 +61,19 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "multiplayer";
             })
         );
-        const multiplayerGame = await game.init(settings);
+        const multiplayerGame = await gameManager.init(settings);
+
         set(
             produce((state) => {
-                state.game = multiplayerGame;
+                state.gameManager = multiplayerGame;
             })
         );
     },
     loadMainMenu: () => {
-        get().game.destroy();
+        get().gameManager.destroy();
         set(
             produce((state) => {
-                state.game = null;
+                state.gameManager = null;
                 state.mode = "mainMenu";
             })
         );
