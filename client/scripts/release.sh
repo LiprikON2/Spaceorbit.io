@@ -42,6 +42,9 @@ promptVersion () {
 
     echo "Choose new package version (current $PACKAGE_VERSION)" >&2
     choosen_version=$(echo -e "$option1\n$option2\n$option3\n$option4" | $gum choose)
+
+    npm pkg set version=$choosen_version
+
     echo $choosen_version
 }
 
@@ -61,13 +64,12 @@ if [ -z "$1" ]; then
         exit 1
     fi
 
-    choosen_version=$(promptVersion)
-    
-    npm pkg set version=$choosen_version
+    promptVersion
 
     ./scripts/apk-build.sh
+fi
 
-elif [ $1 == "--skip-build" ]; then
+if [ -z "$1" ] || [ $1 == "--skip-build" ]; then
 
     if [ -z "$choosen_version" ]; then
         choosen_version=$(promptVersion)
