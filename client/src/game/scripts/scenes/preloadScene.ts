@@ -85,16 +85,17 @@ export default class PreloadScene extends Phaser.Scene {
 
         this.game.outEmitter.emit("loading", {
             name: "Preload Scene",
-            progress: 80,
+            progress: 95,
         });
     }
 
     create() {
         // Scenes
         this.scene.start("MainScene");
-        this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 90 });
+        this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 98 });
 
         // Animations
+        this.game.outEmitter.emit("loading", { name: "Animations", progress: 99 });
         this.anims.create({
             key: "explosion_1-anim",
             frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),
@@ -123,7 +124,6 @@ export default class PreloadScene extends Phaser.Scene {
             repeat: 0,
             hideOnComplete: true,
         });
-        this.game.outEmitter.emit("loading", { name: "Animations", progress: 100 });
 
         /**
          * This is how you would dynamically import the mainScene class (with code splitting),

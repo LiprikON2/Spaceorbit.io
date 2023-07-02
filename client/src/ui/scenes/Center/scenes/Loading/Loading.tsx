@@ -9,12 +9,9 @@ export const Loading = () => {
     return (
         <>
             <Title order={3}>Loading...</Title>
-            <Progress
-                styles={{ bar: { transition: "width 1000ms linear" } }}
-                value={status.progress}
-            />
+            <Progress value={status.progress} />
             <Group>
-                <Loader color="cyan" variant="dots" />
+                <Loader />
                 <Text c="dimmed">{status.name}</Text>
             </Group>
         </>

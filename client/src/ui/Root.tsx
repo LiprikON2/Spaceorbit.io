@@ -47,6 +47,15 @@ const theme: Partial<MantineTheme> = {
                 size: "xl",
                 style: { width: "100%" },
             },
+            styles: {
+                bar: { transition: "width 1500ms linear" },
+            },
+        },
+        Loader: {
+            defaultProps: {
+                color: "cyan",
+                variant: "dots",
+            },
         },
     },
     // TODO
