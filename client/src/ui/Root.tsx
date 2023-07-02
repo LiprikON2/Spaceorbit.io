@@ -65,6 +65,24 @@ const theme: Partial<MantineTheme> = {
                 },
             },
         },
+        Tabs: {
+            styles: {
+                tabsList: {
+                    flexWrap: "nowrap",
+                },
+            },
+        },
+        Paper: {
+            defaultProps: {
+                shadow: "xs",
+                radius: "md",
+                p: "lg",
+                withBorder: true,
+                style: {
+                    width: "100%",
+                },
+            },
+        },
     },
     // TODO
     // headings: {

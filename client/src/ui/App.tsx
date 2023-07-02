@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Group } from "@mantine/core";
+import { BackgroundImage, Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
 import { syncSettingsToSession, useGame } from "./hooks";
@@ -9,8 +9,10 @@ import { Center } from "./scenes/Center";
 import { Right } from "./scenes/Right";
 import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
+import background from "~/assets/ui/background-space.webp";
 
-const StyledUI = styled.div`
+// @ts-ignore
+const StyledUI = styled(BackgroundImage)`
     position: absolute;
     inset: 0;
     z-index: 1;
@@ -19,8 +21,6 @@ const StyledUI = styled.div`
     pointer-events: none;
 
     display: grid;
-    /* grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(8, 1fr); */
     grid-auto-columns: 1fr;
     grid-auto-rows: 1fr;
     grid-template-areas:
@@ -37,7 +37,7 @@ const StyledUI = styled.div`
         margin: 1rem;
         pointer-events: auto;
     }
-`;
+` as typeof BackgroundImage;
 
 const StyledTopLeftGroup = styled(Group)`
     grid-area: top-l;
@@ -56,12 +56,6 @@ const StyledCenterGroup = styled(Group)`
     grid-area: cent;
     justify-self: stretch;
     align-self: center;
-
-    display: flex;
-    flex-direction: column;
-    & > {
-        flex-grow: 1;
-    }
 `;
 const StyledRightGroup = styled(Group)`
     grid-area: right;
@@ -90,7 +84,7 @@ export const App = () => {
     } = useGame();
 
     return (
-        <StyledUI>
+        <StyledUI src={background} style={{ ...(isLoaded && { backgroundImage: "none" }) }}>
             {isLoaded && <TopLeft GroupComponent={StyledTopLeftGroup} />}
             {isLoaded && <TopRight GroupComponent={StyledTopRightGroup} />}
             {!isLoaded && <Center GroupComponent={StyledCenterGroup} />}
