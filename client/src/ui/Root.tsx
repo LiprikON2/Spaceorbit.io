@@ -83,6 +83,17 @@ const theme: Partial<MantineTheme> = {
                 },
             },
         },
+        Textarea: {
+            defaultProps: {
+                autosize: true,
+                maxRows: 2,
+            },
+        },
+        Stack: {
+            defaultProps: {
+                spacing: "xs",
+            },
+        },
     },
     // TODO
     // headings: {

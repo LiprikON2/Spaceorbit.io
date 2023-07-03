@@ -61,7 +61,7 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "multiplayer";
             })
         );
-        const multiplayerGame = await gameManager.init(settings);
+        const multiplayerGame = await gameManager.init(settings, true);
 
         set(
             produce((state) => {

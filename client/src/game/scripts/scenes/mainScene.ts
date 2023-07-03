@@ -1,3 +1,5 @@
+import type { ClientChannel } from "@geckos.io/client";
+
 import { InputManager, MobManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameExtended } from "~/game/core";
@@ -10,14 +12,18 @@ export default class MainScene extends Phaser.Scene {
     player;
     background;
     backgroundDict = {};
-    screen;
-    emitter;
     debugText;
     mobs = [];
+    channel: ClientChannel;
 
     constructor() {
         super({ key: "MainScene" });
     }
+
+    init({ channel }) {
+        this.channel = channel;
+    }
+
     // TODO use polyfill or something to prevent game from stopping requesting animation frames on blur
     create() {
         this.soundManager = new SoundManager(this);
@@ -56,7 +62,7 @@ export default class MainScene extends Phaser.Scene {
             180
         );
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(5, [this.player]);
+        this.mobManager.spawnMobs(0, [this.player]);
 
         // Prevents shield from running away when ship hits the world bounds
         this.physics.world.on("worldbounds", (body) => {
@@ -175,16 +181,17 @@ export default class MainScene extends Phaser.Scene {
     // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
     // Scrolling factor doesn't adjust the collision boundaries,
     // so they need to be adjusted manually
+    // TODO look at 'space' example
     getScrollingFactorCollisionAdjustment(
         parallax,
         textureWidth,
         textureHeight
     ): [{ x: number; y: number }, { width: number; height: number }] {
-        var csx = this.cameras.main.scrollX;
-        var csy = this.cameras.main.scrollY;
+        const csx = this.cameras.main.scrollX;
+        const csy = this.cameras.main.scrollY;
 
-        var px = 0 + csx * parallax - csx;
-        var py = 0 + csy * parallax - csy;
+        const px = 0 + csx * parallax - csx;
+        const py = 0 + csy * parallax - csy;
 
         const imageOffset: { x: number; y: number } = { x: px, y: py };
         const boundsSize: { width: number; height: number } = {

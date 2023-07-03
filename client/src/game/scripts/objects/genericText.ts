@@ -1,7 +1,7 @@
 export default class GenericText extends Phaser.GameObjects.Text {
     player;
     constructor(scene, player) {
-        super(scene, 25, 100, "", { color: "white", fontSize: "2rem" });
+        super(scene, scene.game.config.width * 0.85, 100, "", { color: "white", fontSize: "2rem" });
         scene.add.existing(this);
         this.setOrigin(0).setScrollFactor(0);
         this.player = player;

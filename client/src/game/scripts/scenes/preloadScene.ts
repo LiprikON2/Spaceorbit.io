@@ -91,11 +91,11 @@ export default class PreloadScene extends Phaser.Scene {
 
     create() {
         // Scenes
-        this.scene.start("MainScene");
         this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 98 });
+        this.scene.start("MainScene", { channel: this.game.channel });
 
         // Animations
-        this.game.outEmitter.emit("loading", { name: "Animations", progress: 99 });
+        this.game.outEmitter.emit("loading", { name: "Animations", progress: 100 });
         this.anims.create({
             key: "explosion_1-anim",
             frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),

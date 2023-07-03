@@ -65,7 +65,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
 
         this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
         this.setName(Phaser.Utils.String.UUID());
-        this.setScale(scale);
+        this.resize(scale);
 
         // Sounds
         // @ts-ignore
@@ -75,6 +75,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.halfWidth = this.body.width / 2;
         this.halfHeight = this.body.height / 2;
         this.setCircularHitbox(this.baseSpecs.hitboxRadius);
+
         // Enables pointerdown events
         this.setInteractive();
         this.on("pointerdown", () => {
@@ -108,6 +109,12 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         this.moveToPlugin.on("complete", () => this.onStopMoving());
 
         if (this.status.shields === 0) this.shields.crack(true);
+    }
+
+    resize(scale) {
+        this.displayWidth = Number(this.scene.game.config.width) * scale;
+        // Keeps 1:1 aspect ratio
+        this.scaleY = this.scaleX;
     }
 
     getSpeed() {

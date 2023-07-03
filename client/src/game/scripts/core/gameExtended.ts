@@ -1,12 +1,21 @@
 import type { Emitter } from "nanoevents";
-import { OutEvents } from ".";
+import type { ClientChannel } from "@geckos.io/client";
+
+import type { OutEvents } from ".";
 
 export class GameExtended extends Phaser.Game {
     settings;
     outEmitter: Emitter<OutEvents> | null;
-    constructor(GameConfig?: Phaser.Types.Core.GameConfig, settings = {}, outEmitter = null) {
+    channel: ClientChannel;
+    constructor(
+        GameConfig?: Phaser.Types.Core.GameConfig,
+        settings = {},
+        outEmitter = null,
+        channel?
+    ) {
         super(GameConfig);
         this.settings = settings;
         this.outEmitter = outEmitter;
+        this.channel = channel;
     }
 }

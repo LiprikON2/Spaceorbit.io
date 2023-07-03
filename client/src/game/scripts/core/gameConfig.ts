@@ -10,8 +10,8 @@ import { MainScene, PreloadScene } from "~/scenes";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
-// const DEFAULT_WIDTH = 920;
-// const DEFAULT_HEIGHT = 800;
+// const DEFAULT_WIDTH = 960;
+// const DEFAULT_HEIGHT = 540;
 
 // const graphicsSettings = { best: 1, medium: 0.75, low: 0.5 };
 // const DPR = window.devicePixelRatio * graphicsSettings.low;

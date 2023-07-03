@@ -6,6 +6,7 @@ import { MainScene } from "~/scenes";
 import type { Spaceship } from "~/objects";
 import { GameExtended } from ".";
 import { gameConfig } from ".";
+import { geckos } from "@geckos.io/client";
 
 export interface OutEvents {
     loading: (report: { name: string; progress: number }) => void;
@@ -25,7 +26,10 @@ export class GameManager {
         return this.emitter.on(event, callback);
     };
 
-    init = async (settings) => {
+    init = async (settings, isMultiplayer = false, channelPort = 1444) => {
+        let channel;
+        if (isMultiplayer) channel = geckos({ port: 1444 });
+
         const whenIsBooted = new Promise((resolve) => {
             this.game = new GameExtended(
                 {
@@ -33,7 +37,8 @@ export class GameManager {
                     callbacks: { postBoot: () => resolve(true) },
                 },
                 settings,
-                this.emitter
+                this.emitter,
+                channel ?? undefined
             );
         });
         await whenIsBooted;
@@ -46,7 +51,6 @@ export class GameManager {
 
         return this;
     };
-    initMultiplayer = async (settings) => {};
 
     // TODO use this when ui modals are opened
     lockInput = () => {
