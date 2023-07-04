@@ -1,6 +1,6 @@
 import express from "express";
 
-const logger = (name: string) => {
+export const logger = (name: string) => {
     const handler: express.RequestHandler = (
         req: express.Request,
         res: express.Response,
@@ -11,5 +11,3 @@ const logger = (name: string) => {
     };
     return handler;
 };
-
-export default logger;

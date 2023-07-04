@@ -26,9 +26,13 @@ export class GameManager {
         return this.emitter.on(event, callback);
     };
 
-    init = async (settings, isMultiplayer = false, channelPort = 1444) => {
+    init = async (settings, isMultiplayer = false, channelPort = 3010) => {
         let channel;
-        if (isMultiplayer) channel = geckos({ port: 1444 });
+        if (isMultiplayer)
+            channel = geckos({
+                url: `${location.protocol}//${location.hostname}:${channelPort}`,
+                port: null,
+            });
 
         const whenIsBooted = new Promise((resolve) => {
             this.game = new GameExtended(

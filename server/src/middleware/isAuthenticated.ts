@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 
 /* Handle jwt check for protected routes */
-const isAuthenticated = (
+export const isAuthenticated = (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -29,4 +29,3 @@ const isAuthenticated = (
 
     return next();
 };
-export default isAuthenticated;

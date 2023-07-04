@@ -1,3 +1,5 @@
+/*
+
 import "core-js/actual";
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -131,3 +133,29 @@ const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "
 events.forEach((event) => {
     container.addEventListener(event, (e) => e.stopPropagation());
 });
+
+/*/
+
+import geckosClient from "@geckos.io/client";
+// @ts-ignore
+const channel = geckosClient({ url: "http://127.0.0.1:3010", port: null });
+console.log("client channel created", channel);
+
+channel.onConnect((error) => {
+    console.log("CONNECT");
+    if (error) console.error(error.message);
+
+    // listens for a disconnection
+    channel.onDisconnect(() => {
+        console.log("diccsosn");
+    });
+
+    // listens for a custom event from the server
+    channel.on("chat message", (data) => {
+        console.log("is it truly over?", data);
+    });
+
+    // emits a message to the server
+    channel.emit("chat message", "Hi!");
+});
+//*/

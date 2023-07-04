@@ -1,5 +1,5 @@
 {
-    "name": "laboratory-work-4-main",
+    "name": "spaceorbit-server",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -8,8 +8,8 @@
     },
     "scripts": {
         "dev": "vite",
+        "prod": "npx nodemon --exec \"vite build && node dist/app.js\" -e ts --ignore dist/",
         "build": "vite build",
-        "preview": "vite preview",
         "migrate": "npx prisma migrate dev --name ' ' && npx prisma generate"
     },
     "devDependencies": {
@@ -20,6 +20,9 @@
         "vite-plugin-node": "^3.0.2"
     },
     "dependencies": {
+        "@geckos.io/client": "^2.3.1",
+        "@geckos.io/phaser-on-nodejs": "^1.2.8",
+        "@geckos.io/server": "^2.3.1",
         "@prisma/client": "^4.12.0",
         "@types/bcrypt": "^5.0.0",
         "@types/express-list-endpoints": "^6.0.0",
@@ -32,6 +35,7 @@
         "express-list-endpoints": "^6.0.0",
         "jsonwebtoken": "^9.0.0",
         "nodemailer": "^6.9.1",
+        "phaser": "^3.55.2",
         "uuid": "^9.0.0"
     }
 }

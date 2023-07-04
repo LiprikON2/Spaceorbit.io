@@ -29,10 +29,11 @@ export default defineConfig({
 
             // tell the plugin where is your project entry
             appPath: resolve(__dirname, "./src/core/app.ts"),
+            // appPath: resolve(__dirname, "./src/game/todelete/server/server.js"),
 
             // Optional, default: 'viteNodeApp'
             // the name of named export of you app from the appPath file
-            exportName: "app",
+            exportName: "serverListener",
 
             // Optional, default: 'esbuild'
             // The TypeScript compiler you want to use
@@ -71,6 +72,14 @@ export default defineConfig({
         //   'class-validator',
         //   'fastify-swagger',
         // ],
-        exclude: ["mock-aws-s3", "aws-sdk", "nock"],
+        exclude: [
+            "mock-aws-s3",
+            "aws-sdk",
+            "nock",
+            "node-datachannel",
+            "@geckos.io/server",
+            "@geckos.io/phaser-on-nodejs",
+            "phaser",
+        ],
     },
 });

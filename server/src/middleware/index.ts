@@ -1,5 +1,3 @@
-import logger from "./logger";
-import isAuthenticated from "./isAuthenticated";
-import correctContentType from "./correctContentType";
-
-export { logger, isAuthenticated, correctContentType };
+export * from "./correctContentType";
+export * from "./isAuthenticated";
+export * from "./logger";

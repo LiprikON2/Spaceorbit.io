@@ -92,7 +92,16 @@ export default class PreloadScene extends Phaser.Scene {
     create() {
         // Scenes
         this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 98 });
-        this.scene.start("MainScene", { channel: this.game.channel });
+
+        const { channel } = this.game;
+        channel.onConnect((error) => {
+            // TODO show error on loading screen
+            if (error) console.error(error.message);
+
+            channel.on("ready", () => {
+                this.scene.start("MainScene", { channel });
+            });
+        });
 
         // Animations
         this.game.outEmitter.emit("loading", { name: "Animations", progress: 100 });

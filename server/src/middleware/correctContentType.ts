@@ -1,6 +1,6 @@
 import express from "express";
 
-const correctContentType: express.RequestHandler = (
+export const correctContentType: express.RequestHandler = (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -13,4 +13,3 @@ const correctContentType: express.RequestHandler = (
     }
     return next();
 };
-export default correctContentType;
