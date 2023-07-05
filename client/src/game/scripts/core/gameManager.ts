@@ -8,8 +8,17 @@ import { GameExtended } from ".";
 import { gameConfig } from ".";
 import { geckos } from "@geckos.io/client";
 
+export interface StatusEvent {
+    name: string;
+    progress: number;
+}
+export interface ConnectionErrorEvent {
+    message: string;
+    navigateToMode: "mainMenu" | "singleplayer" | "multiplayer";
+}
 export interface OutEvents {
-    loading: (report: { name: string; progress: number }) => void;
+    loading: (status: StatusEvent) => void;
+    connectionError: (errorDetails: ConnectionErrorEvent) => void;
 }
 
 export class GameManager {
@@ -82,7 +91,7 @@ export class GameManager {
         return this.scene?.player ?? null;
     }
     destroy = () => {
-        this.game.destroy(false);
+        this.game.destroy(true);
     };
 }
 

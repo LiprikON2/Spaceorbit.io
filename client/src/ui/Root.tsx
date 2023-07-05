@@ -1,4 +1,4 @@
-/*
+//*
 
 import "core-js/actual";
 import React from "react";
@@ -136,26 +136,58 @@ events.forEach((event) => {
 
 /*/
 
-import geckosClient from "@geckos.io/client";
-// @ts-ignore
-const channel = geckosClient({ url: "http://127.0.0.1:3010", port: null });
-console.log("client channel created", channel);
+// import geckosClient from "@geckos.io/client";
+// // @ts-ignore
+// const channel = geckosClient({ url: "http://127.0.0.1:3010", port: null });
+// console.log("client channel created", channel);
 
-channel.onConnect((error) => {
-    console.log("CONNECT");
-    if (error) console.error(error.message);
+// channel.onConnect((error) => {
+//     console.log("CONNECT");
+//     if (error) console.error(error.message);
 
-    // listens for a disconnection
-    channel.onDisconnect(() => {
-        console.log("diccsosn");
-    });
+//     // listens for a disconnection
+//     channel.onDisconnect(() => {
+//         console.log("diccsosn");
+//     });
 
-    // listens for a custom event from the server
-    channel.on("chat message", (data) => {
-        console.log("is it truly over?", data);
-    });
+//     // listens for a custom event from the server
+//     channel.on("chat message", (data) => {
+//         console.log("is it truly over?", data);
+//     });
 
-    // emits a message to the server
-    channel.emit("chat message", "Hi!");
-});
+//     // emits a message to the server
+//     channel.emit("chat message", "Hi!");
+// });
+
+const gg = async () => {
+    const host = `http://localhost:3010/.wrtc/v2`;
+
+    let headers: any = { "Content-Type": "application/json" };
+    let userData = {};
+
+    try {
+        console.log("trying");
+        const res = await fetch(`${host}/connections`, {
+            method: "POST",
+            headers,
+        });
+        console.log("Tried");
+        if (res.status >= 300) {
+            throw {
+                name: "Error",
+                message: `Connection failed with status code ${res.status}.`,
+                status: res.status,
+                statusText: res.statusText,
+            };
+        }
+
+        const json = await res.json();
+
+        userData = json.userData;
+    } catch (error: any) {
+        console.error("WHAT", error.message);
+        return { error };
+    }
+};
+gg();
 //*/

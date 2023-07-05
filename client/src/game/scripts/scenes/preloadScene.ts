@@ -90,21 +90,8 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     create() {
-        // Scenes
-        this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 98 });
-
-        const { channel } = this.game;
-        channel.onConnect((error) => {
-            // TODO show error on loading screen
-            if (error) console.error(error.message);
-
-            channel.on("ready", () => {
-                this.scene.start("MainScene", { channel });
-            });
-        });
-
         // Animations
-        this.game.outEmitter.emit("loading", { name: "Animations", progress: 100 });
+        this.game.outEmitter.emit("loading", { name: "Animations", progress: 98 });
         this.anims.create({
             key: "explosion_1-anim",
             frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),
@@ -133,6 +120,35 @@ export default class PreloadScene extends Phaser.Scene {
             repeat: 0,
             hideOnComplete: true,
         });
+
+        // Scenes
+        const { channel } = this.game;
+        if (channel) {
+            this.game.outEmitter.emit("loading", {
+                name: "Connecting to the server",
+                progress: 99,
+            });
+            channel.onConnect((error) => {
+                if (error) {
+                    this.game.outEmitter.emit("connectionError", {
+                        message: "Could not connect to the server",
+                        navigateToMode: "mainMenu",
+                    });
+                    this.game.destroy(true);
+                }
+
+                channel.on("ready", () => {
+                    this.game.outEmitter.emit("loading", {
+                        name: "Main Scene",
+                        progress: 100,
+                    });
+                    this.scene.start("MainScene", { channel });
+                });
+            });
+        } else {
+            this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 100 });
+            this.scene.start("MainScene");
+        }
 
         /**
          * This is how you would dynamically import the mainScene class (with code splitting),

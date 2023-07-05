@@ -25,14 +25,14 @@ const StyledUI = styled(BackgroundImage)`
     grid-auto-columns: 1fr;
     grid-auto-rows: 1fr;
     grid-template-areas:
-        "top-l top-l top-l    .     .     .    .    .    . top-r top-r top-r"
-        "    .     .     .    .     .     .    .    .    .     .     .     ."
-        "    .     .     .    .  cent  cent cent cent    .     .     .     ."
-        " left  left  left    .  cent  cent cent cent    . right right right"
-        " left  left  left    .  cent  cent cent cent    . right right right"
-        "    .     .     .    .  cent  cent cent cent    .     .     .     ."
-        "    .     .     .    .     .     .    .    .    .     .     .     ."
-        "bot-l bot-l bot-l    .     .     .    .    .    . bot-r bot-r bot-r";
+        "top-l top-l top-l    .    .    .    .    .    . top-r top-r top-r"
+        "    .     .     .    .    .    .    .    .    .     .     .     ."
+        "    .     .     . cent cent cent cent cent cent     .     .     ."
+        " left  left  left cent cent cent cent cent cent right right right"
+        " left  left  left cent cent cent cent cent cent right right right"
+        "    .     .     . cent cent cent cent cent cent     .     .     ."
+        "    .     .     .    .    .    .    .    .    .     .     .     ."
+        "bot-l bot-l bot-l    .    .    .    .    .    . bot-r bot-r bot-r";
 
     & > * {
         margin: 1rem;
@@ -55,8 +55,11 @@ const StyledTopRightGroup = styled(Group)`
 `;
 const StyledCenterGroup = styled(Group)`
     grid-area: cent;
-    justify-self: stretch;
+    justify-self: center;
     align-self: center;
+
+    width: min(60ch, 100vw - 5rem);
+    margin-inline: auto;
 `;
 
 const StyledUnderTopRightGroup = styled(Group)`

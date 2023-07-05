@@ -70,7 +70,8 @@ export const useGame = create<GameStore>((set, get) => ({
         );
     },
     loadMainMenu: () => {
-        get().gameManager.destroy();
+        const { gameManager } = get();
+        if (gameManager) gameManager.destroy();
         set(
             produce((state) => {
                 state.gameManager = null;

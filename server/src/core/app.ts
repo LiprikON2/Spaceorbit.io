@@ -68,7 +68,7 @@ app.use("/endpoints", (req, res) => {
 
 // Workaround to allow websockets on development using vite-plugin-node
 // https://github.com/axe-me/vite-plugin-node/issues/22#issuecomment-1547114428
-export const serverListener = server.listeners("request")[0];
+export const [serverListener] = server.listeners("request");
 
 if (import.meta.env.PROD) {
     server.listen(3010);
