@@ -1,7 +1,7 @@
 import React from "react";
 import { Text } from "@mantine/core";
 
-export const NonFieldErrors = ({ errors }) => {
+export const Errors = ({ errors }) => {
     return (
         <>
             {errors &&

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
 import { useSessionStorage } from "@mantine/hooks";
 
-import { NonFieldErrors } from "../../components";
+import { Errors } from "~/ui/components";
 import { useSaveMutation } from "./hooks";
 import { useProfile } from "../../hooks";
 import { useGame } from "~/ui/hooks";
@@ -35,7 +35,7 @@ export const Me = ({ onLogout }) => {
     const save = useSaveMutation(setNonFieldErrors);
     return (
         <Stack>
-            <NonFieldErrors errors={nonFieldErrors} />
+            <Errors errors={nonFieldErrors} />
             {meStatus === "success" ? (
                 <>
                     <Text>Username: {me.username}</Text>

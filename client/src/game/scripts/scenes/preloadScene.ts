@@ -144,6 +144,13 @@ export default class PreloadScene extends Phaser.Scene {
                     });
                     this.scene.start("MainScene", { channel });
                 });
+                // channel.onDisconnect(() => {
+                //     this.game.outEmitter.emit("connectionError", {
+                //         message: "Could not connect to the server",
+                //         navigateToMode: "mainMenu",
+                //     });
+                //     this.game.destroy(true);
+                // });
             });
         } else {
             this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 100 });

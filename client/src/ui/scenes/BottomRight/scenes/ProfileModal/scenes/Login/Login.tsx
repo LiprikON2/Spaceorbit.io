@@ -3,8 +3,7 @@ import { useDidUpdate } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { TextInput, PasswordInput, Space, Stack, Anchor } from "@mantine/core";
 
-import { Button } from "~/ui/components";
-import { NonFieldErrors } from "../../components";
+import { Button, Errors } from "~/ui/components";
 import { useLoginMutation } from "./hooks";
 
 export const Login = ({ setShowLogIn, initEmailPass = {}, setInitEmailPass }) => {
@@ -32,7 +31,7 @@ export const Login = ({ setShowLogIn, initEmailPass = {}, setInitEmailPass }) =>
     return (
         <form onSubmit={form.onSubmit(handleLogin)}>
             <Stack>
-                <NonFieldErrors errors={nonFieldErrors} />
+                <Errors errors={nonFieldErrors} />
                 <TextInput
                     placeholder="example@gmail.com"
                     label="Email"

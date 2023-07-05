@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { produce } from "immer";
 
+import { getSessionStorage } from "./services/localStorage";
+
 const isTouchDevice = () =>
     "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator["msMaxTouchPoints"] > 0;
 
@@ -16,30 +18,6 @@ interface SettingsStore {
     toggleTouchControlsSetting: () => void;
 }
 
-const setSessionStorage = (key, value) => {
-    sessionStorage.setItem(key, serializeJSON(value));
-};
-
-const getSessionStorage = (key) => {
-    return deserializeJSON(sessionStorage.getItem(key) ?? "{}");
-};
-
-const serializeJSON = (value: any) => {
-    try {
-        return JSON.stringify(value);
-    } catch (error) {
-        throw new Error("Failed to serialize the value");
-    }
-};
-
-const deserializeJSON = (value: string) => {
-    try {
-        return JSON.parse(value);
-    } catch {
-        return value;
-    }
-};
-
 const defaultSettings = {
     musicMute: false,
     effectsMute: false,
@@ -51,11 +29,11 @@ const defaultSettings = {
     showDeviceInfo: false,
 };
 
-const key = "settings";
+export const settingsStorageKey = "settings";
 
 export const useSettings = create<SettingsStore>()(
     subscribeWithSelector((set) => ({
-        settings: { ...defaultSettings, ...getSessionStorage(key) },
+        settings: { ...defaultSettings, ...getSessionStorage(settingsStorageKey) },
         toggleEffectsSetting: () =>
             set(
                 produce((state) => {
@@ -100,12 +78,3 @@ export const useSettings = create<SettingsStore>()(
             ),
     }))
 );
-
-export const syncSettingsToSession = () => {
-    const unsub = useSettings.subscribe(
-        (state) => state.settings,
-        (state) => setSessionStorage(key, state)
-    );
-
-    return unsub;
-};

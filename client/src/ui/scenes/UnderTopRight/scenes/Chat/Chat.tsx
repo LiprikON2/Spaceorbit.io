@@ -15,12 +15,10 @@ const isoToLocalTime = (isoString) => {
     return localTime;
 };
 
-const getCurrentTime = () => {
+const getIsoTime = () => {
     const now = new Date();
     const isoTime = now.toISOString();
-    const localTime = isoToLocalTime(isoTime);
-
-    return { isoTime, localTime };
+    return isoTime;
 };
 
 export const Chat = () => {
@@ -42,24 +40,32 @@ export const Chat = () => {
     };
     const handleFocus = () => gameManager.lockInput();
 
-    useEffect(() => {
-        channel.on("message", (data) => {
-            console.log("Recived message!", data);
-        });
-    }, []);
-
     const [message, setMessage] = useState("");
-    const [chatEntires, { append: addChatEntry }] = useListState([]);
+    const [chatEntires, { append: appendChatEntry }] = useListState([]);
     const chatViewportRef = useScrollToBottom([chatEntires]);
 
     const sendMessage = () => {
         if (message) {
-            const { isoTime, localTime } = getCurrentTime();
-            channel.emit("message", { nick, message, isoTime }, { reliable: true });
-            addChatEntry({ nick, message, localTime });
+            const isoTime = getIsoTime();
+            const chatEntry = { nick, message, isoTime };
+            channel.emit("message", chatEntry, { reliable: true });
+            addMessage(chatEntry);
+
             setMessage("");
         }
     };
+
+    const addMessage = (chatEntry) => {
+        const { nick, message, isoTime } = chatEntry;
+        const localTime = isoToLocalTime(isoTime);
+        appendChatEntry({ nick, message, localTime });
+    };
+
+    useEffect(() => {
+        channel.on("message", (chatEntry) => {
+            addMessage(chatEntry);
+        });
+    }, []);
 
     return (
         <Box mx="sm">

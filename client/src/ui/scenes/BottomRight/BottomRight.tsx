@@ -26,15 +26,11 @@ export const BottomRight = ({ GroupComponent }) => {
         toggleProfileModal();
     };
 
-    const handleMainMenu = () => {
-        loadMainMenu();
-    };
-
     return (
         <>
             <GroupComponent>
                 {isLoaded && (
-                    <Button isSquare onClick={handleMainMenu}>
+                    <Button isSquare onClick={loadMainMenu}>
                         <Home />
                     </Button>
                 )}

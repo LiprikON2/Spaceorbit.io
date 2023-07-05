@@ -1,16 +1,17 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BackgroundImage, Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
-import { syncSettingsToSession, useGame } from "./hooks";
+import { useGame, useMultiplayerDisconnect, useSyncSettingsToSession } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
 import { TopRight } from "./scenes/TopRight";
 import { Center } from "./scenes/Center";
 import { Right } from "./scenes/Right";
 import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
-import background from "~/assets/ui/background-space.webp";
 import { UnderTopRight } from "./scenes/UnderTopRight";
+import background from "~/assets/ui/background-space.webp";
+import { ErrorModal } from "./components";
 
 // @ts-ignore
 const StyledUI = styled(BackgroundImage)`
@@ -92,10 +93,12 @@ const StyledBottomRightGroup = styled(Group)`
 `;
 
 export const App = () => {
-    useEffect(() => {
-        const unsub = syncSettingsToSession();
-        return unsub;
-    }, []);
+    useSyncSettingsToSession();
+
+    const { connectionError, clearConnectionError } = useMultiplayerDisconnect();
+    const clearErrors = () => {
+        clearConnectionError();
+    };
 
     const {
         computed: { isLoaded },
@@ -110,6 +113,10 @@ export const App = () => {
             <Right GroupComponent={StyledRightGroup} />
             {isLoaded && <BottomLeft GroupComponent={StyledBottomLeftGroup} />}
             <BottomRight GroupComponent={StyledBottomRightGroup} />
+            <ErrorModal
+                errors={[...(connectionError ? [connectionError] : [])]}
+                clearErrors={clearErrors}
+            />
         </StyledUI>
     );
 };

@@ -6,6 +6,7 @@ import geckos from "@geckos.io/server";
 import { createServer } from "http";
 
 import { isAuthenticated, logger, correctContentType } from "~/middleware";
+import { getIsoTime } from "~/utils";
 
 export const app = express();
 const server = createServer(app);
@@ -15,13 +16,19 @@ const io = geckos({ cors: { allowAuthorization: true, origin: "*" } });
 io.addServer(server);
 
 io.onConnection((channel) => {
-    console.log("its happening!");
+    console.log("Channel connected");
 
-    channel.emit("chat message", "Hi!");
-
-    channel.on("chat message", (data) => {
-        console.log("got?", data);
+    channel.on("message", (data) => {
+        console.log("Message:", data);
+        channel.broadcast.emit("message", data);
     });
+
+    channel.emit("ready");
+    channel.emit(
+        "message",
+        { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
+        { reliable: true }
+    );
 });
 
 const rootRoutes = express.Router();

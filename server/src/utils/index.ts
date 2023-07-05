@@ -1,3 +1,2 @@
-import { generateAccessToken, generateRefreshToken, generateTokens, hashToken } from "./jwt";
-
-export { generateAccessToken, generateRefreshToken, generateTokens, hashToken };
+export * from "./jwt";
+export * from "./time";

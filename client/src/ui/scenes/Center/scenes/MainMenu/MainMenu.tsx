@@ -33,9 +33,3 @@ export const MainMenu = () => {
         </>
     );
 };
-
-// display: flex;
-//     flex-direction: column;
-//     & > {
-//         flex-grow: 1;
-//     }
