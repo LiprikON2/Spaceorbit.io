@@ -1,7 +1,7 @@
+import { useState } from "react";
 import { useDidUpdate } from "@mantine/hooks";
 
-import { useGame } from "../";
-import { useState } from "react";
+import { useGame } from "../..";
 
 export const useMultiplayerDisconnect = () => {
     const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -13,11 +13,9 @@ export const useMultiplayerDisconnect = () => {
 
     useDidUpdate(() => {
         if (isLoaded) {
-            console.log("LOADED CHANGED");
             const { channel } = gameManager.game;
             channel.onDisconnect(() => {
                 loadMainMenu();
-                console.log("SET ERROR");
                 setConnectionError("Connection to server lost");
             });
         }

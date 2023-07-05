@@ -1,2 +1,2 @@
+export * from "./hooks";
 export * from "./useGame";
-export * from "./useMultiplayerDisconnect";
