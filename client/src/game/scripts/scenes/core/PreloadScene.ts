@@ -139,15 +139,15 @@ export class PreloadScene extends Phaser.Scene {
 
                 channel.on("ready", () => {
                     this.game.outEmitter.emit("loading", {
-                        name: "Main Scene",
+                        name: "World Scene",
                         progress: 100,
                     });
-                    this.scene.start("ClientScene", { channel });
+                    this.scene.start("UnnamedMapScene", { channel });
                 });
             });
         } else {
-            this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 100 });
-            this.scene.start("ClientScene");
+            this.game.outEmitter.emit("loading", { name: "World Scene", progress: 100 });
+            this.scene.start("UnnamedMapScene");
         }
 
         /**
