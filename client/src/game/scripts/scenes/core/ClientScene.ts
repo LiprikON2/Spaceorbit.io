@@ -1,31 +1,23 @@
-import type { ClientChannel } from "@geckos.io/client";
-
 import { InputManager, MobManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
-import type { GameExtended } from "~/game/core";
+import { BaseScene } from "~/scenes/core";
 
-export default class MainScene extends Phaser.Scene {
-    game: GameExtended;
+export class ClientScene extends BaseScene {
     inputManager;
     soundManager;
     mobManager;
     player;
     background;
-    backgroundDict = {};
     debugText;
     mobs = [];
-    channel: ClientChannel;
 
     constructor() {
-        super({ key: "MainScene" });
-    }
-
-    init({ channel }) {
-        this.channel = channel;
+        super({ key: "ClientScene" });
     }
 
     // TODO use polyfill or something to prevent game from stopping requesting animation frames on blur
     create() {
+        super.create();
         this.soundManager = new SoundManager(this);
         this.mobManager = new MobManager(this);
         this.player = new Spaceship(
@@ -111,7 +103,8 @@ export default class MainScene extends Phaser.Scene {
         return { x: randomX, y: randomY };
     }
 
-    update(time, delta) {
+    update(time: number, delta: number) {
+        super.update(time, delta);
         this.inputManager.update(time, delta);
         this.debugText.update();
         this.mobManager.update(time, delta);
@@ -120,8 +113,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     updateRootBackground(color?, defaultColor = "#1d252c") {
-        const root = document.getElementById("phaser-game");
-        root!.style.backgroundColor = color ?? defaultColor;
+        this.rootElem.style.backgroundColor = color ?? defaultColor;
     }
 
     // https://blog.ourcade.co/posts/2020/add-pizazz-parallax-scrolling-phaser-3/

@@ -1,4 +1,4 @@
-import { MainScene } from "~/scenes";
+import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects";
 import { produce } from "immer";
 import { create } from "zustand";
@@ -13,7 +13,7 @@ interface GameStore {
         isLoading: boolean;
         isLoaded: boolean;
         player: Spaceship | null;
-        scene: MainScene | null;
+        scene: ClientScene | null;
     };
     loadSingleplayer: (settings) => Promise<void>;
     loadMultiplayer: (settings) => Promise<void>;

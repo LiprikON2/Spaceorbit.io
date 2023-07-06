@@ -6,7 +6,7 @@ import type { OutEvents } from ".";
 export class GameExtended extends Phaser.Game {
     settings;
     outEmitter: Emitter<OutEvents> | null;
-    channel: ClientChannel;
+    channel?: ClientChannel;
     constructor(
         GameConfig?: Phaser.Types.Core.GameConfig,
         settings = {},

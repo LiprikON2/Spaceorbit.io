@@ -1,6 +1,6 @@
 import type { GameExtended } from "~/game/core";
 
-export default class PreloadScene extends Phaser.Scene {
+export class PreloadScene extends Phaser.Scene {
     game: GameExtended;
     constructor() {
         super({ key: "PreloadScene" });
@@ -142,12 +142,12 @@ export default class PreloadScene extends Phaser.Scene {
                         name: "Main Scene",
                         progress: 100,
                     });
-                    this.scene.start("MainScene", { channel });
+                    this.scene.start("ClientScene", { channel });
                 });
             });
         } else {
             this.game.outEmitter.emit("loading", { name: "Main Scene", progress: 100 });
-            this.scene.start("MainScene");
+            this.scene.start("ClientScene");
         }
 
         /**

@@ -6,7 +6,7 @@ import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 
-import { MainScene, PreloadScene } from "~/scenes";
+import { ClientScene, PreloadScene } from "~/scenes/core";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -33,7 +33,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, MainScene],
+    scene: [PreloadScene, ClientScene],
     physics: {
         default: "arcade",
         arcade: {

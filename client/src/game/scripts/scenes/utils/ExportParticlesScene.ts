@@ -1,4 +1,4 @@
-export default class ExportParticlesScene extends Phaser.Scene {
+export class ExportParticlesScene extends Phaser.Scene {
     screenWidth;
     screenHeight;
     screen;

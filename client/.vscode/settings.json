@@ -1,3 +1,6 @@
 {
-    "exportall.config.relExclusion": ["/src/ui/components/ErrorModal"]
+    "exportall.config.relExclusion": [
+        "/src/ui/components/ErrorModal",
+        "/src/game/scripts/scenes/core/index.ts"
+    ]
 }

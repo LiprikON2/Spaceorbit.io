@@ -1,9 +1,10 @@
 {
-    "name": "spaceorbit",
+    "name": "@spaceorbit/client",
     "version": "0.3.0",
     "description": "",
     "homepage": "",
-    "main": "index.js",
+    "main": "src/game/index.ts",
+    "types": "src/game/index.ts",
     "scripts": {
         "dev": "npm start",
         "start": "webpack serve --config webpack/webpack.dev.js",
@@ -30,7 +31,7 @@
         "author": "Yannick Deubel (https://github.com/yandeu)"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=16"
     },
     "license": "MIT",
     "dependencies": {

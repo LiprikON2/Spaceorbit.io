@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { createNanoEvents } from "nanoevents";
 import type { Emitter } from "nanoevents";
 
-import { MainScene } from "~/scenes";
+import { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects";
 import { GameExtended } from ".";
 import { gameConfig } from ".";
@@ -59,8 +59,8 @@ export class GameManager {
         await whenIsBooted;
 
         const whenSceneCreated = new Promise((resolve) => {
-            const MainScene = this.game.scene.keys.MainScene as MainScene;
-            MainScene.events.on("create", resolve);
+            const clientScene = this.game.scene.keys.ClientScene as ClientScene;
+            clientScene.events.on("create", resolve);
         });
         await whenSceneCreated;
 
@@ -85,9 +85,9 @@ export class GameManager {
         this.scene.input.keyboard.resetKeys();
     };
 
-    get scene(): MainScene | null {
-        const mainScene = this.game?.scene?.keys?.MainScene as MainScene;
-        return mainScene ?? null;
+    get scene(): ClientScene | null {
+        const clientScene = this.game?.scene?.keys?.ClientScene as ClientScene;
+        return clientScene ?? null;
     }
     get player(): Spaceship | null {
         return this.scene?.player ?? null;
