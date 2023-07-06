@@ -49,14 +49,14 @@ export default class SoundManager {
     }
     setVolume(key, newVolume) {
         this.options[key] = newVolume;
-        this.update();
+        this.updateVolumes();
     }
     toggleMute(key) {
         this.options[key] = !this.options[key];
-        this.update();
+        this.updateVolumes();
     }
 
-    update() {
+    updateVolumes() {
         if (this.music) {
             this.music.mute = this.options.musicMute;
             this.music.volume = this.options.masterVolume * this.options.musicVolume;
@@ -204,8 +204,10 @@ export default class SoundManager {
         this.soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
         settings.isSilent = false;
     }
-
-    updateLooping() {
+    /**
+     * Updates looping sounds
+     */
+    update() {
         Object.keys(this.loopingSounds).forEach((UUID) => {
             const soundObj = this.loopingSounds[UUID];
             const soundSource = this.scene.children.getByName(UUID);

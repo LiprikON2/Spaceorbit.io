@@ -3,8 +3,8 @@ import type { Spaceship } from "~/objects";
 import { produce } from "immer";
 import { create } from "zustand";
 
-import { gameManager } from "~/game/core/gameManager";
-import type { GameManager } from "~/game/core/gameManager";
+import { gameManager } from "~/game/core/GameManager";
+import type { GameManager } from "~/game/core/GameManager";
 
 interface GameStore {
     gameManager: GameManager | null;

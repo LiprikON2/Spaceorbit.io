@@ -6,30 +6,15 @@ import geckos from "@geckos.io/server";
 import { createServer } from "http";
 
 import { isAuthenticated, logger, correctContentType } from "~/middleware";
-import { getIsoTime } from "~/utils";
+import { GameServer, serverConfig } from "~/game";
 
 export const app = express();
 const server = createServer(app);
 
-// const game = new PhaserGame(server);
-const io = geckos({ cors: { allowAuthorization: true, origin: "*" } });
-io.addServer(server);
+const geckosServer = geckos({ cors: { allowAuthorization: true, origin: "*" } });
+geckosServer.addServer(server);
 
-io.onConnection((channel) => {
-    console.log("Channel connected");
-
-    channel.on("message", (data) => {
-        console.log("Message:", data);
-        channel.broadcast.emit("message", data);
-    });
-
-    channel.emit("ready");
-    channel.emit(
-        "message",
-        { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
-        { reliable: true }
-    );
-});
+const game = new GameServer(geckosServer, serverConfig);
 
 const rootRoutes = express.Router();
 rootRoutes.use(routes);

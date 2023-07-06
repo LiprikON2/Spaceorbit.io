@@ -1,7 +1,7 @@
-import type { GameExtended } from "~/game/core";
+import type { GameClient } from "~/game/core";
 
 export class PreloadScene extends Phaser.Scene {
-    game: GameExtended;
+    game: GameClient;
     constructor() {
         super({ key: "PreloadScene" });
     }

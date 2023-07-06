@@ -5,7 +5,7 @@ export class BaseMapScene extends ClientScene {
         super(config);
     }
 
-    create() {
+    async create() {
         super.create();
 
         this.loadTileBackground(

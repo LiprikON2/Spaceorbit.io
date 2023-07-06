@@ -419,7 +419,7 @@ export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
         );
     }
 
-    update(time, delta) {
+    update(time: number, delta: number) {
         this.updateTextPos();
     }
 }

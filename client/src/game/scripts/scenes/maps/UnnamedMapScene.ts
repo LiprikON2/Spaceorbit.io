@@ -5,7 +5,7 @@ export class UnnamedMapScene extends BaseMapScene {
         super("UnnamedMapScene");
     }
 
-    create() {
+    async create() {
         super.create();
 
         this.loadBackground("map_1-2", 0.5);

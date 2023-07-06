@@ -1,3 +1,3 @@
-export * from "./gameConfig";
-export * from "./gameExtended";
-export * from "./gameManager";
+export * from "./clientConfig";
+export * from "./GameClient";
+export * from "./GameManager";

@@ -17,6 +17,13 @@ export default defineConfig({
     resolve: {
         alias: {
             "~": resolve("./src"),
+            // "~/game": resolve(__dirname, "../src/game/scripts"),
+            // "~/scenes": resolve(__dirname, "../src/game/scripts/scenes"),
+            // "~/managers": resolve(__dirname, "../src/game/scripts/managers"),
+            // "~/objects": resolve(__dirname, "../src/game/scripts/objects"),
+            // "~/assets": resolve(__dirname, "../src/game/assets"),
+
+            // "~/ui": resolve(__dirname, "../src/ui"),
         },
     },
 

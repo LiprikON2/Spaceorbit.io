@@ -3,7 +3,7 @@ import type { ClientChannel } from "@geckos.io/client";
 
 import type { OutEvents } from ".";
 
-export class GameExtended extends Phaser.Game {
+export class GameClient extends Phaser.Game {
     settings;
     outEmitter: Emitter<OutEvents> | null;
     channel?: ClientChannel;

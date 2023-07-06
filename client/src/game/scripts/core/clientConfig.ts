@@ -23,8 +23,9 @@ const DEFAULT_HEIGHT = 1080;
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
 
-export const gameConfig: Phaser.Types.Core.GameConfig = {
+export const clientConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
+    // TODO test perfomance/mobile safari
     transparent: true,
     scale: {
         parent: "phaser-game",

@@ -4,8 +4,8 @@ import type { Emitter } from "nanoevents";
 
 import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects";
-import { GameExtended } from ".";
-import { gameConfig } from ".";
+import { GameClient } from ".";
+import { clientConfig } from ".";
 import { geckos } from "@geckos.io/client";
 
 export interface StatusEvent {
@@ -23,7 +23,7 @@ export interface OutEvents {
 
 export class GameManager {
     config: Phaser.Types.Core.GameConfig;
-    game: GameExtended;
+    game: GameClient;
     emitter: Emitter<OutEvents>;
 
     constructor(config) {
@@ -46,7 +46,7 @@ export class GameManager {
             });
 
         const whenIsBooted = new Promise((resolve) => {
-            this.game = new GameExtended(
+            this.game = new GameClient(
                 {
                     ...this.config,
                     callbacks: { postBoot: () => resolve(true) },
@@ -97,4 +97,4 @@ export class GameManager {
     };
 }
 
-export const gameManager = new GameManager(gameConfig);
+export const gameManager = new GameManager(clientConfig);
