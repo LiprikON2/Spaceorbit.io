@@ -39,7 +39,9 @@ export class GameManager {
         let channel;
         if (isMultiplayer)
             channel = geckos({
-                url: `${location.protocol}//${location.hostname}:${channelPort}`,
+                // TODO
+                // url: `${location.protocol}//${location.hostname}:${channelPort}`,
+                url: `${location.protocol}//192.168.1.246:${channelPort}`,
                 port: null,
             });
 

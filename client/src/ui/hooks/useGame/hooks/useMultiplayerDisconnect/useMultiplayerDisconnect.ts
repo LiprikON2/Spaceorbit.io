@@ -8,11 +8,12 @@ export const useMultiplayerDisconnect = () => {
     const {
         gameManager,
         loadMainMenu,
+        mode,
         computed: { isLoaded },
     } = useGame();
 
     useDidUpdate(() => {
-        if (isLoaded) {
+        if (isLoaded && mode === "multiplayer") {
             const { channel } = gameManager.game;
             channel.onDisconnect(() => {
                 loadMainMenu();

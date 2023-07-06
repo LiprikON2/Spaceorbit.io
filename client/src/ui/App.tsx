@@ -1,5 +1,5 @@
 import React from "react";
-import { BackgroundImage, Group } from "@mantine/core";
+import { Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
 import { useGame, useMultiplayerDisconnect, useSyncSettingsToSession } from "./hooks";
@@ -11,7 +11,7 @@ import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
 import { UnderTopRight } from "./scenes/UnderTopRight";
 import background from "~/assets/ui/background-space.webp";
-import { ErrorModal } from "./components";
+import { ErrorModal, BackgroundImage } from "./components";
 
 // @ts-ignore
 const StyledUI = styled(BackgroundImage)`
@@ -62,7 +62,6 @@ const StyledCenterGroup = styled(Group)`
     width: min(60ch, 100vw - 5rem);
     margin-inline: auto;
 `;
-
 const StyledUnderTopRightGroup = styled(Group)`
     grid-column: top-l-start / cent-start;
     grid-row: top-l-end / left-end;
@@ -75,7 +74,6 @@ const StyledUnderTopRightGroup = styled(Group)`
 
     margin-block: 0;
 `;
-
 const StyledRightGroup = styled(Group)`
     grid-area: right;
     justify-self: end;
@@ -96,8 +94,13 @@ export const App = () => {
     useSyncSettingsToSession();
 
     const { connectionError, clearConnectionError } = useMultiplayerDisconnect();
+
+    const errors = [...(connectionError ? [connectionError] : [])];
     const clearErrors = () => {
-        clearConnectionError();
+        const timeUntilModalIsDismissed = 500;
+        setTimeout(() => {
+            clearConnectionError();
+        }, timeUntilModalIsDismissed);
     };
 
     const {
@@ -105,7 +108,7 @@ export const App = () => {
     } = useGame();
 
     return (
-        <StyledUI src={background} style={{ ...(isLoaded && { backgroundImage: "none" }) }}>
+        <StyledUI src={background} showBg={!isLoaded}>
             {isLoaded && <TopLeft GroupComponent={StyledTopLeftGroup} />}
             {isLoaded && <TopRight GroupComponent={StyledTopRightGroup} />}
             {!isLoaded && <Center GroupComponent={StyledCenterGroup} />}
@@ -113,10 +116,7 @@ export const App = () => {
             <Right GroupComponent={StyledRightGroup} />
             {isLoaded && <BottomLeft GroupComponent={StyledBottomLeftGroup} />}
             <BottomRight GroupComponent={StyledBottomRightGroup} />
-            <ErrorModal
-                errors={[...(connectionError ? [connectionError] : [])]}
-                clearErrors={clearErrors}
-            />
+            <ErrorModal errors={errors} clearErrors={clearErrors} />
         </StyledUI>
     );
 };
