@@ -4,7 +4,7 @@ import Weapons from "./weapons";
 import Shields from "./shields";
 import Outfitting from "./outfitting";
 
-export default class Spaceship extends Phaser.Physics.Arcade.Sprite {
+export class Spaceship extends Phaser.Physics.Arcade.Sprite {
     halfWidth: number;
     halfHeight: number;
 

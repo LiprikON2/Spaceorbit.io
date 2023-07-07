@@ -4,7 +4,6 @@
     "description": "",
     "homepage": "",
     "main": "src/game/index.ts",
-    "types": "src/game/index.ts",
     "scripts": {
         "dev": "npm start",
         "start": "webpack serve --config webpack/webpack.dev.js",

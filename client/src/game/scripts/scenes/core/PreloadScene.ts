@@ -1,4 +1,4 @@
-import type { GameClient } from "~/game/core";
+import type { GameClient } from "~/game";
 
 export class PreloadScene extends Phaser.Scene {
     game: GameClient;

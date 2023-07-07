@@ -1,5 +1,3 @@
-import GenericText from "./genericText";
-import Spaceship from "./ship/spaceship";
-import Mob from "./mob";
-
-export { GenericText, Spaceship, Mob };
+export { GenericText } from "./genericText";
+export { Spaceship } from "./ship/spaceship";
+export { Mob } from "./mob";

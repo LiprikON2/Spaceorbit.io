@@ -1,5 +1,5 @@
-import { hashToken } from "~/utils";
-import DbService from "~/services/DbService";
+import { hashToken } from "@/utils";
+import DbService from "@/services/DbService";
 
 class UserService extends DbService {
     // Creates token entry for user in db

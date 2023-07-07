@@ -1,4 +1,4 @@
-export default class GenericText extends Phaser.GameObjects.Text {
+export class GenericText extends Phaser.GameObjects.Text {
     player;
     constructor(scene, player) {
         super(scene, scene.game.config.width * 0.85, 100, "", { color: "white", fontSize: "2rem" });

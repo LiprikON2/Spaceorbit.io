@@ -2,11 +2,12 @@ import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
 import { BaseScene } from "@spaceorbit/client";
-import { getIsoTime } from "~/utils";
+import { getIsoTime } from "@/utils";
 
 export class ServerScene extends BaseScene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
-        super(config);
+        // super(config);
+        super("ServerScene");
     }
 
     preload() {}
@@ -18,6 +19,7 @@ export class ServerScene extends BaseScene {
     update(time: number, delta: number) {}
 
     listenForMessages() {
+        // @ts-ignore
         this.game.server.onConnection((channel) => {
             console.log("Channel connected");
             channel.on("message", (data) => {
@@ -33,6 +35,7 @@ export class ServerScene extends BaseScene {
         });
     }
 }
+
 //     tick;
 //     players;
 //     constructor(config) {

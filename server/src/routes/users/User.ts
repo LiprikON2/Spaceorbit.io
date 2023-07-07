@@ -1,7 +1,7 @@
 import express from "express";
 
-import UserController from "~/controllers/users/User";
-import { isAuthenticated } from "~/middleware";
+import UserController from "@/controllers/users/User";
+import { isAuthenticated } from "@/middleware";
 
 const userRoutes = express.Router();
 const controller = new UserController();

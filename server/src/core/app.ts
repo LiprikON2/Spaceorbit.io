@@ -1,12 +1,12 @@
 import express from "express";
-import routes from "~/routes";
 import bodyParserErrorHandler from "express-body-parser-error-handler";
 import listEndpoints from "express-list-endpoints";
 import geckos from "@geckos.io/server";
 import { createServer } from "http";
 
-import { isAuthenticated, logger, correctContentType } from "~/middleware";
-import { GameServer, serverConfig } from "~/game";
+import { isAuthenticated, logger, correctContentType } from "@/middleware";
+import { GameServer, serverConfig } from "@/game";
+import routes from "@/routes";
 
 export const app = express();
 const server = createServer(app);

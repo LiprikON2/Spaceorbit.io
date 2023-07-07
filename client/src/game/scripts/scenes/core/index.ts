@@ -1,3 +1,3 @@
-export * from "./BaseScene";
-export * from "./ClientScene";
-export * from "./PreloadScene";
+export { PreloadScene } from "./PreloadScene";
+export { BaseScene } from "./BaseScene";
+export { ClientScene } from "./ClientScene";

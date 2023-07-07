@@ -1,11 +1,9 @@
 import type { ClientChannel } from "@geckos.io/client";
+
 import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
-import { BaseScene } from "~/scenes/core";
+import { BaseScene } from "~/scenes";
 
-// export interface Cool {
-//     createPlayer: (player: Spaceship) => void;
-// }
 export class ClientScene extends BaseScene {
     channel?: ClientChannel;
 

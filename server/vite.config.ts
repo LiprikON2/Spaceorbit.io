@@ -2,6 +2,10 @@ import { defineConfig } from "vite";
 import { VitePluginNode } from "vite-plugin-node";
 import { resolve } from "path";
 
+import webpackConfig from "@spaceorbit/client/webpack/webpack.common";
+
+const webpackAliases = webpackConfig.resolve.alias;
+
 const host = process.env.HOST ?? "0.0.0.0";
 const port = parseInt(process.env.PORT ?? "") || 3010;
 
@@ -16,14 +20,8 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            "~": resolve("./src"),
-            // "~/game": resolve(__dirname, "../src/game/scripts"),
-            // "~/scenes": resolve(__dirname, "../src/game/scripts/scenes"),
-            // "~/managers": resolve(__dirname, "../src/game/scripts/managers"),
-            // "~/objects": resolve(__dirname, "../src/game/scripts/objects"),
-            // "~/assets": resolve(__dirname, "../src/game/assets"),
-
-            // "~/ui": resolve(__dirname, "../src/ui"),
+            ...webpackAliases,
+            ...{ "@": resolve("./src") },
         },
     },
 
@@ -35,8 +33,7 @@ export default defineConfig({
             adapter: "express",
 
             // tell the plugin where is your project entry
-            appPath: resolve(__dirname, "./src/core/app.ts"),
-            // appPath: resolve(__dirname, "./src/game/todelete/server/server.js"),
+            appPath: resolve("./src/core/app.ts"),
 
             // Optional, default: 'viteNodeApp'
             // the name of named export of you app from the appPath file
@@ -68,6 +65,8 @@ export default defineConfig({
         }),
     ],
     optimizeDeps: {
+        // disabled: true,
+        // include: [],
         // Vite does not work well with optionnal dependencies,
         // you can mark them as ignored for now
         // eg: for nestjs, exlude these optional dependencies:

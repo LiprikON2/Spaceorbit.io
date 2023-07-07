@@ -1,4 +1,4 @@
-import { Spaceship } from "~/objects";
+import { Spaceship } from ".";
 
 enum Direction {
     Left,
@@ -6,7 +6,7 @@ enum Direction {
     Still,
 }
 
-export default class Mob extends Spaceship {
+export class Mob extends Spaceship {
     isReadyToFire: boolean = false;
     isSleeping: boolean = false;
     isAggresive: boolean = true;

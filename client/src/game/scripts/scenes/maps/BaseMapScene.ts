@@ -1,4 +1,4 @@
-import { ClientScene } from "~/scenes/core";
+import { ClientScene } from "~/scenes";
 
 export class BaseMapScene extends ClientScene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {

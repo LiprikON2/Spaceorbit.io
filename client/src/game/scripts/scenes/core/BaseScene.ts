@@ -1,5 +1,5 @@
-import { MobManager } from "~/game/managers";
-import { Spaceship } from "~/game/objects";
+import { MobManager } from "~/managers";
+import { Spaceship } from "~/objects";
 import type { GameClient } from "~/game";
 
 /**

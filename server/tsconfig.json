@@ -17,8 +17,8 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "paths": {
-            "~/*": ["./src/*"],
-            "express-body-parser-error-handler": ["./src/types/express-body-parser-error-handler"]
+            "@/*": ["./src/*"]
+            // "express-body-parser-error-handler": ["./src/types/express-body-parser-error-handler"]
         },
         "typeRoots": ["node_modules/@types", "src/types"]
     },

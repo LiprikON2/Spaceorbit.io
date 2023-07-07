@@ -1,6 +1,6 @@
 import express from "express";
 
-import BaseController from "~/controllers/BaseController";
+import BaseController from "@/controllers/BaseController";
 
 class CrudController extends BaseController {
     protected providerService: any; // TODO make type/interface

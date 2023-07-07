@@ -1,7 +1,7 @@
 import { User, Prisma } from "@prisma/client";
 import bcrypt from "bcrypt";
 
-import DbService from "~/services/DbService";
+import DbService from "@/services/DbService";
 
 class UserService extends DbService {
     private saltRounds = 8;
