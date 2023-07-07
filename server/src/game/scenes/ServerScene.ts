@@ -1,48 +1,50 @@
 import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
-// import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
+import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
 import { getIsoTime } from "~/server/utils";
+import type { GameServer } from "~/server/game/GameServer";
 
-export class ServerScene {}
-// export class ServerScene extends BaseScene {
-//     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
-//         // super(config);
-//         super("ServerScene");
-//     }
+export class ServerScene extends BaseScene {
+    declare game: GameServer;
+    constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
+        super("ServerScene");
+    }
 
-//     preload() {}
+    preload() {}
 
-//     create() {
-//         this.listenForMessages();
-//     }
+    create() {
+        this.game.server.onConnection((channel) => {
+            console.log("Channel connected", channel);
 
-//     update(time: number, delta: number) {}
+            this.listenForRequests(channel);
+            this.listenForMessages(channel);
+        });
+    }
 
-//     listenForMessages() {
-//         // @ts-ignore
-//         this.game.server.onConnection((channel) => {
-//             console.log("Channel connected");
-//             channel.on("message", (data) => {
-//                 console.log("Message:", data);
-//                 channel.broadcast.emit("message", data, { reliable: true });
-//             });
-//             channel.emit("ready");
-//             channel.emit(
-//                 "message",
-//                 { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
-//                 { reliable: true }
-//             );
-//         });
-//     }
-// }
+    update(time: number, delta: number) {}
 
-export const test = function () {
-    return "yes";
-};
+    listenForRequests(channel) {
+        channel.on("requestPlayer", () => {
+            const player = this.createPlayer();
+            channel.emit("requestPlayer", player, { reliable: true });
+        });
+        // channel.broadcast.emit("requestPlayer", data, { reliable: true });
+    }
 
-export const test2 = "yes";
-console.log("ServerScene", ServerScene, test, test2);
+    listenForMessages(channel) {
+        channel.on("message", (data) => {
+            console.log("Message:", data);
+            channel.broadcast.emit("message", data, { reliable: true });
+        });
+        channel.emit("ready");
+        channel.emit(
+            "message",
+            { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
+            { reliable: true }
+        );
+    }
+}
 
 //     tick;
 //     players;

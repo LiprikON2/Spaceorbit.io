@@ -1,2 +1,2 @@
-// export * from "./core";
-// export * from "./maps";
+export { PreloadScene, BaseScene, ClientScene } from "./core";
+export { UnnamedMapScene, BaseMapScene } from "./maps";

@@ -1,3 +1,2 @@
-export * from "./clientConfig";
-export * from "./GameClient";
+export * from "./client";
 export * from "./GameManager";

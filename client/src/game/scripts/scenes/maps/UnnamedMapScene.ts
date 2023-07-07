@@ -1,4 +1,4 @@
-import { BaseMapScene } from ".";
+import { BaseMapScene } from "./BaseMapScene";
 
 export class UnnamedMapScene extends BaseMapScene {
     constructor() {

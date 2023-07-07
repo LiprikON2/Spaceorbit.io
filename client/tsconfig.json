@@ -10,7 +10,7 @@
         "forceConsistentCasingInFileNames": true,
 
         "allowJs": true,
-        "allowUnreachableCode": false,
+        "allowUnreachableCode": true,
         "noImplicitAny": false,
         "sourceMap": true,
         // Temp fix for Netlify's TS2531 errors

@@ -1,12 +1,12 @@
 import Phaser from "phaser";
 import { createNanoEvents } from "nanoevents";
 import type { Emitter } from "nanoevents";
-
-import type { ClientScene } from "~/scenes/core";
-import type { Spaceship } from "~/objects";
-import { GameClient } from ".";
-import { clientConfig } from ".";
 import { geckos } from "@geckos.io/client";
+
+import type { ClientScene } from "~/scenes/core/ClientScene";
+import type { Spaceship } from "~/objects";
+import { GameClient, clientConfig } from "./client";
+import { TouchSensor } from "@dnd-kit/core";
 
 export interface StatusEvent {
     name: string;
@@ -17,6 +17,7 @@ export interface ConnectionErrorEvent {
     navigateToMode: "mainMenu" | "singleplayer" | "multiplayer";
 }
 export interface OutEvents {
+    worldCreate: () => void;
     loading: (status: StatusEvent) => void;
     connectionError: (errorDetails: ConnectionErrorEvent) => void;
 }
@@ -60,10 +61,12 @@ export class GameManager {
 
         const whenSceneCreated = new Promise((resolve) => {
             const clientScene = this.game.scene.scenes.at(-1);
-            clientScene.events.on("create", resolve);
+            clientScene.events.on("create", () => {
+                resolve(true);
+            });
+            // this.on("worldCreate", resolve);
         });
         await whenSceneCreated;
-
         return this;
     };
 

@@ -2,10 +2,12 @@ import type { ClientChannel } from "@geckos.io/client";
 
 import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
-import { BaseScene } from ".";
+import type { GameClient } from "~/game";
+import { BaseScene } from "./BaseScene";
 
 export class ClientScene extends BaseScene {
     channel?: ClientChannel;
+    game: GameClient;
 
     inputManager: InputManager;
     soundManager: SoundManager;
@@ -50,6 +52,7 @@ export class ClientScene extends BaseScene {
                 }
             }
         });
+        this.game.outEmitter.emit("worldCreate");
         this.didCreateFinish = true;
     }
 
@@ -74,7 +77,7 @@ export class ClientScene extends BaseScene {
     }
 
     async producePlayer(): Promise<Spaceship> {
-        if (this.isSingleplayer) {
+        if (true || this.isSingleplayer) {
             return this.createPlayer();
         } else {
             return this.#requestPlayer();

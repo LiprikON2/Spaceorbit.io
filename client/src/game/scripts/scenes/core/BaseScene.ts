@@ -1,13 +1,11 @@
 import { MobManager } from "~/managers";
 import { Spaceship } from "~/objects";
-import type { GameClient } from "~/game";
 
 /**
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
 export class BaseScene extends Phaser.Scene {
     rootElem: HTMLElement;
-    game: GameClient;
     mobManager: MobManager;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {

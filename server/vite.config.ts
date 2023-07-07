@@ -65,8 +65,8 @@ export default defineConfig({
         }),
     ],
     optimizeDeps: {
-        // disabled: true,
-        // include: [],
+        disabled: true,
+        include: [],
         // Vite does not work well with optionnal dependencies,
         // you can mark them as ignored for now
         // eg: for nestjs, exlude these optional dependencies:

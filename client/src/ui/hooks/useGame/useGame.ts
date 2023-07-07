@@ -1,4 +1,4 @@
-import type { ClientScene } from "~/scenes";
+import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects";
 import { produce } from "immer";
 import { create } from "zustand";

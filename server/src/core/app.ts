@@ -6,7 +6,7 @@ import { createServer } from "http";
 
 import routes from "~/server/routes";
 import { isAuthenticated, logger, correctContentType } from "~/server/middleware";
-import { GameServer, serverConfig } from "~/server/game";
+import { serverConfig, GameServer } from "~/server/game";
 
 export const app = express();
 const server = createServer(app);

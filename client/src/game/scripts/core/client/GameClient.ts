@@ -1,7 +1,7 @@
 import type { Emitter } from "nanoevents";
 import type { ClientChannel } from "@geckos.io/client";
 
-import type { OutEvents } from ".";
+import type { OutEvents } from "~/game/core/GameManager";
 
 export class GameClient extends Phaser.Game {
     settings;

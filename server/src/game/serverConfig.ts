@@ -1,7 +1,7 @@
 import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
-import { ServerScene } from "~/server/game";
+import { ServerScene } from "./scenes/ServerScene";
 
 // import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 // import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";

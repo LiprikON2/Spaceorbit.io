@@ -1,4 +1,4 @@
-import { Spaceship } from ".";
+import { Spaceship } from "./ship/spaceship";
 
 enum Direction {
     Left,

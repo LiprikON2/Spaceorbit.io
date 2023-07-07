@@ -1,4 +1,11 @@
-export * from "./core";
-export * from "./managers";
-export * from "./objects";
-export * from "./scenes";
+export {
+    clientConfig,
+    GameClient,
+    StatusEvent,
+    ConnectionErrorEvent,
+    OutEvents,
+    GameManager,
+    gameManager,
+} from "./core";
+export { InputManager, MobManager, SoundManager } from "./managers";
+export { Mob, Spaceship, GenericText } from "./objects";
