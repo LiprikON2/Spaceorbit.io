@@ -21,7 +21,7 @@ export default defineConfig({
     resolve: {
         alias: {
             ...webpackAliases,
-            ...{ "@": resolve("./src") },
+            ...{ "~/server": resolve(__dirname, "./src") },
         },
     },
 
@@ -33,7 +33,7 @@ export default defineConfig({
             adapter: "express",
 
             // tell the plugin where is your project entry
-            appPath: resolve("./src/core/app.ts"),
+            appPath: resolve(__dirname, "./src/core/app.ts"),
 
             // Optional, default: 'viteNodeApp'
             // the name of named export of you app from the appPath file

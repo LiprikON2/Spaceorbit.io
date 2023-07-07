@@ -1,12 +1,12 @@
 import express from "express";
-import { generateTokens, hashToken } from "@/utils";
+import { generateTokens, hashToken } from "~/server/utils";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 
-import UserService from "@/services/users/User";
-import BaseController from "@/controllers/BaseController";
-import AuthService from "@/services/auth/Auth";
-import MailService from "@/services/mail/Mail";
+import UserService from "~/server/services/users/User";
+import BaseController from "~/server/controllers/BaseController";
+import AuthService from "~/server/services/auth/Auth";
+import MailService from "~/server/services/mail/Mail";
 
 class UserController extends BaseController {
     private userService = new UserService();

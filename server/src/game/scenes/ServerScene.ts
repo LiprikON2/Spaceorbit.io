@@ -1,40 +1,48 @@
 import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
-import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
-import { getIsoTime } from "@/utils";
+// import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
+import { getIsoTime } from "~/server/utils";
 
-export class ServerScene extends BaseScene {
-    constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
-        // super(config);
-        super("ServerScene");
-    }
+export class ServerScene {}
+// export class ServerScene extends BaseScene {
+//     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
+//         // super(config);
+//         super("ServerScene");
+//     }
 
-    preload() {}
+//     preload() {}
 
-    create() {
-        this.listenForMessages();
-    }
+//     create() {
+//         this.listenForMessages();
+//     }
 
-    update(time: number, delta: number) {}
+//     update(time: number, delta: number) {}
 
-    listenForMessages() {
-        // @ts-ignore
-        this.game.server.onConnection((channel) => {
-            console.log("Channel connected");
-            channel.on("message", (data) => {
-                console.log("Message:", data);
-                channel.broadcast.emit("message", data, { reliable: true });
-            });
-            channel.emit("ready");
-            channel.emit(
-                "message",
-                { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
-                { reliable: true }
-            );
-        });
-    }
-}
+//     listenForMessages() {
+//         // @ts-ignore
+//         this.game.server.onConnection((channel) => {
+//             console.log("Channel connected");
+//             channel.on("message", (data) => {
+//                 console.log("Message:", data);
+//                 channel.broadcast.emit("message", data, { reliable: true });
+//             });
+//             channel.emit("ready");
+//             channel.emit(
+//                 "message",
+//                 { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
+//                 { reliable: true }
+//             );
+//         });
+//     }
+// }
+
+export const test = function () {
+    return "yes";
+};
+
+export const test2 = "yes";
+console.log("ServerScene", ServerScene, test, test2);
 
 //     tick;
 //     players;
