@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { createNanoEvents } from "nanoevents";
 import type { Emitter } from "nanoevents";
 
-import type { ClientScene } from "~/scenes";
+import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects";
 import { GameClient } from ".";
 import { clientConfig } from ".";

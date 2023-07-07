@@ -1,7 +1,7 @@
 import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
-import { BaseScene } from "@spaceorbit/client";
+import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
 import { getIsoTime } from "@/utils";
 
 export class ServerScene extends BaseScene {

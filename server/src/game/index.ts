@@ -1,3 +1,3 @@
-export * from "./GameServer";
-export * from "./serverConfig";
-export * from "./ServerScene";
+export { GameServer } from "./GameServer";
+export { serverConfig } from "./serverConfig";
+export { ServerScene } from "./ServerScene";
