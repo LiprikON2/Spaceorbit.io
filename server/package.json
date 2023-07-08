@@ -7,7 +7,7 @@
         "schema": "src/db/schema.prisma"
     },
     "scripts": {
-        "dev": "vite",
+        "dev": "npm run prod",
         "prod": "npx nodemon --exec \"vite build && node dist/app.js\" -e ts --ignore dist/",
         "build": "vite build",
         "migrate": "npx prisma migrate dev --name ' ' && npx prisma generate"

@@ -1,3 +1,4 @@
+import { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 import { MobManager } from "~/managers";
 import { Spaceship } from "~/objects";
 
@@ -7,6 +8,7 @@ import { Spaceship } from "~/objects";
 export class BaseScene extends Phaser.Scene {
     rootElem: HTMLElement;
     mobManager: MobManager;
+    plugins: Phaser.Plugins.PluginManager;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -20,18 +22,32 @@ export class BaseScene extends Phaser.Scene {
 
     update(time: number, delta: number) {}
 
-    createPlayer() {
-        return new Spaceship(
-            this,
-            400,
-            400,
-            "F5S4",
-            this.getPlayerKit(),
-            undefined,
-            "Player",
-            this.mobManager.mobs,
-            100
-        );
+    getPlayerServerOptions() {
+        const spaceshipServerOptions: SpaceshipServerOptions = {
+            id: "",
+            x: 400,
+            y: 400,
+            // TODO spaceship factory pattern
+            outfit: this.getPlayerKit(),
+            atlasTexture: "F5S4",
+            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
+            username: "Player",
+            enemies: [],
+            depth: 10,
+        };
+
+        return spaceshipServerOptions;
+        // return new Spaceship(
+        //     this,
+        //     400,
+        //     400,
+        //     "F5S4",
+        //     this.getPlayerKit(),
+        //     undefined,
+        //     "Player",
+        //     this.mobManager.mobs,
+        //     100
+        // );
     }
 
     getPlayerKit() {

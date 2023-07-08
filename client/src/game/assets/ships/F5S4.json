@@ -17,7 +17,7 @@
             "h": 291
         },
         "scale": 0.090104,
-        "baseSpecs": {
+        "baseStats": {
             "speed": 200,
             "health": 16000,
             "hitboxRadius": 75

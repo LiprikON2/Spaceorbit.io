@@ -1,3 +1,8 @@
+import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscroller";
+import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
+
+type VirtualJoyStick = RexVirtualJoyStick & Phaser.Events.EventEmitter;
+
 export default class InputManager {
     scene;
     player;
@@ -22,7 +27,7 @@ export default class InputManager {
         scene.cameras.main.startFollow(player);
         scene.cameras.main.setZoom(this.zoom);
 
-        const scroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
+        const scroller: MouseWheelScroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
         });
         scroller.on("scroll", (inc, gameObject, scroller) => {
@@ -53,15 +58,19 @@ export default class InputManager {
 
         // TODO multitouch
         this.scene.input.addPointer(1);
-        const joystick = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
-            x: Number(this.scene.game.config.height) * 0.25,
-            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.25,
-            radius: 100,
-            base: baseJoystick,
-            thumb: thumbJoystick,
-            enable: this.isTouchMode,
-            fixed: true,
-        });
+        const joystick: VirtualJoyStick = this.scene.plugins
+            .get("rexVirtualJoystick")
+            .add(this.scene, {
+                x: Number(this.scene.game.config.height) * 0.25,
+                y:
+                    Number(this.scene.game.config.height) -
+                    Number(this.scene.game.config.height) * 0.25,
+                radius: 100,
+                base: baseJoystick,
+                thumb: thumbJoystick,
+                enable: this.isTouchMode,
+                fixed: true,
+            });
         joystick.setVisible(this.isTouchMode);
 
         joystick.on("update", () => {
@@ -75,17 +84,22 @@ export default class InputManager {
 
         this.touchControls.joystick = joystick;
 
-        const virtualBtn = this.scene.plugins.get("rexVirtualJoystick").add(this.scene, {
-            x: Number(this.scene.game.config.width) * 0.75,
-            y: Number(this.scene.game.config.height) - Number(this.scene.game.config.height) * 0.25,
-            radius: 100,
-            base: this.scene.add.rectangle(-999, -999),
-            thumb: thumbBtn,
-            enable: false,
-            fixed: true,
-        });
+        const virtualBtn: VirtualJoyStick = this.scene.plugins
+            .get("rexVirtualJoystick")
+            .add(this.scene, {
+                x: Number(this.scene.game.config.width) * 0.75,
+                y:
+                    Number(this.scene.game.config.height) -
+                    Number(this.scene.game.config.height) * 0.25,
+                radius: 100,
+                base: this.scene.add.rectangle(-999, -999),
+                thumb: thumbBtn,
+                enable: false,
+                fixed: true,
+            });
         virtualBtn.setVisible(this.isTouchMode);
 
+        // @ts-ignore
         virtualBtn.on("pointerdown", () => this.player.toggleAttack());
         this.touchControls.virtualBtn = virtualBtn;
     }

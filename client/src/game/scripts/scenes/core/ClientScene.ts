@@ -4,6 +4,7 @@ import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseScene } from "./BaseScene";
+import { SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 
 export class ClientScene extends BaseScene {
     channel?: ClientChannel;
@@ -15,7 +16,7 @@ export class ClientScene extends BaseScene {
     background;
     debugText;
     mobs = [];
-    didCreateFinish = false;
+    isPaused = true;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -52,13 +53,13 @@ export class ClientScene extends BaseScene {
                 }
             }
         });
+        this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
-        this.didCreateFinish = true;
     }
 
     update(time: number, delta: number) {
         // Since create() is async, update() is called before create() finishes
-        if (this.didCreateFinish) {
+        if (!this.isPaused) {
             super.update(time, delta);
 
             this.inputManager.update(time, delta);
@@ -77,18 +78,26 @@ export class ClientScene extends BaseScene {
     }
 
     async producePlayer(): Promise<Spaceship> {
-        if (true || this.isSingleplayer) {
-            return this.createPlayer();
+        let serverOptions: SpaceshipServerOptions;
+        if (this.isSingleplayer) {
+            serverOptions = this.getPlayerServerOptions();
         } else {
-            return this.#requestPlayer();
+            serverOptions = await this.#requestPlayerServerOptions();
         }
+
+        return new Spaceship(serverOptions, {
+            scene: this,
+            soundManager: this.soundManager,
+        });
     }
 
-    async #requestPlayer(): Promise<Spaceship> {
+    async #requestPlayerServerOptions(): Promise<SpaceshipServerOptions> {
         this.channel.emit("requestPlayer", { reliable: true });
+
         return new Promise((resolve) => {
-            this.channel.on("createPlayer", (player) => {
-                resolve(player as Spaceship);
+            this.channel.on("receivePlayer", (serverOptions) => {
+                console.log("receivePlayer:", serverOptions);
+                resolve(serverOptions as SpaceshipServerOptions);
             });
         });
     }

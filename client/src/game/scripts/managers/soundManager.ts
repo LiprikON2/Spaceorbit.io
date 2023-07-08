@@ -1,3 +1,5 @@
+import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin";
+
 type SoundManagerConfig = {
     masterVolume: number;
     effectsVolume: number;
@@ -16,7 +18,7 @@ export default class SoundManager {
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
     music;
-    soundFade;
+    soundFade: SoundFadePlugin;
     loopingSounds = {};
 
     constructor(scene, options?: SoundManagerConfig) {
@@ -77,14 +79,14 @@ export default class SoundManager {
             this.sounds[type] = keys.map((key) => this.scene.sound.add(key));
         }
     }
-    addMusic(musicPlaylist, play = false, override = false) {
-        if (override) {
+    addMusic(musicPlaylist, autoplay = false, overridePlaylist = false) {
+        if (overridePlaylist) {
             this.musicPlaylist = musicPlaylist;
         } else {
             this.musicPlaylist = this.musicPlaylist.concat(musicPlaylist);
         }
 
-        if (play) {
+        if (autoplay) {
             this.scene.sound.once(Phaser.Sound.Events.UNLOCKED, () => this.playMusic());
         }
     }

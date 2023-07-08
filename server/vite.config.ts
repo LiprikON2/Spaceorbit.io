@@ -78,14 +78,6 @@ export default defineConfig({
         //   'class-validator',
         //   'fastify-swagger',
         // ],
-        exclude: [
-            "mock-aws-s3",
-            "aws-sdk",
-            "nock",
-            "node-datachannel",
-            "@geckos.io/server",
-            "@geckos.io/phaser-on-nodejs",
-            "phaser",
-        ],
+        exclude: ["mock-aws-s3", "aws-sdk", "nock", "node-datachannel"],
     },
 });

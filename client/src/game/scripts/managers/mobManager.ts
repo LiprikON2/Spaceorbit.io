@@ -1,6 +1,6 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
 // import { NavMesh } from "navmesh";
-import { Mob } from "~/objects";
+import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/mob";
 
 export default class MobManager {
     scene;
@@ -49,16 +49,31 @@ export default class MobManager {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
-            const mob = new Mob(
-                this.scene,
+            const serverOptions: MobServerOptions = {
+                id: "",
                 x,
                 y,
-                "F5S4",
-                this.getMobKit("normal"),
-                this.getMobMultiplier("normal"),
-                "Enemy",
-                mobEnemies
-            );
+                outfit: this.getMobKit("normal"),
+                atlasTexture: "F5S4",
+                multipliers: this.getMobMultipliers("normal"),
+                username: "Enemy",
+                enemies: mobEnemies,
+                depth: 0,
+            };
+            const clientOptions: MobClientOptions = {
+                scene: this.scene,
+            };
+            const mob = new Mob(serverOptions, clientOptions);
+            // const mob = new Mob(
+            //     this.scene,
+            //     x,
+            //     y,
+            //     "F5S4",
+            //     this.getMobKit("normal"),
+            //     this.getMobMultiplier("normal"),
+            //     "Enemy",
+            //     mobEnemies
+            // );
             // TODO make it into emit event
             // Needed to be called when soundManager knows about player, and player knows about soundManager
             mob.exhausts.initExhaustSound();
@@ -85,7 +100,7 @@ export default class MobManager {
         }
     }
 
-    getMobMultiplier(type) {
+    getMobMultipliers(type) {
         if (type === "normal") {
             return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
         }

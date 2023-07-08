@@ -1,6 +1,7 @@
+import type { Spaceship } from "~/game";
 export default class Weapons {
-    scene;
-    ship;
+    scene: Phaser.Scene;
+    ship: Spaceship;
     // delay = 1000/fps
     primaryFireRate = 600;
     weaponSlots: {
@@ -34,12 +35,14 @@ export default class Weapons {
                 projectileDamage: 0,
                 projectileScale: { x: 1, y: 1 },
             }));
-        this.scene.soundManager.addSounds("laser", [
-            "laser_sound_2",
-            "laser_sound_1",
-            "laser_sound_3",
-        ]);
-        this.scene.soundManager.addSounds("gatling", ["gatling_sound_1"]);
+        if (this.ship.soundManager) {
+            this.ship.soundManager.addSounds("laser", [
+                "laser_sound_2",
+                "laser_sound_1",
+                "laser_sound_3",
+            ]);
+            this.ship.soundManager.addSounds("gatling", ["gatling_sound_1"]);
+        }
 
         const middleSlot = Math.floor((this.getSlotCount() - 1) / 2);
         this.createLaser(middleSlot);
@@ -115,8 +118,8 @@ export default class Weapons {
                 // Update cooldown
                 this.weaponSlots[weapon.id].lastFired = time;
                 // Play the apropriate sound one time, regardless of the amount of weapons
-                if (!playedSound) {
-                    this.scene.soundManager.play(type, {
+                if (!playedSound && this.ship.soundManager) {
+                    this.ship.soundManager.play(type, {
                         sourceX: this.ship.x,
                         sourceY: this.ship.y,
                         pitchPower: weapons.length,
@@ -183,7 +186,7 @@ export default class Weapons {
             .sprite(offsetX, offsetY, weapon.type, 0)
             .setRotation(rotation - Math.PI / 2)
             .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
-        projectile.weapon = weapon;
+        projectile["weapon"] = weapon;
 
         const hitboxSize = 2;
         projectile

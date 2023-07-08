@@ -63,5 +63,7 @@ app.use("/endpoints", (req, res) => {
 export const [serverListener] = server.listeners("request");
 
 if (import.meta.env.PROD) {
-    server.listen(3010);
+    const port = parseInt(process.env.PORT ?? "") || 3010;
+    server.listen(port);
+    console.log("\n     http://localhost:" + port + "\n");
 }

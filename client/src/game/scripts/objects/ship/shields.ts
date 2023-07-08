@@ -1,47 +1,51 @@
+import type { Spaceship } from "~/game";
 import debounce from "lodash/debounce";
+import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
-    scene;
-    ship;
+    scene: Phaser.Scene;
+    ship: Spaceship;
     lastHit = -Infinity;
-    moveToPlugin;
+    moveToPlugin: MoveTo;
     tweenFade;
+    soundManager;
 
-    constructor(scene, ship) {
-        super(scene, ship.x, ship.y, "shield");
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
+    constructor(ship) {
+        super(ship.scene, ship.x, ship.y, "shield");
+        this.scene.add.existing(this);
+        this.scene.physics.add.existing(this);
 
-        this.scene = scene;
         this.ship = ship;
         this.setName(ship.name + "-shield");
         const scale = 0.7;
-        const shieldHitboxRadius = (ship.baseSpecs.hitboxRadius / 0.7) * 1.5;
         this.setOrigin(0.5)
             .setDepth(ship.depth + 1)
             .setScale(scale)
             .setAlpha(0, 0.1, 0, 0);
 
+        const shieldHitboxRadius = (ship.baseStats.hitboxRadius / 0.7) * 1.5;
         this.body.setCircle(
             shieldHitboxRadius,
             this.width / 2 - shieldHitboxRadius,
             this.height / 2 - shieldHitboxRadius
         );
-        this.tweenFade = scene.tweens.add({
+        this.tweenFade = this.scene.tweens.add({
             targets: this,
             alphaTopLeft: { value: 1, duration: 500, ease: "Power1" },
             alphaBottomRight: { value: 1, duration: 1000, ease: "Power1" },
             alphaBottomLeft: { value: 1, duration: 500, ease: "Power1", delay: 500 },
             yoyo: true,
         });
-        this.scene.soundManager.addSounds("shield", ["shield_sound_1"]);
-        this.scene.soundManager.addSounds("shield_down", ["shield_down_sound_1"]);
-
-        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
+        if (this.ship.soundManager) {
+            this.ship.soundManager.addSounds("shield", ["shield_sound_1"]);
+            this.ship.soundManager.addSounds("shield_down", ["shield_down_sound_1"]);
+        }
+        // @ts-ignore
+        this.moveToPlugin = this.scene.plugins.get("rexMoveTo").add(this);
     }
 
     moveTo(x, y) {
-        this.moveToPlugin.setSpeed(this.ship.getSpeed());
+        this.moveToPlugin.setSpeed(this.ship.maxSpeed);
         this.moveToPlugin.moveTo(x, y);
     }
 
@@ -49,11 +53,13 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
         () => {
             if (!this.tweenFade.isPlaying()) {
                 this.tweenFade.play();
-                this.scene.soundManager.play("shield", {
-                    sourceX: this.x,
-                    sourceY: this.y,
-                    volume: 1,
-                });
+                if (this.ship.soundManager) {
+                    this.ship.soundManager.play("shield", {
+                        sourceX: this.x,
+                        sourceY: this.y,
+                        volume: 1,
+                    });
+                }
             }
         },
         200,
@@ -62,8 +68,8 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
 
     crack(silent = false) {
         this.disableBody(true, true);
-        if (!silent) {
-            this.scene.soundManager.play("shield_down", {
+        if (!silent && this.ship.soundManager) {
+            this.ship.soundManager.play("shield_down", {
                 sourceX: this.x,
                 sourceY: this.y,
                 volume: 0.3,

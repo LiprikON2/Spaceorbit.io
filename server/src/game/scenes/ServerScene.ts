@@ -1,9 +1,7 @@
-import "@geckos.io/phaser-on-nodejs";
-import Phaser from "phaser";
-
 import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
+import { ServerChannel } from "@geckos.io/server";
 
 export class ServerScene extends BaseScene {
     declare game: GameServer;
@@ -15,7 +13,7 @@ export class ServerScene extends BaseScene {
 
     create() {
         this.game.server.onConnection((channel) => {
-            console.log("Channel connected", channel);
+            console.log("Channel connected", channel.webrtcConnection.id);
 
             this.listenForRequests(channel);
             this.listenForMessages(channel);
@@ -24,15 +22,18 @@ export class ServerScene extends BaseScene {
 
     update(time: number, delta: number) {}
 
-    listenForRequests(channel) {
+    listenForRequests(channel: ServerChannel) {
         channel.on("requestPlayer", () => {
-            const player = this.createPlayer();
-            channel.emit("requestPlayer", player, { reliable: true });
+            console.log("requestPlayer:");
+            // Erorr about sound manager
+            const serverOptions = this.getPlayerServerOptions();
+            console.log("receivePlayer:", serverOptions);
+            channel.emit("receivePlayer", serverOptions, { reliable: true });
         });
         // channel.broadcast.emit("requestPlayer", data, { reliable: true });
     }
 
-    listenForMessages(channel) {
+    listenForMessages(channel: ServerChannel) {
         channel.on("message", (data) => {
             console.log("Message:", data);
             channel.broadcast.emit("message", data, { reliable: true });

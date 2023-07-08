@@ -1,5 +1,3 @@
-import "@geckos.io/phaser-on-nodejs";
-import Phaser from "phaser";
 import type { GeckosServer } from "@geckos.io/server";
 
 export class GameServer extends Phaser.Game {

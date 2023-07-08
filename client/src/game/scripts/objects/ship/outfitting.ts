@@ -1,9 +1,23 @@
-export default class Outfitting {
-    scene;
-    ship;
-    #outfit;
+import type { Spaceship } from "./spaceship";
 
-    constructor(scene, ship, outfit) {
+export interface Item {
+    itemName: string;
+    itemType: string;
+    label: string;
+    color: string;
+}
+
+export interface Outfit {
+    weapons: Item[];
+    engines: any[];
+    inventory: Item[];
+}
+export default class Outfitting {
+    scene: Phaser.Scene;
+    ship: Spaceship;
+    #outfit: Outfit;
+
+    constructor(scene: Phaser.Scene, ship: Spaceship, outfit: Outfit) {
         this.scene = scene;
         this.ship = ship;
         this.#outfit = outfit;

@@ -60,13 +60,10 @@ export class GameManager {
         await whenIsBooted;
 
         const whenSceneCreated = new Promise((resolve) => {
-            const clientScene = this.game.scene.scenes.at(-1);
-            clientScene.events.on("create", () => {
-                resolve(true);
-            });
-            // this.on("worldCreate", resolve);
+            this.on("worldCreate", resolve);
         });
         await whenSceneCreated;
+
         return this;
     };
 
