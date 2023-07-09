@@ -5,6 +5,7 @@ import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
 import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
+import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugin.js";
 
 import { PreloadScene } from "~/scenes/core";
 import { UnnamedMapScene } from "~/scenes/maps";
@@ -73,6 +74,11 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
             {
                 key: "rexButton",
                 plugin: ButtonPlugin,
+                start: true,
+            },
+            {
+                key: "rexContainerLitePlugin",
+                plugin: ContainerLitePlugin,
                 start: true,
             },
         ],

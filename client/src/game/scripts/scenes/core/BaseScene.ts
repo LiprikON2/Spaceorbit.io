@@ -1,3 +1,5 @@
+import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
+
 import { AllegianceEnum, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 import { MobManager } from "~/managers";
 
@@ -8,6 +10,7 @@ export class BaseScene extends Phaser.Scene {
     rootElem: HTMLElement;
     mobManager: MobManager;
     plugins: Phaser.Plugins.PluginManager;
+    add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);

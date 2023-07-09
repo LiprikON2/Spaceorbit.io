@@ -1,10 +1,5 @@
+import { BaseScene } from "~/scenes/core";
 import type SoundManager from "~/managers/soundManager";
-// import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
-import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
-import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
-// import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin.js";
-// import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
-// import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 
 interface Multipliers {
     speed: number;
@@ -36,10 +31,8 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         health: number;
         multipliers: Multipliers;
     };
-    rotateToPlugin: RotateTo;
-    moveToPlugin: MoveTo;
     soundManager: SoundManager;
-    scene: Phaser.Scene;
+    scene: BaseScene;
     atlas: {
         metadata: any;
         width: number;
@@ -55,9 +48,10 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         // @ts-ignore
-        this.body.onWorldBounds = true;
+        // this.body.onWorldBounds = true;
         const { depth } = serverOptions;
-        this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
+        // this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
+        this.setOrigin(0.5).setDepth(depth);
         this.setName(Phaser.Utils.String.UUID());
 
         const atlas = scene.textures.get(atlasTexture);
@@ -93,13 +87,6 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         this.on("pointerdown", () => {
             this.scene.input.emit("clickTarget", this);
         });
-
-        // Movement plugins
-        // @ts-ignore
-        this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
-        // @ts-ignore
-        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this);
-        this.moveToPlugin.on("complete", () => this.onStopMoving());
     }
 
     get maxHealth() {

@@ -68,7 +68,7 @@ export const SettingsModal = ({ opened, onClose }) => {
         inputManager.toggleTouchControls();
         handleTouchControls.toggle();
     };
-    const [touchControlChecked, handleTouchControls] = useDisclosure(settings.enableTouchControls);
+    const [touchControlChecked, handleTouchControls] = useDisclosure(settings.isTouchMode);
     const [activeTab, setActiveTab] = useState<string | null>("audio");
 
     // TODELETE: Mutating state!

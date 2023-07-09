@@ -1,12 +1,10 @@
 import type { Spaceship } from "~/game";
 import debounce from "lodash/debounce";
-import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
     scene: Phaser.Scene;
     ship: Spaceship;
     lastHit = -Infinity;
-    moveToPlugin: MoveTo;
     tweenFade;
     soundManager;
 
@@ -40,13 +38,6 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
             this.ship.soundManager.addSounds("shield", ["shield_sound_1"]);
             this.ship.soundManager.addSounds("shield_down", ["shield_down_sound_1"]);
         }
-        // @ts-ignore
-        this.moveToPlugin = this.scene.plugins.get("rexMoveTo").add(this);
-    }
-
-    moveTo(x, y) {
-        this.moveToPlugin.setSpeed(this.ship.maxSpeed);
-        this.moveToPlugin.moveTo(x, y);
     }
 
     getHit = debounce(

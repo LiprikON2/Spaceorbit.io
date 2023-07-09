@@ -4,6 +4,9 @@ import Weapons from "./weapons";
 import Shields from "./shields";
 import Outfitting, { type Outfit } from "./outfitting";
 import { Sprite, SpriteClientOptions, SpriteServerOptions } from "../Sprite";
+import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/ContainerLite";
+import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
+import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -55,6 +58,9 @@ export class Spaceship extends Sprite {
         Mars: ["Unaffiliated", "Alien", "Venus", "Earth"],
         Earth: ["Unaffiliated", "Alien", "Venus", "Mars"],
     };
+    boundingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
+    rotateToPlugin: RotateTo;
+    moveToPlugin: MoveTo;
 
     // constructor(
     //     scene: Phaser.Scene,
@@ -76,18 +82,6 @@ export class Spaceship extends Sprite {
         // Dimentions
         this.setCircularHitbox(this.baseStats.hitboxRadius);
 
-        // Text
-        // TODO make a display class
-        // TODO use `Nine Slice Game Object` to display hp
-        const { username } = serverOptions;
-        this.nick = username;
-        this.followText = this.scene.add
-            .text(-999, -999, username, { fontSize: "2rem" })
-            .setAlign("center")
-            .setOrigin(0.5)
-            .setAlpha(1)
-            .setDepth(this.depth + 5);
-
         // Modules
         const { scene } = clientOptions;
         const damageMultiplier = this.status.multipliers.damage;
@@ -106,6 +100,39 @@ export class Spaceship extends Sprite {
 
         this.soundManager.makeTarget(this);
         if (this.status.shields === 0) this.shields.crack(true);
+
+        // Text
+        // TODO make a display class
+        // TODO use `Nine Slice Game Object` to display hp
+        const { username, x, y } = serverOptions;
+        this.nick = username;
+        const textOffsetY = this.body.height * this.scale;
+        this.followText = this.scene.add
+            .text(x, y + textOffsetY, username, { fontSize: "2rem" })
+            .setAlign("center")
+            .setOrigin(0.5)
+            .setAlpha(1)
+            .setDepth(this.depth + 5);
+
+        // Movement
+        this.boundingBox = this.scene.add.rexContainerLite(
+            x,
+            y,
+            this.body.width * this.scale,
+            this.body.height * this.scale
+        );
+        this.scene.physics.world.enable(this.boundingBox);
+        this.scene.physics.world.enableBody(this.boundingBox);
+        this.boundingBox.pin(this, { syncRotation: false });
+        this.boundingBox.pin(this.shields, { syncRotation: false });
+        this.boundingBox.pin(this.followText, { syncRotation: false });
+        this.boundingBox.body.setCollideWorldBounds(true);
+
+        // @ts-ignore
+        this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
+        // @ts-ignore
+        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.boundingBox);
+        this.moveToPlugin.on("complete", () => this.onStopMoving());
     }
 
     get opposition(): AllegianceKeys[] {
@@ -168,6 +195,7 @@ export class Spaceship extends Sprite {
     }
 
     explode() {
+        this.boundingBox.body.enable = false;
         this.disableBody(true, false);
         this.resetMovement();
         this.emit("dead", this.name); // todo
@@ -213,10 +241,9 @@ export class Spaceship extends Sprite {
             // @ts-ignore
             ({ x, y } = this.scene.getRandomPositionOnMap());
         }
-        this.x = x;
-        this.y = y;
-        this.shields.x = x;
-        this.shields.y = y;
+        this.boundingBox.x = x;
+        this.boundingBox.y = y;
+        this.boundingBox.body.enable = true;
         this.status.health = this.maxHealth;
         this.status.shields = this.maxShields;
 
@@ -250,44 +277,37 @@ export class Spaceship extends Sprite {
         this.moveToPlugin.setSpeed(this.maxSpeed);
 
         this.moveToPlugin.moveTo(x, y);
-        this.shields.moveTo(x, y);
         this.exhausts.startExhaust();
     }
 
     resetMovement() {
-        this.setVelocity(0);
-        this.shields.setVelocity(0);
+        this.boundingBox.body.stop();
         this.moveToPlugin.stop();
-        this.shields.moveToPlugin.stop();
     }
     onStopMoving() {
         this.exhausts.stopExhaust();
     }
     moveUp() {
         if (this.active && !this.isUsingJoystick()) {
-            this.setVelocityY(-this.maxSpeed);
-            this.shields.setVelocityY(-this.maxSpeed);
+            this.boundingBox.body.setVelocityY(-this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveDown() {
         if (this.active && !this.isUsingJoystick()) {
-            this.setVelocityY(this.maxSpeed);
-            this.shields.setVelocityY(this.maxSpeed);
+            this.boundingBox.body.setVelocityY(this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveLeft() {
         if (this.active && !this.isUsingJoystick()) {
-            this.setVelocityX(-this.maxSpeed);
-            this.shields.setVelocityX(-this.maxSpeed);
+            this.boundingBox.body.setVelocityX(-this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveRight() {
         if (this.active && !this.isUsingJoystick()) {
-            this.setVelocityX(this.maxSpeed);
-            this.shields.setVelocityX(this.maxSpeed);
+            this.boundingBox.body.setVelocityX(this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
@@ -295,32 +315,28 @@ export class Spaceship extends Sprite {
     moveUpRight() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveUpLeft() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4 - Math.PI / 2;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveDownRight() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
     moveDownLeft() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4 + Math.PI / 2;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
@@ -329,8 +345,7 @@ export class Spaceship extends Sprite {
     moveRightRelative() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = this.rotation;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
@@ -338,14 +353,15 @@ export class Spaceship extends Sprite {
     moveLeftRelative() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = this.rotation + Math.PI;
-            this.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.shields.body.velocity.setToPolar(angle, this.maxSpeed);
+            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
+
     isUsingJoystick() {
         return this.lastMoveInput.force !== 0;
     }
+
     // For using virtual omni-directional joystick
     move() {
         let hasMoved = false;
@@ -353,8 +369,7 @@ export class Spaceship extends Sprite {
             const rotation = this.lastMoveInput.rotation;
             const speed = this.maxSpeed * this.lastMoveInput.force;
 
-            this.body.velocity.setToPolar(rotation, speed);
-            this.shields.body.velocity.setToPolar(rotation, speed);
+            this.boundingBox.body.velocity.setToPolar(rotation, speed);
             this.exhausts.startExhaust();
             hasMoved = true;
         }
@@ -374,10 +389,10 @@ export class Spaceship extends Sprite {
     }
 
     updateTextPos() {
-        this.followText.setPosition(
-            this.body.position.x + this.baseStats.hitboxRadius,
-            this.body.position.y + this.baseStats.hitboxRadius * 3.5 + 20
-        );
+        // this.followText.setPosition(
+        //     this.body.position.x + this.baseStats.hitboxRadius,
+        //     this.body.position.y + this.baseStats.hitboxRadius * 3.5 + 20
+        // );
     }
 
     update(time: number, delta: number) {

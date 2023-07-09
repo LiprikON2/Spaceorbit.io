@@ -15,9 +15,8 @@ export default class InputManager {
 
     constructor(scene, player, zoom = 1) {
         const localStorageSettings = scene.game.settings;
-        const { enableTouchControls } = localStorageSettings;
-        // TODO: rename enableTouchControls -> isTouchMode
-        this.isTouchMode = enableTouchControls ?? this.isTouchMode;
+        const { isTouchMode } = localStorageSettings;
+        this.isTouchMode = isTouchMode ?? this.isTouchMode;
 
         this.scene = scene;
         this.player = player;

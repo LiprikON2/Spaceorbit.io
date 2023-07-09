@@ -25,7 +25,7 @@ const defaultSettings = {
     effectsVolume: 0.1,
     musicVolume: 0.05,
     graphicsSettings: 1,
-    enableTouchControls: isTouchDevice(),
+    isTouchMode: isTouchDevice(),
     showDeviceInfo: false,
 };
 
@@ -73,7 +73,7 @@ export const useSettings = create<SettingsStore>()(
         toggleTouchControlsSetting: () =>
             set(
                 produce((state) => {
-                    state.settings.enableTouchControls = !state.settings.enableTouchControls;
+                    state.settings.isTouchMode = !state.settings.isTouchMode;
                 })
             ),
     }))
