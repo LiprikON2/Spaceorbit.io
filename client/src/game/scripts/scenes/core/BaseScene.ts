@@ -1,6 +1,5 @@
-import { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
+import { AllegianceEnum, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 import { MobManager } from "~/managers";
-import { Spaceship } from "~/objects";
 
 /**
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
@@ -32,22 +31,11 @@ export class BaseScene extends Phaser.Scene {
             atlasTexture: "F5S4",
             multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
             username: "Player",
-            enemies: [],
-            depth: 10,
+            allegiance: AllegianceEnum.Earth,
+            depth: 100,
         };
 
         return spaceshipServerOptions;
-        // return new Spaceship(
-        //     this,
-        //     400,
-        //     400,
-        //     "F5S4",
-        //     this.getPlayerKit(),
-        //     undefined,
-        //     "Player",
-        //     this.mobManager.mobs,
-        //     100
-        // );
     }
 
     getPlayerKit() {

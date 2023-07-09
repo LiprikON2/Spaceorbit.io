@@ -5,11 +5,29 @@ import Shields from "./shields";
 import Outfitting, { type Outfit } from "./outfitting";
 import { Sprite, SpriteClientOptions, SpriteServerOptions } from "../Sprite";
 
+export enum AllegianceEnum {
+    // AlienNeutral = "AlienNeutral",
+    // AlienHostile = "AlienHostile",
+    Unaffiliated = "Unaffiliated",
+    Alien = "Alien",
+    Venus = "Venus",
+    Mars = "Mars",
+    Earth = "Earth",
+}
+type AllegianceKeys = keyof typeof AllegianceEnum;
+
+type AllegianceOpposition = {
+    [key in AllegianceKeys]: AllegianceKeys[];
+};
+
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
+    allegiance: AllegianceEnum;
 }
 
-export interface SpaceshipClientOptions extends SpriteClientOptions {}
+export interface SpaceshipClientOptions extends SpriteClientOptions {
+    allGroup: Phaser.GameObjects.Group;
+}
 
 export class Spaceship extends Sprite {
     modules: {
@@ -26,8 +44,17 @@ export class Spaceship extends Sprite {
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
-    enemies: Spaceship[] = [];
+    allGroup: Phaser.GameObjects.Group;
     toggleFire = false;
+
+    allegiance: AllegianceEnum | AllegianceKeys;
+    allegianceOpposition: AllegianceOpposition = {
+        Unaffiliated: ["Unaffiliated", "Alien", "Venus", "Mars", "Earth"],
+        Alien: ["Unaffiliated", "Venus", "Mars", "Earth"],
+        Venus: ["Unaffiliated", "Alien", "Mars", "Earth"],
+        Mars: ["Unaffiliated", "Alien", "Venus", "Earth"],
+        Earth: ["Unaffiliated", "Alien", "Venus", "Mars"],
+    };
 
     // constructor(
     //     scene: Phaser.Scene,
@@ -71,11 +98,25 @@ export class Spaceship extends Sprite {
         const { outfit } = serverOptions;
         this.outfitting = new Outfitting(scene, this, outfit);
 
-        const { enemies } = serverOptions;
-        // TODO convert list of ids to list of references to spaceship class
-        // this.enemies = enemies;
+        const { allegiance } = serverOptions;
+        this.allegiance = allegiance;
 
+        const { allGroup } = clientOptions;
+        this.allGroup = allGroup;
+
+        this.soundManager.makeTarget(this);
         if (this.status.shields === 0) this.shields.crack(true);
+    }
+
+    get opposition(): AllegianceKeys[] {
+        return this.allegianceOpposition[this.allegiance];
+    }
+
+    get enemies(): Spaceship[] {
+        const all = this.allGroup.getChildren() as Spaceship[];
+        const enemies = all.filter((ship) => this.opposition.includes(ship.allegiance));
+
+        return enemies;
     }
 
     get maxSpeed() {
@@ -139,7 +180,7 @@ export class Spaceship extends Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
-    setTarget(target: Spaceship | null = null) {
+    setTarget(target?: Spaceship) {
         const prevTarget = this.target;
 
         if (target !== prevTarget && target !== this) {

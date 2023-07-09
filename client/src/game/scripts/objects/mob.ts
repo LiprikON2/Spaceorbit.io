@@ -88,7 +88,6 @@ export class Mob extends Spaceship {
         // If it is wandering
         if (!this.target && !this.isSleeping) {
             const closestEnemy = this.scene.physics.closest(this, this.enemies) as Spaceship;
-            // @ts-ignore
             const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
 
             // TODO emit "got shot by" event to aggro on the shooter

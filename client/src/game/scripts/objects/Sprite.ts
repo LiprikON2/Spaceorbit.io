@@ -20,7 +20,6 @@ export interface SpriteServerOptions {
     atlasTexture: string | Phaser.Textures.Texture;
     multipliers: Multipliers;
     username: string;
-    enemies: string[];
     depth: number;
 }
 

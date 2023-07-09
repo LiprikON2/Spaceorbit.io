@@ -1,6 +1,7 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
 // import { NavMesh } from "navmesh";
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/mob";
+import { AllegianceEnum } from "../objects/ship/spaceship";
 
 export default class MobManager {
     scene;
@@ -45,7 +46,7 @@ export default class MobManager {
         // this.spawnMobs(20);
     }
 
-    spawnMobs(count, mobEnemies) {
+    spawnMobs(count, soundManager) {
         const mobsToSpawn = count - this.mobs.length;
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
@@ -57,23 +58,17 @@ export default class MobManager {
                 atlasTexture: "F5S4",
                 multipliers: this.getMobMultipliers("normal"),
                 username: "Enemy",
-                enemies: mobEnemies,
-                depth: 0,
+                allegiance: AllegianceEnum.Alien,
+                depth: 90,
             };
             const clientOptions: MobClientOptions = {
                 scene: this.scene,
+                allGroup: this.scene.allGroup,
+                soundManager,
             };
             const mob = new Mob(serverOptions, clientOptions);
-            // const mob = new Mob(
-            //     this.scene,
-            //     x,
-            //     y,
-            //     "F5S4",
-            //     this.getMobKit("normal"),
-            //     this.getMobMultiplier("normal"),
-            //     "Enemy",
-            //     mobEnemies
-            // );
+            this.scene.allGroup.add(mob);
+            this.scene.mobGroup.add(mob);
             // TODO make it into emit event
             // Needed to be called when soundManager knows about player, and player knows about soundManager
             mob.exhausts.initExhaustSound();

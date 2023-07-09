@@ -14,9 +14,12 @@ export class ClientScene extends BaseScene {
     soundManager: SoundManager;
     player: Spaceship;
     background;
-    debugText;
+    debugText: GenericText;
     mobs = [];
     isPaused = true;
+    playerGroup: Phaser.GameObjects.Group;
+    mobGroup: Phaser.GameObjects.Group;
+    allGroup: Phaser.GameObjects.Group;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -24,6 +27,9 @@ export class ClientScene extends BaseScene {
 
     init({ channel }: { channel?: ClientChannel }) {
         this.channel = channel;
+        this.playerGroup = this.add.group();
+        this.mobGroup = this.add.group();
+        this.allGroup = this.add.group();
     }
 
     async create() {
@@ -34,11 +40,10 @@ export class ClientScene extends BaseScene {
 
         this.inputManager = new InputManager(this, this.player);
 
-        this.soundManager.makeTarget(this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
 
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(0, [this.player]);
+        this.mobManager.spawnMobs(10, this.soundManager);
 
         // Prevents shield from running away when ship hits the world bounds
         this.physics.world.on("worldbounds", (body) => {
@@ -84,11 +89,16 @@ export class ClientScene extends BaseScene {
         } else {
             serverOptions = await this.#requestPlayerServerOptions();
         }
-
-        return new Spaceship(serverOptions, {
+        const player = new Spaceship(serverOptions, {
             scene: this,
             soundManager: this.soundManager,
+            allGroup: this.allGroup,
         });
+
+        this.playerGroup.add(player);
+        this.allGroup.add(player);
+
+        return player;
     }
 
     async #requestPlayerServerOptions(): Promise<SpaceshipServerOptions> {
