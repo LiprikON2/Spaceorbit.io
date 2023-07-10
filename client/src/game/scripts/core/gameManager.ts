@@ -6,7 +6,6 @@ import { geckos } from "@geckos.io/client";
 import type { ClientScene } from "~/scenes/core/ClientScene";
 import type { Spaceship } from "~/objects";
 import { GameClient, clientConfig } from "./client";
-import { TouchSensor } from "@dnd-kit/core";
 
 export interface StatusEvent {
     name: string;

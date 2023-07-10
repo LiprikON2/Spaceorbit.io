@@ -1,4 +1,4 @@
-import type { Spaceship } from "~/game";
+import type { Spaceship } from "./spaceship";
 export default class Weapons {
     scene: Phaser.Scene;
     ship: Spaceship;

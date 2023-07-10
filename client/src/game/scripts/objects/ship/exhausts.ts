@@ -111,7 +111,7 @@ export default class Exhausts {
     // Init exhaust sound and tween
     initExhaustSound() {
         // The exhaust sound is constantly playing, tween just changes the volume
-        this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.name, {
+        this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.id, {
             maxVolume: 0.3,
             pitchPower: this.getEngineCount() - 1,
         });
@@ -126,7 +126,7 @@ export default class Exhausts {
         if (this.isRunning()) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.stop());
             if (this.isSoundInit) {
-                this.scene.soundManager.fadeOutLooping(this.ship.name);
+                this.scene.soundManager.fadeOutLooping(this.ship.id);
             }
         }
     }
@@ -135,7 +135,7 @@ export default class Exhausts {
         if (!this.isRunning()) {
             this.exhaustEmitters.forEach((exhaustEmitter) => exhaustEmitter.start());
             if (this.isSoundInit) {
-                this.scene.soundManager.fadeInLooping(this.ship.name);
+                this.scene.soundManager.fadeInLooping(this.ship.id);
             }
         }
     }

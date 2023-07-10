@@ -1,6 +1,11 @@
 import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
 
-import { AllegianceEnum, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
+import {
+    AllegianceEnum,
+    Spaceship,
+    type SpaceshipClientOptions,
+    type SpaceshipServerOptions,
+} from "~/game/objects/ship/spaceship";
 import { MobManager } from "~/managers";
 
 /**
@@ -11,6 +16,9 @@ export class BaseScene extends Phaser.Scene {
     mobManager: MobManager;
     plugins: Phaser.Plugins.PluginManager;
     add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
+    playerGroup: Phaser.GameObjects.Group;
+    mobGroup: Phaser.GameObjects.Group;
+    allGroup: Phaser.GameObjects.Group;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -18,15 +26,36 @@ export class BaseScene extends Phaser.Scene {
         this.mobManager = new MobManager(this);
     }
 
-    preload() {}
+    preload() {
+        this.playerGroup = this.add.group({ runChildUpdate: true });
+        this.mobGroup = this.add.group({ runChildUpdate: true });
+        this.allGroup = this.add.group();
+    }
 
     create() {}
 
     update(time: number, delta: number) {}
 
-    getPlayerServerOptions() {
+    createPlayer(
+        serverOptions: SpaceshipServerOptions,
+        clientOptions?: Partial<SpaceshipClientOptions>
+    ) {
+        const defaultClientOptions = {
+            allGroup: this.allGroup,
+            scene: this,
+        };
+        const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
+        const player = new Spaceship(serverOptions, mergedClientOptions);
+
+        this.playerGroup.add(player);
+        this.allGroup.add(player);
+
+        return player;
+    }
+
+    getPlayerServerOptions(id?) {
         const spaceshipServerOptions: SpaceshipServerOptions = {
-            id: "",
+            id: id ?? Phaser.Utils.String.UUID(),
             x: 400,
             y: 400,
             // TODO spaceship factory pattern

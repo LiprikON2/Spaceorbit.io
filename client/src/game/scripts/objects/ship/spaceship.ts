@@ -1,12 +1,13 @@
+import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/ContainerLite";
+import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
+import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
+
 import Explosion from "./explosion";
 import Exhausts from "./exhausts";
 import Weapons from "./weapons";
 import Shields from "./shields";
 import Outfitting, { type Outfit } from "./outfitting";
-import { Sprite, SpriteClientOptions, SpriteServerOptions } from "../Sprite";
-import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/ContainerLite";
-import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
-import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
+import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -62,17 +63,6 @@ export class Spaceship extends Sprite {
     rotateToPlugin: RotateTo;
     moveToPlugin: MoveTo;
 
-    // constructor(
-    //     scene: Phaser.Scene,
-    //     x: number,
-    //     y: number,
-    //     atlasTexture: string | Phaser.Textures.Texture,
-    //     outfit,
-    //     multipliers = { speed: 1, health: 1, shields: 1, damage: 1 },
-    //     nick = "",
-    //     enemies: Spaceship[] = [],
-    //     depth = 10
-    // ) {
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
         super(serverOptions, clientOptions);
 
@@ -105,7 +95,7 @@ export class Spaceship extends Sprite {
         // TODO make a display class
         // TODO use `Nine Slice Game Object` to display hp
         const { username, x, y } = serverOptions;
-        this.nick = username;
+        this.setName(username);
         const textOffsetY = this.body.height * this.scale;
         this.followText = this.scene.add
             .text(x, y + textOffsetY, username, { fontSize: "2rem" })
@@ -141,7 +131,9 @@ export class Spaceship extends Sprite {
 
     get enemies(): Spaceship[] {
         const all = this.allGroup.getChildren() as Spaceship[];
-        const enemies = all.filter((ship) => this.opposition.includes(ship.allegiance));
+        const enemies = all.filter(
+            (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
+        );
 
         return enemies;
     }
@@ -198,7 +190,7 @@ export class Spaceship extends Sprite {
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
         this.resetMovement();
-        this.emit("dead", this.name); // todo
+        this.emit("dead", this.id);
 
         // TODO add variety ("explosion patterns")
         new Explosion(this.scene, this.x, this.y, this.depth, {
@@ -208,7 +200,7 @@ export class Spaceship extends Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
-    setTarget(target?: Spaceship) {
+    setTarget(target: Spaceship | null = null) {
         const prevTarget = this.target;
 
         if (target !== prevTarget && target !== this) {
@@ -388,14 +380,5 @@ export class Spaceship extends Sprite {
         }
     }
 
-    updateTextPos() {
-        // this.followText.setPosition(
-        //     this.body.position.x + this.baseStats.hitboxRadius,
-        //     this.body.position.y + this.baseStats.hitboxRadius * 3.5 + 20
-        // );
-    }
-
-    update(time: number, delta: number) {
-        this.updateTextPos();
-    }
+    update(time: number, delta: number) {}
 }

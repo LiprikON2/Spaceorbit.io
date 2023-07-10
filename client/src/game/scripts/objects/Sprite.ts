@@ -1,4 +1,4 @@
-import { BaseScene } from "~/scenes/core";
+import type { BaseScene } from "~/scenes/core/BaseScene";
 import type SoundManager from "~/managers/soundManager";
 
 interface Multipliers {
@@ -24,6 +24,7 @@ export interface SpriteClientOptions {
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
+    id: string;
     name: string;
     baseStats: { health: number; hitboxRadius: number; speed: number };
     status: {
@@ -52,7 +53,8 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         const { depth } = serverOptions;
         // this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
         this.setOrigin(0.5).setDepth(depth);
-        this.setName(Phaser.Utils.String.UUID());
+        const { id } = serverOptions;
+        this.id = id;
 
         const atlas = scene.textures.get(atlasTexture);
         const { height: textureHeight, width: textureWidth } = atlas.source[0];

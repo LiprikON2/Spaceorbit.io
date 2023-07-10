@@ -1,7 +1,7 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
 // import { NavMesh } from "navmesh";
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/mob";
-import { AllegianceEnum } from "../objects/ship/spaceship";
+import { AllegianceEnum } from "~/objects/ship/spaceship";
 
 export default class MobManager {
     scene;
@@ -51,7 +51,7 @@ export default class MobManager {
         for (let i = 0; i < mobsToSpawn; i++) {
             const { x, y } = this.scene.getRandomPositionOnMap();
             const serverOptions: MobServerOptions = {
-                id: "",
+                id: Phaser.Utils.String.UUID(),
                 x,
                 y,
                 outfit: this.getMobKit("normal"),
@@ -74,11 +74,6 @@ export default class MobManager {
             mob.exhausts.initExhaustSound();
             this.mobs.push(mob);
         }
-    }
-    update(time, delta) {
-        this.mobs.forEach((mob) => {
-            mob.update(time, delta);
-        });
     }
 
     getMobKit(type) {

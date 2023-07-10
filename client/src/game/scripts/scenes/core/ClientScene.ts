@@ -4,7 +4,7 @@ import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseScene } from "./BaseScene";
-import { SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
+import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 
 export class ClientScene extends BaseScene {
     channel?: ClientChannel;
@@ -17,9 +17,6 @@ export class ClientScene extends BaseScene {
     debugText: GenericText;
     mobs = [];
     isPaused = true;
-    playerGroup: Phaser.GameObjects.Group;
-    mobGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -27,16 +24,16 @@ export class ClientScene extends BaseScene {
 
     init({ channel }: { channel?: ClientChannel }) {
         this.channel = channel;
-        this.playerGroup = this.add.group();
-        this.mobGroup = this.add.group();
-        this.allGroup = this.add.group();
+        this.soundManager = new SoundManager(this);
     }
 
     async create() {
         super.create();
 
-        this.soundManager = new SoundManager(this);
         this.player = await this.producePlayer();
+        await this.produceOtherPlayers();
+        this.produceOtherPlayerOnConnect();
+
         this.inputManager = new InputManager(this, this.player);
 
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
@@ -55,10 +52,16 @@ export class ClientScene extends BaseScene {
 
             this.inputManager.update(time, delta);
             this.debugText.update();
-            this.mobManager.update(time, delta);
             this.soundManager.update();
-            this.player.update(time, delta);
         }
+    }
+
+    getPlayerClientOptions() {
+        return {
+            allGroup: this.allGroup,
+            scene: this,
+            soundManager: this.soundManager,
+        };
     }
 
     get isSingleplayer() {
@@ -73,28 +76,56 @@ export class ClientScene extends BaseScene {
         if (this.isSingleplayer) {
             serverOptions = this.getPlayerServerOptions();
         } else {
-            serverOptions = await this.#requestPlayerServerOptions();
+            serverOptions = await this.requestPlayer();
         }
-        const player = new Spaceship(serverOptions, {
-            scene: this,
-            soundManager: this.soundManager,
-            allGroup: this.allGroup,
-        });
+        const clientOptions = this.getPlayerClientOptions();
 
-        this.playerGroup.add(player);
-        this.allGroup.add(player);
-
-        return player;
+        return this.createPlayer(serverOptions, clientOptions);
     }
 
-    async #requestPlayerServerOptions(): Promise<SpaceshipServerOptions> {
-        this.channel.emit("requestPlayer", { reliable: true });
+    async requestPlayer(): Promise<SpaceshipServerOptions> {
+        this.channel.emit("player:request-options", { reliable: true });
 
         return new Promise((resolve) => {
-            this.channel.on("receivePlayer", (serverOptions) => {
-                console.log("receivePlayer:", serverOptions);
+            this.channel.on("player:request-options", (serverOptions) => {
+                console.log("player:request-options");
                 resolve(serverOptions as SpaceshipServerOptions);
             });
         });
+    }
+
+    async produceOtherPlayers(): Promise<Spaceship[]> {
+        if (this.isMultiplayer) {
+            const serverOptionsList = await this.requestAlreadyConnectedPlayers();
+            const clientOptions = this.getPlayerClientOptions();
+
+            const otherPlayers = serverOptionsList.map((serverOptions) =>
+                this.createPlayer(serverOptions, clientOptions)
+            );
+            return otherPlayers;
+        }
+    }
+
+    async requestAlreadyConnectedPlayers(): Promise<SpaceshipServerOptions[]> {
+        this.channel.emit("players:already-connected", { reliable: true });
+
+        return new Promise((resolve) => {
+            this.channel.on("players:already-connected", (serverOptionsList) => {
+                console.log("players:already-connected", serverOptionsList);
+
+                resolve(serverOptionsList as SpaceshipServerOptions[]);
+            });
+        });
+    }
+
+    produceOtherPlayerOnConnect() {
+        if (this.isMultiplayer) {
+            this.channel.on("player:connected", (serverOptions) => {
+                console.log("player:connected", serverOptions);
+                const clientOptions = this.getPlayerClientOptions();
+
+                this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
+            });
+        }
     }
 }

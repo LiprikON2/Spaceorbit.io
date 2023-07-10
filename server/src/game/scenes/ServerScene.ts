@@ -1,10 +1,12 @@
-import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core";
+import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core/BaseScene";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
 import { ServerChannel } from "@geckos.io/server";
+import type { SpaceshipServerOptions } from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
 
 export class ServerScene extends BaseScene {
     declare game: GameServer;
+    playerOptionsList: SpaceshipServerOptions[] = [];
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super("ServerScene");
     }
@@ -13,24 +15,37 @@ export class ServerScene extends BaseScene {
 
     create() {
         this.game.server.onConnection((channel) => {
-            console.log("Channel connected", channel.webrtcConnection.id);
+            console.log("Channel connected", channel.id);
 
-            this.listenForRequests(channel);
+            this.listenForPlayerOptionsRequest(channel);
+            this.listenForOtherPlayersOptionsRequest(channel);
+
             this.listenForMessages(channel);
         });
     }
 
     update(time: number, delta: number) {}
 
-    listenForRequests(channel: ServerChannel) {
-        channel.on("requestPlayer", () => {
-            console.log("requestPlayer:");
-            // Erorr about sound manager
-            const serverOptions = this.getPlayerServerOptions();
-            console.log("receivePlayer:", serverOptions);
-            channel.emit("receivePlayer", serverOptions, { reliable: true });
+    listenForPlayerOptionsRequest(channel: ServerChannel) {
+        channel.on("player:request-options", () => {
+            console.log("player:request-options");
+
+            const serverOptions = this.getPlayerServerOptions(channel.id);
+            this.playerOptionsList.push(serverOptions);
+            channel.emit("player:request-options", serverOptions, { reliable: true });
+            channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
         });
-        // channel.broadcast.emit("requestPlayer", data, { reliable: true });
+    }
+
+    listenForOtherPlayersOptionsRequest(channel: ServerChannel) {
+        channel.on("players:already-connected", () => {
+            console.log("players:already-connected");
+
+            const otherPlayers = this.playerOptionsList.filter(
+                (playerOptions) => playerOptions.id !== channel.id
+            );
+            channel.emit("players:already-connected", otherPlayers, { reliable: true });
+        });
     }
 
     listenForMessages(channel: ServerChannel) {
@@ -41,7 +56,7 @@ export class ServerScene extends BaseScene {
         channel.emit("ready");
         channel.emit(
             "message",
-            { nick: "Server", message: "Welcome!", isoTime: getIsoTime() },
+            { name: "Server", message: "Welcome!", isoTime: getIsoTime() },
             { reliable: true }
         );
     }

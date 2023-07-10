@@ -8,7 +8,7 @@ import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugin.js";
 
 import { PreloadScene } from "~/scenes/core";
-import { UnnamedMapScene } from "~/scenes/maps";
+import { UnnamedMapScene } from "~/game/scenes/maps/UnnamedMapScene";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;

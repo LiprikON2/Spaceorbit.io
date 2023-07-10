@@ -1,7 +1,9 @@
-import type { Spaceship } from "~/game";
 import debounce from "lodash/debounce";
 
+import type { Spaceship } from "./spaceship";
+
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
+    id: string;
     scene: Phaser.Scene;
     ship: Spaceship;
     lastHit = -Infinity;
@@ -14,7 +16,7 @@ export default class Shields extends Phaser.Physics.Arcade.Sprite {
         this.scene.physics.add.existing(this);
 
         this.ship = ship;
-        this.setName(ship.name + "-shield");
+        this.id = ship.id + "-shield";
         const scale = 0.7;
         this.setOrigin(0.5)
             .setDepth(ship.depth + 1)

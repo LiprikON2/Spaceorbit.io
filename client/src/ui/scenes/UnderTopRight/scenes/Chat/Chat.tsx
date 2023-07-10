@@ -28,7 +28,7 @@ export const Chat = () => {
     const {
         gameManager,
         computed: {
-            player: { nick },
+            player: { name },
         },
     } = useGame();
 
@@ -47,7 +47,7 @@ export const Chat = () => {
     const sendMessage = () => {
         if (message) {
             const isoTime = getIsoTime();
-            const chatEntry = { nick, message, isoTime };
+            const chatEntry = { name, message, isoTime };
             channel.emit("message", chatEntry, { reliable: true });
             addMessage(chatEntry);
 
@@ -56,9 +56,9 @@ export const Chat = () => {
     };
 
     const addMessage = (chatEntry) => {
-        const { nick, message, isoTime } = chatEntry;
+        const { name, message, isoTime } = chatEntry;
         const localTime = isoToLocalTime(isoTime);
-        appendChatEntry({ nick, message, localTime });
+        appendChatEntry({ name, message, localTime });
     };
 
     useEffect(() => {
@@ -78,10 +78,10 @@ export const Chat = () => {
                 offsetScrollbars
             >
                 <Stack align="flex-start" pr="1rem" pb="0.25rem" spacing="0.25rem">
-                    {chatEntires.map(({ nick, message, localTime }, index) => (
+                    {chatEntires.map(({ name, message, localTime }, index) => (
                         <ChatEntry
                             key={index}
-                            nick={nick}
+                            name={name}
                             message={message}
                             localTime={localTime}
                         />
