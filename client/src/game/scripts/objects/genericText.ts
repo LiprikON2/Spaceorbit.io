@@ -10,7 +10,17 @@ export class GenericText extends Phaser.GameObjects.Text {
     public update() {
         let text = "";
         text += `fps: ${Math.floor(this.scene.game.loop.actualFps)}\n`;
-        text += `x: ${Math.floor(this.player.x)} y: ${Math.floor(this.player.y)}\n`;
+
+        text += `ship:\n`;
+        text += `\tx: ${Math.floor(this.player.x)} y: ${Math.floor(this.player.y)}\n`;
+        text += `\tangle: ${Math.floor(this.player.angle)}\n`;
+        text += `\tz: ${Math.floor(this.player.z)} w: ${Math.floor(this.player.w)}\n`;
+
+        text += `bounding box:\n`;
+        text += `\tx: ${Math.floor(this.player.boundingBox.x)} y: ${Math.floor(
+            this.player.boundingBox.y
+        )}\n`;
+        text += `\tangle: ${Math.floor(this.player.boundingBox.angle)}\n`;
         // text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
         text += `${Math.floor(Number(this.scene.game.config.width))}x${Math.floor(
             Number(this.scene.game.config.height)

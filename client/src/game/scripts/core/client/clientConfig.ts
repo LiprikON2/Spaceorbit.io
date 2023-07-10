@@ -26,7 +26,10 @@ const DEFAULT_HEIGHT = 1080;
 
 export const clientConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    // TODO test perfomance/mobile safari
+    fps: {
+        // target: 10,
+        // forceSetTimeOut: true,
+    },
     transparent: true,
     scale: {
         parent: "phaser-game",

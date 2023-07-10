@@ -7,8 +7,14 @@ import type { SpaceshipServerOptions } from "@spaceorbit/client/src/game/scripts
 export class ServerScene extends BaseScene {
     declare game: GameServer;
     playerOptionsList: SpaceshipServerOptions[] = [];
+    pendingPlayersState: object = {};
+    elapsedSinceUpdate = 0;
+    updateFps = 30;
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super("ServerScene");
+    }
+    get updateDelta() {
+        return 1000 / this.updateFps;
     }
 
     preload() {}
@@ -16,15 +22,15 @@ export class ServerScene extends BaseScene {
     create() {
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
+            channel.emit("connection:established");
 
             this.listenForPlayerOptionsRequest(channel);
             this.listenForOtherPlayersOptionsRequest(channel);
 
+            this.listenForPlayerState(channel);
             this.listenForMessages(channel);
         });
     }
-
-    update(time: number, delta: number) {}
 
     listenForPlayerOptionsRequest(channel: ServerChannel) {
         channel.on("player:request-options", () => {
@@ -53,12 +59,32 @@ export class ServerScene extends BaseScene {
             console.log("Message:", data);
             channel.broadcast.emit("message", data, { reliable: true });
         });
-        channel.emit("ready");
         channel.emit(
             "message",
             { name: "Server", message: "Welcome!", isoTime: getIsoTime() },
             { reliable: true }
         );
+    }
+    listenForPlayerState(channel: ServerChannel) {
+        channel.on("player:state", (state) => {
+            // console.log("player:state");
+            this.pendingPlayersState[channel.id!] = state as object;
+        });
+    }
+
+    update(time: number, delta: number) {
+        this.elapsedSinceUpdate += delta;
+        if (this.elapsedSinceUpdate > this.updateDelta) {
+            this.sendPlayersState();
+            this.elapsedSinceUpdate = 0;
+        }
+    }
+
+    sendPlayersState() {
+        if (Object.keys(this.pendingPlayersState).length) {
+            this.game.server.emit("players:pending-state", this.pendingPlayersState);
+            this.pendingPlayersState = {};
+        }
     }
 }
 

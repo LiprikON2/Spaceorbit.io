@@ -49,10 +49,14 @@ export class ClientScene extends BaseScene {
         // Since create() is async, update() is called before create() finishes
         if (!this.isPaused) {
             super.update(time, delta);
-
             this.inputManager.update(time, delta);
             this.debugText.update();
             this.soundManager.update();
+
+            if (this.isMultiplayer) {
+                this.sendPlayerState();
+                this.updateOtherPlayersState();
+            }
         }
     }
 
@@ -100,7 +104,7 @@ export class ClientScene extends BaseScene {
             const clientOptions = this.getPlayerClientOptions();
 
             const otherPlayers = serverOptionsList.map((serverOptions) =>
-                this.createPlayer(serverOptions, clientOptions)
+                this.createPlayer(serverOptions, clientOptions, true)
             );
             return otherPlayers;
         }
@@ -127,5 +131,27 @@ export class ClientScene extends BaseScene {
                 this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
             });
         }
+    }
+
+    sendPlayerState() {
+        // const { x, y, angle } = this.player.getState();
+        const { x, y, angle } = this.player;
+        this.channel.emit("player:state", { x, y, angle });
+    }
+
+    updateOtherPlayersState() {
+        this.channel.on("players:pending-state", (pendingState) => {
+            this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
+                if (Object.keys(pendingState).includes(otherPlayer.id)) {
+                    const otherPlayerState = pendingState[otherPlayer.id];
+                    const { x, y, angle } = otherPlayerState;
+
+                    // player.setState();
+                    otherPlayer.boundingBox.x = x;
+                    otherPlayer.boundingBox.y = y;
+                    otherPlayer.angle = angle;
+                }
+            });
+        });
     }
 }

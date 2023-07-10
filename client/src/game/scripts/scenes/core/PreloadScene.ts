@@ -137,7 +137,7 @@ export class PreloadScene extends Phaser.Scene {
                     this.game.destroy(true);
                 }
 
-                channel.on("ready", () => {
+                channel.on("connection:established", () => {
                     this.game.outEmitter.emit("loading", {
                         name: "World Scene",
                         progress: 100,

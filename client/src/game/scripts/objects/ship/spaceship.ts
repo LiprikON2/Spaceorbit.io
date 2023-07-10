@@ -279,6 +279,7 @@ export class Spaceship extends Sprite {
     onStopMoving() {
         this.exhausts.stopExhaust();
     }
+
     moveUp() {
         if (this.active && !this.isUsingJoystick()) {
             this.boundingBox.body.setVelocityY(-this.maxSpeed);
@@ -332,20 +333,23 @@ export class Spaceship extends Sprite {
             this.exhausts.startExhaust();
         }
     }
-
-    // Move right relative to the ship rotation, instead of to the screen's right side
+    /**
+     * Moves ship right, relative to the ship rotation, instead of to the screen's right side
+     */
     moveRightRelative() {
         if (this.active && !this.isUsingJoystick()) {
-            const angle = this.rotation;
-            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
+            const rotation = this.rotation;
+            this.boundingBox.body.velocity.setToPolar(rotation, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }
-    // Move left relative to the ship rotation, instead of to the screen's left side
+    /**
+     * Moves ship left relative to the ship rotation, instead of to the screen's left side
+     */
     moveLeftRelative() {
         if (this.active && !this.isUsingJoystick()) {
-            const angle = this.rotation + Math.PI;
-            this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
+            const rotation = this.rotation + Math.PI;
+            this.boundingBox.body.velocity.setToPolar(rotation, this.maxSpeed);
             this.exhausts.startExhaust();
         }
     }

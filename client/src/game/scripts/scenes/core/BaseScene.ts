@@ -8,6 +8,10 @@ import {
 } from "~/game/objects/ship/spaceship";
 import { MobManager } from "~/managers";
 
+type SpaceshipGroup = {
+    getChildren: () => Spaceship[];
+} & Phaser.GameObjects.Group;
+
 /**
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
@@ -16,9 +20,10 @@ export class BaseScene extends Phaser.Scene {
     mobManager: MobManager;
     plugins: Phaser.Plugins.PluginManager;
     add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
-    playerGroup: Phaser.GameObjects.Group;
-    mobGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
+    playerGroup: SpaceshipGroup;
+    otherPlayersGroup: SpaceshipGroup;
+    mobGroup: SpaceshipGroup;
+    allGroup: SpaceshipGroup;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -27,9 +32,12 @@ export class BaseScene extends Phaser.Scene {
     }
 
     preload() {
-        this.playerGroup = this.add.group({ runChildUpdate: true });
-        this.mobGroup = this.add.group({ runChildUpdate: true });
-        this.allGroup = this.add.group();
+        this.playerGroup = this.add.group({ runChildUpdate: true }) as SpaceshipGroup;
+        this.otherPlayersGroup = this.add.group() as SpaceshipGroup;
+        this.mobGroup = this.add.group({ runChildUpdate: true }) as SpaceshipGroup;
+        this.allGroup = this.add.group() as SpaceshipGroup;
+
+        this.allGroup.getChildren();
     }
 
     create() {}
@@ -38,7 +46,8 @@ export class BaseScene extends Phaser.Scene {
 
     createPlayer(
         serverOptions: SpaceshipServerOptions,
-        clientOptions?: Partial<SpaceshipClientOptions>
+        clientOptions?: Partial<SpaceshipClientOptions>,
+        isOther = false
     ) {
         const defaultClientOptions = {
             allGroup: this.allGroup,
@@ -47,6 +56,7 @@ export class BaseScene extends Phaser.Scene {
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);
 
+        if (isOther) this.otherPlayersGroup.add(player);
         this.playerGroup.add(player);
         this.allGroup.add(player);
 

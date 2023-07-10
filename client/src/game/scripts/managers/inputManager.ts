@@ -7,9 +7,9 @@ export default class InputManager {
     scene;
     player;
     keys;
-    zoom;
-    time = 0;
-    frameTime = 0;
+    zoom: number;
+    // time = 0;
+    // frameTime = 0;
     touchControls = { joystick: null, virtualBtn: null };
     isTouchMode = false;
 
@@ -130,8 +130,8 @@ export default class InputManager {
     }
 
     update(time, delta) {
-        this.frameTime += delta;
-        this.time = time;
+        // this.frameTime += delta;
+        // this.time = time;
 
         // Key bindings
         const upBtn = this.keys.W.isDown || this.keys.UP.isDown;
