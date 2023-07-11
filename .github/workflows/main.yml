@@ -21,5 +21,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Checking versions 
+        run: npm version && tsc -v
+
       - name: Build Packages
         run: npm run prod-build
