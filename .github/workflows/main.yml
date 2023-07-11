@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Use specific typescript version
-        run: npm uninstall typescript && npm install typescript@4.5.5
+        run: npm uninstall typescript && npm uninstall -g typescript && npm install typescript@4.5.5 && npm install -g typescript@4.5.5
 
       - name: Checking versions 
         run: npm version && tsc -v
