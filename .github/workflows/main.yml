@@ -25,7 +25,7 @@ jobs:
         run: npm uninstall typescript && npm uninstall -g typescript && npm install typescript@4.5.5 && npm install -g typescript@4.5.5
 
       - name: Checking versions 
-        run: npm version && tsc -v
+        run: npm version && tsc -v && npm list typescript
 
       - name: Build Packages
         run: npm run prod-build
