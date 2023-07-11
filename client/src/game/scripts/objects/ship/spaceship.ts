@@ -149,6 +149,17 @@ export class Spaceship extends Sprite {
         return shipSpeed * speedMultiplier;
     }
 
+    getClientState() {
+        const { x, y, angle } = this;
+        return { x, y, angle };
+    }
+
+    setClientState({ x, y, angle }) {
+        this.boundingBox.x = x;
+        this.boundingBox.y = y;
+        this.angle = angle;
+    }
+
     getHit(projectile) {
         const damageMultiplier = projectile.weapon.multiplier;
         const damage = projectile.weapon.projectileDamage * damageMultiplier;
@@ -226,15 +237,20 @@ export class Spaceship extends Sprite {
         this.targetedBy = [];
     }
 
-    respawn(x?, y?) {
-        this.breakOffTargeting();
-        this.setTarget();
+    teleport(x?, y?, map?) {
         if (typeof x === "undefined" || typeof y === "undefined") {
             // @ts-ignore
             ({ x, y } = this.scene.getRandomPositionOnMap());
         }
         this.boundingBox.x = x;
         this.boundingBox.y = y;
+    }
+
+    respawn(x?, y?) {
+        this.breakOffTargeting();
+        this.setTarget();
+        this.teleport(x, y);
+
         this.boundingBox.body.enable = true;
         this.status.health = this.maxHealth;
         this.status.shields = this.maxShields;

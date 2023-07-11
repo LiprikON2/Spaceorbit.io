@@ -24,6 +24,7 @@
         "@geckos.io/client": "^2.3.1",
         "@geckos.io/phaser-on-nodejs": "^1.2.8",
         "@geckos.io/server": "^2.3.1",
+        "@geckos.io/snapshot-interpolation": "^1.1.0",
         "@prisma/client": "^4.12.0",
         "@spaceorbit/client": "file:../client",
         "@types/bcrypt": "^5.0.0",

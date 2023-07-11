@@ -31,7 +31,6 @@ export const SettingsModal = ({ opened, onClose }) => {
         setGraphicsSettingsSetting,
     } = useSettings();
 
-    // TODELETE: Mutating state!
     const addEngine = () => {
         player.exhausts.createExhaust();
     };
@@ -71,7 +70,6 @@ export const SettingsModal = ({ opened, onClose }) => {
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.isTouchMode);
     const [activeTab, setActiveTab] = useState<string | null>("audio");
 
-    // TODELETE: Mutating state!
     const sendMobs = (e) => {
         e.preventDefault();
         const { mobs } = mobManager;
@@ -83,12 +81,8 @@ export const SettingsModal = ({ opened, onClose }) => {
         });
     };
 
-    // TODELETE: Mutating state!
     const teleport = () => {
-        player.x = x;
-        player.y = y;
-        player.shields.x = x;
-        player.shields.y = y;
+        player.teleport(x, y);
     };
 
     const [x, setx] = useState(120);

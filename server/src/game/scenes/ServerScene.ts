@@ -9,12 +9,12 @@ export class ServerScene extends BaseScene {
     playerOptionsList: SpaceshipServerOptions[] = [];
     pendingPlayersState: object = {};
     elapsedSinceUpdate = 0;
-    updateFps = 30;
+    tickrate = 30;
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super("ServerScene");
     }
-    get updateDelta() {
-        return 1000 / this.updateFps;
+    get tickrateDeltaTime() {
+        return 1000 / this.tickrate;
     }
 
     preload() {}
@@ -74,7 +74,7 @@ export class ServerScene extends BaseScene {
 
     update(time: number, delta: number) {
         this.elapsedSinceUpdate += delta;
-        if (this.elapsedSinceUpdate > this.updateDelta) {
+        if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
             this.sendPlayersState();
             this.elapsedSinceUpdate = 0;
         }

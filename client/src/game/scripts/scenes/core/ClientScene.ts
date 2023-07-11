@@ -134,9 +134,9 @@ export class ClientScene extends BaseScene {
     }
 
     sendPlayerState() {
-        // const { x, y, angle } = this.player.getState();
-        const { x, y, angle } = this.player;
-        this.channel.emit("player:state", { x, y, angle });
+        // TODO
+        const state = this.player.getClientState();
+        this.channel.emit("player:state", state);
     }
 
     updateOtherPlayersState() {
@@ -144,12 +144,7 @@ export class ClientScene extends BaseScene {
             this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
                 if (Object.keys(pendingState).includes(otherPlayer.id)) {
                     const otherPlayerState = pendingState[otherPlayer.id];
-                    const { x, y, angle } = otherPlayerState;
-
-                    // player.setState();
-                    otherPlayer.boundingBox.x = x;
-                    otherPlayer.boundingBox.y = y;
-                    otherPlayer.angle = angle;
+                    otherPlayer.setClientState(otherPlayerState);
                 }
             });
         });
