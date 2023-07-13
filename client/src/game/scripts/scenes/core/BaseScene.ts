@@ -16,7 +16,7 @@ type SpaceshipGroup = {
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
 export class BaseScene extends Phaser.Scene {
-    rootElem: HTMLElement;
+    rootElem: HTMLElement | null;
     mobManager: MobManager;
     plugins: Phaser.Plugins.PluginManager;
     add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };

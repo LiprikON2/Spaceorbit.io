@@ -2,6 +2,7 @@ import "@geckos.io/phaser-on-nodejs";
 import Phaser from "phaser";
 
 import { ServerScene } from "./scenes/ServerScene";
+import { MixinUnnamedMapScene, PreloadScene } from "@spaceorbit/client";
 
 // import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 // import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
@@ -13,6 +14,8 @@ import { ServerScene } from "./scenes/ServerScene";
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
 
+const UnnamedMapSceneServer = MixinUnnamedMapScene(ServerScene);
+
 export const serverConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.HEADLESS,
     scale: {
@@ -22,7 +25,7 @@ export const serverConfig: Phaser.Types.Core.GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [ServerScene],
+    scene: [PreloadScene, UnnamedMapSceneServer],
     physics: {
         default: "arcade",
         arcade: {

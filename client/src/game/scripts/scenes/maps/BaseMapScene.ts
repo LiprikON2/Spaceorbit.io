@@ -1,4 +1,4 @@
-import { BaseScene } from "~/scenes/core/BaseScene";
+import { BaseScene } from "../core/BaseScene";
 
 export class BaseMapScene extends BaseScene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -7,7 +7,6 @@ export class BaseMapScene extends BaseScene {
 
     create() {
         super.create();
-        console.log("create BaseMapScene");
 
         this.loadTileBackground(
             this,
@@ -56,27 +55,27 @@ export class BaseMapScene extends BaseScene {
         }
     }
 
-    loadBackground(atlasTexture: string, parallax: number) {
-        const atlas = this.textures.get(atlasTexture);
-        const width = atlas.frames["map"].width;
-        const height = atlas.frames["map"].height;
-        const color = atlas.customData["meta"].bgColor;
+    loadBackground(texture: string, parallax: number) {
+        const json = this.cache.json.get(texture + "_json");
 
+        const { w: width, h: height } = json.meta.size;
         const [imageOffset, boundsSize] = this.getScrollingFactorCollisionAdjustment(
             parallax,
             width,
             height
         );
-
-        this.add
-            .image(imageOffset.x, imageOffset.y, atlasTexture)
-            .setOrigin(0, 0)
-            .setScrollFactor(parallax);
+        if (this.textures.exists(texture)) {
+            this.add
+                .image(imageOffset.x, imageOffset.y, texture)
+                .setOrigin(0, 0)
+                .setScrollFactor(parallax);
+        }
 
         // TODO solve magic numbers
         // TODO make it obvious when you hit world bounds
         this.physics.world.setBounds(0, 0, boundsSize.width - 500, boundsSize.height - 700);
 
+        const { color } = json.meta.bgColor;
         this.updateRootBackground(color);
     }
 
@@ -103,7 +102,9 @@ export class BaseMapScene extends BaseScene {
         return [imageOffset, boundsSize];
     }
 
-    updateRootBackground(color?, defaultColor = "#1d252c") {
-        this.rootElem.style.backgroundColor = color ?? defaultColor;
+    updateRootBackground(color = "#1d252c") {
+        if (this.rootElem) {
+            this.rootElem.style.backgroundColor = color;
+        }
     }
 }
