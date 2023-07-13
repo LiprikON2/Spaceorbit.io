@@ -7,8 +7,9 @@ import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-p
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugin.js";
 
-import { PreloadScene } from "~/scenes/core";
-import { UnnamedMapScene } from "~/game/scenes/maps/UnnamedMapScene";
+import { ClientScene, PreloadScene } from "~/scenes/core";
+import { MixinUnnamedMapScene } from "~/scenes/maps/UnnamedMapScene";
+import { MixinBaseMapScene } from "~/game/scenes/maps/BaseMapScene";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -23,6 +24,8 @@ const DEFAULT_HEIGHT = 1080;
 // // Set width and height.
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
+
+const UnnamedMapSceneClient = MixinUnnamedMapScene(MixinBaseMapScene(ClientScene));
 
 export const clientConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -39,7 +42,7 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, UnnamedMapScene],
+    scene: [PreloadScene, UnnamedMapSceneClient],
     physics: {
         default: "arcade",
         arcade: {

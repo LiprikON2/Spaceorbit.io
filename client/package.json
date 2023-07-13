@@ -44,6 +44,7 @@
         "@mantine/core": "~6.0.14",
         "@mantine/form": "~6.0.14",
         "@mantine/hooks": "~6.0.14",
+        "@spaceorbit/server": "file:../server",
         "@tanstack/react-query": "~4.29.13",
         "core-js": "~3.31.0",
         "immer": "~10.0.2",

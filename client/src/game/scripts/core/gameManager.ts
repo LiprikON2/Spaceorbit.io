@@ -85,7 +85,7 @@ export class GameManager {
     };
 
     get scene(): ClientScene | null {
-        const clientScene = this.game?.scene?.scenes?.at(-1) as ClientScene;
+        const clientScene = this.game?.scene?.keys["UnnamedMapScene"] as ClientScene;
         return clientScene ?? null;
     }
     get player(): Spaceship | null {

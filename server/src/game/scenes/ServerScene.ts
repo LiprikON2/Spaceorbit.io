@@ -1,3 +1,5 @@
+import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
+
 import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core/BaseScene";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
@@ -6,10 +8,13 @@ import type { SpaceshipServerOptions } from "@spaceorbit/client/src/game/scripts
 
 export class ServerScene extends BaseScene {
     declare game: GameServer;
+    si = new SnapshotInterpolation();
+
     playerOptionsList: SpaceshipServerOptions[] = [];
     pendingPlayersState: object = {};
     elapsedSinceUpdate = 0;
     tickrate = 30;
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super("ServerScene");
     }
@@ -17,7 +22,9 @@ export class ServerScene extends BaseScene {
         return 1000 / this.tickrate;
     }
 
-    preload() {}
+    // preload() {
+    //     this.scene.launch("UnnamedMapScene");
+    // }
 
     create() {
         this.game.server.onConnection((channel) => {
@@ -67,7 +74,7 @@ export class ServerScene extends BaseScene {
     }
     listenForPlayerState(channel: ServerChannel) {
         channel.on("player:state", (state) => {
-            // console.log("player:state");
+            // console.log("player:state", state);
             this.pendingPlayersState[channel.id!] = state as object;
         });
     }
@@ -75,7 +82,7 @@ export class ServerScene extends BaseScene {
     update(time: number, delta: number) {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
-            this.sendPlayersState();
+            // this.sendPlayersState();
             this.elapsedSinceUpdate = 0;
         }
     }

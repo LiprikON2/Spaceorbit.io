@@ -2,11 +2,13 @@ import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscrol
 import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
 
 type VirtualJoyStick = RexVirtualJoyStick & Phaser.Events.EventEmitter;
-
+interface Keys {
+    [key: string]: Phaser.Input.Keyboard.Key;
+}
 export default class InputManager {
-    scene;
+    scene: Phaser.Scene;
     player;
-    keys;
+    keys: Keys;
     zoom: number;
     // time = 0;
     // frameTime = 0;
@@ -21,7 +23,9 @@ export default class InputManager {
         this.scene = scene;
         this.player = player;
         this.zoom = zoom;
-        this.keys = scene.input.keyboard.addKeys("W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT");
+        this.keys = this.scene.input.keyboard.addKeys(
+            "W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT"
+        ) as Keys;
 
         scene.cameras.main.startFollow(player);
         scene.cameras.main.setZoom(this.zoom);
@@ -59,6 +63,7 @@ export default class InputManager {
         this.scene.input.addPointer(1);
         const joystick: VirtualJoyStick = this.scene.plugins
             .get("rexVirtualJoystick")
+            // @ts-ignore
             .add(this.scene, {
                 x: Number(this.scene.game.config.height) * 0.25,
                 y:
@@ -85,6 +90,7 @@ export default class InputManager {
 
         const virtualBtn: VirtualJoyStick = this.scene.plugins
             .get("rexVirtualJoystick")
+            // @ts-ignore
             .add(this.scene, {
                 x: Number(this.scene.game.config.width) * 0.75,
                 y:
@@ -198,5 +204,12 @@ export default class InputManager {
             }
         }
         if (cursorX && cursorY) this.player.lookAtPoint(cursorX, cursorY);
+    }
+
+    getInputState() {
+        const inputState = {};
+        Object.entries(this.keys).forEach(([key, value]) => (inputState[key] = value.isDown));
+
+        return inputState;
     }
 }

@@ -1,4 +1,5 @@
 import type { ClientChannel } from "@geckos.io/client";
+import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 
 import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
@@ -7,8 +8,9 @@ import { BaseScene } from "./BaseScene";
 import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 
 export class ClientScene extends BaseScene {
-    channel?: ClientChannel;
     game: GameClient;
+    channel?: ClientChannel;
+    si?: SnapshotInterpolation;
 
     inputManager: InputManager;
     soundManager: SoundManager;
@@ -23,13 +25,16 @@ export class ClientScene extends BaseScene {
     }
 
     init({ channel }: { channel?: ClientChannel }) {
-        this.channel = channel;
+        if (channel) {
+            this.channel = channel;
+            this.si = new SnapshotInterpolation(30);
+        }
         this.soundManager = new SoundManager(this);
     }
 
     async create() {
+        console.log("client!");
         super.create();
-
         this.player = await this.producePlayer();
         await this.produceOtherPlayers();
         this.produceOtherPlayerOnConnect();
@@ -43,6 +48,7 @@ export class ClientScene extends BaseScene {
 
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
+        console.log("clientscene worldCreate");
     }
 
     update(time: number, delta: number) {
@@ -99,15 +105,15 @@ export class ClientScene extends BaseScene {
     }
 
     async produceOtherPlayers(): Promise<Spaceship[]> {
-        if (this.isMultiplayer) {
-            const serverOptionsList = await this.requestAlreadyConnectedPlayers();
-            const clientOptions = this.getPlayerClientOptions();
+        if (this.isSingleplayer) return;
 
-            const otherPlayers = serverOptionsList.map((serverOptions) =>
-                this.createPlayer(serverOptions, clientOptions, true)
-            );
-            return otherPlayers;
-        }
+        const serverOptionsList = await this.requestAlreadyConnectedPlayers();
+        const clientOptions = this.getPlayerClientOptions();
+
+        const otherPlayers = serverOptionsList.map((serverOptions) =>
+            this.createPlayer(serverOptions, clientOptions, true)
+        );
+        return otherPlayers;
     }
 
     async requestAlreadyConnectedPlayers(): Promise<SpaceshipServerOptions[]> {
@@ -134,9 +140,9 @@ export class ClientScene extends BaseScene {
     }
 
     sendPlayerState() {
-        // TODO
-        const state = this.player.getClientState();
-        this.channel.emit("player:state", state);
+        // const state = this.player.getClientState();
+        const inputState = this.inputManager.getInputState();
+        this.channel.emit("player:state", { ...inputState, time: this.si.serverTime });
     }
 
     updateOtherPlayersState() {

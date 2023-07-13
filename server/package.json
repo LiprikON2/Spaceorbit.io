@@ -3,6 +3,7 @@
     "private": true,
     "version": "0.0.1",
     "type": "module",
+    "main": "src/game/index.ts",
     "prisma": {
         "schema": "src/db/schema.prisma"
     },

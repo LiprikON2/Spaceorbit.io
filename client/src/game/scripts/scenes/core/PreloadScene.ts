@@ -3,7 +3,7 @@ import type { GameClient } from "~/game/core/client/GameClient";
 export class PreloadScene extends Phaser.Scene {
     game: GameClient;
     constructor() {
-        super({ key: "PreloadScene" });
+        super("PreloadScene");
     }
 
     preload() {
@@ -142,12 +142,12 @@ export class PreloadScene extends Phaser.Scene {
                         name: "World Scene",
                         progress: 100,
                     });
-                    this.scene.start("UnnamedMapScene", { channel });
+                    this.scene.start("UnnamedMapScene", { parentSceneKey: "ClientScene", channel });
                 });
             });
         } else {
             this.game.outEmitter.emit("loading", { name: "World Scene", progress: 100 });
-            this.scene.start("UnnamedMapScene");
+            this.scene.start("UnnamedMapScene", { parentSceneKey: "ClientScene" });
         }
 
         /**

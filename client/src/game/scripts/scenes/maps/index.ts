@@ -1,2 +1,2 @@
-export { BaseMapScene } from "./BaseMapScene";
-export { UnnamedMapScene } from "./UnnamedMapScene";
+export { BaseMapSceneClient } from "./BaseMapScene";
+export * from "./UnnamedMapScene";
