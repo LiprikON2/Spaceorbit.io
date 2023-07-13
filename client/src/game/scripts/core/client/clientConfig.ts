@@ -9,7 +9,6 @@ import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugi
 
 import { ClientScene, PreloadScene } from "~/scenes/core";
 import { MixinUnnamedMapScene } from "~/scenes/maps/UnnamedMapScene";
-import { MixinBaseMapScene } from "~/game/scenes/maps/BaseMapScene";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;
@@ -25,7 +24,7 @@ const DEFAULT_HEIGHT = 1080;
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
 
-const UnnamedMapSceneClient = MixinUnnamedMapScene(MixinBaseMapScene(ClientScene));
+const UnnamedMapSceneClient = MixinUnnamedMapScene(ClientScene);
 
 export const clientConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,

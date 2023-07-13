@@ -4,10 +4,10 @@ import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
-import { BaseScene } from "./BaseScene";
+import { BaseMapScene } from "../maps/BaseMapScene";
 import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
 
-export class ClientScene extends BaseScene {
+export class ClientScene extends BaseMapScene {
     game: GameClient;
     channel?: ClientChannel;
     si?: SnapshotInterpolation;

@@ -1,12 +1,12 @@
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 
-import { BaseScene } from "@spaceorbit/client/src/game/scripts/scenes/core/BaseScene";
+import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
 import { ServerChannel } from "@geckos.io/server";
 import type { SpaceshipServerOptions } from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
 
-export class ServerScene extends BaseScene {
+export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
 
@@ -16,8 +16,9 @@ export class ServerScene extends BaseScene {
     tickrate = 30;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
-        super("ServerScene");
+        super(config);
     }
+
     get tickrateDeltaTime() {
         return 1000 / this.tickrate;
     }

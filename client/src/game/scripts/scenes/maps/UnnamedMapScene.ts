@@ -1,20 +1,14 @@
-// import { ServerScene } from "@spaceorbit/server/src/game/scenes/ServerScene";
-// import { BaseMapSceneClient, BaseMapSceneServer, MixinBaseMapScene } from "./BaseMapScene";
-import { BaseMapSceneClient, MixinBaseMapScene } from "./BaseMapScene";
-import { ClientScene } from "../core/ClientScene";
+import { BaseMapScene } from "./BaseMapScene";
 
-let baseMapScene = new BaseMapSceneClient("t");
-baseMapScene = null;
-
-type Constructor<T = {}> = new (...args: any[]) => T;
-// type BaseMappable = GConstructor<typeof baseMapScene>;
-
-// Class Mixin from Class Mixin
+// Class Mixin
 // https://www.typescriptlang.org/docs/handbook/mixins.html
-export function MixinUnnamedMapScene<
-    BaseMapClientOrServerScene extends Constructor<typeof baseMapScene>
->(BaseMapClientOrServer: BaseMapClientOrServerScene) {
-    return class extends BaseMapClientOrServer {
+// https://blog.bitsrc.io/multiple-inheritance-or-typescript-mixins-10076c4f136a
+type Constructor<T = {}> = new (...args: any[]) => T;
+
+export function MixinUnnamedMapScene<ClientOrServerScene extends Constructor<BaseMapScene>>(
+    clientOrServer: ClientOrServerScene
+) {
+    return class extends clientOrServer {
         constructor(...args: any[]) {
             super("UnnamedMapScene");
         }
@@ -26,5 +20,3 @@ export function MixinUnnamedMapScene<
         }
     };
 }
-
-// const test = MixinUnnamedMapScene(MixinBaseMapScene(ClientScene));
