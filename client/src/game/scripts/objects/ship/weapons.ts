@@ -1,6 +1,7 @@
-import type { Spaceship } from "./spaceship";
+import type { BaseScene } from "~/game/scenes/core/BaseScene";
+import type { Spaceship } from "./Spaceship";
 export default class Weapons {
-    scene: Phaser.Scene;
+    scene: BaseScene;
     ship: Spaceship;
     // delay = 1000/fps
     primaryFireRate = 600;
@@ -77,23 +78,29 @@ export default class Weapons {
     }
 
     createLaser(slot) {
-        this.weaponSlots[slot].type = "laser";
-        this.weaponSlots[slot].cooldownTime = 600;
-        this.weaponSlots[slot].projectileVelocity = 5000;
-        this.weaponSlots[slot].projectileDamage = 1000;
-        this.weaponSlots[slot].projectileScale = { x: 3, y: 1 };
-        this.weaponSlots[slot].multiplier = this.multiplier;
+        this.weaponSlots[slot] = {
+            ...this.weaponSlots[slot],
+            type: "laser",
+            cooldownTime: 600,
+            projectileVelocity: 5000,
+            projectileDamage: 1000,
+            projectileScale: { x: 3, y: 1 },
+            multiplier: this.multiplier,
+        };
 
         // DPS = 1000 * (1000 / 600) = 1666 damage per second
     }
 
     createGatling(slot) {
-        this.weaponSlots[slot].type = "gatling";
-        this.weaponSlots[slot].cooldownTime = 100;
-        this.weaponSlots[slot].projectileVelocity = 1200;
-        this.weaponSlots[slot].projectileDamage = 200;
-        this.weaponSlots[slot].projectileScale = { x: 0.4, y: 0.4 };
-        this.weaponSlots[slot].multiplier = this.multiplier;
+        this.weaponSlots[slot] = {
+            ...this.weaponSlots[slot],
+            type: "gatling",
+            cooldownTime: 100,
+            projectileVelocity: 1200,
+            projectileDamage: 200,
+            projectileScale: { x: 0.4, y: 0.4 },
+            multiplier: this.multiplier,
+        };
 
         // DPS = 166 * (1000 / 100) = 2000 damage per second
     }
@@ -172,7 +179,7 @@ export default class Weapons {
 
         let velocityX, velocityY;
         if (addShipMomentum) {
-            // Take ship velocity in asdccount for speed of the bullet
+            // Take ship velocity in account when calculating the speed of a bullet
             const shipVelocityX = this.ship.body.velocity.x;
             const shipVelocityY = this.ship.body.velocity.y;
             velocityX = Math.sin(rotation) * projectileVelocity + shipVelocityX;
@@ -183,7 +190,7 @@ export default class Weapons {
         }
 
         const projectile = this.scene.physics.add
-            .sprite(offsetX, offsetY, weapon.type, 0)
+            .sprite(offsetX, offsetY, this.ship.isTextured ? weapon.type : "", 0)
             .setRotation(rotation - Math.PI / 2)
             .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
         projectile["weapon"] = weapon;

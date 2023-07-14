@@ -21,6 +21,7 @@ export interface SpriteServerOptions {
 export interface SpriteClientOptions {
     scene: Phaser.Scene;
     soundManager?: SoundManager;
+    toPassTexture: boolean;
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
@@ -32,18 +33,20 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         health: number;
         multipliers: Multipliers;
     };
-    soundManager: SoundManager;
+    soundManager?: SoundManager;
     scene: BaseScene;
     atlas: {
         metadata: any;
         width: number;
         height: number;
     };
+    isTextured: boolean;
 
     constructor(serverOptions: SpriteServerOptions, clientOptions: SpriteClientOptions) {
         const { x, y, atlasTexture } = serverOptions;
-        const { scene } = clientOptions;
-        super(scene, x, y, atlasTexture);
+        const { scene, toPassTexture } = clientOptions;
+        super(scene, x, y, toPassTexture ? atlasTexture : "");
+        this.isTextured = toPassTexture;
 
         // Phaser stuff
         scene.add.existing(this);
@@ -56,10 +59,11 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         const { id } = serverOptions;
         this.id = id;
 
-        const atlas = scene.textures.get(atlasTexture);
-        const { height: textureHeight, width: textureWidth } = atlas.source[0];
+        const textureMeta = this.scene.getTextureJson(atlasTexture).meta;
+        const { w: textureWidth, h: textureHeight } = textureMeta.size;
+
         this.atlas = {
-            metadata: atlas.customData["meta"],
+            metadata: textureMeta,
             height: textureHeight,
             width: textureWidth,
         };

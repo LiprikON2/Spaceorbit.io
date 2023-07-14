@@ -1,3 +1,3 @@
-export { GenericText } from "./genericText";
-export { Spaceship } from "./ship/spaceship";
-export { Mob } from "./mob";
+export { GenericText } from "./GenericText";
+export { Spaceship } from "./ship/Spaceship";
+export { Mob } from "./Mob";

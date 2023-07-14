@@ -1,6 +1,6 @@
 import debounce from "lodash/debounce";
 
-import type { Spaceship } from "./spaceship";
+import type { Spaceship } from "./Spaceship";
 
 export default class Shields extends Phaser.Physics.Arcade.Sprite {
     id: string;

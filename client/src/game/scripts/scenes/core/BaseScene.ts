@@ -5,7 +5,7 @@ import {
     Spaceship,
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
-} from "~/game/objects/ship/spaceship";
+} from "~/game/objects/ship/Spaceship";
 import { MobManager } from "~/managers";
 
 type SpaceshipGroup = {
@@ -44,6 +44,10 @@ export class BaseScene extends Phaser.Scene {
 
     update(time: number, delta: number) {}
 
+    getTextureJson(textureKey) {
+        return this.cache.json.get(textureKey + "_json");
+    }
+
     createPlayer(
         serverOptions: SpaceshipServerOptions,
         clientOptions?: Partial<SpaceshipClientOptions>,
@@ -52,6 +56,7 @@ export class BaseScene extends Phaser.Scene {
         const defaultClientOptions = {
             allGroup: this.allGroup,
             scene: this,
+            toPassTexture: true,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);

@@ -2,7 +2,7 @@ import {
     Spaceship,
     type SpaceshipServerOptions,
     type SpaceshipClientOptions,
-} from "~/objects/ship/spaceship";
+} from "~/game/objects/ship/Spaceship";
 
 enum Direction {
     Left,

@@ -1,0 +1,21 @@
+{
+    "frames": {
+        "map": {
+            "frame": {
+                "x": 0,
+                "y": 0,
+                "w": 119,
+                "h": 115
+            }
+        }
+    },
+    "meta": {
+        "image": "projectile.webp",
+        "format": "RGB888",
+        "size": {
+            "w": 119,
+            "h": 115
+        },
+        "scale": 1
+    }
+}

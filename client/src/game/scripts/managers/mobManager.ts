@@ -1,7 +1,7 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
 // import { NavMesh } from "navmesh";
-import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/mob";
-import { AllegianceEnum } from "~/objects/ship/spaceship";
+import { Mob, type MobClientOptions, type MobServerOptions } from "~/game/objects/Mob";
+import { AllegianceEnum } from "~/game/objects/ship/Spaceship";
 
 export default class MobManager {
     scene;
@@ -65,6 +65,7 @@ export default class MobManager {
                 scene: this.scene,
                 allGroup: this.scene.allGroup,
                 soundManager,
+                toPassTexture: true,
             };
             const mob = new Mob(serverOptions, clientOptions);
             this.scene.allGroup.add(mob);

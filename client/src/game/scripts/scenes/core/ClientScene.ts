@@ -5,7 +5,7 @@ import { InputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
-import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/spaceship";
+import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
 
 export class ClientScene extends BaseMapScene {
     game: GameClient;
@@ -71,6 +71,7 @@ export class ClientScene extends BaseMapScene {
             allGroup: this.allGroup,
             scene: this,
             soundManager: this.soundManager,
+            toPassTexture: true,
         };
     }
 

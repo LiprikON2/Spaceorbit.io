@@ -1,4 +1,4 @@
-import type { Spaceship } from "./spaceship";
+import type { Spaceship } from "./Spaceship";
 
 export interface Item {
     itemName: string;

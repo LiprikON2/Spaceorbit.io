@@ -1,0 +1,21 @@
+{
+    "frames": {
+        "map": {
+            "frame": {
+                "x": 0,
+                "y": 0,
+                "w": 95,
+                "h": 68
+            }
+        }
+    },
+    "meta": {
+        "image": "spr_bullet_strip02.png",
+        "format": "RGB888",
+        "size": {
+            "w": 95,
+            "h": 68
+        },
+        "scale": 1
+    }
+}

@@ -10,7 +10,9 @@ import F5S4N from "~/assets/ships/F5S4N.png";
 import F5S4_json from "~/assets/ships/F5S4.json";
 
 import laser from "~/assets/weapons/lasers/spr_bullet_strip02.png";
+import laser_json from "~/assets/weapons/lasers/spr_bullet_strip02-red.json";
 import gatling from "~/assets/weapons/gatling/projectile.webp";
+import gatling_json from "~/assets/weapons/gatling/projectile.json";
 import shield from "~/assets/ships/shield_Edit.png";
 import particles from "~/assets/effects/particles_1080x1080.png";
 import exhaust from "~/assets/effects/whitePuff00.png";
@@ -35,7 +37,14 @@ import track_2 from "~/assets/music/SMP1_THEME_Gliese 1214b.mp3";
 import track_3 from "~/assets/music/SMP1_THEME_Space caravan.mp3";
 import track_4 from "~/assets/music/SMP1_THEME_Voyager.mp3";
 
-console.log("map_11", map_11_json);
+interface TextureWithJsonOptions {
+    type?: "image" | "atlas" | "spritesheet";
+    jsonPath: string;
+    texturePath: string;
+    nTexturePath?: string;
+    spritesheetFrameOptions?: Phaser.Types.Loader.FileTypes.ImageFrameConfig;
+}
+
 export class PreloadScene extends Phaser.Scene {
     game: GameClient | Phaser.Game;
     constructor() {
@@ -54,9 +63,35 @@ export class PreloadScene extends Phaser.Scene {
             this.game.outEmitter.emit(event, status);
         }
     }
+    loadTextureWithJson(key: string, options: TextureWithJsonOptions) {
+        const defaultOptions: Partial<TextureWithJsonOptions> = {
+            type: "image",
+            nTexturePath: null,
+            spritesheetFrameOptions: null,
+        };
+        const mergedOptions = { ...defaultOptions, ...options };
+        const { type, jsonPath, texturePath, nTexturePath, spritesheetFrameOptions } =
+            mergedOptions;
+        this.load.json(key + "_json", jsonPath);
+
+        if (this.isClient) {
+            if (type === "image") {
+                this.load.image(key, texturePath);
+            } else if (type === "atlas") {
+                this.load.atlas({
+                    key,
+                    textureURL: texturePath,
+                    ...(nTexturePath && { normalMap: nTexturePath }),
+                    atlasURL: jsonPath,
+                });
+            } else if (type === "spritesheet") {
+                this.load.spritesheet(key, texturePath, spritesheetFrameOptions);
+            }
+        }
+    }
 
     // TODO (in preload)
-    // this.loadAtlas
+    // this.loadTextureWithJson
     // this.loadImage
     // ...
     // and then use as
@@ -65,63 +100,65 @@ export class PreloadScene extends Phaser.Scene {
     preload() {
         // Maps
         this.emitOut("loading", { name: "Maps", progress: 1 });
-        if (this.isClient) {
-            // this.load.atlas("map_1-1", "assets/maps/map_1-1.jpg", "assets/maps/map_1-1.json");
-            // this.load.atlas("map_1-2", "assets/maps/map_1-2.webp", "assets/maps/map_1-2.json");
-            this.load.image("map_1-1", map_11);
-            this.load.image("map_1-2", map_12);
-        }
-        this.load.json("map_1-1_json", map_11_json);
-        this.load.json("map_1-2_json", map_12_json);
+        this.loadTextureWithJson("map_1-1", { jsonPath: map_11_json, texturePath: map_11 });
+        this.loadTextureWithJson("map_1-2", { jsonPath: map_12_json, texturePath: map_12 });
 
         // Ships
         this.emitOut("loading", { name: "Ships", progress: 2 });
-        // this.load.atlas({
-        //     key: "F5S4",
-        //     textureURL: F5S4,
-        //     normalMap: F5S4N,
-        //     atlasURL: F5S4_json,
-        // });
+        this.loadTextureWithJson("F5S4", {
+            type: "atlas",
+            jsonPath: F5S4_json,
+            texturePath: F5S4,
+            nTexturePath: F5S4N,
+        });
         // Weapons
         this.emitOut("loading", { name: "Weapons", progress: 3 });
-        this.load.spritesheet("laser", laser, {
-            frameWidth: 95,
-            frameHeight: 68,
+        this.loadTextureWithJson("laser", {
+            type: "spritesheet",
+            jsonPath: laser_json,
+            texturePath: laser,
+            spritesheetFrameOptions: {
+                frameWidth: 95,
+                frameHeight: 68,
+            },
         });
-        this.load.image("gatling", gatling);
-        // Modules
-        this.emitOut("loading", { name: "Modules", progress: 4 });
-        this.load.image("shield", shield);
-        // Effects
-        // TODO is it better to use powers of 2?
-        this.emitOut("loading", { name: "Effects", progress: 7 });
-        this.load.spritesheet("particles", particles, {
-            frameWidth: 1080,
-            frameHeight: 1080,
+        this.loadTextureWithJson("gatling", {
+            jsonPath: gatling_json,
+            texturePath: gatling,
         });
-        this.load.image("exhaust", exhaust);
-        this.load.spritesheet("explosion_1", explosion1, {
-            frameWidth: 512,
-            frameHeight: 512,
-        });
-        this.load.spritesheet("explosion_2", explosion2, {
-            frameWidth: 512,
-            frameHeight: 512,
-        });
-        this.load.spritesheet("explosion_3", explosion3, {
-            frameWidth: 512,
-            frameHeight: 512,
-        });
-        this.load.spritesheet("explosion_4", explosion4, {
-            frameWidth: 512,
-            frameHeight: 512,
-        });
-        // UI
-        this.emitOut("loading", { name: "UI", progress: 10 });
-        this.load.image("joystick_1", joystick1);
-        this.load.image("joystick_2", joystick2);
 
         if (this.isClient) {
+            // Modules
+            this.emitOut("loading", { name: "Modules", progress: 4 });
+            this.load.image("shield", shield);
+            // Effects
+            // TODO is it better to use powers of 2?
+            this.emitOut("loading", { name: "Effects", progress: 7 });
+            this.load.spritesheet("particles", particles, {
+                frameWidth: 1080,
+                frameHeight: 1080,
+            });
+            this.load.image("exhaust", exhaust);
+            this.load.spritesheet("explosion_1", explosion1, {
+                frameWidth: 512,
+                frameHeight: 512,
+            });
+            this.load.spritesheet("explosion_2", explosion2, {
+                frameWidth: 512,
+                frameHeight: 512,
+            });
+            this.load.spritesheet("explosion_3", explosion3, {
+                frameWidth: 512,
+                frameHeight: 512,
+            });
+            this.load.spritesheet("explosion_4", explosion4, {
+                frameWidth: 512,
+                frameHeight: 512,
+            });
+            // UI
+            this.emitOut("loading", { name: "UI", progress: 10 });
+            this.load.image("joystick_1", joystick1);
+            this.load.image("joystick_2", joystick2);
             // Sound Effects
             this.emitOut("loading", { name: "Sound Effects", progress: 15 });
             this.load.audio("laser_sound_1", laser_sound_1);

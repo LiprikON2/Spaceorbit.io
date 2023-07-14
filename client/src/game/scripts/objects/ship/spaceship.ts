@@ -2,11 +2,11 @@ import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/containe
 import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
 import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
-import Explosion from "./explosion";
-import Exhausts from "./exhausts";
-import Weapons from "./weapons";
-import Shields from "./shields";
-import Outfitting, { type Outfit } from "./outfitting";
+import Explosion from "./Explosion";
+import Exhausts from "./Exhausts";
+import Weapons from "./Weapons";
+import Shields from "./Shields";
+import Outfitting, { type Outfit } from "./Outfitting";
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 
 export enum AllegianceEnum {
@@ -123,6 +123,10 @@ export class Spaceship extends Sprite {
         // @ts-ignore
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.boundingBox);
         this.moveToPlugin.on("complete", () => this.onStopMoving());
+
+        this.setPipeline("Light2D");
+        const light = this.scene.lights.addLight(0, 0, 10000).setIntensity(0.5);
+        this.scene.lights.enable().setAmbientColor(0x888888);
     }
 
     get opposition(): AllegianceKeys[] {

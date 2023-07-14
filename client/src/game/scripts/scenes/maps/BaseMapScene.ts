@@ -55,27 +55,27 @@ export class BaseMapScene extends BaseScene {
         }
     }
 
-    loadBackground(texture: string, parallax: number) {
-        const json = this.cache.json.get(texture + "_json");
+    loadBackground(textureKey: string, parallaxCoef: number) {
+        const json = this.getTextureJson(textureKey);
 
         const { w: width, h: height } = json.meta.size;
         const [imageOffset, boundsSize] = this.getScrollingFactorCollisionAdjustment(
-            parallax,
+            parallaxCoef,
             width,
             height
         );
-        if (this.textures.exists(texture)) {
+        if (this.textures.exists(textureKey)) {
             this.add
-                .image(imageOffset.x, imageOffset.y, texture)
+                .image(imageOffset.x, imageOffset.y, textureKey)
                 .setOrigin(0, 0)
-                .setScrollFactor(parallax);
+                .setScrollFactor(parallaxCoef);
         }
 
         // TODO solve magic numbers
         // TODO make it obvious when you hit world bounds
         this.physics.world.setBounds(0, 0, boundsSize.width - 500, boundsSize.height - 700);
 
-        const { color } = json.meta.bgColor;
+        const color = json.meta.bgColor;
         this.updateRootBackground(color);
     }
 
