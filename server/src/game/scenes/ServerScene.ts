@@ -43,6 +43,15 @@ export class ServerScene extends BaseMapScene {
         return otherPlayersOptions;
     }
 
+    get playersState() {
+        const playersStateEntries = Object.entries(this.players).map(([playerId, { player }]) => [
+            playerId,
+            player.getClientState(),
+        ]);
+
+        return Object.fromEntries(playersStateEntries);
+    }
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
@@ -59,7 +68,7 @@ export class ServerScene extends BaseMapScene {
             channel.emit("connection:established");
             channel.emit(
                 "message",
-                { name: "System", message: "Welcome, pilot!", isoTime: getIsoTime() },
+                { name: "System", message: "Pilot, welcome!", isoTime: getIsoTime() },
                 { reliable: true }
             );
 
@@ -70,6 +79,10 @@ export class ServerScene extends BaseMapScene {
                 this.emulateActions(channel, actions as object)
             );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
+            channel.onDisconnect((reason) => {
+                console.log(`Channel ${reason}`, channel.id);
+                this.removePlayer(channel.id);
+            });
         });
     }
 
@@ -84,6 +97,12 @@ export class ServerScene extends BaseMapScene {
             serverOptions,
             inputManager,
         };
+    }
+
+    removePlayer(playerId: ChannelId) {
+        const { player } = this.players[playerId!];
+        player.destroy();
+        delete this.players[playerId!];
     }
 
     sendPlayerOptions(channel: ServerChannel) {
@@ -117,14 +136,12 @@ export class ServerScene extends BaseMapScene {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
             this.elapsedSinceUpdate = 0;
+            this.sendPlayersState();
         }
         Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 
     sendPlayersState() {
-        // if (Object.keys(this.pendingPlayersState).length) {
-        //     this.game.server.emit("players:pending-state", this.pendingPlayersState);
-        //     this.pendingPlayersState = {};
-        // }
+        this.game.server.emit("players:emulated-state", this.playersState);
     }
 }

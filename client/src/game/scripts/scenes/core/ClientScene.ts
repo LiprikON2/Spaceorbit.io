@@ -148,10 +148,10 @@ export class ClientScene extends BaseMapScene {
     }
 
     updateOtherPlayersState() {
-        this.channel.on("players:pending-state", (pendingState) => {
+        this.channel.on("players:emulated-state", (emulatedState) => {
             this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
-                if (Object.keys(pendingState).includes(otherPlayer.id)) {
-                    const otherPlayerState = pendingState[otherPlayer.id];
+                if (Object.keys(emulatedState).includes(otherPlayer.id)) {
+                    const otherPlayerState = emulatedState[otherPlayer.id];
                     otherPlayer.setClientState(otherPlayerState);
                 }
             });

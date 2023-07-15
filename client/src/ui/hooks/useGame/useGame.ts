@@ -11,6 +11,7 @@ interface GameStore {
     computed: {
         isLoading: boolean;
         isLoaded: boolean;
+        isExiting: boolean;
         player: Spaceship | null;
         scene: ClientScene | null;
     };
@@ -30,6 +31,10 @@ export const useGame = create<GameStore>((set, get) => ({
         },
         get isLoaded() {
             return !!get().gameManager?.player;
+        },
+        get isExiting() {
+            // return get().gameManager === null && !get().computed.isLoaded;
+            return get().gameManager === null;
         },
 
         get player() {
@@ -70,7 +75,7 @@ export const useGame = create<GameStore>((set, get) => ({
     },
     loadMainMenu: () => {
         const { gameManager } = get();
-        if (gameManager) gameManager.destroy();
+        if (gameManager) gameManager.exit();
         set(
             produce((state) => {
                 state.gameManager = null;

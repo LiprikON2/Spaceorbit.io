@@ -91,7 +91,8 @@ export class GameManager {
     get player(): Spaceship | null {
         return this.scene?.player ?? null;
     }
-    destroy = () => {
+    exit = () => {
+        if (this.game.channel) this.game.channel.close();
         this.game.destroy(true);
     };
 }

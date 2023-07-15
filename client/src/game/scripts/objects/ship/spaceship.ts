@@ -24,6 +24,12 @@ type AllegianceOpposition = {
     [key in AllegianceKeys]: AllegianceKeys[];
 };
 
+interface ClientState {
+    x: number;
+    y: number;
+    angle: number;
+}
+
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
     allegiance: AllegianceEnum;
@@ -155,15 +161,15 @@ export class Spaceship extends Sprite {
         }
     }
 
-    getClientState() {
+    getClientState(): ClientState {
         const { x, y, angle } = this;
         return { x, y, angle };
     }
 
-    setClientState({ x, y, angle }) {
+    setClientState({ x, y, angle }: ClientState) {
         this.boundingBox.x = x;
         this.boundingBox.y = y;
-        this.angle = angle;
+        this.setAngle(angle);
     }
 
     getHit(projectile) {
@@ -398,17 +404,17 @@ export class Spaceship extends Sprite {
 
     // For using virtual omni-directional joystick
     move() {
-        let hasMoved = false;
+        let moved = false;
         if (this.active && this.isUsingJoystick()) {
             const rotation = this.lastMoveInput.rotation;
             const speed = this.maxSpeed * this.lastMoveInput.force;
 
             this.boundingBox.body.velocity.setToPolar(rotation, speed);
             this.exhausts.startExhaust();
-            hasMoved = true;
+            moved = true;
         }
 
-        return hasMoved;
+        return moved;
     }
 
     setMove(angle, force) {

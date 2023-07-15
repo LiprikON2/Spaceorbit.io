@@ -69,8 +69,8 @@ export default class ClientInputManager extends BaseInputManager {
         }
 
         return {
-            lookAtWorldX: worldX,
-            lookAtWorldY: worldY,
+            worldX,
+            worldY,
 
             up: this.keys.W.isDown || this.keys.UP.isDown,
             right: this.keys.D.isDown || this.keys.RIGHT.isDown,

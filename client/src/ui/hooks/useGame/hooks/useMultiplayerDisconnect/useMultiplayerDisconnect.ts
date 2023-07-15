@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDidUpdate } from "@mantine/hooks";
 
-import { useGame } from "../..";
+import { useGame } from "~/ui/hooks";
 
 export const useMultiplayerDisconnect = () => {
     const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -9,18 +9,21 @@ export const useMultiplayerDisconnect = () => {
         gameManager,
         loadMainMenu,
         mode,
-        computed: { isLoaded },
+        computed: { isLoaded, isExiting },
     } = useGame();
 
     useDidUpdate(() => {
         if (isLoaded && mode === "multiplayer") {
             const { channel } = gameManager.game;
             channel.onDisconnect(() => {
-                loadMainMenu();
-                setConnectionError("Connection to server lost");
+                // TODO isExiting here is ending up stale from mutations
+                if (!isExiting) {
+                    loadMainMenu();
+                    setConnectionError("Connection to the server was lost");
+                }
             });
         }
-    }, [isLoaded]);
+    }, [isExiting]);
 
     const clearConnectionError = () => {
         setConnectionError(null);

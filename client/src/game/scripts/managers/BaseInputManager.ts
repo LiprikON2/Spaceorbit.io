@@ -15,13 +15,13 @@ export interface Actions {
     touchMode: boolean;
     autoattack: boolean;
     targetId: string | null;
-    lookAtWorldX: number | null;
-    lookAtWorldY: number | null;
+    worldX: number | null;
+    worldY: number | null;
 }
 
 const defaultActions = {
-    lookAtWorldX: null,
-    lookAtWorldY: null,
+    worldX: null,
+    worldY: null,
 
     up: false,
     right: false,
@@ -78,53 +78,52 @@ export default class BaseInputManager {
     }
 
     update(time: number, delta: number) {
-        const { up, left, down, right, primaryFire, autoattack, lookAtWorldX, lookAtWorldY } =
-            this.actions;
+        const { up, left, down, right, primaryFire, autoattack, worldX, worldY } = this.actions;
 
-        let haveMoved = false;
+        let moved = false;
 
         this.player.resetMovement();
-        haveMoved = this.player.move();
+        moved = this.player.move();
 
         // Movement
         if (up && !left && !down && !right) {
             this.player.moveUp();
-            haveMoved = true;
+            moved = true;
         } else if (!up && left && !down && !right) {
             this.player.moveLeft();
-            haveMoved = true;
+            moved = true;
         } else if (!up && !left && down && !right) {
             this.player.moveDown();
-            haveMoved = true;
+            moved = true;
         } else if (!up && !left && !down && right) {
             this.player.moveRight();
-            haveMoved = true;
+            moved = true;
         } else if (up && left && !down && !right) {
             this.player.moveUpLeft();
-            haveMoved = true;
+            moved = true;
         } else if (up && !left && !down && right) {
             this.player.moveUpRight();
-            haveMoved = true;
+            moved = true;
         } else if (!up && left && down && !right) {
             this.player.moveDownLeft();
-            haveMoved = true;
+            moved = true;
         } else if (!up && !left && down && right) {
             this.player.moveDownRight();
-            haveMoved = true;
+            moved = true;
         }
-        if (!haveMoved) this.player.onStopMoving();
+        if (!moved) this.player.onStopMoving();
 
         // Shooting
         if (primaryFire && !autoattack) {
-            this.player.primaryFire(time, { cursorX: lookAtWorldX, cursorY: lookAtWorldY });
+            this.player.primaryFire(time, { cursorX: worldX, cursorY: worldY });
         } else if (autoattack) {
             const dist = Phaser.Math.Distance.BetweenPoints(this.player, this.player.target);
             if (dist < 900) {
-                this.player.primaryFire(time, { cursorX: lookAtWorldX, cursorY: lookAtWorldY });
+                this.player.primaryFire(time, { cursorX: worldX, cursorY: worldY });
             }
         }
 
         // Aiming
-        if (lookAtWorldX && lookAtWorldY) this.player.lookAtPoint(lookAtWorldX, lookAtWorldY);
+        if (worldX && worldY) this.player.lookAtPoint(worldX, worldY);
     }
 }
