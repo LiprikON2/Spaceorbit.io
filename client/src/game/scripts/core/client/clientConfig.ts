@@ -24,6 +24,44 @@ const DEFAULT_HEIGHT = 1080;
 // const WIDTH = Math.round(Math.max(width, height) * DPR);
 // const HEIGHT = Math.round(Math.min(width, height) * DPR);
 
+export const plugins = [
+    {
+        key: "rexMouseWheelScroller",
+        plugin: MouseWheelScrollerPlugin,
+        start: true,
+    },
+    {
+        key: "rexRotateTo",
+        plugin: RotateToPlugin,
+        start: true,
+    },
+    {
+        key: "rexSoundFade",
+        plugin: SoundFadePlugin,
+        start: true,
+    },
+    {
+        key: "rexMoveTo",
+        plugin: MoveToPlugin,
+        start: true,
+    },
+    {
+        key: "rexVirtualJoystick",
+        plugin: VirtualJoystickPlugin,
+        start: true,
+    },
+    {
+        key: "rexButton",
+        plugin: ButtonPlugin,
+        start: true,
+    },
+    {
+        key: "rexContainerLitePlugin",
+        plugin: ContainerLitePlugin,
+        start: true,
+    },
+];
+
 const UnnamedMapSceneClient = MixinUnnamedMapScene(ClientScene);
 
 export const clientConfig: Phaser.Types.Core.GameConfig = {
@@ -50,43 +88,7 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
         },
     },
     plugins: {
-        global: [
-            {
-                key: "rexMouseWheelScroller",
-                plugin: MouseWheelScrollerPlugin,
-                start: true,
-            },
-            {
-                key: "rexRotateTo",
-                plugin: RotateToPlugin,
-                start: true,
-            },
-            {
-                key: "rexSoundFade",
-                plugin: SoundFadePlugin,
-                start: true,
-            },
-            {
-                key: "rexMoveTo",
-                plugin: MoveToPlugin,
-                start: true,
-            },
-            {
-                key: "rexVirtualJoystick",
-                plugin: VirtualJoystickPlugin,
-                start: true,
-            },
-            {
-                key: "rexButton",
-                plugin: ButtonPlugin,
-                start: true,
-            },
-            {
-                key: "rexContainerLitePlugin",
-                plugin: ContainerLitePlugin,
-                start: true,
-            },
-        ],
+        global: plugins,
     },
     input: {
         gamepad: true,

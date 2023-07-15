@@ -47,15 +47,17 @@ interface TextureWithJsonOptions {
 
 export class PreloadScene extends Phaser.Scene {
     game: GameClient | Phaser.Game;
-    constructor() {
-        super("PreloadScene");
-    }
+
     get isClient() {
         return this.game instanceof GameClient;
     }
 
     get isServer() {
         return !this.isClient;
+    }
+
+    constructor() {
+        super("PreloadScene");
     }
 
     emitOut(event: keyof OutEvents, status: any) {
@@ -185,36 +187,38 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     create() {
-        // Animations
-        this.emitOut("loading", { name: "Animations", progress: 98 });
-        this.anims.create({
-            key: "explosion_1-anim",
-            frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),
-            frameRate: 20,
-            repeat: 0,
-            hideOnComplete: true,
-        });
-        this.anims.create({
-            key: "explosion_2-anim",
-            frames: this.anims.generateFrameNumbers("explosion_2", { start: 0, end: 63 }),
-            frameRate: 20,
-            repeat: 0,
-            hideOnComplete: true,
-        });
-        this.anims.create({
-            key: "explosion_3-anim",
-            frames: this.anims.generateFrameNumbers("explosion_3", { start: 0, end: 63 }),
-            frameRate: 20,
-            repeat: 0,
-            hideOnComplete: true,
-        });
-        this.anims.create({
-            key: "explosion_4-anim",
-            frames: this.anims.generateFrameNumbers("explosion_4", { start: 0, end: 63 }),
-            frameRate: 20,
-            repeat: 0,
-            hideOnComplete: true,
-        });
+        if (this.isClient) {
+            // Animations
+            this.emitOut("loading", { name: "Animations", progress: 98 });
+            this.anims.create({
+                key: "explosion_1-anim",
+                frames: this.anims.generateFrameNumbers("explosion_1", { start: 0, end: 63 }),
+                frameRate: 20,
+                repeat: 0,
+                hideOnComplete: true,
+            });
+            this.anims.create({
+                key: "explosion_2-anim",
+                frames: this.anims.generateFrameNumbers("explosion_2", { start: 0, end: 63 }),
+                frameRate: 20,
+                repeat: 0,
+                hideOnComplete: true,
+            });
+            this.anims.create({
+                key: "explosion_3-anim",
+                frames: this.anims.generateFrameNumbers("explosion_3", { start: 0, end: 63 }),
+                frameRate: 20,
+                repeat: 0,
+                hideOnComplete: true,
+            });
+            this.anims.create({
+                key: "explosion_4-anim",
+                frames: this.anims.generateFrameNumbers("explosion_4", { start: 0, end: 63 }),
+                frameRate: 20,
+                repeat: 0,
+                hideOnComplete: true,
+            });
+        }
 
         // Scenes
         if (this.game instanceof GameClient && this.game.channel) {

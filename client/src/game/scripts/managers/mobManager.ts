@@ -54,6 +54,7 @@ export default class MobManager {
                 id: Phaser.Utils.String.UUID(),
                 x,
                 y,
+                angle: 90,
                 outfit: this.getMobKit("normal"),
                 atlasTexture: "F5S4",
                 multipliers: this.getMobMultipliers("normal"),

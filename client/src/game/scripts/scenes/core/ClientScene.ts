@@ -1,18 +1,18 @@
 import type { ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 
-import { InputManager, SoundManager } from "~/managers";
+import { ClientInputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
-import type { SpaceshipClientOptions, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
+import type { SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
 
 export class ClientScene extends BaseMapScene {
     game: GameClient;
     channel?: ClientChannel;
     si?: SnapshotInterpolation;
 
-    inputManager: InputManager;
+    inputManager: ClientInputManager;
     soundManager: SoundManager;
     player: Spaceship;
     background;
@@ -32,23 +32,25 @@ export class ClientScene extends BaseMapScene {
         this.soundManager = new SoundManager(this);
     }
 
+    preload() {
+        super.preload();
+    }
+
     async create() {
-        console.log("client!");
         super.create();
         this.player = await this.producePlayer();
         await this.produceOtherPlayers();
         this.produceOtherPlayerOnConnect();
 
-        this.inputManager = new InputManager(this, this.player);
+        this.inputManager = new ClientInputManager(this, this.player);
 
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
 
         this.debugText = new GenericText(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(5, this.soundManager);
+        this.mobManager.spawnMobs(0, this.soundManager);
 
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
-        console.log("clientscene worldCreate");
     }
 
     update(time: number, delta: number) {
@@ -60,7 +62,7 @@ export class ClientScene extends BaseMapScene {
             this.soundManager.update();
 
             if (this.isMultiplayer) {
-                this.sendPlayerState();
+                this.sendPlayerActions();
                 this.updateOtherPlayersState();
             }
         }
@@ -140,10 +142,9 @@ export class ClientScene extends BaseMapScene {
         }
     }
 
-    sendPlayerState() {
-        // const state = this.player.getClientState();
-        const inputState = this.inputManager.getInputState();
-        this.channel.emit("player:state", { ...inputState, time: this.si.serverTime });
+    sendPlayerActions() {
+        const { actionsCompact } = this.inputManager;
+        this.channel.emit("player:actions", { ...actionsCompact, time: this.si.serverTime });
     }
 
     updateOtherPlayersState() {

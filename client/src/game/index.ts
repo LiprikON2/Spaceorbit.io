@@ -7,7 +7,7 @@ export * from "./scripts";
 //     OutEvents,
 //     GameManager,
 //     gameManager,
-//     InputManager,
+//     ClientInputManager,
 //     MobManager,
 //     SoundManager,
 //     Mob,

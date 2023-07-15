@@ -1,93 +1,130 @@
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
-import { ServerChannel } from "@geckos.io/server";
+import { ChannelId, ServerChannel } from "@geckos.io/server";
 
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
-import type { SpaceshipServerOptions } from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
+import type {
+    Spaceship,
+    SpaceshipServerOptions,
+} from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
 import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
+import BaseInputManager from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
 
+interface Players {
+    [key: string]: {
+        serverOptions: SpaceshipServerOptions;
+        player: Spaceship;
+        inputManager: BaseInputManager;
+    };
+}
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
 
-    playerOptionsList: SpaceshipServerOptions[] = [];
-    pendingPlayersState: object = {};
+    players: Players = {};
     elapsedSinceUpdate = 0;
     tickrate = 30;
+
+    get tickrateDeltaTime() {
+        return 1000 / this.tickrate;
+    }
+    getPlayerById(playerId: ChannelId) {
+        return this.players[playerId!];
+    }
+
+    getOtherPlayersOptions(playerId: ChannelId) {
+        const otherPlayersEntries = Object.entries(this.players).filter(
+            ([key]) => key !== playerId
+        );
+        const otherPlayersOptions = otherPlayersEntries.map(([key, { player, serverOptions }]) => {
+            const { x, y, angle } = player.getClientState();
+            return { ...serverOptions, x, y, angle };
+        });
+        return otherPlayersOptions;
+    }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
 
-    get tickrateDeltaTime() {
-        return 1000 / this.tickrate;
+    preload() {
+        super.preload();
     }
 
     create() {
+        super.create();
+
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
             channel.emit("connection:established");
-
-            this.listenForPlayerOptionsRequest(channel);
-            this.listenForOtherPlayersOptionsRequest(channel);
-
-            this.listenForPlayerState(channel);
-            this.listenForMessages(channel);
-        });
-    }
-
-    listenForPlayerOptionsRequest(channel: ServerChannel) {
-        channel.on("player:request-options", () => {
-            console.log("player:request-options");
-
-            const serverOptions = this.getPlayerServerOptions(channel.id);
-            this.playerOptionsList.push(serverOptions);
-            channel.emit("player:request-options", serverOptions, { reliable: true });
-            channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
-        });
-    }
-
-    listenForOtherPlayersOptionsRequest(channel: ServerChannel) {
-        channel.on("players:already-connected", () => {
-            console.log("players:already-connected");
-
-            const otherPlayers = this.playerOptionsList.filter(
-                (playerOptions) => playerOptions.id !== channel.id
+            channel.emit(
+                "message",
+                { name: "System", message: "Welcome, pilot!", isoTime: getIsoTime() },
+                { reliable: true }
             );
-            channel.emit("players:already-connected", otherPlayers, { reliable: true });
+
+            channel.on("player:request-options", () => this.sendPlayerOptions(channel));
+            channel.on("players:already-connected", () => this.sendAlreadyConnected(channel));
+
+            channel.on("player:actions", (actions) =>
+                this.emulateActions(channel, actions as object)
+            );
+            channel.on("message", (message) => this.broadcastMessage(channel, message));
         });
     }
 
-    listenForMessages(channel: ServerChannel) {
-        channel.on("message", (data) => {
-            console.log("Message:", data);
-            channel.broadcast.emit("message", data, { reliable: true });
+    addPlayer(serverOptions: SpaceshipServerOptions) {
+        const player = this.createPlayer(serverOptions, {
+            toPassTexture: false,
         });
-        channel.emit(
-            "message",
-            { name: "Server", message: "Welcome!", isoTime: getIsoTime() },
-            { reliable: true }
-        );
+        const inputManager = new BaseInputManager(this, player);
+
+        this.players[serverOptions.id] = {
+            player,
+            serverOptions,
+            inputManager,
+        };
     }
-    listenForPlayerState(channel: ServerChannel) {
-        channel.on("player:state", (state) => {
-            // console.log("player:state", state);
-            this.pendingPlayersState[channel.id!] = state as object;
-        });
+
+    sendPlayerOptions(channel: ServerChannel) {
+        console.log("player:request-options");
+
+        const serverOptions = this.getPlayerServerOptions(channel.id);
+        channel.emit("player:request-options", serverOptions, { reliable: true });
+        channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
+
+        this.addPlayer(serverOptions);
+    }
+
+    sendAlreadyConnected(channel: ServerChannel) {
+        console.log("players:already-connected");
+
+        const otherPlayersOptions = this.getOtherPlayersOptions(channel.id);
+        channel.emit("players:already-connected", otherPlayersOptions, { reliable: true });
+    }
+
+    broadcastMessage(channel: ServerChannel, message) {
+        console.log("Message:", message);
+        channel.broadcast.emit("message", message, { reliable: true });
+    }
+    emulateActions(channel: ServerChannel, actions: object) {
+        // console.log("player:actions", actions);
+        const { inputManager } = this.getPlayerById(channel.id);
+        inputManager.setActions(actions);
     }
 
     update(time: number, delta: number) {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
-            // this.sendPlayersState();
             this.elapsedSinceUpdate = 0;
         }
+        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 
     sendPlayersState() {
-        if (Object.keys(this.pendingPlayersState).length) {
-            this.game.server.emit("players:pending-state", this.pendingPlayersState);
-            this.pendingPlayersState = {};
-        }
+        // if (Object.keys(this.pendingPlayersState).length) {
+        //     this.game.server.emit("players:pending-state", this.pendingPlayersState);
+        //     this.pendingPlayersState = {};
+        // }
     }
 }

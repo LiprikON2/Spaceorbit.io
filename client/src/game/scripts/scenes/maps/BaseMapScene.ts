@@ -4,25 +4,30 @@ export class BaseMapScene extends BaseScene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
+    preload() {
+        super.preload();
+    }
 
     create() {
         super.create();
 
-        this.loadTileBackground(
-            this,
-            this.physics.world.bounds.width,
-            this.physics.world.bounds.height,
-            "particles",
-            0.75
-        );
-        this.loadTileBackground(
-            this,
-            this.physics.world.bounds.width,
-            this.physics.world.bounds.height,
-            "particles",
-            1,
-            180
-        );
+        if (this.isClient) {
+            this.loadTileBackground(
+                this,
+                this.physics.world.bounds.width,
+                this.physics.world.bounds.height,
+                "particles",
+                0.75
+            );
+            this.loadTileBackground(
+                this,
+                this.physics.world.bounds.width,
+                this.physics.world.bounds.height,
+                "particles",
+                1,
+                180
+            );
+        }
     }
 
     // https://blog.ourcade.co/posts/2020/add-pizazz-parallax-scrolling-phaser-3/
@@ -64,7 +69,7 @@ export class BaseMapScene extends BaseScene {
             width,
             height
         );
-        if (this.textures.exists(textureKey)) {
+        if (this.isClient) {
             this.add
                 .image(imageOffset.x, imageOffset.y, textureKey)
                 .setOrigin(0, 0)

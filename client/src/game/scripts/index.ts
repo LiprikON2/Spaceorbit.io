@@ -7,6 +7,6 @@ export {
     GameManager,
     gameManager,
 } from "./core";
-export { InputManager, MobManager, SoundManager } from "./managers";
+export { ClientInputManager, MobManager, SoundManager } from "./managers";
 export { Mob, Spaceship, GenericText } from "./objects";
 export * from "./scenes";

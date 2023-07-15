@@ -1,5 +1,5 @@
 import type { BaseScene } from "~/scenes/core/BaseScene";
-import type SoundManager from "~/managers/soundManager";
+import type SoundManager from "~/game/managers/SoundManager";
 
 interface Multipliers {
     speed: number;
@@ -12,6 +12,7 @@ export interface SpriteServerOptions {
     id: string;
     x: number;
     y: number;
+    angle: number;
     atlasTexture: string | Phaser.Textures.Texture;
     multipliers: Multipliers;
     username: string;
@@ -42,6 +43,24 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     };
     isTextured: boolean;
 
+    get maxHealth() {
+        const healthMultiplier = this.status.multipliers.health;
+        return this.baseStats.health * healthMultiplier;
+    }
+    get maxShields() {
+        const shieldsMultiplier = this.status.multipliers.shields;
+        return 10000 * shieldsMultiplier;
+    }
+    get absoluteHalfWidth() {
+        return this.atlas.width / 2;
+    }
+    get absoluteHalfHeight() {
+        return this.atlas.height / 2;
+    }
+    get atlasMetadata() {
+        return this.atlas.metadata;
+    }
+
     constructor(serverOptions: SpriteServerOptions, clientOptions: SpriteClientOptions) {
         const { x, y, atlasTexture } = serverOptions;
         const { scene, toPassTexture } = clientOptions;
@@ -53,9 +72,9 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         scene.physics.add.existing(this);
         // @ts-ignore
         // this.body.onWorldBounds = true;
-        const { depth } = serverOptions;
+        const { depth, angle } = serverOptions;
         // this.setCollideWorldBounds(true).setOrigin(0.5).setDepth(depth);
-        this.setOrigin(0.5).setDepth(depth);
+        this.setOrigin(0.5).setDepth(depth).setAngle(angle);
         const { id } = serverOptions;
         this.id = id;
 
@@ -93,26 +112,6 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         this.on("pointerdown", () => {
             this.scene.input.emit("clickTarget", this);
         });
-    }
-
-    get maxHealth() {
-        const healthMultiplier = this.status.multipliers.health;
-        return this.baseStats.health * healthMultiplier;
-    }
-    get maxShields() {
-        const shieldsMultiplier = this.status.multipliers.shields;
-        return 10000 * shieldsMultiplier;
-    }
-
-    get absoluteHalfWidth() {
-        return this.atlas.width / 2;
-    }
-    get absoluteHalfHeight() {
-        return this.atlas.height / 2;
-    }
-
-    get atlasMetadata() {
-        return this.atlas.metadata;
     }
 
     resize(scale: number) {

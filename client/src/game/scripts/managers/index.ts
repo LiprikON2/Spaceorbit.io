@@ -1,5 +1,5 @@
-import InputManager from "./inputManager";
-import MobManager from "./mobManager";
-import SoundManager from "./soundManager";
+import ClientInputManager from "./ClientInputManager";
+import MobManager from "./MobManager";
+import SoundManager from "./SoundManager";
 
-export { InputManager, MobManager, SoundManager };
+export { ClientInputManager, MobManager, SoundManager };

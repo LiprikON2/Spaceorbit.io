@@ -20,7 +20,7 @@ export const SettingsModal = ({ opened, onClose }) => {
     const {
         computed: {
             player,
-            scene: { soundManager, inputManager, mobManager },
+            scene: { soundManager, inputManager: inputManager, mobManager },
         },
     } = useGame();
     const {

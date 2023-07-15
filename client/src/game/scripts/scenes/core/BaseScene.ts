@@ -1,5 +1,6 @@
 import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
 
+import type { GameClient } from "~/game/core/client/GameClient";
 import {
     AllegianceEnum,
     Spaceship,
@@ -16,6 +17,7 @@ type SpaceshipGroup = {
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
 export class BaseScene extends Phaser.Scene {
+    game: GameClient | Phaser.Game;
     rootElem: HTMLElement | null;
     mobManager: MobManager;
     plugins: Phaser.Plugins.PluginManager;
@@ -24,6 +26,13 @@ export class BaseScene extends Phaser.Scene {
     otherPlayersGroup: SpaceshipGroup;
     mobGroup: SpaceshipGroup;
     allGroup: SpaceshipGroup;
+
+    get isClient() {
+        return Boolean(this.rootElem);
+    }
+    get isServer() {
+        return !this.isClient;
+    }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -36,8 +45,6 @@ export class BaseScene extends Phaser.Scene {
         this.otherPlayersGroup = this.add.group() as SpaceshipGroup;
         this.mobGroup = this.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.allGroup = this.add.group() as SpaceshipGroup;
-
-        this.allGroup.getChildren();
     }
 
     create() {}
@@ -73,6 +80,7 @@ export class BaseScene extends Phaser.Scene {
             id: id ?? Phaser.Utils.String.UUID(),
             x: 400,
             y: 400,
+            angle: 0,
             // TODO spaceship factory pattern
             outfit: this.getPlayerKit(),
             atlasTexture: "F5S4",

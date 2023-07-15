@@ -63,6 +63,30 @@ export class Spaceship extends Sprite {
     rotateToPlugin: RotateTo;
     moveToPlugin: MoveTo;
 
+    get opposition(): AllegianceKeys[] {
+        return this.allegianceOpposition[this.allegiance];
+    }
+
+    get enemies(): Spaceship[] {
+        const all = this.allGroup.getChildren() as Spaceship[];
+        const enemies = all.filter(
+            (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
+        );
+
+        return enemies;
+    }
+
+    get maxSpeed() {
+        const speedBoost = 0.2;
+        const speed = this.baseStats.speed;
+        const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
+        const speedMultiplier = this.status.multipliers.speed;
+
+        // Each additional engine gives 20% speed boost
+        const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
+        return shipSpeed * speedMultiplier;
+    }
+
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
         super(serverOptions, clientOptions);
 
@@ -88,7 +112,7 @@ export class Spaceship extends Sprite {
         const { allGroup } = clientOptions;
         this.allGroup = allGroup;
 
-        this.soundManager.makeTarget(this);
+        if (this.soundManager) this.soundManager.makeTarget(this);
         if (this.status.shields === 0) this.shields.crack(true);
 
         // Text
@@ -124,33 +148,11 @@ export class Spaceship extends Sprite {
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.boundingBox);
         this.moveToPlugin.on("complete", () => this.onStopMoving());
 
-        this.setPipeline("Light2D");
-        const light = this.scene.lights.addLight(0, 0, 10000).setIntensity(0.5);
-        this.scene.lights.enable().setAmbientColor(0x888888);
-    }
-
-    get opposition(): AllegianceKeys[] {
-        return this.allegianceOpposition[this.allegiance];
-    }
-
-    get enemies(): Spaceship[] {
-        const all = this.allGroup.getChildren() as Spaceship[];
-        const enemies = all.filter(
-            (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
-        );
-
-        return enemies;
-    }
-
-    get maxSpeed() {
-        const speedBoost = 0.2;
-        const speed = this.baseStats.speed;
-        const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
-        const speedMultiplier = this.status.multipliers.speed;
-
-        // Each additional engine gives 20% speed boost
-        const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
-        return shipSpeed * speedMultiplier;
+        if (this.isTextured) {
+            this.setPipeline("Light2D");
+            const light = this.scene.lights.addLight(0, 0, 10000).setIntensity(0.5);
+            this.scene.lights.enable().setAmbientColor(0x888888);
+        }
     }
 
     getClientState() {
@@ -208,9 +210,11 @@ export class Spaceship extends Sprite {
         this.emit("dead", this.id);
 
         // TODO add variety ("explosion patterns")
-        new Explosion(this.scene, this.x, this.y, this.depth, {
-            double: true,
-        });
+        if (this.isTextured) {
+            new Explosion(this.scene, this.x, this.y, this.depth, {
+                double: true,
+            });
+        }
 
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
@@ -268,21 +272,35 @@ export class Spaceship extends Sprite {
         if (this.status.shields === 0) this.shields.crack(true);
     }
 
-    lookAtPoint(cursorX, cursorY) {
-        const rotation = Phaser.Math.Angle.Between(this.x, this.y, cursorX, cursorY) + Math.PI / 2;
-
+    lookAtPoint(worldX, worldY) {
+        const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
         this.rotateTo(rotation);
+    }
+
+    rotateTo(rotation) {
+        this.rotateToPlugin.rotateTo(
+            Phaser.Math.RadToDeg(rotation + Math.PI / 2),
+            0,
+            this.maxSpeed
+        );
+        if (this.exhausts) this.exhausts.updateExhaustPosition();
+    }
+
+    setAngle(angle?: number) {
+        super.setAngle(angle);
+        if (this.exhausts) this.exhausts.updateExhaustPosition();
+        return this;
+    }
+    setRotation(rotation?: number) {
+        super.setRotation(rotation);
+        if (this.exhausts) this.exhausts.updateExhaustPosition();
+        return this;
     }
 
     toggleAttack() {
         if (this.target) {
             this.toggleFire = !this.toggleFire;
         }
-    }
-
-    rotateTo(rotation) {
-        this.rotateToPlugin.rotateTo(Phaser.Math.RadToDeg(rotation), 0, this.maxSpeed);
-        this.exhausts.updateExhaustPosition();
     }
 
     moveTo(x, y) {

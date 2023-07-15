@@ -3,6 +3,7 @@ import Phaser from "phaser";
 
 import { ServerScene } from "./scenes/ServerScene";
 import { MixinUnnamedMapScene, PreloadScene } from "@spaceorbit/client";
+import { plugins } from "@spaceorbit/client/src/game/scripts/core/client/clientConfig";
 
 // import MouseWheelScrollerPlugin from "phaser3-rex-plugins/plugins/mousewheelscroller-plugin.js";
 // import RotateToPlugin from "phaser3-rex-plugins/plugins/rotateto-plugin.js";
@@ -33,41 +34,7 @@ export const serverConfig: Phaser.Types.Core.GameConfig = {
             gravity: {},
         },
     },
-    // plugins: {
-    //     global: [
-    //         {
-    //             key: "rexMouseWheelScroller",
-    //             plugin: MouseWheelScrollerPlugin,
-    //             start: true,
-    //         },
-    //         {
-    //             key: "rexRotateTo",
-    //             plugin: RotateToPlugin,
-    //             start: true,
-    //         },
-    //         {
-    //             key: "rexSoundFade",
-    //             plugin: SoundFadePlugin,
-    //             start: true,
-    //         },
-    //         {
-    //             key: "rexMoveTo",
-    //             plugin: MoveToPlugin,
-    //             start: true,
-    //         },
-    //         {
-    //             key: "rexVirtualJoystick",
-    //             plugin: VirtualJoystickPlugin,
-    //             start: true,
-    //         },
-    //         {
-    //             key: "rexButton",
-    //             plugin: ButtonPlugin,
-    //             start: true,
-    //         },
-    //     ],
-    // },
-    // input: {
-    //     gamepad: true,
-    // },
+    plugins: {
+        global: plugins,
+    },
 };
