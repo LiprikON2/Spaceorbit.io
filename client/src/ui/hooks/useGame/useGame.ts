@@ -7,22 +7,25 @@ import { gameManager, type GameManager } from "~/game/core/GameManager";
 
 interface GameStore {
     gameManager: GameManager | null;
-    mode: "mainMenu" | "singleplayer" | "multiplayer";
+    mode: "mainMenu" | "exiting" | "singleplayer" | "multiplayer";
     computed: {
         isLoading: boolean;
         isLoaded: boolean;
-        isExiting: boolean;
         player: Spaceship | null;
         scene: ClientScene | null;
     };
+    errors: string[];
     loadSingleplayer: (settings) => Promise<void>;
     loadMultiplayer: (settings) => Promise<void>;
     loadMainMenu: () => void;
+    exit: (initiatedByUser?: boolean) => void;
+    clearErrors: () => void;
 }
 
 export const useGame = create<GameStore>((set, get) => ({
     gameManager: null,
     mode: "mainMenu",
+    errors: [],
 
     // https://github.com/pmndrs/zustand/issues/132
     computed: {
@@ -31,10 +34,6 @@ export const useGame = create<GameStore>((set, get) => ({
         },
         get isLoaded() {
             return !!get().gameManager?.player;
-        },
-        get isExiting() {
-            // return get().gameManager === null && !get().computed.isLoaded;
-            return get().gameManager === null;
         },
 
         get player() {
@@ -76,11 +75,40 @@ export const useGame = create<GameStore>((set, get) => ({
     loadMainMenu: () => {
         const { gameManager } = get();
         if (gameManager) gameManager.exit();
+
         set(
             produce((state) => {
                 state.gameManager = null;
                 state.mode = "mainMenu";
             })
         );
+    },
+    exit: (initiatedByUser = false) => {
+        const { mode } = get();
+        const wasConnectionLost = mode !== "mainMenu" && !initiatedByUser;
+
+        if (wasConnectionLost) {
+            set(
+                produce((state) => {
+                    state.errors = [...state.errors, "Connection to the server was lost"];
+                })
+            );
+        }
+
+        set(
+            produce((state) => {
+                state.mode = "exiting";
+            })
+        );
+    },
+    clearErrors: () => {
+        const timeUntilModalIsDismissed = 500;
+        setTimeout(() => {
+            set(
+                produce((state) => {
+                    state.errors = [];
+                })
+            );
+        }, timeUntilModalIsDismissed);
     },
 }));

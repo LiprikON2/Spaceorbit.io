@@ -265,7 +265,7 @@ export class Spaceship extends Sprite {
         this.targetedBy = [];
     }
 
-    teleport(x?, y?, map?) {
+    teleport(x?: number, y?: number, map?: string) {
         if (typeof x === "undefined" || typeof y === "undefined") {
             // @ts-ignore
             ({ x, y } = this.scene.getRandomPositionOnMap());
@@ -323,7 +323,7 @@ export class Spaceship extends Sprite {
         }
     }
 
-    moveTo(x, y) {
+    moveTo(x: number, y: number) {
         this.moveToPlugin.setSpeed(this.maxSpeed);
 
         this.moveToPlugin.moveTo(x, y);
@@ -431,12 +431,12 @@ export class Spaceship extends Sprite {
         return moved;
     }
 
-    setMove(angle, force) {
+    setMove(angle: number, force: number) {
         this.lastMoveInput.rotation = Phaser.Math.DegToRad(angle);
         this.lastMoveInput.force = force;
     }
 
-    primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
+    primaryFire(time: number, cursor?: { cursorX: number; cursorY: number }) {
         if (this.active) {
             this.weapons.primaryFire(time, cursor);
         }

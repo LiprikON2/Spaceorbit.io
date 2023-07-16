@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
-import { Modal, Space, Title } from "@mantine/core";
+import { Modal, Space, Stack, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 import { Errors } from "./components";
+import { Button } from "../ToggleButton";
 
 export const ErrorModal = ({ errors, clearErrors }) => {
     const [opened, { close, open }] = useDisclosure(false);
@@ -13,24 +14,27 @@ export const ErrorModal = ({ errors, clearErrors }) => {
         }
     }, [errors]);
 
-    const handleClose = () => {
+    const dismiss = () => {
         close();
         clearErrors();
     };
 
     return (
-        <Modal.Root opened={opened} onClose={handleClose} centered size="auto">
+        <Modal.Root opened={opened} onClose={dismiss} centered size="auto" padding="sm">
             <Modal.Overlay />
             <Modal.Content>
                 <Modal.Header py={0}>
-                    <Title c="red" order={2}>
-                        Error
-                    </Title>
+                    <Title order={2}>Error</Title>
                     <Modal.CloseButton />
                 </Modal.Header>
                 <Modal.Body>
                     <Space h="md" />
-                    <Errors errors={errors} />
+                    <Stack align="flex-end" spacing="lg">
+                        <Errors errors={errors} />
+                        <Button style={{ minWidth: "5rem" }} compact onClick={dismiss}>
+                            Ok
+                        </Button>
+                    </Stack>
                 </Modal.Body>
             </Modal.Content>
         </Modal.Root>

@@ -9,7 +9,7 @@ import { useGame } from "~/ui/hooks";
 export const BottomRight = ({ GroupComponent }) => {
     const {
         gameManager,
-        loadMainMenu,
+        exit,
         computed: { isLoaded, isLoading },
     } = useGame();
     const [openedProfileModal, toggleProfileModal] = useToggle([false, true]);
@@ -30,7 +30,7 @@ export const BottomRight = ({ GroupComponent }) => {
         <>
             <GroupComponent>
                 {isLoaded && (
-                    <Button isSquare onClick={loadMainMenu}>
+                    <Button isSquare onClick={() => exit(true)}>
                         <Home />
                     </Button>
                 )}

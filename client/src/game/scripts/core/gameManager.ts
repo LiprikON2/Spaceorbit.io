@@ -92,7 +92,7 @@ export class GameManager {
         return this.scene?.player ?? null;
     }
     exit = () => {
-        if (this.game.channel) this.game.channel.close();
+        if (this.game.channel) setTimeout(() => this.game.channel.close(), 0);
         this.game.destroy(true);
     };
 }

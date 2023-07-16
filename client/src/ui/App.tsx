@@ -2,7 +2,7 @@ import React from "react";
 import { Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
-import { useGame, useMultiplayerDisconnect, useSyncSettingsToSession } from "./hooks";
+import { useGame, useMainMenu, useSyncSettingsToSession } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
 import { TopRight } from "./scenes/TopRight";
 import { Center } from "./scenes/Center";
@@ -93,17 +93,20 @@ const StyledBottomRightGroup = styled(Group)`
 export const App = () => {
     useSyncSettingsToSession();
 
-    const { connectionError, clearConnectionError } = useMultiplayerDisconnect();
+    useMainMenu();
 
-    const errors = [...(connectionError ? [connectionError] : [])];
-    const clearErrors = () => {
-        const timeUntilModalIsDismissed = 500;
-        setTimeout(() => {
-            clearConnectionError();
-        }, timeUntilModalIsDismissed);
-    };
+    // const errors = [...(connectionError ? [connectionError] : [])];
+    // const errors = [...[]];
+    // const clearErrors = () => {
+    //     const timeUntilModalIsDismissed = 500;
+    //     setTimeout(() => {
+    //         // clearConnectionError();
+    //     }, timeUntilModalIsDismissed);
+    // };
 
     const {
+        errors,
+        clearErrors,
         computed: { isLoaded },
     } = useGame();
 
