@@ -24,11 +24,12 @@ type AllegianceOpposition = {
     [key in AllegianceKeys]: AllegianceKeys[];
 };
 
-interface ClientState {
+export type ClientState = {
+    id: string;
     x: number;
     y: number;
     angle: number;
-}
+};
 
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
@@ -160,16 +161,22 @@ export class Spaceship extends Sprite {
             this.scene.lights.enable().setAmbientColor(0x888888);
         }
     }
+    destroyFully(fromScene?: boolean) {
+        this.setTarget();
+        this.breakOffTargeting();
+        this.boundingBox.destroy(fromScene);
+    }
 
     getClientState(): ClientState {
-        const { x, y, angle } = this;
-        return { x, y, angle };
+        const { id, x, y, angle } = this;
+        return { id, x, y, angle };
     }
 
     setClientState({ x, y, angle }: ClientState) {
         this.boundingBox.x = x;
         this.boundingBox.y = y;
         this.setAngle(angle);
+        this.rotateToPlugin.setEnable(false);
     }
 
     getHit(projectile) {
@@ -225,10 +232,17 @@ export class Spaceship extends Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
-    setTarget(target: Spaceship | null = null) {
+    /**
+     * Sets reference to spaceship for autoattacking, also:
+     *  - adds brackets to that spaceship's name
+     *  - updates list of targetedBy of that spaceship with current spaceship
+     * @param target
+     */
+    setTarget(target: Spaceship = null) {
         const prevTarget = this.target;
 
-        if (target !== prevTarget && target !== this) {
+        const isValidNewTarget = target !== prevTarget && target !== this;
+        if (isValidNewTarget) {
             if (prevTarget) {
                 const { followText } = prevTarget;
                 followText.setText(followText.text.slice(1, -1));
@@ -260,7 +274,7 @@ export class Spaceship extends Sprite {
         this.boundingBox.y = y;
     }
 
-    respawn(x?, y?) {
+    respawn(x?: number, y?: number) {
         this.breakOffTargeting();
         this.setTarget();
         this.teleport(x, y);
@@ -278,12 +292,12 @@ export class Spaceship extends Sprite {
         if (this.status.shields === 0) this.shields.crack(true);
     }
 
-    lookAtPoint(worldX, worldY) {
+    lookAtPoint(worldX: number, worldY: number) {
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
         this.rotateTo(rotation);
     }
 
-    rotateTo(rotation) {
+    rotateTo(rotation: number) {
         this.rotateToPlugin.rotateTo(
             Phaser.Math.RadToDeg(rotation + Math.PI / 2),
             0,

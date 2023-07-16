@@ -1,11 +1,16 @@
-import type { ClientChannel } from "@geckos.io/client";
+import type { ChannelId, ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 
 import { ClientInputManager, SoundManager } from "~/managers";
 import { Spaceship, GenericText } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
-import type { SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
+import type { ClientState, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
+import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
+
+interface WorldState {
+    players: ClientState[];
+}
 
 export class ClientScene extends BaseMapScene {
     game: GameClient;
@@ -38,9 +43,22 @@ export class ClientScene extends BaseMapScene {
 
     async create() {
         super.create();
-        this.player = await this.producePlayer();
-        await this.produceOtherPlayers();
-        this.produceOtherPlayerOnConnect();
+
+        if (this.isSingleplayer) {
+            const serverOptions = this.getPlayerServerOptions();
+            this.player = await this.producePlayer(serverOptions, true);
+        } else {
+            this.player = await this.producePlayer(null, true);
+
+            await this.produceConnectedPlayers();
+            this.channel.on("player:connected", (serverOptions) =>
+                this.producePlayer(serverOptions as SpaceshipServerOptions)
+            );
+            this.channel.on("player:disconnected", (playerId) =>
+                this.destroyPlayer(playerId as ChannelId)
+            );
+            this.updateWorldState();
+        }
 
         this.inputManager = new ClientInputManager(this, this.player);
 
@@ -63,7 +81,7 @@ export class ClientScene extends BaseMapScene {
 
             if (this.isMultiplayer) {
                 this.sendPlayerActions();
-                this.updateOtherPlayersState();
+                this.updatePlayerState();
             }
         }
     }
@@ -84,16 +102,13 @@ export class ClientScene extends BaseMapScene {
         return Boolean(this.channel);
     }
 
-    async producePlayer(): Promise<Spaceship> {
-        let serverOptions: SpaceshipServerOptions;
-        if (this.isSingleplayer) {
-            serverOptions = this.getPlayerServerOptions();
-        } else {
+    async producePlayer(serverOptions?: SpaceshipServerOptions, isMe = false): Promise<Spaceship> {
+        if (!serverOptions) {
             serverOptions = await this.requestPlayer();
         }
         const clientOptions = this.getPlayerClientOptions();
 
-        return this.createPlayer(serverOptions, clientOptions);
+        return this.createPlayer(serverOptions, clientOptions, isMe);
     }
 
     async requestPlayer(): Promise<SpaceshipServerOptions> {
@@ -107,14 +122,12 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    async produceOtherPlayers(): Promise<Spaceship[]> {
-        if (this.isSingleplayer) return;
-
+    async produceConnectedPlayers(): Promise<Spaceship[]> {
         const serverOptionsList = await this.requestAlreadyConnectedPlayers();
         const clientOptions = this.getPlayerClientOptions();
 
         const otherPlayers = serverOptionsList.map((serverOptions) =>
-            this.createPlayer(serverOptions, clientOptions, true)
+            this.createPlayer(serverOptions, clientOptions)
         );
         return otherPlayers;
     }
@@ -131,15 +144,10 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    produceOtherPlayerOnConnect() {
-        if (this.isMultiplayer) {
-            this.channel.on("player:connected", (serverOptions) => {
-                console.log("player:connected", serverOptions);
-                const clientOptions = this.getPlayerClientOptions();
-
-                this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
-            });
-        }
+    produceOtherPlayerOnConnect(serverOptions: SpaceshipServerOptions) {
+        console.log("player:connected", serverOptions);
+        const clientOptions = this.getPlayerClientOptions();
+        this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
     }
 
     sendPlayerActions() {
@@ -147,14 +155,29 @@ export class ClientScene extends BaseMapScene {
         this.channel.emit("player:actions", { ...actionsCompact, time: this.si.serverTime });
     }
 
-    updateOtherPlayersState() {
-        this.channel.on("players:emulated-state", (emulatedState) => {
-            this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
-                if (Object.keys(emulatedState).includes(otherPlayer.id)) {
-                    const otherPlayerState = emulatedState[otherPlayer.id];
-                    otherPlayer.setClientState(otherPlayerState);
-                }
-            });
+    updateWorldState() {
+        this.channel.on("players:world-state", (worldState) => {
+            this.si.snapshot.add(worldState as Snapshot);
+
+            // this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
+            //     if (Object.keys(worldState).includes(otherPlayer.id)) {
+            //         const otherPlayerState = worldState[otherPlayer.id];
+            //         otherPlayer.setClientState(otherPlayerState);
+            //     }
+            // });
         });
+    }
+    updatePlayerState() {
+        const snapshot = this.si.calcInterpolation("x y angle(deg)", "players");
+        if (snapshot) {
+            const playersState = snapshot.state as ClientState[];
+            playersState.forEach((playerState) => {
+                const [player] = this.otherPlayersGroup.getMatching(
+                    "id",
+                    playerState.id
+                ) as Spaceship[];
+                if (player) player.setClientState(playerState);
+            });
+        }
     }
 }

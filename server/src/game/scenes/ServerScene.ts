@@ -4,11 +4,14 @@ import { ChannelId, ServerChannel } from "@geckos.io/server";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
 import type {
+    ClientState,
     Spaceship,
     SpaceshipServerOptions,
 } from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
 import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
-import BaseInputManager from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
+import BaseInputManager, {
+    type Actions,
+} from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
 
 interface Players {
     [key: string]: {
@@ -43,13 +46,12 @@ export class ServerScene extends BaseMapScene {
         return otherPlayersOptions;
     }
 
-    get playersState() {
-        const playersStateEntries = Object.entries(this.players).map(([playerId, { player }]) => [
-            playerId,
-            player.getClientState(),
-        ]);
+    get playersState(): ClientState[] {
+        const playersState = Object.values(this.players).map(({ player }) =>
+            player.getClientState()
+        );
 
-        return Object.fromEntries(playersStateEntries);
+        return playersState;
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -76,12 +78,13 @@ export class ServerScene extends BaseMapScene {
             channel.on("players:already-connected", () => this.sendAlreadyConnected(channel));
 
             channel.on("player:actions", (actions) =>
-                this.emulateActions(channel, actions as object)
+                this.emulateActions(channel, actions as Actions)
             );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
+
             channel.onDisconnect((reason) => {
                 console.log(`Channel ${reason}`, channel.id);
-                this.removePlayer(channel.id);
+                this.removePlayer(channel);
             });
         });
     }
@@ -99,10 +102,11 @@ export class ServerScene extends BaseMapScene {
         };
     }
 
-    removePlayer(playerId: ChannelId) {
-        const { player } = this.players[playerId!];
-        player.destroy();
-        delete this.players[playerId!];
+    removePlayer(channel: ServerChannel) {
+        channel.broadcast.emit("player:disconnected", channel.id!);
+
+        this.destroyPlayer(channel.id!);
+        delete this.players[channel.id!];
     }
 
     sendPlayerOptions(channel: ServerChannel) {
@@ -126,7 +130,8 @@ export class ServerScene extends BaseMapScene {
         console.log("Message:", message);
         channel.broadcast.emit("message", message, { reliable: true });
     }
-    emulateActions(channel: ServerChannel, actions: object) {
+
+    emulateActions(channel: ServerChannel, actions: Actions) {
         // console.log("player:actions", actions);
         const { inputManager } = this.getPlayerById(channel.id);
         inputManager.setActions(actions);
@@ -136,12 +141,17 @@ export class ServerScene extends BaseMapScene {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
             this.elapsedSinceUpdate = 0;
-            this.sendPlayersState();
+            this.sendWorldState();
         }
         Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 
-    sendPlayersState() {
-        this.game.server.emit("players:emulated-state", this.playersState);
+    sendWorldState() {
+        const worldState = {
+            players: this.playersState,
+        };
+        const worldSnapshot = this.si.snapshot.create(worldState);
+
+        this.game.server.emit("players:world-state", worldSnapshot);
     }
 }

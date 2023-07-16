@@ -58,7 +58,7 @@ export class BaseScene extends Phaser.Scene {
     createPlayer(
         serverOptions: SpaceshipServerOptions,
         clientOptions?: Partial<SpaceshipClientOptions>,
-        isOther = false
+        isMe = false
     ) {
         const defaultClientOptions = {
             allGroup: this.allGroup,
@@ -68,11 +68,23 @@ export class BaseScene extends Phaser.Scene {
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);
 
-        if (isOther) this.otherPlayersGroup.add(player);
+        if (!isMe) this.otherPlayersGroup.add(player);
         this.playerGroup.add(player);
         this.allGroup.add(player);
 
         return player;
+    }
+
+    destroyPlayer(playerId: string) {
+        const [player] = this.playerGroup.getMatching("id", playerId) as Spaceship[];
+        if (player) {
+            player.on("destroy", () => console.log("Was destroyed:", playerId));
+
+            this.allGroup.remove(player);
+            this.playerGroup.remove(player);
+            this.allGroup.remove(player);
+            player.destroy(true);
+        }
     }
 
     getPlayerServerOptions(id?) {
