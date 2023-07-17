@@ -187,28 +187,28 @@ export class ClientScene extends BaseMapScene {
     }
 
     updateReconciliation() {
-        // get the latest snapshot from the server
+        // Get the latest snapshot from the server
         const serverSnapshot = this.si.vault.get();
         if (serverSnapshot) {
-            // get the closest player snapshot that matches the server snapshot time
+            // Get the closest client snapshot that matches the server snapshot time
             const clientSnapshot = this.clientVault.get(serverSnapshot.time, true);
             if (clientSnapshot) {
                 const serverPlayersState = serverSnapshot.state["players"] as ClientState[];
-                // get the current player position on the server
+                // Get the current server state on the server
                 const serverPlayerState = serverPlayersState.find(
                     (playerState) => playerState.id === this.player.id
                 );
 
                 const [clientPlayerState] = clientSnapshot.state["player"] as ClientState[];
 
-                // calculate the offset between server and client
+                // Calculate the offset between server and client
                 const offsetX = clientPlayerState.x - serverPlayerState.x;
                 const offsetY = clientPlayerState.y - serverPlayerState.y;
-                // check if the player is currently on the move
+                // Check if the player is currently on the move
                 const isMoving = this.player.activity === "moving";
-                // we correct the position faster if the player moves
+                // Correct the position faster if player moves
                 const correction = isMoving ? 60 : 180;
-                // apply a step by step correction of the player's position
+                // Apply a step by step correction of the player's position
                 this.player.boundingBox.x -= offsetX / correction;
                 this.player.boundingBox.y -= offsetY / correction;
             }

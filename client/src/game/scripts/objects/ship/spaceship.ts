@@ -36,7 +36,7 @@ export type ClientState = {
 
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
-    allegiance: AllegianceEnum;
+    allegiance: AllegianceEnum | AllegianceKeys;
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
@@ -435,9 +435,9 @@ export class Spaceship extends Sprite {
         this.lastMoveInput.force = force;
     }
 
-    primaryFire(time: number, cursor?: { cursorX: number; cursorY: number }) {
+    primaryFire(time: number, point?: { worldX: number; worldY: number }) {
         if (this.active) {
-            this.weapons.primaryFire(time, cursor);
+            this.weapons.primaryFire(time, point);
         }
     }
 

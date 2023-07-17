@@ -98,7 +98,7 @@ export class BaseScene extends Phaser.Scene {
             atlasTexture: "F5S4",
             multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
             username: "Player",
-            allegiance: AllegianceEnum.Earth,
+            allegiance: "Unaffiliated",
             depth: 100,
         };
 

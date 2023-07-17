@@ -148,7 +148,10 @@ export class ServerScene extends BaseMapScene {
     }
 
     sendServerSnapshot() {
-        const serverState = { players: this.playersState };
+        const serverState = {
+            players: this.playersState,
+            // projectiles: [],
+        };
         const serverSnapshot = this.si.snapshot.create(serverState);
 
         this.game.server.emit("players:server-snapshot", serverSnapshot);

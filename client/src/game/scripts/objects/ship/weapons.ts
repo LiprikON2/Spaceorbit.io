@@ -1,5 +1,8 @@
 import type { BaseScene } from "~/game/scenes/core/BaseScene";
 import type { Spaceship } from "./Spaceship";
+
+type WeaponType = "laser" | "gatling" | null;
+
 export default class Weapons {
     scene: BaseScene;
     ship: Spaceship;
@@ -8,7 +11,7 @@ export default class Weapons {
     weaponSlots: {
         x: number;
         y: number;
-        type: string;
+        type: WeaponType;
         id: number;
         cooldownTime: number;
         lastFired: number;
@@ -25,7 +28,7 @@ export default class Weapons {
         this.multiplier = multiplier;
         // Sort by x value, from lowest to highest
         this.weaponSlots = weaponOrigins
-            .sort(({ x: a }, { x: b }) => a - b)
+            .sort(({ x: x1 }, { x: x2 }) => x1 - x2)
             .map((origin, index) => ({
                 ...origin,
                 type: null,
@@ -56,7 +59,7 @@ export default class Weapons {
     getWeaponCount() {
         return this.weaponSlots.filter((slot) => slot.type !== null).length;
     }
-    getWeaponsOfType(type) {
+    getWeaponsOfType(type: WeaponType) {
         return this.weaponSlots.filter((slot) => slot.type === type);
     }
 
@@ -106,14 +109,14 @@ export default class Weapons {
     }
 
     clearSlot(slot) {
-        this.weaponSlots[slot].type = "";
+        this.weaponSlots[slot].type = null;
     }
 
-    primaryFire(time, cursor?: { cursorX: number; cursorY: number }) {
-        this.fireAll("laser", time, cursor);
-        this.fireAll("gatling", time, cursor);
+    primaryFire(time: number, point?: { worldX: number; worldY: number }) {
+        this.fireAll("laser", time, point);
+        this.fireAll("gatling", time, point);
     }
-    fireAll(type, time, cursor?: { cursorX: number; cursorY: number }) {
+    fireAll(type: WeaponType, time: number, point?: { worldX: number; worldY: number }) {
         let playedSound = false;
         const weapons = this.getWeaponsOfType(type);
         const toAddShipMomentum = type === "gatling";
@@ -121,7 +124,7 @@ export default class Weapons {
         weapons.forEach((weapon) => {
             if (time - weapon.lastFired > weapon.cooldownTime) {
                 // Check if enough time passed since last shot
-                this.shootProjectile(weapon, toAddShipMomentum, cursor);
+                this.shootProjectile(weapon, toAddShipMomentum, point);
                 // Update cooldown
                 this.weaponSlots[weapon.id].lastFired = time;
                 // Play the apropriate sound one time, regardless of the amount of weapons
@@ -138,23 +141,19 @@ export default class Weapons {
         });
     }
 
-    shootProjectile(
-        weapon,
-        addShipMomentum = false,
-        cursor?: { cursorX: number; cursorY: number }
-    ) {
+    shootProjectile(weapon, addShipMomentum = false, point?: { worldX: number; worldY: number }) {
         const projectileVelocity = weapon.projectileVelocity;
-        const projectileDistance = 900000;
+        const projectileDistance = 900_000;
         const projectileLifespan = projectileDistance / projectileVelocity;
 
         const { offsetX, offsetY } = this.ship.getRotatedPoint(weapon, true);
 
         let rotation;
-        if (cursor) {
+        if (point) {
             // If firing at a cursor, aim them to shoot at cursor
-            const { cursorX, cursorY } = cursor;
+            const { worldX, worldY } = point;
             const cursorRotation =
-                Phaser.Math.Angle.Between(offsetX, offsetY, cursorX, cursorY) + Math.PI / 2;
+                Phaser.Math.Angle.Between(offsetX, offsetY, worldX, worldY) + Math.PI / 2;
             const maxTraverseAngle = Math.PI / 9;
             let angleOffset = Math.abs(
                 Phaser.Math.Angle.ShortestBetween(
@@ -190,7 +189,7 @@ export default class Weapons {
         }
 
         const projectile = this.scene.physics.add
-            .sprite(offsetX, offsetY, this.ship.isTextured ? weapon.type : "", 0)
+            .sprite(offsetX, offsetY, this.ship.isTextured ? weapon.type : null, 0)
             .setRotation(rotation - Math.PI / 2)
             .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
         projectile["weapon"] = weapon;
@@ -206,8 +205,11 @@ export default class Weapons {
 
         this.ship.enemies.forEach((enemy) => {
             this.scene.physics.add.overlap(enemy, projectile, () => {
-                enemy.getHit(projectile);
-                projectile.destroy();
+                if (enemy.status.shields <= 0) {
+                    enemy.getHit(projectile);
+                    // TODO reuse projectiles
+                    projectile.destroy();
+                }
             });
             this.scene.physics.add.overlap(enemy.shields, projectile, () => {
                 if (enemy.status.shields > 0) {

@@ -79,7 +79,6 @@ export default class BaseInputManager {
 
     update(time: number, delta: number) {
         const { up, left, down, right, primaryFire, autoattack, worldX, worldY } = this.actions;
-
         let moved = false;
 
         this.player.resetMovement();
@@ -115,11 +114,11 @@ export default class BaseInputManager {
 
         // Shooting
         if (primaryFire && !autoattack) {
-            this.player.primaryFire(time, { cursorX: worldX, cursorY: worldY });
+            this.player.primaryFire(time, { worldX, worldY });
         } else if (autoattack) {
             const dist = Phaser.Math.Distance.BetweenPoints(this.player, this.player.target);
             if (dist < 900) {
-                this.player.primaryFire(time, { cursorX: worldX, cursorY: worldY });
+                this.player.primaryFire(time, { worldX, worldY });
             }
         }
 

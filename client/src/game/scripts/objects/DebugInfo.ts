@@ -14,7 +14,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
             `\tx: ${Math.floor(sprite.x)} y: ${Math.floor(sprite.y)}`,
             `\tangle: ${Math.floor(sprite.angle)}`,
             `\tvx: ${Math.floor(sprite.body.velocity.x)} vy: ${Math.floor(sprite.body.velocity.y)}`,
-            "",
+            "\n",
         ];
 
         return textLines.join("\n");
@@ -30,7 +30,10 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);
-        text += `\nworld: ${this.scene.physics.world.bounds.width}x${this.scene.physics.world.bounds.height}`;
+        text += `world: ${this.scene.physics.world.bounds.width}x${this.scene.physics.world.bounds.height}\n\n`;
+        text += `hp: ${this.player.status.health}\n`;
+        text += `shields: ${this.player.status.shields}\n`;
+
         this.setText(text);
     }
 }
