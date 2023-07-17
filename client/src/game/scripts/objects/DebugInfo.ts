@@ -30,7 +30,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);
-
+        text += `\nworld: ${this.scene.physics.world.bounds.width}x${this.scene.physics.world.bounds.height}`;
         this.setText(text);
     }
 }

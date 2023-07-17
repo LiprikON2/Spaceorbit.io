@@ -106,8 +106,10 @@ export class ClientScene extends BaseMapScene {
         if (!serverOptions) {
             serverOptions = await this.requestPlayer();
         }
-        const clientOptions = this.getPlayerClientOptions();
+        const isAlreadyPresent = !!this.playerGroup.getMatching("id", serverOptions.id).length;
+        if (isAlreadyPresent) return;
 
+        const clientOptions = this.getPlayerClientOptions();
         return this.createPlayer(serverOptions, clientOptions, isMe);
     }
 
@@ -122,14 +124,9 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    async produceConnectedPlayers(): Promise<Spaceship[]> {
+    async produceConnectedPlayers() {
         const serverOptionsList = await this.requestAlreadyConnectedPlayers();
-        const clientOptions = this.getPlayerClientOptions();
-
-        const otherPlayers = serverOptionsList.map((serverOptions) =>
-            this.createPlayer(serverOptions, clientOptions)
-        );
-        return otherPlayers;
+        serverOptionsList.forEach((serverOptions) => this.producePlayer(serverOptions));
     }
 
     async requestAlreadyConnectedPlayers(): Promise<SpaceshipServerOptions[]> {
