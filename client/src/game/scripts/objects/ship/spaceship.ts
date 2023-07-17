@@ -87,7 +87,8 @@ export class Spaceship extends Sprite {
     }
 
     get maxSpeed() {
-        const speedBoost = 0.2;
+        // const speedBoost = 0.2;
+        const speedBoost = 20;
         const speed = this.baseStats.speed;
         const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
         const speedMultiplier = this.multipliers.speed;

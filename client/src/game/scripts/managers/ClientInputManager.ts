@@ -1,6 +1,7 @@
 import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscroller";
 import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
 
+import type { ClientScene } from "~/scenes/core/ClientScene";
 import { GameClient } from "~/game/core/client/GameClient";
 import BaseInputManager, { type Keys, type Actions } from "./BaseInputManager";
 
@@ -47,6 +48,7 @@ const makeButton = (scene, enable) => {
 
 export default class ClientInputManager extends BaseInputManager {
     touchControls = { joystick: null, virtualBtn: null };
+    scene: ClientScene;
     zoom: number;
 
     get isGameInFocus() {

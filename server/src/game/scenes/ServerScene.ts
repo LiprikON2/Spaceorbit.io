@@ -40,6 +40,7 @@ export class ServerScene extends BaseMapScene {
             ([key]) => key !== playerId
         );
         const otherPlayersOptions = otherPlayersEntries.map(([key, { player, serverOptions }]) => {
+            // TODO update
             const { x, y, angle } = player.getClientState();
             return { ...serverOptions, x, y, angle };
         });
@@ -141,17 +142,15 @@ export class ServerScene extends BaseMapScene {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
             this.elapsedSinceUpdate = 0;
-            this.sendWorldState();
+            this.sendServerSnapshot();
         }
         Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 
-    sendWorldState() {
-        const worldState = {
-            players: this.playersState,
-        };
-        const worldSnapshot = this.si.snapshot.create(worldState);
+    sendServerSnapshot() {
+        const serverState = { players: this.playersState };
+        const serverSnapshot = this.si.snapshot.create(serverState);
 
-        this.game.server.emit("players:world-state", worldSnapshot);
+        this.game.server.emit("players:server-snapshot", serverSnapshot);
     }
 }

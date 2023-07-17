@@ -1,5 +1,5 @@
 import type { ChannelId, ClientChannel } from "@geckos.io/client";
-import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
+import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
 
 import { ClientInputManager, SoundManager } from "~/managers";
 import { Spaceship, DebugInfo } from "~/objects";
@@ -16,6 +16,7 @@ export class ClientScene extends BaseMapScene {
     game: GameClient;
     channel?: ClientChannel;
     si?: SnapshotInterpolation;
+    clientVault?: Vault;
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
@@ -25,6 +26,22 @@ export class ClientScene extends BaseMapScene {
     mobs = [];
     isPaused = true;
 
+    get isSingleplayer() {
+        return !this.isMultiplayer;
+    }
+    get isMultiplayer() {
+        return Boolean(this.channel);
+    }
+
+    getPlayerClientOptions() {
+        return {
+            allGroup: this.allGroup,
+            scene: this,
+            soundManager: this.soundManager,
+            toPassTexture: true,
+        };
+    }
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
@@ -33,6 +50,7 @@ export class ClientScene extends BaseMapScene {
         if (channel) {
             this.channel = channel;
             this.si = new SnapshotInterpolation(30);
+            this.clientVault = new Vault();
         }
         this.soundManager = new SoundManager(this);
     }
@@ -57,7 +75,9 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("player:disconnected", (playerId) =>
                 this.destroyPlayer(playerId as ChannelId)
             );
-            this.updateWorldState();
+            this.channel.on("players:server-snapshot", (serverSnapshot) =>
+                this.addServerSnapshot(serverSnapshot as Snapshot)
+            );
         }
 
         this.inputManager = new ClientInputManager(this, this.player);
@@ -69,37 +89,6 @@ export class ClientScene extends BaseMapScene {
 
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
-    }
-
-    update(time: number, delta: number) {
-        // Since create() is async, update() is called before create() finishes
-        if (!this.isPaused) {
-            super.update(time, delta);
-            this.inputManager.update(time, delta);
-            this.debugText.update();
-            this.soundManager.update();
-
-            if (this.isMultiplayer) {
-                this.sendPlayerActions();
-                this.updatePlayerState();
-            }
-        }
-    }
-
-    getPlayerClientOptions() {
-        return {
-            allGroup: this.allGroup,
-            scene: this,
-            soundManager: this.soundManager,
-            toPassTexture: true,
-        };
-    }
-
-    get isSingleplayer() {
-        return !this.isMultiplayer;
-    }
-    get isMultiplayer() {
-        return Boolean(this.channel);
     }
 
     async producePlayer(serverOptions?: SpaceshipServerOptions, isMe = false): Promise<Spaceship> {
@@ -147,34 +136,82 @@ export class ClientScene extends BaseMapScene {
         this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
     }
 
+    addServerSnapshot(serverState: Snapshot) {
+        this.si.snapshot.add(serverState);
+    }
+
+    createClientSnapshot() {
+        const clientState = { player: [this.player.getClientState()] };
+        const clientSnapshot = this.si.snapshot.create(clientState);
+        this.clientVault.add(clientSnapshot);
+    }
+
+    update(time: number, delta: number) {
+        // Since create() is async, update() is called before create() finishes
+        if (!this.isPaused) {
+            super.update(time, delta);
+            this.debugText.update();
+            this.soundManager.update();
+
+            // Acts as client predictor in multiplayer
+            this.inputManager.update(time, delta);
+
+            if (this.isMultiplayer) {
+                this.createClientSnapshot();
+                this.sendPlayerActions();
+                this.updateReconciliation();
+                this.updateOtherPlayersState();
+            }
+        }
+    }
+
     sendPlayerActions() {
         const { actionsCompact } = this.inputManager;
         this.channel.emit("player:actions", { ...actionsCompact, time: this.si.serverTime });
     }
 
-    updateWorldState() {
-        this.channel.on("players:world-state", (worldState) => {
-            this.si.snapshot.add(worldState as Snapshot);
+    updateOtherPlayersState() {
+        const serverPlayersSnapshot = this.si.calcInterpolation("x y angle(deg)", "players");
+        if (serverPlayersSnapshot) {
+            const playersState = serverPlayersSnapshot.state as ClientState[];
 
-            // this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
-            //     if (Object.keys(worldState).includes(otherPlayer.id)) {
-            //         const otherPlayerState = worldState[otherPlayer.id];
-            //         otherPlayer.setClientState(otherPlayerState);
-            //     }
-            // });
-        });
-    }
-    updatePlayerState() {
-        const snapshot = this.si.calcInterpolation("x y angle(deg)", "players");
-        if (snapshot) {
-            const playersState = snapshot.state as ClientState[];
             playersState.forEach((playerState) => {
                 const [player] = this.otherPlayersGroup.getMatching(
                     "id",
                     playerState.id
                 ) as Spaceship[];
+
                 if (player) player.setClientState(playerState);
             });
+        }
+    }
+
+    updateReconciliation() {
+        // get the latest snapshot from the server
+        const serverSnapshot = this.si.vault.get();
+        if (serverSnapshot) {
+            // get the closest player snapshot that matches the server snapshot time
+            const clientSnapshot = this.clientVault.get(serverSnapshot.time, true);
+            if (clientSnapshot) {
+                const serverPlayersState = serverSnapshot.state["players"] as ClientState[];
+                // get the current player position on the server
+                const serverPlayerState = serverPlayersState.find(
+                    (playerState) => playerState.id === this.player.id
+                );
+
+                const [clientPlayerState] = clientSnapshot.state["player"] as ClientState[];
+
+                // calculate the offset between server and client
+                const offsetX = clientPlayerState.x - serverPlayerState.x;
+                const offsetY = clientPlayerState.y - serverPlayerState.y;
+                // check if the player is currently on the move
+                const isMoving = this.player.activity === "moving";
+                // we correct the position faster if the player moves
+                const correction = isMoving ? 60 : 180;
+                // apply a step by step correction of the player's position
+                this.player.boundingBox.x -= offsetX / correction;
+                this.player.boundingBox.y -= offsetY / correction;
+            }
         }
     }
 }
