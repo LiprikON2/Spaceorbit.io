@@ -8,6 +8,11 @@ interface Multipliers {
     damage: number;
 }
 
+export type Status = {
+    shields: number;
+    health: number;
+};
+
 export interface SpriteServerOptions {
     id: string;
     x: number;
@@ -29,11 +34,8 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     id: string;
     name: string;
     baseStats: { health: number; hitboxRadius: number; speed: number };
-    status: {
-        shields: number;
-        health: number;
-        multipliers: Multipliers;
-    };
+    status: Status;
+    multipliers: Multipliers;
     soundManager?: SoundManager;
     scene: BaseScene;
     atlas: {
@@ -44,11 +46,11 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     isTextured: boolean;
 
     get maxHealth() {
-        const healthMultiplier = this.status.multipliers.health;
+        const healthMultiplier = this.multipliers.health;
         return this.baseStats.health * healthMultiplier;
     }
     get maxShields() {
-        const shieldsMultiplier = this.status.multipliers.shields;
+        const shieldsMultiplier = this.multipliers.shields;
         return 10000 * shieldsMultiplier;
     }
     get absoluteHalfWidth() {
@@ -92,8 +94,9 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         this.resize(scale);
 
         const { multipliers } = serverOptions;
+        this.multipliers = multipliers;
+
         this.status = {
-            multipliers,
             health: 0,
             shields: 0,
         };

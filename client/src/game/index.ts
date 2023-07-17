@@ -12,5 +12,5 @@ export * from "./scripts";
 //     SoundManager,
 //     Mob,
 //     Spaceship,
-//     GenericText,
+//     DebugInfo,
 // } from "./scripts";

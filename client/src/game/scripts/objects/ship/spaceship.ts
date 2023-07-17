@@ -7,7 +7,7 @@ import Exhausts from "./Exhausts";
 import Weapons from "./Weapons";
 import Shields from "./Shields";
 import Outfitting, { type Outfit } from "./Outfitting";
-import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
+import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -24,12 +24,15 @@ type AllegianceOpposition = {
     [key in AllegianceKeys]: AllegianceKeys[];
 };
 
+type Activity = "moving" | "stopped";
+
 export type ClientState = {
     id: string;
     x: number;
     y: number;
     angle: number;
-};
+    activity: Activity;
+} & Status;
 
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
@@ -87,11 +90,21 @@ export class Spaceship extends Sprite {
         const speedBoost = 0.2;
         const speed = this.baseStats.speed;
         const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
-        const speedMultiplier = this.status.multipliers.speed;
+        const speedMultiplier = this.multipliers.speed;
 
         // Each additional engine gives 20% speed boost
         const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
         return shipSpeed * speedMultiplier;
+    }
+
+    get speed() {
+        const { x: vx, y: vy } = this.boundingBox.body.velocity;
+        const speed = Math.sqrt(vx ** 2 + vy ** 2);
+        this.status;
+        return speed;
+    }
+    get activity() {
+        return this.speed ? "moving" : "stopped";
     }
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
@@ -105,7 +118,7 @@ export class Spaceship extends Sprite {
 
         // Modules
         const { scene } = clientOptions;
-        const damageMultiplier = this.status.multipliers.damage;
+        const damageMultiplier = this.multipliers.damage;
         this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
         this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, damageMultiplier);
         this.shields = new Shields(this);
@@ -165,18 +178,6 @@ export class Spaceship extends Sprite {
         this.setTarget();
         this.breakOffTargeting();
         this.boundingBox.destroy(fromScene);
-    }
-
-    getClientState(): ClientState {
-        const { id, x, y, angle } = this;
-        return { id, x, y, angle };
-    }
-
-    setClientState({ x, y, angle }: ClientState) {
-        this.boundingBox.x = x;
-        this.boundingBox.y = y;
-        this.setAngle(angle);
-        this.rotateToPlugin.setEnable(false);
     }
 
     getHit(projectile) {
@@ -297,15 +298,6 @@ export class Spaceship extends Sprite {
         this.rotateTo(rotation);
     }
 
-    rotateTo(rotation: number) {
-        this.rotateToPlugin.rotateTo(
-            Phaser.Math.RadToDeg(rotation + Math.PI / 2),
-            0,
-            this.maxSpeed
-        );
-        if (this.exhausts) this.exhausts.updateExhaustPosition();
-    }
-
     setAngle(angle?: number) {
         super.setAngle(angle);
         if (this.exhausts) this.exhausts.updateExhaustPosition();
@@ -317,22 +309,28 @@ export class Spaceship extends Sprite {
         return this;
     }
 
-    toggleAttack() {
-        if (this.target) {
-            this.toggleFire = !this.toggleFire;
-        }
+    rotateTo(rotation: number) {
+        this.rotateToPlugin.rotateTo(
+            Phaser.Math.RadToDeg(rotation + Math.PI / 2),
+            0,
+            this.maxSpeed
+        );
+        if (this.exhausts) this.exhausts.updateExhaustPosition();
     }
 
     moveTo(x: number, y: number) {
         this.moveToPlugin.setSpeed(this.maxSpeed);
 
         this.moveToPlugin.moveTo(x, y);
-        this.exhausts.startExhaust();
+        this.onStartMoving();
     }
 
     resetMovement() {
         this.boundingBox.body.stop();
         this.moveToPlugin.stop();
+    }
+    onStartMoving() {
+        this.exhausts.startExhaust();
     }
     onStopMoving() {
         this.exhausts.stopExhaust();
@@ -341,25 +339,25 @@ export class Spaceship extends Sprite {
     moveUp() {
         if (this.active && !this.isUsingJoystick()) {
             this.boundingBox.body.setVelocityY(-this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveDown() {
         if (this.active && !this.isUsingJoystick()) {
             this.boundingBox.body.setVelocityY(this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveLeft() {
         if (this.active && !this.isUsingJoystick()) {
             this.boundingBox.body.setVelocityX(-this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveRight() {
         if (this.active && !this.isUsingJoystick()) {
             this.boundingBox.body.setVelocityX(this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
 
@@ -367,28 +365,28 @@ export class Spaceship extends Sprite {
         if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4;
             this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveUpLeft() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = -Math.PI / 4 - Math.PI / 2;
             this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveDownRight() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4;
             this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     moveDownLeft() {
         if (this.active && !this.isUsingJoystick()) {
             const angle = Math.PI / 4 + Math.PI / 2;
             this.boundingBox.body.velocity.setToPolar(angle, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     /**
@@ -398,7 +396,7 @@ export class Spaceship extends Sprite {
         if (this.active && !this.isUsingJoystick()) {
             const rotation = this.rotation;
             this.boundingBox.body.velocity.setToPolar(rotation, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
     /**
@@ -408,7 +406,7 @@ export class Spaceship extends Sprite {
         if (this.active && !this.isUsingJoystick()) {
             const rotation = this.rotation + Math.PI;
             this.boundingBox.body.velocity.setToPolar(rotation, this.maxSpeed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
         }
     }
 
@@ -424,7 +422,7 @@ export class Spaceship extends Sprite {
             const speed = this.maxSpeed * this.lastMoveInput.force;
 
             this.boundingBox.body.velocity.setToPolar(rotation, speed);
-            this.exhausts.startExhaust();
+            this.onStartMoving();
             moved = true;
         }
 
@@ -442,5 +440,28 @@ export class Spaceship extends Sprite {
         }
     }
 
+    toggleAttack() {
+        if (this.target) {
+            this.toggleFire = !this.toggleFire;
+        }
+    }
+
     update(time: number, delta: number) {}
+
+    getClientState(): ClientState {
+        const { id, x, y, angle, activity, status } = this;
+        return { id, x, y, angle, activity, ...status };
+    }
+
+    setClientState({ x, y, angle, activity }: ClientState) {
+        this.boundingBox.x = x;
+        this.boundingBox.y = y;
+        this.rotateTo(Phaser.Math.DegToRad(angle - 90));
+
+        if (activity === "moving") {
+            this.onStartMoving();
+        } else if (activity === "stopped") {
+            this.onStopMoving();
+        }
+    }
 }

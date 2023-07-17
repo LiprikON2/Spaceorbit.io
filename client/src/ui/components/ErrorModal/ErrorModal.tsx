@@ -16,7 +16,9 @@ export const ErrorModal = ({ errors, clearErrors }) => {
 
     const dismiss = () => {
         close();
-        clearErrors();
+
+        const timeUntilModalIsDismissed = 500;
+        setTimeout(() => clearErrors(), timeUntilModalIsDismissed);
     };
 
     return (

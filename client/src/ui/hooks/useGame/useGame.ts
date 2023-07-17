@@ -102,13 +102,10 @@ export const useGame = create<GameStore>((set, get) => ({
         );
     },
     clearErrors: () => {
-        const timeUntilModalIsDismissed = 500;
-        setTimeout(() => {
-            set(
-                produce((state) => {
-                    state.errors = [];
-                })
-            );
-        }, timeUntilModalIsDismissed);
+        set(
+            produce((state) => {
+                state.errors = [];
+            })
+        );
     },
 }));

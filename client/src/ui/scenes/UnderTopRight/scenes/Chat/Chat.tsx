@@ -45,7 +45,8 @@ export const Chat = () => {
     const chatViewportRef = useScrollToBottom([chatEntires]);
 
     const sendMessage = () => {
-        if (message) {
+        const isNotEmpty = !!message.replaceAll("\n", "");
+        if (isNotEmpty) {
             const isoTime = getIsoTime();
             const chatEntry = { name, message, isoTime };
             channel.emit("message", chatEntry, { reliable: true });
@@ -72,8 +73,8 @@ export const Chat = () => {
             <Title order={4}>Chat</Title>
             <ScrollArea
                 viewportRef={chatViewportRef}
-                w="20rem"
-                h="10rem"
+                w="16rem"
+                h="8rem"
                 py="0.25rem"
                 offsetScrollbars
             >
@@ -98,8 +99,11 @@ export const Chat = () => {
                 onKeyDown={getHotkeyHandler([
                     ["Enter", sendMessage],
                     ["Escape", handleBlur],
+                    ["Shift+Enter", (e) => e.preventDefault()],
                 ])}
                 mt="0.5rem"
+                autosize
+                maxRows={2}
                 variant="unstyled"
             />
         </Box>

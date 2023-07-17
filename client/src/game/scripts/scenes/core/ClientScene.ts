@@ -2,7 +2,7 @@ import type { ChannelId, ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 
 import { ClientInputManager, SoundManager } from "~/managers";
-import { Spaceship, GenericText } from "~/objects";
+import { Spaceship, DebugInfo } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
 import type { ClientState, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
@@ -21,7 +21,7 @@ export class ClientScene extends BaseMapScene {
     soundManager: SoundManager;
     player: Spaceship;
     background;
-    debugText: GenericText;
+    debugText: DebugInfo;
     mobs = [];
     isPaused = true;
 
@@ -64,7 +64,7 @@ export class ClientScene extends BaseMapScene {
 
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
 
-        this.debugText = new GenericText(this, this.player).setDepth(1000);
+        this.debugText = new DebugInfo(this, this.player).setDepth(1000);
         this.mobManager.spawnMobs(0, this.soundManager);
 
         this.isPaused = false;
