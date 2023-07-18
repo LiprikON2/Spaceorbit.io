@@ -83,7 +83,7 @@ export class BaseScene extends Phaser.Scene {
             this.allGroup.remove(player);
             this.playerGroup.remove(player);
             this.allGroup.remove(player);
-            player.destroy(true);
+            player.destroyFully();
         }
     }
 

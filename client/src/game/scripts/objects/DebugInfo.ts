@@ -25,11 +25,12 @@ export class DebugInfo extends Phaser.GameObjects.Text {
     public update() {
         let text = "";
         // text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
-        text += `fps: ${Math.floor(this.scene.game.loop.actualFps)}\n`;
+        text += `fps: ${Math.floor(this.scene.game.loop.actualFps)} ping: ${
+            this.scene.ping.avgDebounced
+        }\n`;
         text += `${Math.floor(Number(this.scene.game.config.width))}x${Math.floor(
             Number(this.scene.game.config.height)
         )}\n\n`;
-        text += `ping: ${this.scene.ping.avgDebounced}\n`;
 
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);

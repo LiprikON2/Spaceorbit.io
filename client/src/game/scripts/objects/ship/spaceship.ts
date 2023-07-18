@@ -175,6 +175,10 @@ export class Spaceship extends Sprite {
             this.scene.lights.enable().setAmbientColor(0x888888);
         }
     }
+    /**
+     * Destroys not only the sprite itself, but also related objects pinned to its bounding box
+     * @param fromScene
+     */
     destroyFully(fromScene?: boolean) {
         this.setTarget();
         this.breakOffTargeting();
