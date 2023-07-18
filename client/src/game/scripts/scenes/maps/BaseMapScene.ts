@@ -112,4 +112,13 @@ export class BaseMapScene extends BaseScene {
             this.rootElem.style.backgroundColor = color;
         }
     }
+
+    addLights(origins: [number, number][]) {
+        origins.forEach(([originX, originY]) => {
+            this.lights
+                .addLight(this.halfWorldWidth * originX, this.halfWorldHeight * originY, 5000)
+                .setIntensity(0.5);
+        });
+        this.lights.enable().setAmbientColor(0x888888);
+    }
 }

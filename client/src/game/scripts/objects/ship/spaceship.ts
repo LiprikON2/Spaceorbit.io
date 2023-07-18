@@ -226,6 +226,7 @@ export class Spaceship extends Sprite {
     }
 
     getHit(projectile) {
+        // this.emit('hit', projectile)
         const damageMultiplier = projectile.weapon.multiplier;
         const damage = projectile.weapon.projectileDamage * damageMultiplier;
         // console.log(this.status.shields, this.status.health);

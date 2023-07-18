@@ -34,6 +34,13 @@ export class BaseScene extends Phaser.Scene {
         return !this.isClient;
     }
 
+    get halfWorldWidth() {
+        return this.physics.world.bounds.width / 2;
+    }
+    get halfWorldHeight() {
+        return this.physics.world.bounds.height / 2;
+    }
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
         this.rootElem = document.getElementById("phaser-game");

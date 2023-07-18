@@ -20,6 +20,7 @@ export default class Weapons {
         projectileScale: { x: number; y: number };
         multiplier: number;
     }[];
+    projectileGroup;
 
     multiplier = 1;
     constructor(scene: BaseScene, ship: Spaceship, weaponOrigins, multiplier?: number) {
@@ -50,6 +51,8 @@ export default class Weapons {
 
         const middleSlot = Math.floor((this.getSlotCount() - 1) / 2);
         this.createLaser(middleSlot);
+
+        this.projectileGroup = this.scene.add.group();
     }
 
     getSlotCount() {
@@ -203,6 +206,8 @@ export default class Weapons {
                 projectile.height / 2 - hitboxSize
             )
             .setVelocity(velocityX, velocityY);
+
+        this.projectileGroup.add(projectile);
 
         this.ship.enemies.forEach((enemy) => {
             this.scene.physics.add.overlap(enemy, projectile, () => {

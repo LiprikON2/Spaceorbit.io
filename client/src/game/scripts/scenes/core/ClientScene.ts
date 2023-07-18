@@ -85,9 +85,6 @@ export class ClientScene extends BaseMapScene {
 
         this.mobManager.spawnMobs(1, this.soundManager);
 
-        this.lights.addLight(0, 0, 10000).setIntensity(5);
-        this.lights.enable().setAmbientColor(0x888888);
-
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
     }
