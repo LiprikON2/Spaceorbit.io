@@ -9,10 +9,6 @@ import type { ClientState, SpaceshipServerOptions } from "~/game/objects/ship/Sp
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import { PingBuffer } from "~/game/utils/Ping";
 
-interface WorldState {
-    players: ClientState[];
-}
-
 export class ClientScene extends BaseMapScene {
     game: GameClient;
     channel?: ClientChannel;

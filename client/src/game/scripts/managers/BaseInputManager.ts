@@ -50,7 +50,7 @@ export default class BaseInputManager {
     /**
      * Returns action object without keys which have default values
      */
-    get actionsCompact(): Actions {
+    get actionsCompact(): Partial<Actions> {
         const actionsCompactEntries = Object.entries(this.actions).filter(
             ([key, value]) => value !== defaultActions[key]
         );

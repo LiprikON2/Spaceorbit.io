@@ -79,7 +79,7 @@ export class ServerScene extends BaseMapScene {
             channel.on("players:already-connected", () => this.sendAlreadyConnected(channel));
 
             channel.on("player:actions", (actions) =>
-                this.emulateActions(channel, actions as Actions)
+                this.emulateActions(channel.id, actions as Actions)
             );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
@@ -132,9 +132,9 @@ export class ServerScene extends BaseMapScene {
         channel.broadcast.emit("message", message, { reliable: true });
     }
 
-    emulateActions(channel: ServerChannel, actions: Actions) {
+    emulateActions(playerId: ChannelId, actions: Partial<Actions>) {
         // console.log("player:actions", actions);
-        const { inputManager } = this.getPlayerById(channel.id);
+        const { inputManager } = this.getPlayerById(playerId);
         inputManager.setActions(actions);
     }
 
@@ -165,5 +165,12 @@ export class ServerScene extends BaseMapScene {
         const serverSnapshot = this.si.snapshot.create(serverState);
 
         this.game.server.emit("players:server-snapshot", serverSnapshot);
+    }
+
+    isPointInCircle(point: { x: number; y: number }, circle: { x: number; y: number; r: number }) {
+        const { x, y } = point;
+        const { x: circleX, y: circleY, r: radius } = circle;
+
+        return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
     }
 }
