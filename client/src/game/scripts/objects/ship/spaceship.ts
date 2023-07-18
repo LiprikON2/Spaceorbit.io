@@ -34,9 +34,17 @@ export type ClientState = {
     activity: Activity;
 } & Status;
 
+interface Multipliers {
+    speed: number;
+    health: number;
+    shields: number;
+    damage: number;
+}
+
 export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
     allegiance: AllegianceEnum | AllegianceKeys;
+    multipliers: Multipliers;
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
@@ -55,6 +63,9 @@ export class Spaceship extends Sprite {
 
     outfitting;
     followText;
+    status: Status;
+    baseStats: { health: number; hitboxRadius: number; speed: number };
+    multipliers: Multipliers;
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
@@ -86,6 +97,15 @@ export class Spaceship extends Sprite {
         return enemies;
     }
 
+    get maxHealth() {
+        const healthMultiplier = this.multipliers.health;
+        return this.baseStats.health * healthMultiplier;
+    }
+    get maxShields() {
+        const shieldsMultiplier = this.multipliers.shields;
+        return 10000 * shieldsMultiplier;
+    }
+
     get maxSpeed() {
         // const speedBoost = 0.2;
         const speedBoost = 20;
@@ -111,11 +131,15 @@ export class Spaceship extends Sprite {
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
         super(serverOptions, clientOptions);
 
+        const { baseStats } = this.atlasMetadata;
+        this.baseStats = baseStats;
+        this.setCircularHitbox(this.baseStats.hitboxRadius);
+
+        const { multipliers } = serverOptions;
+        this.multipliers = multipliers;
+
         const { modules } = this.atlasMetadata;
         this.modules = modules;
-
-        // Dimentions
-        this.setCircularHitbox(this.baseStats.hitboxRadius);
 
         // Modules
         const { scene } = clientOptions;
@@ -133,7 +157,13 @@ export class Spaceship extends Sprite {
         const { allGroup } = clientOptions;
         this.allGroup = allGroup;
 
-        if (this.soundManager) this.soundManager.makeTarget(this);
+        this.status = {
+            health: 0,
+            shields: 0,
+        };
+        this.status.health = this.maxHealth;
+        this.status.shields = this.maxShields;
+
         if (this.status.shields === 0) this.shields.crack(true);
 
         // Text
@@ -171,9 +201,19 @@ export class Spaceship extends Sprite {
 
         if (this.isTextured) {
             this.setPipeline("Light2D");
-            const light = this.scene.lights.addLight(0, 0, 10000).setIntensity(0.5);
-            this.scene.lights.enable().setAmbientColor(0x888888);
         }
+
+        if (this.soundManager) {
+            this.soundManager.addShip(this);
+            // Make sure relevant sounds are loaded
+            this.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
+        }
+
+        // Enables click events
+        this.setInteractive();
+        this.on("pointerdown", () => {
+            this.scene.input.emit("clickTarget", this);
+        });
     }
     /**
      * Destroys not only the sprite itself, but also related objects pinned to its bounding box

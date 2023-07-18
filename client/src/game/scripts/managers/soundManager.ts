@@ -1,5 +1,8 @@
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin";
 
+import type { Spaceship } from "~/objects/ship/Spaceship";
+import type { BaseScene } from "~/scenes/core/BaseScene";
+
 type SoundManagerConfig = {
     masterVolume: number;
     effectsVolume: number;
@@ -12,8 +15,8 @@ type SoundManagerConfig = {
 };
 
 export default class SoundManager {
-    scene;
-    player;
+    scene: BaseScene;
+    player: Spaceship;
     sounds = {};
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
@@ -44,7 +47,7 @@ export default class SoundManager {
         this.options = Object.assign({}, defaults, options);
 
         this.scene = scene;
-        this.soundFade = this.scene.plugins.get("rexSoundFade");
+        this.soundFade = this.scene.plugins.get("rexSoundFade") as SoundFadePlugin;
 
         // Prevent sound mute when tabbing out
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
@@ -69,7 +72,7 @@ export default class SoundManager {
         });
     }
 
-    makeTarget(player) {
+    addShip(player: Spaceship) {
         this.player = player;
         this.player.exhausts.initExhaustSound();
     }
@@ -163,7 +166,7 @@ export default class SoundManager {
     }
 
     // Like music, but also is affected by proximity
-    playLooping(key, UUID, options?) {
+    playLooping(key, id, options?) {
         const defaults = {
             maxVolume: 1,
             pitchPower: 0,
@@ -178,8 +181,8 @@ export default class SoundManager {
             mute: this.options.effectsMute,
         };
 
-        if (!this.loopingSounds[UUID]) {
-            this.loopingSounds[UUID] = {
+        if (!this.loopingSounds[id]) {
+            this.loopingSounds[id] = {
                 sound: this.scene.sound.add(key),
                 settings: {
                     config,
@@ -189,30 +192,31 @@ export default class SoundManager {
                 },
             };
         }
-        this.loopingSounds[UUID].sound.play(config);
+        this.loopingSounds[id].sound.play(config);
     }
 
-    fadeOutLooping(UUID) {
-        const { sound, settings } = this.loopingSounds[UUID];
+    fadeOutLooping(id) {
+        const { sound, settings } = this.loopingSounds[id];
         const finalVolume = settings.proximityVolume;
 
         this.soundFade.fadeIn(this.scene, sound, 100, 0, finalVolume);
         settings.isSilent = true;
     }
-    fadeInLooping(UUID) {
-        const { sound, settings } = this.loopingSounds[UUID];
+    fadeInLooping(id) {
+        const { sound, settings } = this.loopingSounds[id];
         const finalVolume = settings.proximityVolume;
 
         this.soundFade.fadeIn(this.scene, sound, 100, finalVolume, 0);
         settings.isSilent = false;
     }
+
     /**
      * Updates looping sounds
      */
     update() {
-        Object.keys(this.loopingSounds).forEach((UUID) => {
-            const soundObj = this.loopingSounds[UUID];
-            const soundSource = this.scene.children.getByName(UUID);
+        Object.keys(this.loopingSounds).forEach((id) => {
+            const soundObj = this.loopingSounds[id];
+            const [soundSource] = this.scene.allGroup.getMatching("id", id) as Spaceship[];
 
             let distanceToSoundSource = 0;
             if (soundSource) {
@@ -223,10 +227,8 @@ export default class SoundManager {
                     soundSource.y
                 );
             }
-
             const proximityVolume = this.normalizeVolume(
                 distanceToSoundSource,
-                // @ts-ignore
                 soundObj.settings.maxVolume
             );
 
@@ -236,7 +238,6 @@ export default class SoundManager {
             soundObj.settings.proximityVolume = finalVolume;
 
             const isFading = soundObj.sound?._fade?._isRunning;
-
             if (!isFading && !soundObj.settings.isSilent) {
                 soundObj.sound.volume = finalVolume;
             }

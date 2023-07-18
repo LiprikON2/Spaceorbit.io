@@ -22,7 +22,7 @@ export default class Weapons {
     }[];
 
     multiplier = 1;
-    constructor(scene, ship, weaponOrigins, multiplier?) {
+    constructor(scene: BaseScene, ship: Spaceship, weaponOrigins, multiplier?: number) {
         this.scene = scene;
         this.ship = ship;
         this.multiplier = multiplier;
@@ -116,6 +116,7 @@ export default class Weapons {
         this.fireAll("laser", time, point);
         this.fireAll("gatling", time, point);
     }
+
     fireAll(type: WeaponType, time: number, point?: { worldX: number; worldY: number }) {
         let playedSound = false;
         const weapons = this.getWeaponsOfType(type);

@@ -79,12 +79,14 @@ export class ClientScene extends BaseMapScene {
             );
         }
 
+        this.debugText = new DebugInfo(this, this.player).setDepth(1000);
         this.inputManager = new ClientInputManager(this, this.player);
-
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
 
-        this.debugText = new DebugInfo(this, this.player).setDepth(1000);
-        this.mobManager.spawnMobs(0, this.soundManager);
+        this.mobManager.spawnMobs(1, this.soundManager);
+
+        this.lights.addLight(0, 0, 10000).setIntensity(5);
+        this.lights.enable().setAmbientColor(0x888888);
 
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
