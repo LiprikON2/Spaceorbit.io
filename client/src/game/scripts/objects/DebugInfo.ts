@@ -1,5 +1,7 @@
+import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects/ship/Spaceship";
 export class DebugInfo extends Phaser.GameObjects.Text {
+    scene: ClientScene;
     player: Spaceship;
     constructor(scene, player) {
         super(scene, scene.game.config.width * 0.82, 100, "", { color: "white", fontSize: "2rem" });
@@ -27,6 +29,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         text += `${Math.floor(Number(this.scene.game.config.width))}x${Math.floor(
             Number(this.scene.game.config.height)
         )}\n\n`;
+        text += `ping: ${this.scene.ping.avgDebounced}\n`;
 
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);

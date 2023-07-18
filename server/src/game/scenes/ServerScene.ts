@@ -139,12 +139,22 @@ export class ServerScene extends BaseMapScene {
     }
 
     update(time: number, delta: number) {
+        this.everyTick(delta, () => {
+            this.sendServerSnapshot();
+        });
+        this.updatePlayersInput(time, delta);
+    }
+
+    updatePlayersInput(time: number, delta: number) {
+        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
+    }
+
+    everyTick(delta: number, callback: Function) {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
             this.elapsedSinceUpdate = 0;
-            this.sendServerSnapshot();
+            callback();
         }
-        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 
     sendServerSnapshot() {

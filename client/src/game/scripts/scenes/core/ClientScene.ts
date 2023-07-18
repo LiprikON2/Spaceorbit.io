@@ -7,6 +7,7 @@ import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
 import type { ClientState, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
+import { PingBuffer } from "~/game/utils/Ping";
 
 interface WorldState {
     players: ClientState[];
@@ -25,6 +26,7 @@ export class ClientScene extends BaseMapScene {
     debugText: DebugInfo;
     mobs = [];
     isPaused = true;
+    ping: PingBuffer;
 
     get isSingleplayer() {
         return !this.isMultiplayer;
@@ -44,6 +46,7 @@ export class ClientScene extends BaseMapScene {
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
+        this.ping = new PingBuffer(180);
     }
 
     init({ channel }: { channel?: ClientChannel }) {
@@ -161,6 +164,7 @@ export class ClientScene extends BaseMapScene {
                 this.sendPlayerActions();
                 this.updateReconciliation();
                 this.updateOtherPlayersState();
+                this.updatePing();
             }
         }
     }
@@ -213,5 +217,12 @@ export class ClientScene extends BaseMapScene {
                 this.player.boundingBox.y -= offsetY / correction;
             }
         }
+    }
+
+    updatePing() {
+        const serverTime = this.si.vault.get()?.time;
+        const clientTime = this.clientVault.get()?.time;
+        const ping = serverTime - clientTime + this.si.timeOffset;
+        if (!isNaN(ping)) this.ping.push(ping);
     }
 }
