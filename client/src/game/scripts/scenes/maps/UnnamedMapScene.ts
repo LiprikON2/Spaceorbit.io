@@ -18,13 +18,15 @@ export function MixinUnnamedMapScene<ClientOrServerScene extends Constructor<Bas
 
             this.loadBackground("map_1-2", 0.5);
 
-            this.addLights([
-                [0.3, 0.5],
-                [0.4, 0.25],
-                [0.5, 0.5],
-                [0.6, 0.25],
-                [0.7, 0.5],
-            ]);
+            if (this.isClient) {
+                this.addLights([
+                    [0.3, 0.5],
+                    [0.4, 0.25],
+                    [0.5, 0.5],
+                    [0.6, 0.25],
+                    [0.7, 0.5],
+                ]);
+            }
         }
     };
 }

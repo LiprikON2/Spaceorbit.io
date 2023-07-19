@@ -1,9 +1,9 @@
-import type { BaseScene } from "~/game/scenes/core/BaseScene";
-import type { Spaceship } from "./Spaceship";
+import type { BaseScene } from "~/scenes/core/BaseScene";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 
 type WeaponType = "laser" | "gatling" | null;
 
-export default class Weapons {
+export class Weapons {
     scene: BaseScene;
     ship: Spaceship;
     // delay = 1000/fps
@@ -209,23 +209,78 @@ export default class Weapons {
 
         this.projectileGroup.add(projectile);
 
-        this.ship.enemies.forEach((enemy) => {
-            this.scene.physics.add.overlap(enemy, projectile, () => {
-                if (enemy.status.shields <= 0) {
-                    enemy.getHit(projectile);
-                    // TODO reuse projectiles
-                    projectile.destroy();
-                }
-            });
-            this.scene.physics.add.overlap(enemy.shields, projectile, () => {
-                if (enemy.status.shields > 0) {
-                    enemy.getHit(projectile);
-                    projectile.destroy();
-                    // console.log(projectile);
-                }
-            });
-        });
+        // this.ship.enemies.forEach((enemy) => {
+        //     this.scene.physics.add.overlap(enemy, projectile, () => {
+        //         if (enemy.status.shields <= 0) {
+        //             enemy.getHit(projectile);
+        //             // TODO reuse projectiles
+        //             projectile.destroy();
+        //         }
+        //     });
+        //     this.scene.physics.add.overlap(enemy.shields, projectile, () => {
+        //         if (enemy.status.shields > 0) {
+        //             enemy.getHit(projectile);
+        //             projectile.destroy();
+        //             // console.log(projectile);
+        //         }
+        //     });
+        // });
 
         this.scene.time.delayedCall(projectileLifespan, () => projectile.destroy());
     }
+
+    update(time: number, delta: number) {
+        const projectiles = this.projectileGroup.getChildren();
+
+        if (projectiles.length) {
+            projectiles.forEach((projectile) => {
+                this.ship.enemies.forEach((enemy) => {
+                    const projectilePoint = { x: projectile.x, y: projectile.y };
+                    const enemyHasShields = enemy.status.shields > 0;
+                    if (enemyHasShields) {
+                        const hitboxCircle = {
+                            x: enemy.x,
+                            y: enemy.y,
+                            r: enemy.shields.body.radius,
+                        };
+                        const didHitShield = isPointInCircle(projectilePoint, hitboxCircle);
+                        if (didHitShield) {
+                            // TODO reuse projectiles
+                            console.log("didHitShield", enemy.shields.body.radius, didHitShield);
+                            enemy.getHit(projectile);
+                            projectile.destroy();
+
+                            this.ship.emit("hit:dealed", projectile, projectilePoint, hitboxCircle);
+                        }
+                    } else {
+                        const hitboxCircle = {
+                            x: enemy.x,
+                            y: enemy.y,
+                            r: enemy.body.radius,
+                        };
+                        const didHitBody = isPointInCircle(projectilePoint, hitboxCircle);
+
+                        if (didHitBody) {
+                            // TODO reuse projectiles
+                            console.log("didHitBody", enemy.body.radius, didHitBody);
+                            enemy.getHit(projectile);
+                            projectile.destroy();
+
+                            this.ship.emit("hit:dealed", projectile, projectilePoint, hitboxCircle);
+                        }
+                    }
+                });
+            });
+        }
+    }
 }
+
+const isPointInCircle = (
+    point: { x: number; y: number },
+    circle: { x: number; y: number; r: number }
+) => {
+    const { x, y } = point;
+    const { x: circleX, y: circleY, r: radius } = circle;
+
+    return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
+};

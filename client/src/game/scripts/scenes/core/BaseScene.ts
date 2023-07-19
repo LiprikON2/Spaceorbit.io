@@ -6,7 +6,7 @@ import {
     Spaceship,
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
-} from "~/game/objects/ship/Spaceship";
+} from "~/game/objects/Sprite/Spaceship";
 import { MobManager } from "~/managers";
 
 type SpaceshipGroup = {

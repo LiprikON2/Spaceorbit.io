@@ -1,6 +1,6 @@
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin";
 
-import type { Spaceship } from "~/objects/ship/Spaceship";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import type { BaseScene } from "~/scenes/core/BaseScene";
 
 type SoundManagerConfig = {

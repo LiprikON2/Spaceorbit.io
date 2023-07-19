@@ -1,12 +1,16 @@
 import type { ChannelId, ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
+import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 
 import { ClientInputManager, SoundManager } from "~/managers";
-import { Spaceship, DebugInfo } from "~/objects";
+import {
+    Spaceship,
+    type ClientState,
+    type SpaceshipServerOptions,
+} from "~/objects/Sprite/Spaceship";
+import { DebugInfo } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
-import type { ClientState, SpaceshipServerOptions } from "~/game/objects/ship/Spaceship";
-import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import { PingBuffer } from "~/game/utils/Ping";
 
 export class ClientScene extends BaseMapScene {
@@ -76,6 +80,20 @@ export class ClientScene extends BaseMapScene {
             );
             this.channel.on("players:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot as Snapshot)
+            );
+            this.player.on(
+                "hit:dealed",
+                (
+                    projectile,
+                    projectilePoint: { x: number; y: number },
+                    hitboxCircle: { x: number; y: number; r: number }
+                ) => {
+                    this.channel.emit("player:assert-hit", {
+                        projectilePoint,
+                        hitboxCircle,
+                        time: this.si.serverTime,
+                    });
+                }
             );
         }
 

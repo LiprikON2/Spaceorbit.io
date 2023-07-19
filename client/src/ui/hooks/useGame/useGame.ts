@@ -1,5 +1,5 @@
 import type { ClientScene } from "~/scenes/core";
-import type { Spaceship } from "~/objects";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import { produce } from "immer";
 import { create } from "zustand";
 

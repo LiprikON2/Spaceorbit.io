@@ -6,7 +6,7 @@ type ExplosionConfig = {
     doubleDiff?: number;
 };
 
-export default class Explosion extends Phaser.GameObjects.Sprite {
+export class Explosion extends Phaser.GameObjects.Sprite {
     explosionSound: Phaser.Sound.BaseSound;
     options: ExplosionConfig;
     constructor(

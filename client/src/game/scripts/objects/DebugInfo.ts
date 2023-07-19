@@ -1,5 +1,5 @@
 import type { ClientScene } from "~/scenes/core";
-import type { Spaceship } from "~/objects/ship/Spaceship";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 export class DebugInfo extends Phaser.GameObjects.Text {
     scene: ClientScene;
     player: Spaceship;

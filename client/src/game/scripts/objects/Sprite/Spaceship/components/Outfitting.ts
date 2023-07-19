@@ -1,4 +1,4 @@
-import type { Spaceship } from "./Spaceship";
+import type { Spaceship } from "../Spaceship";
 
 export interface Item {
     itemName: string;
@@ -12,7 +12,7 @@ export interface Outfit {
     engines: any[];
     inventory: Item[];
 }
-export default class Outfitting {
+export class Outfitting {
     scene: Phaser.Scene;
     ship: Spaceship;
     #outfit: Outfit;

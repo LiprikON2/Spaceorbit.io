@@ -1,4 +1,4 @@
-export default class Exhausts {
+export class Exhausts {
     scene;
     ship;
     exhaustEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
@@ -98,8 +98,7 @@ export default class Exhausts {
             const { offsetX, offsetY } = this.ship.getRotatedPoint(
                 this.exhaustOrigins[pattern[index]]
             );
-            // @ts-ignore
-            exhaustEmitter.followOffset = { x: offsetX, y: offsetY };
+            exhaustEmitter.followOffset.set(offsetX, offsetY);
         });
     }
     getEngineCount() {

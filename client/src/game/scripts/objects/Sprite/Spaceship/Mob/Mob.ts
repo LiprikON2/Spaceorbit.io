@@ -1,8 +1,4 @@
-import {
-    Spaceship,
-    type SpaceshipServerOptions,
-    type SpaceshipClientOptions,
-} from "~/game/objects/ship/Spaceship";
+import { Spaceship, type SpaceshipServerOptions, type SpaceshipClientOptions } from "../Spaceship";
 
 enum Direction {
     Left,

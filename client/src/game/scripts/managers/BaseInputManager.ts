@@ -1,4 +1,4 @@
-import type { Spaceship } from "~/objects/ship/Spaceship";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import type { BaseScene } from "~/scenes/core/BaseScene";
 
 export interface Keys {

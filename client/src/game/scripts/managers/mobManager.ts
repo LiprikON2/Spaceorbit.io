@@ -1,7 +1,7 @@
 // import { PhaserNavMeshPlugin } from "phaser-navmesh";
 // import { NavMesh } from "navmesh";
-import { Mob, type MobClientOptions, type MobServerOptions } from "~/game/objects/Mob";
-import { AllegianceEnum } from "~/game/objects/ship/Spaceship";
+import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
+import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
 
 export default class MobManager {
     scene;

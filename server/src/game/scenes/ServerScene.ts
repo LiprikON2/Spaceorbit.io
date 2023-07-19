@@ -7,7 +7,7 @@ import type {
     ClientState,
     Spaceship,
     SpaceshipServerOptions,
-} from "@spaceorbit/client/src/game/scripts/objects/ship/spaceship";
+} from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship";
 import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
 import BaseInputManager, {
     type Actions,
@@ -174,3 +174,15 @@ export class ServerScene extends BaseMapScene {
         return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
     }
 }
+
+// const didHit = isPointInCircle(
+//     { x: projectile.x, y: projectile.y },
+//     { x: enemy.x, y: enemy.y, r: enemy.body.radius }
+// );
+// console.log("hit", enemy.body.radius, didHit);
+
+// const didHit = isPointInCircle(
+//     { x: projectile.x, y: projectile.y },
+//     { x: enemy.x, y: enemy.y, r: enemy.shields.body.radius }
+// );
+// console.log("hit", enemy.shields.body.radius, didHit);

@@ -2,11 +2,7 @@ import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/containe
 import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
 import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
-import Explosion from "./Explosion";
-import Exhausts from "./Exhausts";
-import Weapons from "./Weapons";
-import Shields from "./Shields";
-import Outfitting, { type Outfit } from "./Outfitting";
+import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
 import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 
 export enum AllegianceEnum {
@@ -313,8 +309,8 @@ export class Spaceship extends Sprite {
     }
 
     teleport(x?: number, y?: number, map?: string) {
+        this.resetMovement();
         if (typeof x === "undefined" || typeof y === "undefined") {
-            // @ts-ignore
             ({ x, y } = this.scene.getRandomPositionOnMap());
         }
         this.boundingBox.x = x;
@@ -492,7 +488,9 @@ export class Spaceship extends Sprite {
         }
     }
 
-    update(time: number, delta: number) {}
+    update(time: number, delta: number) {
+        this.weapons.update(time, delta);
+    }
 
     getClientState(): ClientState {
         const { id, x, y, angle, activity, status } = this;
