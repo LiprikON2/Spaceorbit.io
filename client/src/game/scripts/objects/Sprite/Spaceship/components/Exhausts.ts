@@ -95,10 +95,10 @@ export class Exhausts {
         const pattern = this.getPattern();
 
         this.exhaustEmitters.forEach((exhaustEmitter, index) => {
-            const { offsetX, offsetY } = this.ship.getRotatedPoint(
+            const { originX, originY } = this.ship.getRotatedPoint(
                 this.exhaustOrigins[pattern[index]]
             );
-            exhaustEmitter.followOffset.set(offsetX, offsetY);
+            exhaustEmitter.followOffset.set(originX, originY);
         });
     }
     getEngineCount() {

@@ -1,5 +1,6 @@
 import type { BaseScene } from "~/scenes/core/BaseScene";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
+import { Projectile } from "./components";
 
 type WeaponType = "laser" | "gatling" | null;
 
@@ -145,40 +146,49 @@ export class Weapons {
         });
     }
 
-    shootProjectile(weapon, addShipMomentum = false, point?: { worldX: number; worldY: number }) {
+    getGimbalPointRotation(
+        originPoint: { originX: number; originY: number },
+        targetPoint?: { worldX: number; worldY: number },
+        maxRotationOffset = Math.PI / 9
+    ) {
+        if (!targetPoint) return this.ship.rotation;
+        // If firing at a cursor, aim them to shoot at cursor
+        const { originX, originY } = originPoint;
+        const { worldX, worldY } = targetPoint;
+
+        const rotationToTarget =
+            Phaser.Math.Angle.Between(originX, originY, worldX, worldY) + Math.PI / 2;
+
+        let angleOffset = Math.abs(
+            Phaser.Math.Angle.ShortestBetween(
+                Phaser.Math.Angle.Wrap(rotationToTarget),
+                this.ship.rotation
+            )
+        );
+        // Dirty fix for aiming at the bottom of the screen (351 deg -> 9 deg)
+        if (angleOffset > Math.PI) {
+            angleOffset = 2 * Math.PI - angleOffset;
+        }
+        if (angleOffset > maxRotationOffset) {
+            // Ensures you can't fire behind your back
+            return this.ship.rotation;
+        } else {
+            return rotationToTarget;
+        }
+    }
+
+    shootProjectile(
+        weapon,
+        addShipMomentum = false,
+        targetPoint?: { worldX: number; worldY: number }
+    ) {
         const projectileVelocity = weapon.projectileVelocity;
         const projectileDistance = 900_000;
         const projectileLifespan = projectileDistance / projectileVelocity;
 
-        const { offsetX, offsetY } = this.ship.getRotatedPoint(weapon, true);
+        const originPoint = this.ship.getRotatedPoint(weapon, true);
 
-        let rotation;
-        if (point) {
-            // If firing at a cursor, aim them to shoot at cursor
-            const { worldX, worldY } = point;
-            const cursorRotation =
-                Phaser.Math.Angle.Between(offsetX, offsetY, worldX, worldY) + Math.PI / 2;
-            const maxTraverseAngle = Math.PI / 9;
-            let angleOffset = Math.abs(
-                Phaser.Math.Angle.ShortestBetween(
-                    Phaser.Math.Angle.Wrap(cursorRotation),
-                    this.ship.rotation
-                )
-            );
-            // Dirty fix for aiming at the bottom of the screen (351 deg -> 9 deg)
-            if (angleOffset > Math.PI) {
-                angleOffset = 2 * Math.PI - angleOffset;
-            }
-            if (angleOffset > maxTraverseAngle) {
-                // Ensures you can't fire behind your back
-                rotation = this.ship.rotation;
-            } else {
-                rotation = cursorRotation;
-            }
-        } else {
-            // Else weapons are aimed with ship orientation
-            rotation = this.ship.rotation;
-        }
+        const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
 
         let velocityX, velocityY;
         if (addShipMomentum) {
@@ -192,39 +202,24 @@ export class Weapons {
             velocityY = -Math.cos(rotation) * projectileVelocity;
         }
 
-        const projectile = this.scene.physics.add
-            .sprite(offsetX, offsetY, this.ship.isTextured ? weapon.type : null, 0)
-            .setRotation(rotation - Math.PI / 2)
-            .setScale(weapon.projectileScale.x, weapon.projectileScale.y);
+        const serverOptions = {
+            id: Phaser.Utils.String.UUID(),
+            x: originPoint.originX,
+            y: originPoint.originY,
+            angle: Phaser.Math.RadToDeg(rotation - Math.PI / 2),
+            atlasTexture: weapon.type,
+            depth: this.ship.depth - 1,
+            scale: { scaleX: weapon.projectileScale.x, scaleY: weapon.projectileScale.y },
+            velocity: { velocityX, velocityY },
+        };
+        const clientOptions = {
+            scene: this.scene,
+            toPassTexture: this.ship.isTextured,
+        };
+        const projectile = new Projectile(serverOptions, clientOptions);
         projectile["weapon"] = weapon;
 
-        const hitboxSize = 2;
-        projectile
-            .setCircle(
-                hitboxSize,
-                projectile.width / 2 - hitboxSize,
-                projectile.height / 2 - hitboxSize
-            )
-            .setVelocity(velocityX, velocityY);
-
         this.projectileGroup.add(projectile);
-
-        // this.ship.enemies.forEach((enemy) => {
-        //     this.scene.physics.add.overlap(enemy, projectile, () => {
-        //         if (enemy.status.shields <= 0) {
-        //             enemy.getHit(projectile);
-        //             // TODO reuse projectiles
-        //             projectile.destroy();
-        //         }
-        //     });
-        //     this.scene.physics.add.overlap(enemy.shields, projectile, () => {
-        //         if (enemy.status.shields > 0) {
-        //             enemy.getHit(projectile);
-        //             projectile.destroy();
-        //             // console.log(projectile);
-        //         }
-        //     });
-        // });
 
         this.scene.time.delayedCall(projectileLifespan, () => projectile.destroy());
     }

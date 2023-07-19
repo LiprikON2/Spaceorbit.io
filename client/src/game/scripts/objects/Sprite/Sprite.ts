@@ -12,7 +12,6 @@ export interface SpriteServerOptions {
     y: number;
     angle: number;
     atlasTexture: string | Phaser.Textures.Texture;
-    username: string;
     depth: number;
 }
 
@@ -114,17 +113,17 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         );
         const { rotation } = this;
 
-        let offsetX;
-        let offsetY;
+        let originX: number;
+        let originY: number;
         if (absolute) {
             // If needed absolute coordinates, use current position of a ship in a world as a circle origin
-            offsetX = r * Math.cos(rotation + additionalRotation) + this.x;
-            offsetY = r * Math.sin(rotation + additionalRotation) + this.y;
+            originX = r * Math.cos(rotation + additionalRotation) + this.x;
+            originY = r * Math.sin(rotation + additionalRotation) + this.y;
         } else {
             // Otherwise use relative to the sprite coordinates
-            offsetX = r * Math.cos(rotation + additionalRotation);
-            offsetY = r * Math.sin(rotation + additionalRotation);
+            originX = r * Math.cos(rotation + additionalRotation);
+            originY = r * Math.sin(rotation + additionalRotation);
         }
-        return { offsetX, offsetY };
+        return { originX, originY };
     }
 }

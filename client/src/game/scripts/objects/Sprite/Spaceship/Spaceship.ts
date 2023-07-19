@@ -41,6 +41,7 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
     outfit: Outfit;
     allegiance: AllegianceEnum | AllegianceKeys;
     multipliers: Multipliers;
+    username: string;
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
