@@ -46,7 +46,7 @@ const makeButton = (scene, enable) => {
     return virtualBtn;
 };
 
-export default class ClientInputManager extends BaseInputManager {
+export class ClientInputManager extends BaseInputManager {
     touchControls = { joystick: null, virtualBtn: null };
     scene: ClientScene;
     zoom: number;

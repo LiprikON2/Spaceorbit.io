@@ -1,5 +1,5 @@
 import type { BaseScene } from "~/scenes/core/BaseScene";
-import type SoundManager from "~/game/managers/SoundManager";
+import type { SoundManager } from "~/managers";
 
 export type Status = {
     shields: number;

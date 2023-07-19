@@ -1,23 +1,26 @@
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "~/objects/Sprite";
-import type { Weapon } from "../Weapons";
+import type { Weapon, Weapons } from "../Weapons";
 
 export interface ProjectileServerOptions extends SpriteServerOptions {
     scale: { scaleX: number; scaleY: number };
     velocity: { velocityX: number; velocityY: number };
-    weapon: Weapon;
+    firedFrom: Weapon;
+    weapons: Weapons;
     travelDistance: number;
 }
 
 export interface ProjectileClientOptions extends SpriteClientOptions {}
 
 export class Projectile extends Sprite {
-    weapon: Weapon;
+    firedFrom: Weapon;
+    weapons: Weapons;
 
     constructor(serverOptions: ProjectileServerOptions, clientOptions: ProjectileClientOptions) {
         super(serverOptions, clientOptions);
 
-        const { weapon } = serverOptions;
-        this.weapon = weapon;
+        const { firedFrom, weapons } = serverOptions;
+        this.firedFrom = firedFrom;
+        this.weapons = weapons;
 
         const { scaleX, scaleY } = serverOptions.scale;
         this.setScale(scaleX, scaleY);
@@ -32,8 +35,12 @@ export class Projectile extends Sprite {
     }
 
     get damage() {
-        const { projectileDamageMultiplier, projectileBaseDamage } = this.weapon;
+        const { projectileDamageMultiplier, projectileBaseDamage } = this.firedFrom;
         return projectileDamageMultiplier * projectileBaseDamage;
+    }
+
+    get owner() {
+        return this.weapons.ship;
     }
 
     destroyAfterTravelling(distance: number) {

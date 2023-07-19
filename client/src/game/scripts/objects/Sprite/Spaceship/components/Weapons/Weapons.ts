@@ -4,6 +4,13 @@ import { Projectile } from "./components";
 
 type WeaponType = "laser" | "gatling" | null;
 
+export interface HitData {
+    enemyId: string;
+    projectileId: string;
+    projectilePoint: { x: number; y: number };
+    hitboxCircle: { x: number; y: number; r: number };
+    time?: number;
+}
 export interface Weapon {
     x: number;
     y: number;
@@ -22,14 +29,13 @@ export class Weapons {
     // delay = 1000/fps
     primaryFireRate = 600;
     weaponSlots: Weapon[];
-    projectileGroup: Phaser.GameObjects.Group;
 
     multiplier = 1;
     constructor(scene: BaseScene, ship: Spaceship, weaponOrigins, multiplier?: number) {
         this.scene = scene;
         this.ship = ship;
         this.multiplier = multiplier;
-        // Sort by x value, from lowest to highest
+        // Sort by x value in ascending order
         this.weaponSlots = weaponOrigins
             .sort(({ x: x1 }, { x: x2 }) => x1 - x2)
             .map((origin, index) => ({
@@ -53,8 +59,6 @@ export class Weapons {
 
         const middleSlot = Math.floor((this.getSlotCount() - 1) / 2);
         this.createLaser(middleSlot);
-
-        this.projectileGroup = this.scene.add.group();
     }
 
     getSlotCount() {
@@ -85,7 +89,7 @@ export class Weapons {
         return doesFit;
     }
 
-    createLaser(slot) {
+    createLaser(slot: number) {
         this.weaponSlots[slot] = {
             ...this.weaponSlots[slot],
             type: "laser",
@@ -99,7 +103,7 @@ export class Weapons {
         // DPS = 1000 * (1000 / 600) = 1666 damage per second
     }
 
-    createGatling(slot) {
+    createGatling(slot: number) {
         this.weaponSlots[slot] = {
             ...this.weaponSlots[slot],
             type: "gatling",
@@ -113,7 +117,7 @@ export class Weapons {
         // DPS = 166 * (1000 / 100) = 2000 damage per second
     }
 
-    clearSlot(slot) {
+    clearSlot(slot: number) {
         this.weaponSlots[slot].type = null;
     }
 
@@ -216,7 +220,8 @@ export class Weapons {
             depth: this.ship.depth - 1,
             scale: { scaleX: weapon.projectileScale.x, scaleY: weapon.projectileScale.y },
             velocity: { velocityX, velocityY },
-            weapon,
+            firedFrom: weapon,
+            weapons: this,
             travelDistance: 900000,
         };
         const clientOptions = {
@@ -225,61 +230,6 @@ export class Weapons {
         };
         const projectile = new Projectile(serverOptions, clientOptions);
 
-        this.projectileGroup.add(projectile);
-    }
-
-    update(time: number, delta: number) {
-        const projectiles = this.projectileGroup.getChildren() as Projectile[];
-
-        if (projectiles.length) {
-            projectiles.forEach((projectile) => {
-                this.ship.enemies.forEach((enemy) => {
-                    const projectilePoint = { x: projectile.x, y: projectile.y };
-                    const enemyHasShields = enemy.status.shields > 0;
-                    if (enemyHasShields) {
-                        const hitboxCircle = {
-                            x: enemy.x,
-                            y: enemy.y,
-                            r: enemy.shields.body.radius,
-                        };
-                        const didHitShield = isPointInCircle(projectilePoint, hitboxCircle);
-                        if (didHitShield) {
-                            // TODO reuse projectiles
-                            console.log("didHitShield", enemy.shields.body.radius, didHitShield);
-                            enemy.getHit(projectile);
-                            projectile.destroy();
-
-                            this.ship.emit("hit:dealed", projectile, projectilePoint, hitboxCircle);
-                        }
-                    } else {
-                        const hitboxCircle = {
-                            x: enemy.x,
-                            y: enemy.y,
-                            r: enemy.body.radius,
-                        };
-                        const didHitBody = isPointInCircle(projectilePoint, hitboxCircle);
-
-                        if (didHitBody) {
-                            // TODO reuse projectiles
-                            console.log("didHitBody", enemy.body.radius, didHitBody);
-                            enemy.getHit(projectile);
-                            projectile.destroy();
-
-                            this.ship.emit("hit:dealed", projectile, projectilePoint, hitboxCircle);
-                        }
-                    }
-                });
-            });
-        }
+        this.scene.projectileGroup.add(projectile);
     }
 }
-
-const isPointInCircle = (
-    point: { x: number; y: number },
-    circle: { x: number; y: number; r: number }
-) => {
-    const { x, y } = point;
-    const { x: circleX, y: circleY, r: radius } = circle;
-
-    return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
-};

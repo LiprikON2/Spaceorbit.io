@@ -12,6 +12,7 @@ import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/Ba
 import BaseInputManager, {
     type Actions,
 } from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
+import type { HitData as ClientHitData } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship/components";
 
 interface Players {
     [key: string]: {
@@ -20,6 +21,11 @@ interface Players {
         inputManager: BaseInputManager;
     };
 }
+
+interface HitData extends ClientHitData {
+    time: number;
+}
+
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
@@ -81,6 +87,8 @@ export class ServerScene extends BaseMapScene {
             channel.on("player:actions", (actions) =>
                 this.emulateActions(channel.id, actions as Actions)
             );
+
+            channel.on("player:assert-hit", (hitData) => this.assertHit(hitData as HitData));
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
             channel.onDisconnect((reason) => {
@@ -88,6 +96,13 @@ export class ServerScene extends BaseMapScene {
                 this.removePlayer(channel);
             });
         });
+    }
+    assertHit({ enemyId, projectileId, projectilePoint, hitboxCircle, time }: HitData) {
+        console.log("player:assert-hit");
+
+        // get the two closest snapshot to the date
+        const snapshots = this.si.vault.get(time);
+        if (!snapshots) return;
     }
 
     addPlayer(serverOptions: SpaceshipServerOptions) {
@@ -145,10 +160,6 @@ export class ServerScene extends BaseMapScene {
         this.updatePlayersInput(time, delta);
     }
 
-    updatePlayersInput(time: number, delta: number) {
-        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
-    }
-
     everyTick(delta: number, callback: Function) {
         this.elapsedSinceUpdate += delta;
         if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
@@ -167,22 +178,7 @@ export class ServerScene extends BaseMapScene {
         this.game.server.emit("players:server-snapshot", serverSnapshot);
     }
 
-    isPointInCircle(point: { x: number; y: number }, circle: { x: number; y: number; r: number }) {
-        const { x, y } = point;
-        const { x: circleX, y: circleY, r: radius } = circle;
-
-        return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
+    updatePlayersInput(time: number, delta: number) {
+        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 }
-
-// const didHit = isPointInCircle(
-//     { x: projectile.x, y: projectile.y },
-//     { x: enemy.x, y: enemy.y, r: enemy.body.radius }
-// );
-// console.log("hit", enemy.body.radius, didHit);
-
-// const didHit = isPointInCircle(
-//     { x: projectile.x, y: projectile.y },
-//     { x: enemy.x, y: enemy.y, r: enemy.shields.body.radius }
-// );
-// console.log("hit", enemy.shields.body.radius, didHit);

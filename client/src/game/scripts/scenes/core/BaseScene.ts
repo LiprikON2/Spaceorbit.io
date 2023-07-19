@@ -2,7 +2,6 @@ import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/container
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import {
-    AllegianceEnum,
     Spaceship,
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
@@ -26,6 +25,7 @@ export class BaseScene extends Phaser.Scene {
     otherPlayersGroup: SpaceshipGroup;
     mobGroup: SpaceshipGroup;
     allGroup: SpaceshipGroup;
+    projectileGroup: Phaser.GameObjects.Group;
 
     get isClient() {
         return Boolean(this.rootElem);
@@ -52,6 +52,7 @@ export class BaseScene extends Phaser.Scene {
         this.otherPlayersGroup = this.add.group() as SpaceshipGroup;
         this.mobGroup = this.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.allGroup = this.add.group() as SpaceshipGroup;
+        this.projectileGroup = this.add.group();
     }
 
     create() {}
@@ -95,6 +96,7 @@ export class BaseScene extends Phaser.Scene {
     }
 
     getPlayerServerOptions(id?) {
+        const playerCount = this.playerGroup.getLength();
         const spaceshipServerOptions: SpaceshipServerOptions = {
             id: id ?? Phaser.Utils.String.UUID(),
             x: 400,
@@ -104,7 +106,7 @@ export class BaseScene extends Phaser.Scene {
             outfit: this.getPlayerKit(),
             atlasTexture: "F5S4",
             multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
-            username: "Player",
+            username: "Player" + (playerCount + 1),
             allegiance: "Unaffiliated",
             depth: 100,
         };

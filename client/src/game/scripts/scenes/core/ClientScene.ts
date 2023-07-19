@@ -2,7 +2,7 @@ import type { ChannelId, ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 
-import { ClientInputManager, SoundManager } from "~/managers";
+import { ClientCollisionManager, ClientInputManager, SoundManager } from "~/managers";
 import {
     Spaceship,
     type ClientState,
@@ -11,7 +11,8 @@ import {
 import { DebugInfo } from "~/objects";
 import type { GameClient } from "~/game";
 import { BaseMapScene } from "../maps/BaseMapScene";
-import { PingBuffer } from "~/game/utils/Ping";
+import { PingBuffer } from "~/game/utils/ping";
+import { HitData } from "~/objects/Sprite/Spaceship/components";
 
 export class ClientScene extends BaseMapScene {
     game: GameClient;
@@ -21,6 +22,7 @@ export class ClientScene extends BaseMapScene {
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
+    collisionManager: ClientCollisionManager;
     player: Spaceship;
     background;
     debugText: DebugInfo;
@@ -81,30 +83,28 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("players:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot as Snapshot)
             );
-            this.player.on(
-                "hit:dealed",
-                (
-                    projectile,
-                    projectilePoint: { x: number; y: number },
-                    hitboxCircle: { x: number; y: number; r: number }
-                ) => {
-                    this.channel.emit("player:assert-hit", {
-                        projectilePoint,
-                        hitboxCircle,
-                        time: this.si.serverTime,
-                    });
-                }
-            );
+            this.player.on("hit:dealed", (hitData) => this.requestHitAssertion(hitData));
         }
 
         this.debugText = new DebugInfo(this, this.player).setDepth(1000);
         this.inputManager = new ClientInputManager(this, this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
+        this.collisionManager = new ClientCollisionManager({
+            projectileGroup: this.projectileGroup,
+            allGroup: this.allGroup,
+        });
 
-        this.mobManager.spawnMobs(1, this.soundManager);
+        this.mobManager.spawnMobs(0, this.soundManager);
 
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
+    }
+    requestHitAssertion(hitData: HitData) {
+        this.channel;
+        this.channel.emit("player:assert-hit", {
+            ...hitData,
+            time: this.si.serverTime,
+        });
     }
 
     async producePlayer(serverOptions?: SpaceshipServerOptions, isMe = false): Promise<Spaceship> {
@@ -168,6 +168,7 @@ export class ClientScene extends BaseMapScene {
             super.update(time, delta);
             this.debugText.update();
             this.soundManager.update();
+            this.collisionManager.update();
 
             // Acts as client predictor in multiplayer
             this.inputManager.update(time, delta);

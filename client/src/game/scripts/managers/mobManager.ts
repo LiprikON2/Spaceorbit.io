@@ -3,7 +3,7 @@
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
 import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
 
-export default class MobManager {
+export class MobManager {
     scene;
     mobs: Mob[] = [];
 

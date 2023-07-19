@@ -14,7 +14,7 @@ type SoundManagerConfig = {
     pauseOnBlur: boolean;
 };
 
-export default class SoundManager {
+export class SoundManager {
     scene: BaseScene;
     player: Spaceship;
     sounds = {};
@@ -52,11 +52,11 @@ export default class SoundManager {
         // Prevent sound mute when tabbing out
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
     }
-    setVolume(key, newVolume) {
+    setVolume(key: string, newVolume: number) {
         this.options[key] = newVolume;
         this.updateVolumes();
     }
-    toggleMute(key) {
+    toggleMute(key: string) {
         this.options[key] = !this.options[key];
         this.updateVolumes();
     }
@@ -77,12 +77,12 @@ export default class SoundManager {
         this.player.exhausts.initExhaustSound();
     }
 
-    addSounds(type, keys) {
+    addSounds(type: string, keys: string[]) {
         if (!this.sounds[type]) {
             this.sounds[type] = keys.map((key) => this.scene.sound.add(key));
         }
     }
-    addMusic(musicPlaylist, autoplay = false, overridePlaylist = false) {
+    addMusic(musicPlaylist: string[], autoplay = false, overridePlaylist = false) {
         if (overridePlaylist) {
             this.musicPlaylist = musicPlaylist;
         } else {
@@ -95,7 +95,7 @@ export default class SoundManager {
     }
 
     // https://phaser.discourse.group/t/sound-in-particular-place/2547/2
-    play(type, options?) {
+    play(type: string, options?: {}) {
         const defaults = {
             sourceX: 0,
             sourceY: 0,
@@ -166,7 +166,7 @@ export default class SoundManager {
     }
 
     // Like music, but also is affected by proximity
-    playLooping(key, id, options?) {
+    playLooping(key: string, id: string, options?) {
         const defaults = {
             maxVolume: 1,
             pitchPower: 0,
@@ -263,7 +263,7 @@ export default class SoundManager {
         });
     }
 
-    normalizeVolume(distance, maxVolume = 1) {
+    normalizeVolume(distance: number, maxVolume = 1) {
         const minDistance = 0;
         const maxDistance = this.options.distanceThreshold;
 

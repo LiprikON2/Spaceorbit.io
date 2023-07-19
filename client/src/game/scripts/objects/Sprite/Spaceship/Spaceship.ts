@@ -112,13 +112,14 @@ export class Spaceship extends Sprite {
     }
 
     get maxSpeed() {
+        // Each additional engine gives 20% speed boost
         // const speedBoost = 0.2;
+        // TODELETE
         const speedBoost = 20;
         const speed = this.baseStats.speed;
         const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
         const speedMultiplier = this.multipliers.speed;
 
-        // Each additional engine gives 20% speed boost
         const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
         return shipSpeed * speedMultiplier;
     }
@@ -271,7 +272,7 @@ export class Spaceship extends Sprite {
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
         this.resetMovement();
-        this.emit("dead", this.id);
+        // this.emit("dead", this.id);
 
         // TODO add variety ("explosion patterns")
         if (this.isTextured) {
@@ -496,9 +497,7 @@ export class Spaceship extends Sprite {
         }
     }
 
-    update(time: number, delta: number) {
-        this.weapons.update(time, delta);
-    }
+    update(time: number, delta: number) {}
 
     getClientState(): ClientState {
         const { id, x, y, angle, activity, status } = this;
