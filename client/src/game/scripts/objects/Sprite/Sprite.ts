@@ -33,6 +33,12 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     };
     isTextured: boolean;
 
+    get speed() {
+        const { x: vx, y: vy } = this.body.velocity;
+        const speed = Math.sqrt(vx ** 2 + vy ** 2);
+        return speed;
+    }
+
     /**
      * Half width of sprite texture, without scaling
      */

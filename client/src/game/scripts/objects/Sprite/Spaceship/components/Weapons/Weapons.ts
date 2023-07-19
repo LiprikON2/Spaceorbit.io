@@ -4,24 +4,25 @@ import { Projectile } from "./components";
 
 type WeaponType = "laser" | "gatling" | null;
 
+export interface Weapon {
+    x: number;
+    y: number;
+    type: WeaponType;
+    id: number;
+    cooldownTime: number;
+    lastFired: number;
+    projectileVelocity: number;
+    projectileBaseDamage: number;
+    projectileScale: { x: number; y: number };
+    projectileDamageMultiplier: number;
+}
 export class Weapons {
     scene: BaseScene;
     ship: Spaceship;
     // delay = 1000/fps
     primaryFireRate = 600;
-    weaponSlots: {
-        x: number;
-        y: number;
-        type: WeaponType;
-        id: number;
-        cooldownTime: number;
-        lastFired: number;
-        projectileVelocity: number;
-        projectileDamage: number;
-        projectileScale: { x: number; y: number };
-        multiplier: number;
-    }[];
-    projectileGroup;
+    weaponSlots: Weapon[];
+    projectileGroup: Phaser.GameObjects.Group;
 
     multiplier = 1;
     constructor(scene: BaseScene, ship: Spaceship, weaponOrigins, multiplier?: number) {
@@ -90,9 +91,9 @@ export class Weapons {
             type: "laser",
             cooldownTime: 600,
             projectileVelocity: 5000,
-            projectileDamage: 1000,
+            projectileBaseDamage: 1000,
             projectileScale: { x: 3, y: 1 },
-            multiplier: this.multiplier,
+            projectileDamageMultiplier: this.multiplier,
         };
 
         // DPS = 1000 * (1000 / 600) = 1666 damage per second
@@ -104,9 +105,9 @@ export class Weapons {
             type: "gatling",
             cooldownTime: 100,
             projectileVelocity: 1200,
-            projectileDamage: 200,
+            projectileBaseDamage: 200,
             projectileScale: { x: 0.4, y: 0.4 },
-            multiplier: this.multiplier,
+            projectileDamageMultiplier: this.multiplier,
         };
 
         // DPS = 166 * (1000 / 100) = 2000 damage per second
@@ -177,30 +178,34 @@ export class Weapons {
         }
     }
 
-    shootProjectile(
-        weapon,
-        addShipMomentum = false,
-        targetPoint?: { worldX: number; worldY: number }
-    ) {
-        const projectileVelocity = weapon.projectileVelocity;
-        const projectileDistance = 900_000;
-        const projectileLifespan = projectileDistance / projectileVelocity;
-
-        const originPoint = this.ship.getRotatedPoint(weapon, true);
-
-        const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
-
+    toVelocityVector(velocity: number, rotation: number, addShipMomentum = false) {
         let velocityX, velocityY;
         if (addShipMomentum) {
             // Take ship velocity in account when calculating the speed of a bullet
             const shipVelocityX = this.ship.body.velocity.x;
             const shipVelocityY = this.ship.body.velocity.y;
-            velocityX = Math.sin(rotation) * projectileVelocity + shipVelocityX;
-            velocityY = -Math.cos(rotation) * projectileVelocity + shipVelocityY;
+            velocityX = Math.sin(rotation) * velocity + shipVelocityX;
+            velocityY = -Math.cos(rotation) * velocity + shipVelocityY;
         } else {
-            velocityX = Math.sin(rotation) * projectileVelocity;
-            velocityY = -Math.cos(rotation) * projectileVelocity;
+            velocityX = Math.sin(rotation) * velocity;
+            velocityY = -Math.cos(rotation) * velocity;
         }
+
+        return { velocityX, velocityY };
+    }
+
+    shootProjectile(
+        weapon: Weapon,
+        addShipMomentum = false,
+        targetPoint?: { worldX: number; worldY: number }
+    ) {
+        const originPoint = this.ship.getRotatedPoint(weapon, true);
+        const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
+        const { velocityX, velocityY } = this.toVelocityVector(
+            weapon.projectileVelocity,
+            rotation,
+            addShipMomentum
+        );
 
         const serverOptions = {
             id: Phaser.Utils.String.UUID(),
@@ -211,21 +216,20 @@ export class Weapons {
             depth: this.ship.depth - 1,
             scale: { scaleX: weapon.projectileScale.x, scaleY: weapon.projectileScale.y },
             velocity: { velocityX, velocityY },
+            weapon,
+            travelDistance: 900000,
         };
         const clientOptions = {
             scene: this.scene,
             toPassTexture: this.ship.isTextured,
         };
         const projectile = new Projectile(serverOptions, clientOptions);
-        projectile["weapon"] = weapon;
 
         this.projectileGroup.add(projectile);
-
-        this.scene.time.delayedCall(projectileLifespan, () => projectile.destroy());
     }
 
     update(time: number, delta: number) {
-        const projectiles = this.projectileGroup.getChildren();
+        const projectiles = this.projectileGroup.getChildren() as Projectile[];
 
         if (projectiles.length) {
             projectiles.forEach((projectile) => {

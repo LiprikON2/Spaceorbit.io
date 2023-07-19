@@ -2,7 +2,15 @@ import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/containe
 import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
 import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
-import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
+import {
+    Explosion,
+    Exhausts,
+    Weapons,
+    Shields,
+    Outfitting,
+    type Outfit,
+    type Projectile,
+} from "./components";
 import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 
 export enum AllegianceEnum {
@@ -118,7 +126,6 @@ export class Spaceship extends Sprite {
     get speed() {
         const { x: vx, y: vy } = this.boundingBox.body.velocity;
         const speed = Math.sqrt(vx ** 2 + vy ** 2);
-        this.status;
         return speed;
     }
     get activity() {
@@ -222,10 +229,10 @@ export class Spaceship extends Sprite {
         this.boundingBox.destroy(fromScene);
     }
 
-    getHit(projectile) {
+    getHit(projectile: Projectile) {
         // this.emit('hit', projectile)
-        const damageMultiplier = projectile.weapon.multiplier;
-        const damage = projectile.weapon.projectileDamage * damageMultiplier;
+        const { damage } = projectile;
+
         // console.log(this.status.shields, this.status.health);
         if (this.status.shields > 0) {
             // Damage to the shield
