@@ -1,11 +1,13 @@
+import type { ProjectileGroup, SpaceshipGroup } from "~/scenes/core/BaseScene";
+
 interface collisionManagerClientOptions {
-    projectileGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
+    projectileGroup: ProjectileGroup;
+    allGroup: SpaceshipGroup;
 }
 
 export class BaseCollisionManager {
-    projectileGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
+    projectileGroup: ProjectileGroup;
+    allGroup: SpaceshipGroup;
 
     constructor(clientOptions: collisionManagerClientOptions) {
         const { projectileGroup, allGroup } = clientOptions;

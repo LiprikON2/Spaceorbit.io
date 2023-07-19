@@ -6,10 +6,27 @@ import {
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
 } from "~/game/objects/Sprite/Spaceship";
+import type { Projectile } from "~/objects/Sprite/Spaceship/components";
 import { MobManager } from "~/managers";
 
-type SpaceshipGroup = {
+export type SpaceshipGroup = {
     getChildren: () => Spaceship[];
+    getMatching: (
+        property?: string,
+        value?: any,
+        startIndex?: number,
+        endIndex?: number
+    ) => Spaceship[];
+} & Phaser.GameObjects.Group;
+
+export type ProjectileGroup = {
+    getChildren: () => Projectile[];
+    getMatching: (
+        property?: string,
+        value?: any,
+        startIndex?: number,
+        endIndex?: number
+    ) => Projectile[];
 } & Phaser.GameObjects.Group;
 
 /**
@@ -25,7 +42,7 @@ export class BaseScene extends Phaser.Scene {
     otherPlayersGroup: SpaceshipGroup;
     mobGroup: SpaceshipGroup;
     allGroup: SpaceshipGroup;
-    projectileGroup: Phaser.GameObjects.Group;
+    projectileGroup: ProjectileGroup;
 
     get isClient() {
         return Boolean(this.rootElem);
@@ -52,7 +69,7 @@ export class BaseScene extends Phaser.Scene {
         this.otherPlayersGroup = this.add.group() as SpaceshipGroup;
         this.mobGroup = this.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.allGroup = this.add.group() as SpaceshipGroup;
-        this.projectileGroup = this.add.group();
+        this.projectileGroup = this.add.group() as ProjectileGroup;
     }
 
     create() {}

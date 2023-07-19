@@ -12,6 +12,7 @@ import {
     type Projectile,
 } from "./components";
 import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
+import type { SpaceshipGroup } from "~/scenes/core/BaseScene";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -53,7 +54,7 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
-    allGroup: Phaser.GameObjects.Group;
+    allGroup: SpaceshipGroup;
 }
 
 export class Spaceship extends Sprite {
@@ -74,7 +75,7 @@ export class Spaceship extends Sprite {
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
-    allGroup: Phaser.GameObjects.Group;
+    allGroup: SpaceshipGroup;
     toggleFire = false;
 
     allegiance: AllegianceEnum | AllegianceKeys;
@@ -94,7 +95,7 @@ export class Spaceship extends Sprite {
     }
 
     get enemies(): Spaceship[] {
-        const all = this.allGroup.getChildren() as Spaceship[];
+        const all = this.allGroup.getChildren();
         const enemies = all.filter(
             (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
         );

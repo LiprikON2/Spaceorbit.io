@@ -194,10 +194,7 @@ export class ClientScene extends BaseMapScene {
             const playersState = serverPlayersSnapshot.state as ClientState[];
 
             playersState.forEach((playerState) => {
-                const [player] = this.otherPlayersGroup.getMatching(
-                    "id",
-                    playerState.id
-                ) as Spaceship[];
+                const [player] = this.otherPlayersGroup.getMatching("id", playerState.id);
 
                 if (player) player.setClientState(playerState);
             });
