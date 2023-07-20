@@ -12,7 +12,10 @@ import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/Ba
 import BaseInputManager, {
     type Actions,
 } from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
-import type { HitData as ClientHitData } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship/components";
+import {
+    type ClientHitData,
+    BaseCollisionManager,
+} from "@spaceorbit/client/src/game/scripts/managers/BaseCollisionManager";
 
 interface Players {
     [key: string]: {
@@ -22,16 +25,17 @@ interface Players {
     };
 }
 
-interface HitData extends ClientHitData {
+interface ServerHitData extends ClientHitData {
+    ownerId: ChannelId;
     time: number;
 }
 
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
+    collisionManager: BaseCollisionManager;
 
     players: Players = {};
-    elapsedSinceUpdate = 0;
     tickrate = 30;
 
     get tickrateDeltaTime() {
@@ -63,6 +67,10 @@ export class ServerScene extends BaseMapScene {
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
+        this.collisionManager = new BaseCollisionManager({
+            projectileGroup: this.projectileGroup,
+            allGroup: this.allGroup,
+        });
     }
 
     preload() {
@@ -88,7 +96,12 @@ export class ServerScene extends BaseMapScene {
                 this.emulateActions(channel.id, actions as Actions)
             );
 
-            channel.on("player:assert-hit", (hitData) => this.assertHit(hitData as HitData));
+            channel.on("player:assert-hit", (hitData) =>
+                this.assertHit(channel, {
+                    ...(hitData as ClientHitData),
+                    ownerId: channel.id,
+                })
+            );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
             channel.onDisconnect((reason) => {
@@ -97,12 +110,57 @@ export class ServerScene extends BaseMapScene {
             });
         });
     }
-    assertHit({ enemyId, projectileId, projectilePoint, hitboxCircle, time }: HitData) {
+    assertHit(
+        channel: ServerChannel,
+        { ownerId, enemyId, firedFromPoint, weaponId, projectilePoint, time }: ServerHitData
+    ) {
         console.log("player:assert-hit");
 
         // get the two closest snapshot to the date
-        const snapshots = this.si.vault.get(time);
-        if (!snapshots) return;
+        const serverSnapshots = this.si.vault.get(time);
+        if (!serverSnapshots) return;
+
+        // interpolate between both snapshots
+        const serverPlayersSnapshot = this.si.interpolate(
+            serverSnapshots.older,
+            serverSnapshots.newer,
+            time,
+            "x y",
+            "players"
+        );
+        if (!serverPlayersSnapshot) return;
+
+        // TODO make some validations
+        // if (hit is not already marked as successfull)
+        // if (projectile origin weapon slot is legit)
+        // if (projectile type is legit)
+        // if (projectile traveled legit distance)
+        // if (firerate is legit)
+        // if (firedFromPoint is legit)
+        const playersState = serverPlayersSnapshot.state as ClientState[];
+
+        const ownerState = playersState.find((playerState) => playerState.id === ownerId);
+        const enemyState = playersState.find((playerState) => playerState.id === enemyId);
+
+        if (!enemyState || !ownerState) return;
+
+        const [enemy] = this.allGroup.getMatching("id", enemyId) as Spaceship[];
+
+        const didHit = this.collisionManager.isPointInCircle(projectilePoint, {
+            x: enemyState.x,
+            y: enemyState.y,
+            r: enemy.hitboxRadius,
+        });
+
+        if (didHit) {
+            const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
+            const weapon = owner.weapons.getWeaponById(weaponId);
+            if (!weapon) return;
+
+            const damage = owner.weapons.getDamageByWeapon(weapon);
+            enemy.getHit(damage);
+            this.game.server.emit("all:hit", { id: enemyId, damage }, { reliable: true });
+        }
     }
 
     addPlayer(serverOptions: SpaceshipServerOptions) {
@@ -154,18 +212,11 @@ export class ServerScene extends BaseMapScene {
     }
 
     update(time: number, delta: number) {
-        this.everyTick(delta, () => {
+        this.everyTick(this.tickrate, delta, () => {
+            // console.log("thisactualFps", this.game.loop.actualFps);
             this.sendServerSnapshot();
         });
         this.updatePlayersInput(time, delta);
-    }
-
-    everyTick(delta: number, callback: Function) {
-        this.elapsedSinceUpdate += delta;
-        if (this.elapsedSinceUpdate > this.tickrateDeltaTime) {
-            this.elapsedSinceUpdate = 0;
-            callback();
-        }
     }
 
     sendServerSnapshot() {
@@ -174,6 +225,7 @@ export class ServerScene extends BaseMapScene {
             // projectiles: [],
         };
         const serverSnapshot = this.si.snapshot.create(serverState);
+        this.si.vault.add(serverSnapshot);
 
         this.game.server.emit("players:server-snapshot", serverSnapshot);
     }

@@ -1,13 +1,24 @@
-interface collisionManagerClientOptions {
-    projectileGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
+import type { ProjectileGroup, SpaceshipGroup } from "~/scenes/core/BaseScene";
+import type { Projectile } from "~/objects/Sprite/Spaceship/components";
+
+interface CollisionManagerClientOptions {
+    projectileGroup: ProjectileGroup;
+    allGroup: SpaceshipGroup;
+}
+
+export interface ClientHitData {
+    enemyId: string;
+    weaponId: number;
+    firedFromPoint: { x: number; y: number };
+    projectilePoint: { x: number; y: number };
+    time: number;
 }
 
 export class BaseCollisionManager {
-    projectileGroup: Phaser.GameObjects.Group;
-    allGroup: Phaser.GameObjects.Group;
+    projectileGroup: ProjectileGroup;
+    allGroup: SpaceshipGroup;
 
-    constructor(clientOptions: collisionManagerClientOptions) {
+    constructor(clientOptions: CollisionManagerClientOptions) {
         const { projectileGroup, allGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
         this.allGroup = allGroup;
@@ -22,4 +33,34 @@ export class BaseCollisionManager {
 
         return (x - circleX) ** 2 + (y - circleY) ** 2 <= radius ** 2;
     };
+
+    emitOnHit(projectile: Projectile) {
+        projectile.owner.enemies.forEach((enemy) => {
+            const projectilePoint = { x: projectile.x, y: projectile.y };
+            const { hitboxCircle } = enemy;
+
+            const didHit = this.isPointInCircle(projectilePoint, hitboxCircle);
+            if (didHit) {
+                // TODO reuse projectiles
+                projectile.destroy();
+
+                const hitData: Partial<ClientHitData> = {
+                    enemyId: enemy.id,
+                    weaponId: projectile.firedFrom.id,
+                    firedFromPoint: projectile.firedFromPoint,
+                    projectilePoint,
+                };
+
+                projectile.owner.emit("enemy:hit", hitData);
+                console.log("didHit", enemy.hitboxRadius, didHit);
+            }
+        });
+    }
+
+    update() {
+        if (!this.projectileGroup.getLength()) return;
+        const projectiles = this.projectileGroup.getChildren();
+
+        projectiles.forEach((projectile) => this.emitOnHit(projectile));
+    }
 }

@@ -7,7 +7,7 @@ export type Status = {
 };
 
 export interface SpriteServerOptions {
-    id: string;
+    id: string | number;
     x: number;
     y: number;
     angle: number;
@@ -22,7 +22,7 @@ export interface SpriteClientOptions {
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
-    id: string;
+    id: string | number;
     name: string;
     soundManager?: SoundManager;
     scene: BaseScene;

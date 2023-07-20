@@ -42,7 +42,7 @@ export class Shields extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    getHit = debounce(
+    playHitAnim = debounce(
         () => {
             if (!this.tweenFade.isPlaying()) {
                 this.tweenFade.play();

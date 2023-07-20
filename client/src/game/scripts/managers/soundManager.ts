@@ -216,7 +216,7 @@ export class SoundManager {
     update() {
         Object.keys(this.loopingSounds).forEach((id) => {
             const soundObj = this.loopingSounds[id];
-            const [soundSource] = this.scene.allGroup.getMatching("id", id) as Spaceship[];
+            const [soundSource] = this.scene.allGroup.getMatching("id", id);
 
             let distanceToSoundSource = 0;
             if (soundSource) {

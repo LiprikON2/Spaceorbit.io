@@ -12,6 +12,7 @@ import {
     type Projectile,
 } from "./components";
 import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
+import type { SpaceshipGroup } from "~/scenes/core/BaseScene";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -46,6 +47,7 @@ interface Multipliers {
 }
 
 export interface SpaceshipServerOptions extends SpriteServerOptions {
+    id: string;
     outfit: Outfit;
     allegiance: AllegianceEnum | AllegianceKeys;
     multipliers: Multipliers;
@@ -53,10 +55,11 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
-    allGroup: Phaser.GameObjects.Group;
+    allGroup: SpaceshipGroup;
 }
 
 export class Spaceship extends Sprite {
+    declare id: string;
     modules: {
         exhaustOrigins: { x: number; y: number }[];
         weaponOrigins: { x: number; y: number }[];
@@ -74,7 +77,7 @@ export class Spaceship extends Sprite {
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
-    allGroup: Phaser.GameObjects.Group;
+    allGroup: SpaceshipGroup;
     toggleFire = false;
 
     allegiance: AllegianceEnum | AllegianceKeys;
@@ -94,7 +97,7 @@ export class Spaceship extends Sprite {
     }
 
     get enemies(): Spaceship[] {
-        const all = this.allGroup.getChildren() as Spaceship[];
+        const all = this.allGroup.getChildren();
         const enemies = all.filter(
             (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
         );
@@ -131,6 +134,19 @@ export class Spaceship extends Sprite {
     }
     get activity() {
         return this.speed ? "moving" : "stopped";
+    }
+
+    get hitboxRadius() {
+        const hasShields = this.status.shields > 0;
+        return hasShields ? this.shields.body.radius : this.body.radius;
+    }
+
+    get hitboxCircle() {
+        return {
+            x: this.x,
+            y: this.y,
+            r: this.hitboxRadius,
+        };
     }
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
@@ -230,14 +246,10 @@ export class Spaceship extends Sprite {
         this.boundingBox.destroy(fromScene);
     }
 
-    getHit(projectile: Projectile) {
-        // this.emit('hit', projectile)
-        const { damage } = projectile;
-
-        // console.log(this.status.shields, this.status.health);
+    getHit(damage) {
         if (this.status.shields > 0) {
             // Damage to the shield
-            this.shields.getHit();
+            this.shields.playHitAnim();
 
             this.status.shields -= damage;
 

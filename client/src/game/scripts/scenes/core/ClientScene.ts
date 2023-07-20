@@ -10,9 +10,9 @@ import {
 } from "~/objects/Sprite/Spaceship";
 import { DebugInfo } from "~/objects";
 import type { GameClient } from "~/game";
-import { BaseMapScene } from "../maps/BaseMapScene";
+import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
 import { PingBuffer } from "~/game/utils/ping";
-import { HitData } from "~/objects/Sprite/Spaceship/components";
+import type { ClientHitData } from "~/managers/BaseCollisionManager";
 
 export class ClientScene extends BaseMapScene {
     game: GameClient;
@@ -70,6 +70,20 @@ export class ClientScene extends BaseMapScene {
         if (this.isSingleplayer) {
             const serverOptions = this.getPlayerServerOptions();
             this.player = await this.producePlayer(serverOptions, true);
+            this.allGroup.getChildren().forEach((entity) =>
+                entity.on("enemy:hit", (hitData) => {
+                    console.log("hitData", hitData);
+                    const { weaponId, ownerId, enemyId } = hitData;
+
+                    const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
+                    const weapon = owner.weapons.getWeaponById(weaponId);
+                    const damage = owner.weapons.getDamageByWeapon(weapon);
+                    const [enemy] = this.allGroup.getMatching("id", enemyId) as Spaceship[];
+
+                    enemy.getHit(damage);
+                })
+            );
+            this.mobManager.spawnMobs(5, this.soundManager);
         } else {
             this.player = await this.producePlayer(null, true);
 
@@ -83,7 +97,10 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("players:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot as Snapshot)
             );
-            this.player.on("hit:dealed", (hitData) => this.requestHitAssertion(hitData));
+            this.player.on("enemy:hit", (hitData) => this.requestHitAssertion(hitData));
+            this.channel.on("all:hit", (hit) =>
+                this.hitEntity(hit as { id: string; damage: number })
+            );
         }
 
         this.debugText = new DebugInfo(this, this.player).setDepth(1000);
@@ -94,13 +111,10 @@ export class ClientScene extends BaseMapScene {
             allGroup: this.allGroup,
         });
 
-        this.mobManager.spawnMobs(0, this.soundManager);
-
         this.isPaused = false;
         this.game.outEmitter.emit("worldCreate");
     }
-    requestHitAssertion(hitData: HitData) {
-        this.channel;
+    requestHitAssertion(hitData: Partial<ClientHitData>) {
         this.channel.emit("player:assert-hit", {
             ...hitData,
             time: this.si.serverTime,
@@ -164,22 +178,24 @@ export class ClientScene extends BaseMapScene {
 
     update(time: number, delta: number) {
         // Since create() is async, update() is called before create() finishes
-        if (!this.isPaused) {
-            super.update(time, delta);
-            this.debugText.update();
-            this.soundManager.update();
-            this.collisionManager.update();
+        if (this.isPaused) return;
 
-            // Acts as client predictor in multiplayer
-            this.inputManager.update(time, delta);
+        super.update(time, delta);
+        this.debugText.update();
+        this.soundManager.update();
+        this.collisionManager.update();
 
-            if (this.isMultiplayer) {
-                this.createClientSnapshot();
+        // Acts as client predictor in multiplayer
+        this.inputManager.update(time, delta);
+
+        if (this.isMultiplayer) {
+            this.createClientSnapshot();
+            this.everyTick(30, delta, () => {
                 this.sendPlayerActions();
                 this.updateReconciliation();
-                this.updateOtherPlayersState();
-                this.updatePing();
-            }
+            });
+            this.updateOtherPlayersState();
+            this.updatePing();
         }
     }
 
@@ -194,11 +210,7 @@ export class ClientScene extends BaseMapScene {
             const playersState = serverPlayersSnapshot.state as ClientState[];
 
             playersState.forEach((playerState) => {
-                const [player] = this.otherPlayersGroup.getMatching(
-                    "id",
-                    playerState.id
-                ) as Spaceship[];
-
+                const [player] = this.otherPlayersGroup.getMatching("id", playerState.id);
                 if (player) player.setClientState(playerState);
             });
         }

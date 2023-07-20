@@ -14,9 +14,13 @@ export interface ProjectileClientOptions extends SpriteClientOptions {}
 export class Projectile extends Sprite {
     firedFrom: Weapon;
     weapons: Weapons;
+    firedFromPoint: { x: number; y: number };
 
     constructor(serverOptions: ProjectileServerOptions, clientOptions: ProjectileClientOptions) {
         super(serverOptions, clientOptions);
+
+        const { x, y } = serverOptions;
+        this.firedFromPoint = { x, y };
 
         const { firedFrom, weapons } = serverOptions;
         this.firedFrom = firedFrom;
@@ -35,12 +39,16 @@ export class Projectile extends Sprite {
     }
 
     get damage() {
-        const { projectileDamageMultiplier, projectileBaseDamage } = this.firedFrom;
-        return projectileDamageMultiplier * projectileBaseDamage;
+        const damage = this.weapons.getDamageByWeapon(this.firedFrom);
+        return damage;
     }
 
     get owner() {
         return this.weapons.ship;
+    }
+
+    get ownerId() {
+        return this.owner.id;
     }
 
     destroyAfterTravelling(distance: number) {

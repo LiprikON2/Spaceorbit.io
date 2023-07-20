@@ -67,7 +67,7 @@ const UnnamedMapSceneClient = MixinUnnamedMapScene(ClientScene);
 export const clientConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     fps: {
-        // target: 10,
+        // target: 60,
         // forceSetTimeOut: true,
     },
     transparent: true,
