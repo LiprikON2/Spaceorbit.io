@@ -37,6 +37,10 @@ export type ClientState = {
     y: number;
     angle: number;
     activity: Activity;
+    worldX: number;
+    worldY: number;
+    primaryFireAutoattack: 0 | 1;
+    primaryFireActive: 0 | 1;
 } & Status;
 
 interface Multipliers {
@@ -78,7 +82,7 @@ export class Spaceship extends Sprite {
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
     allGroup: SpaceshipGroup;
-    toggleFire = false;
+    autoattack = false;
 
     allegiance: AllegianceEnum | AllegianceKeys;
     allegianceOpposition: AllegianceOpposition = {
@@ -91,6 +95,9 @@ export class Spaceship extends Sprite {
     boundingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
     rotateToPlugin: RotateTo;
     moveToPlugin: MoveTo;
+
+    pointer: { worldX: number; worldY: number };
+    primaryFireState = { active: false, autoattack: false };
 
     get opposition(): AllegianceKeys[] {
         return this.allegianceOpposition[this.allegiance];
@@ -191,7 +198,9 @@ export class Spaceship extends Sprite {
         // TODO make a display class
         // TODO use `Nine Slice Game Object` to display hp
         const { username, x, y } = serverOptions;
+        this.pointer = { worldX: x, worldY: y };
         this.setName(username);
+
         const textOffsetY = this.body.height * this.scale;
         this.followText = this.scene.add
             .text(x, y + textOffsetY, username, { fontSize: "2rem" })
@@ -296,6 +305,10 @@ export class Spaceship extends Sprite {
         this.scene.time.delayedCall(2000, () => this.respawn());
     }
 
+    toggleAutoattack() {
+        if (this.target) this.primaryFireState.autoattack = !this.primaryFireState.autoattack;
+    }
+
     /**
      * Sets reference to spaceship for autoattacking, also:
      *  - adds brackets to that spaceship's name
@@ -313,7 +326,7 @@ export class Spaceship extends Sprite {
                 prevTarget.targetedBy = prevTarget.targetedBy.filter(
                     (targetee) => targetee !== this
                 );
-                this.toggleFire = false;
+                this.autoattack = false;
             }
 
             if (target) {
@@ -322,6 +335,15 @@ export class Spaceship extends Sprite {
             }
             this.target = target;
         }
+    }
+
+    setPointer(worldX?: number, worldY?: number) {
+        if (worldX === undefined || worldY === undefined) {
+            const { x, y } = this.getClientState();
+            worldX = x;
+            worldY = y;
+        }
+        this.pointer = { worldX, worldY };
     }
 
     breakOffTargeting() {
@@ -334,8 +356,7 @@ export class Spaceship extends Sprite {
         if (typeof x === "undefined" || typeof y === "undefined") {
             ({ x, y } = this.scene.getRandomPositionOnMap());
         }
-        this.boundingBox.x = x;
-        this.boundingBox.y = y;
+        this.boundingBox.setPosition(x, y);
     }
 
     respawn(x?: number, y?: number) {
@@ -356,7 +377,9 @@ export class Spaceship extends Sprite {
         if (this.status.shields === 0) this.shields.crack(true);
     }
 
-    lookAtPoint(worldX: number, worldY: number) {
+    lookAtPointer(newPoint?: { worldX: number; worldY: number }) {
+        if (newPoint) this.setPointer(newPoint.worldX, newPoint.worldY);
+        const { worldX, worldY } = this.pointer;
         const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
         this.rotateTo(rotation);
     }
@@ -372,12 +395,8 @@ export class Spaceship extends Sprite {
         return this;
     }
 
-    rotateTo(rotation: number) {
-        this.rotateToPlugin.rotateTo(
-            Phaser.Math.RadToDeg(rotation + Math.PI / 2),
-            0,
-            this.maxSpeed
-        );
+    rotateTo(rotation: number, speed = this.maxSpeed) {
+        this.rotateToPlugin.rotateTo(Phaser.Math.RadToDeg(rotation + Math.PI / 2), 0, speed);
         if (this.exhausts) this.exhausts.updateExhaustPosition();
     }
 
@@ -497,28 +516,55 @@ export class Spaceship extends Sprite {
         this.lastMoveInput.force = force;
     }
 
-    primaryFire(time: number, point?: { worldX: number; worldY: number }) {
-        if (this.active) {
-            this.weapons.primaryFire(time, point);
-        }
+    primaryFire(time: number) {
+        this.weapons.primaryFire(time, this.pointer);
     }
 
-    toggleAttack() {
-        if (this.target) {
-            this.toggleFire = !this.toggleFire;
+    update(time: number, delta: number) {
+        if (!this.active) return;
+
+        if (this.primaryFireState.active) {
+            if (!this.primaryFireState.autoattack) {
+                this.primaryFire(time);
+            } else {
+                const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
+                if (dist < 900) {
+                    this.primaryFire(time);
+                }
+            }
         }
     }
-
-    update(time: number, delta: number) {}
 
     getClientState(): ClientState {
-        const { id, x, y, angle, activity, status } = this;
-        return { id, x, y, angle, activity, ...status };
+        const { id, x, y, angle, activity, pointer, status } = this;
+        const { active, autoattack } = this.primaryFireState;
+        const primaryFireActive = active ? 1 : 0;
+        const primaryFireAutoattack = autoattack ? 1 : 0;
+        return {
+            id,
+            x,
+            y,
+            angle,
+            activity,
+            ...pointer,
+            ...status,
+            primaryFireAutoattack,
+            primaryFireActive,
+        };
     }
 
-    setClientState({ x, y, angle, activity }: ClientState) {
-        this.boundingBox.x = x;
-        this.boundingBox.y = y;
+    setClientState({
+        x,
+        y,
+        angle,
+        worldX,
+        worldY,
+        activity,
+        primaryFireActive,
+        primaryFireAutoattack,
+    }: ClientState) {
+        this.boundingBox.setPosition(x, y);
+        this.setPointer(worldX, worldY);
         this.rotateTo(Phaser.Math.DegToRad(angle - 90));
 
         if (activity === "moving") {
@@ -526,5 +572,10 @@ export class Spaceship extends Sprite {
         } else if (activity === "stopped") {
             this.onStopMoving();
         }
+
+        this.primaryFireState = {
+            active: !!primaryFireActive,
+            autoattack: !!primaryFireAutoattack,
+        };
     }
 }

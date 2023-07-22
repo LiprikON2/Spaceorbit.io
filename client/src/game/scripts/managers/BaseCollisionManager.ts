@@ -52,7 +52,6 @@ export class BaseCollisionManager {
                 };
 
                 projectile.owner.emit("enemy:hit", hitData);
-                console.log("didHit", enemy.hitboxRadius, didHit);
             }
         });
     }

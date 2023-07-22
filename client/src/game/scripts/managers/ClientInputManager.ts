@@ -55,19 +55,21 @@ export class ClientInputManager extends BaseInputManager {
         return this.scene.input.activePointer.downElement?.tagName === "CANVAS";
     }
     get isAutoattacking() {
-        return this.player.toggleFire && Boolean(this.player.target);
+        return this.player.autoattack && Boolean(this.player.target);
     }
     get targetId() {
         return this.player?.target?.id ?? null;
     }
 
-    get actions(): Actions {
+    get actions(): Required<Actions> {
         let worldX = null;
         let worldY = null;
-        if (!this.isTouchMode) {
+        if (!this.isTouchMode && !this.isAutoattacking) {
             ({ worldX, worldY } = this.getPointerPosition());
         } else if (this.isAutoattacking) {
-            ({ x: worldX, y: worldY } = this.player.target);
+            ({ x: worldX, y: worldY } = this.player.target.getClientState());
+        } else {
+            // Touch mode behaviour
         }
 
         return {
@@ -86,6 +88,15 @@ export class ClientInputManager extends BaseInputManager {
             autoattack: this.isAutoattacking,
             targetId: this.targetId,
         };
+    }
+
+    getPointerPosition() {
+        // Updates mouse worldX, worldY manually, since when camera moves,
+        // but cursor doesn't it doesn't update them
+        this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
+
+        const { worldX, worldY } = this.scene.input.activePointer;
+        return { worldX, worldY };
     }
 
     constructor(scene, player, zoom = 1) {
@@ -121,7 +132,7 @@ export class ClientInputManager extends BaseInputManager {
         this.scene.input.on("clickTarget", (target) => this.player.setTarget(target));
 
         const toggleShootTargetBtn = this.keys.SPACE;
-        toggleShootTargetBtn.on("down", () => this.player.toggleAttack());
+        toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());
 
         this.initTouchControls();
     }
@@ -136,13 +147,13 @@ export class ClientInputManager extends BaseInputManager {
             const rotationDegree = Math.floor(joystick.angle * 100) / 100;
             this.player.setMove(rotationDegree, force);
 
-            if (!this.player.toggleFire) {
+            if (!this.player.autoattack) {
                 this.player.rotateTo(Phaser.Math.DegToRad(rotationDegree));
             }
         });
 
         const virtualBtn = makeButton(this.scene, this.isTouchMode);
-        virtualBtn.on("pointerdown", () => this.player.toggleAttack());
+        virtualBtn.on("pointerdown", () => this.player.toggleAutoattack());
 
         this.touchControls = { joystick, virtualBtn };
     }

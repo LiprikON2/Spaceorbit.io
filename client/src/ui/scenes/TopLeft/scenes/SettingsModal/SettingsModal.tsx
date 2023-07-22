@@ -77,7 +77,7 @@ export const SettingsModal = ({ opened, onClose }) => {
 
         mobs.forEach((mob) => {
             mob.moveTo(x, y);
-            mob.lookAtPoint(x, y);
+            mob.lookAtPointer({ worldX: x, worldY: y });
         });
     };
 

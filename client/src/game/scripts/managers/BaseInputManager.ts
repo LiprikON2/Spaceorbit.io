@@ -41,9 +41,9 @@ export default class BaseInputManager {
     player: Spaceship;
     keys: Keys;
     isTouchMode = false;
-    _actions: Actions;
+    _actions: Required<Actions>;
 
-    get actions(): Actions {
+    get actions() {
         return this._actions;
     }
 
@@ -54,7 +54,7 @@ export default class BaseInputManager {
         const actionsCompactEntries = Object.entries(this.actions).filter(
             ([key, value]) => value !== defaultActions[key]
         );
-        const actionsCompact = Object.fromEntries(actionsCompactEntries) as Actions;
+        const actionsCompact = Object.fromEntries(actionsCompactEntries) as Partial<Actions>;
         return actionsCompact;
     }
     setActions(actions: Partial<Actions>) {
@@ -66,15 +66,6 @@ export default class BaseInputManager {
         this.player = player;
 
         this._actions = defaultActions;
-    }
-
-    getPointerPosition() {
-        // Updates mouse worldX, worldY manually, since when camera moves,
-        // but cursor doesn't it doesn't update them
-        this.scene.input.activePointer.updateWorldPoint(this.scene.cameras.main);
-
-        const { worldX, worldY } = this.scene.input.activePointer;
-        return { worldX, worldY };
     }
 
     update(time: number, delta: number) {
@@ -112,17 +103,10 @@ export default class BaseInputManager {
         }
         if (!moved) this.player.onStopMoving();
 
-        // Shooting
-        if (primaryFire && !autoattack) {
-            this.player.primaryFire(time, { worldX, worldY });
-        } else if (autoattack) {
-            const dist = Phaser.Math.Distance.BetweenPoints(this.player, this.player.target);
-            if (dist < 900) {
-                this.player.primaryFire(time, { worldX, worldY });
-            }
-        }
-
         // Aiming
-        if (worldX && worldY) this.player.lookAtPoint(worldX, worldY);
+        if (worldX !== null && worldY !== null) this.player.lookAtPointer({ worldX, worldY });
+
+        // Shooting
+        this.player.primaryFireState = { active: primaryFire, autoattack };
     }
 }

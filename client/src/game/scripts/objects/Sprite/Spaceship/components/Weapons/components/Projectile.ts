@@ -17,7 +17,7 @@ export class Projectile extends Sprite {
     firedFromPoint: { x: number; y: number };
 
     constructor(serverOptions: ProjectileServerOptions, clientOptions: ProjectileClientOptions) {
-        super(serverOptions, clientOptions);
+        super(serverOptions, { ...clientOptions });
 
         const { x, y } = serverOptions;
         this.firedFromPoint = { x, y };

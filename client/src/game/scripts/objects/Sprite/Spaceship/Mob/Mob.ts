@@ -57,10 +57,10 @@ export class Mob extends Spaceship {
         const maxY = Math.min(this.y + step, worldMaxHeight);
         const minY = Math.max(this.y - step, worldMinHeight);
 
-        const x = Phaser.Math.Between(minX, maxX);
-        const y = Phaser.Math.Between(minY, maxY);
+        const worldX = Phaser.Math.Between(minX, maxX);
+        const worldY = Phaser.Math.Between(minY, maxY);
 
-        return { x, y };
+        return { worldX, worldY };
     }
 
     update(time, delta) {
@@ -83,20 +83,20 @@ export class Mob extends Spaceship {
             }
 
             if (!this.moveToPlugin.isRunning) {
-                const { x, y } = this.getNextPoint();
-                this.moveTo(x, y);
-                this.lookAtPoint(x, y);
+                const { worldX, worldY } = this.getNextPoint();
+                this.moveTo(worldX, worldY);
+                this.lookAtPointer({ worldX, worldY });
                 haveMoved = true;
             }
         }
 
         // If it is aggroed on someone
         if (this.target) {
-            const { x, y } = this.target;
+            const { x, y } = this.target.getClientState();
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
 
             // Shooting logic
-            this.lookAtPoint(x, y);
+            this.lookAtPointer({ worldX: x, worldY: y });
 
             if (this.isReadyToFire && dist < 900) {
                 // Fire

@@ -205,7 +205,10 @@ export class ClientScene extends BaseMapScene {
     }
 
     updateOtherPlayersState() {
-        const serverPlayersSnapshot = this.si.calcInterpolation("x y angle(deg)", "players");
+        const serverPlayersSnapshot = this.si.calcInterpolation(
+            "x y angle(deg) worldX worldY",
+            "players"
+        );
         if (serverPlayersSnapshot) {
             const playersState = serverPlayersSnapshot.state as ClientState[];
 

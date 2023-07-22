@@ -65,6 +65,24 @@ export class ServerScene extends BaseMapScene {
         return playersState;
     }
 
+    get attacksState() {
+        const playerEntries = Object.entries(this.players);
+        const attacksState = playerEntries.map(([playerId, { player, inputManager }]) => {
+            const { x, y } = player.getClientState();
+            const { primaryFire, autoattack, worldX, worldY } = inputManager.actions;
+
+            return {
+                id: playerId,
+                primaryFire: primaryFire ? 1 : 0,
+                autoattack: autoattack ? 1 : 0,
+                worldX: worldX ?? x,
+                worldY: worldY ?? y,
+            };
+        });
+
+        return attacksState;
+    }
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
         this.collisionManager = new BaseCollisionManager({
@@ -219,10 +237,20 @@ export class ServerScene extends BaseMapScene {
         this.updatePlayersInput(time, delta);
     }
 
+    sendAttacks(
+        playerId: ChannelId,
+        primaryFire: Actions["primaryFire"],
+        autoattack: Actions["autoattack"],
+        worldX: Actions["worldX"],
+        worldY: Actions["worldY"]
+    ) {
+        this.game.server.emit("all:attack", { playerId, primaryFire, autoattack, worldX, worldY });
+    }
+
     sendServerSnapshot() {
         const serverState = {
             players: this.playersState,
-            // projectiles: [],
+            attacks: this.attacksState,
         };
         const serverSnapshot = this.si.snapshot.create(serverState);
         this.si.vault.add(serverSnapshot);
