@@ -215,7 +215,6 @@ export class Weapons {
             toPassTexture: this.ship.isTextured,
         };
         const projectile = new Projectile(serverOptions, clientOptions);
-
         this.scene.projectileGroup.add(projectile);
     }
 

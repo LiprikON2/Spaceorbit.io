@@ -85,7 +85,7 @@ export class Mob extends Spaceship {
             if (!this.moveToPlugin.isRunning) {
                 const { worldX, worldY } = this.getNextPoint();
                 this.moveTo(worldX, worldY);
-                this.lookAtPointer({ worldX, worldY });
+                this.setPointer(worldX, worldY);
                 haveMoved = true;
             }
         }
@@ -96,7 +96,7 @@ export class Mob extends Spaceship {
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
 
             // Shooting logic
-            this.lookAtPointer({ worldX: x, worldY: y });
+            this.setPointer(x, y);
 
             if (this.isReadyToFire && dist < 900) {
                 // Fire

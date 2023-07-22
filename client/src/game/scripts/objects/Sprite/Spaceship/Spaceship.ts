@@ -41,6 +41,7 @@ export type ClientState = {
     worldY: number;
     primaryFireAutoattack: 0 | 1;
     primaryFireActive: 0 | 1;
+    targetId: string | undefined;
 } & Status;
 
 interface Multipliers {
@@ -82,7 +83,6 @@ export class Spaceship extends Sprite {
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
     allGroup: SpaceshipGroup;
-    autoattack = false;
 
     allegiance: AllegianceEnum | AllegianceKeys;
     allegianceOpposition: AllegianceOpposition = {
@@ -96,8 +96,12 @@ export class Spaceship extends Sprite {
     rotateToPlugin: RotateTo;
     moveToPlugin: MoveTo;
 
-    pointer: { worldX: number; worldY: number };
+    _pointer: { worldX: number; worldY: number };
     primaryFireState = { active: false, autoattack: false };
+
+    get isAutoattacking() {
+        return this.primaryFireState.autoattack && Boolean(this.target?.active);
+    }
 
     get opposition(): AllegianceKeys[] {
         return this.allegianceOpposition[this.allegiance];
@@ -198,7 +202,6 @@ export class Spaceship extends Sprite {
         // TODO make a display class
         // TODO use `Nine Slice Game Object` to display hp
         const { username, x, y } = serverOptions;
-        this.pointer = { worldX: x, worldY: y };
         this.setName(username);
 
         const textOffsetY = this.body.height * this.scale;
@@ -244,6 +247,7 @@ export class Spaceship extends Sprite {
         this.on("pointerdown", () => {
             this.scene.input.emit("clickTarget", this);
         });
+        this.setPointer(x, y);
     }
     /**
      * Destroys not only the sprite itself, but also related objects pinned to its bounding box
@@ -326,7 +330,7 @@ export class Spaceship extends Sprite {
                 prevTarget.targetedBy = prevTarget.targetedBy.filter(
                     (targetee) => targetee !== this
                 );
-                this.autoattack = false;
+                this.primaryFireState.autoattack = false;
             }
 
             if (target) {
@@ -337,13 +341,31 @@ export class Spaceship extends Sprite {
         }
     }
 
+    setTargetById(targetId: string) {
+        const [target] = this.allGroup.getMatching("id", targetId);
+        if (target) this.setTarget(target);
+    }
+
     setPointer(worldX?: number, worldY?: number) {
         if (worldX === undefined || worldY === undefined) {
             const { x, y } = this.getClientState();
             worldX = x;
             worldY = y;
         }
-        this.pointer = { worldX, worldY };
+        this._pointer = { worldX, worldY };
+    }
+    get pointer() {
+        if (!this.isAutoattacking) return this._pointer;
+        else {
+            const { x: worldX, y: worldY } = this.target.getClientState();
+            return { worldX, worldY };
+        }
+    }
+
+    lookAtPointer() {
+        let { worldX, worldY } = this.pointer;
+        const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
+        this.rotateTo(rotation);
     }
 
     breakOffTargeting() {
@@ -375,13 +397,6 @@ export class Spaceship extends Sprite {
         this.active = true;
         this.onStopMoving();
         if (this.status.shields === 0) this.shields.crack(true);
-    }
-
-    lookAtPointer(newPoint?: { worldX: number; worldY: number }) {
-        if (newPoint) this.setPointer(newPoint.worldX, newPoint.worldY);
-        const { worldX, worldY } = this.pointer;
-        const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
-        this.rotateTo(rotation);
     }
 
     setAngle(angle?: number) {
@@ -521,25 +536,25 @@ export class Spaceship extends Sprite {
     }
 
     update(time: number, delta: number) {
-        if (!this.active) return;
+        this.lookAtPointer();
 
-        if (this.primaryFireState.active) {
-            if (!this.primaryFireState.autoattack) {
+        if (this.isAutoattacking) {
+            const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
+            if (dist < 900) {
                 this.primaryFire(time);
-            } else {
-                const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
-                if (dist < 900) {
-                    this.primaryFire(time);
-                }
             }
+        } else if (this.primaryFireState.active) {
+            this.primaryFire(time);
         }
     }
 
     getClientState(): ClientState {
-        const { id, x, y, angle, activity, pointer, status } = this;
+        const { id, x, y, angle, activity, _pointer: pointer, status } = this;
+
         const { active, autoattack } = this.primaryFireState;
         const primaryFireActive = active ? 1 : 0;
         const primaryFireAutoattack = autoattack ? 1 : 0;
+        const targetId = this.target?.id;
         return {
             id,
             x,
@@ -550,6 +565,7 @@ export class Spaceship extends Sprite {
             ...status,
             primaryFireAutoattack,
             primaryFireActive,
+            targetId,
         };
     }
 
@@ -562,6 +578,7 @@ export class Spaceship extends Sprite {
         activity,
         primaryFireActive,
         primaryFireAutoattack,
+        targetId,
     }: ClientState) {
         this.boundingBox.setPosition(x, y);
         this.setPointer(worldX, worldY);
@@ -577,5 +594,6 @@ export class Spaceship extends Sprite {
             active: !!primaryFireActive,
             autoattack: !!primaryFireAutoattack,
         };
+        if (targetId) this.setTargetById(targetId);
     }
 }

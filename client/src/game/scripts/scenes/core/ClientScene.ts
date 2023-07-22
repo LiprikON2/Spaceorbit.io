@@ -72,7 +72,6 @@ export class ClientScene extends BaseMapScene {
             this.player = await this.producePlayer(serverOptions, true);
             this.allGroup.getChildren().forEach((entity) =>
                 entity.on("enemy:hit", (hitData) => {
-                    console.log("hitData", hitData);
                     const { weaponId, ownerId, enemyId } = hitData;
 
                     const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
@@ -115,10 +114,14 @@ export class ClientScene extends BaseMapScene {
         this.game.outEmitter.emit("worldCreate");
     }
     requestHitAssertion(hitData: Partial<ClientHitData>) {
-        this.channel.emit("player:assert-hit", {
-            ...hitData,
-            time: this.si.serverTime,
-        });
+        this.channel.emit(
+            "player:assert-hit",
+            {
+                ...hitData,
+                time: this.si.serverTime,
+            },
+            { reliable: true }
+        );
     }
 
     async producePlayer(serverOptions?: SpaceshipServerOptions, isMe = false): Promise<Spaceship> {

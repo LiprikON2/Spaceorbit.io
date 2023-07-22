@@ -54,23 +54,12 @@ export class ClientInputManager extends BaseInputManager {
     get isGameInFocus() {
         return this.scene.input.activePointer.downElement?.tagName === "CANVAS";
     }
-    get isAutoattacking() {
-        return this.player.autoattack && Boolean(this.player.target);
-    }
     get targetId() {
         return this.player?.target?.id ?? null;
     }
 
     get actions(): Required<Actions> {
-        let worldX = null;
-        let worldY = null;
-        if (!this.isTouchMode && !this.isAutoattacking) {
-            ({ worldX, worldY } = this.getPointerPosition());
-        } else if (this.isAutoattacking) {
-            ({ x: worldX, y: worldY } = this.player.target.getClientState());
-        } else {
-            // Touch mode behaviour
-        }
+        const { worldX, worldY } = this.getPointerPosition();
 
         return {
             worldX,
@@ -85,7 +74,7 @@ export class ClientInputManager extends BaseInputManager {
             secondaryFire: false,
 
             touchMode: this.isTouchMode,
-            autoattack: this.isAutoattacking,
+            autoattack: this.player.isAutoattacking,
             targetId: this.targetId,
         };
     }
@@ -147,7 +136,7 @@ export class ClientInputManager extends BaseInputManager {
             const rotationDegree = Math.floor(joystick.angle * 100) / 100;
             this.player.setMove(rotationDegree, force);
 
-            if (!this.player.autoattack) {
+            if (!this.player.primaryFireState.autoattack) {
                 this.player.rotateTo(Phaser.Math.DegToRad(rotationDegree));
             }
         });
@@ -173,5 +162,9 @@ export class ClientInputManager extends BaseInputManager {
 
     update(time: number, delta: number) {
         super.update(time, delta);
+    }
+
+    setTargetById(targetId: string) {
+        // TODO disable this on client more gracefully
     }
 }

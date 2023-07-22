@@ -69,13 +69,13 @@ export default class BaseInputManager {
     }
 
     update(time: number, delta: number) {
-        const { up, left, down, right, primaryFire, autoattack, worldX, worldY } = this.actions;
         let moved = false;
 
         this.player.resetMovement();
         moved = this.player.move();
 
         // Movement
+        const { up, left, down, right } = this.actions;
         if (up && !left && !down && !right) {
             this.player.moveUp();
             moved = true;
@@ -104,9 +104,19 @@ export default class BaseInputManager {
         if (!moved) this.player.onStopMoving();
 
         // Aiming
-        if (worldX !== null && worldY !== null) this.player.lookAtPointer({ worldX, worldY });
+        const { worldX, worldY } = this.actions;
+        const isPointerDetermined = worldX !== null && worldY !== null;
+        if (isPointerDetermined) this.player.setPointer(worldX, worldY);
 
         // Shooting
+        const { primaryFire, autoattack } = this.actions;
         this.player.primaryFireState = { active: primaryFire, autoattack };
+
+        const { targetId } = this.actions;
+        this.setTargetById(targetId);
+    }
+
+    setTargetById(targetId: string) {
+        if (targetId) this.player.setTargetById(targetId);
     }
 }
