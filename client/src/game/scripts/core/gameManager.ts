@@ -16,7 +16,7 @@ export interface ConnectionErrorEvent {
     navigateToMode: "mainMenu" | "singleplayer" | "multiplayer";
 }
 export interface OutEvents {
-    worldCreate: () => void;
+    "world:create": () => void;
     loading: (status: StatusEvent) => void;
     connectionError: (errorDetails: ConnectionErrorEvent) => void;
 }
@@ -59,7 +59,7 @@ export class GameManager {
         await whenIsBooted;
 
         const whenSceneCreated = new Promise((resolve) => {
-            this.on("worldCreate", resolve);
+            this.on("world:create", resolve);
         });
         await whenSceneCreated;
 

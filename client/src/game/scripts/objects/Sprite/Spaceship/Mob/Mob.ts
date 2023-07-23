@@ -92,7 +92,7 @@ export class Mob extends Spaceship {
 
         // If it is aggroed on someone
         if (this.target) {
-            const { x, y } = this.target.getClientState();
+            const { x, y } = this.target.getActionsState();
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
 
             // Shooting logic

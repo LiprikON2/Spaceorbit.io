@@ -2,12 +2,14 @@ import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/container
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import {
+    type AllegianceKeys,
     Spaceship,
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
 } from "~/game/objects/Sprite/Spaceship";
 import type { Projectile } from "~/objects/Sprite/Spaceship/components";
 import { MobManager } from "~/managers";
+import { Status } from "../../..";
 
 export type SpaceshipGroup = {
     getChildren: () => Spaceship[];
@@ -164,9 +166,38 @@ export class BaseScene extends Phaser.Scene {
         return { x: randomX, y: randomY };
     }
 
-    hitEntity({ id, damage }) {
-        const [entity] = this.allGroup.getMatching("id", id);
+    hitEntity(entityId: string, damage: number) {
+        const [entity] = this.allGroup.getMatching("id", entityId);
         if (entity) entity.getHit(damage);
+    }
+
+    respawnEntity(
+        entityId: string,
+        point: { worldX: number; worldY: number } = { worldX: null, worldY: null }
+    ) {
+        console.log("entity:respawn");
+        let { worldX, worldY } = point;
+        const [entity] = this.allGroup.getMatching("id", entityId) as Spaceship[];
+
+        if (entity?.isDead) {
+            const rogueAllegiances: AllegianceKeys[] = ["Alien", "Unaffiliated"];
+            if (point.worldX && point.worldY) {
+                entity.respawn(point.worldX, point.worldY);
+            } else {
+                if (rogueAllegiances.includes(entity.allegiance)) {
+                    [worldX, worldY] = entity.respawn();
+                } else {
+                    [worldX, worldY] = entity.respawn(0, 0);
+                }
+            }
+        }
+
+        return [worldX, worldY];
+    }
+
+    updateEntityStatus(id: string, status: Status) {
+        const [entity] = this.allGroup.getMatching("id", id);
+        if (entity) entity.setStatus(status);
     }
 
     everyTick(tickrate: number, delta: number, callback: Function) {

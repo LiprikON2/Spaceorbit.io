@@ -42,7 +42,7 @@ export class Shields extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    playHitAnim = debounce(
+    playShieldHit = debounce(
         () => {
             if (!this.tweenFade.isPlaying()) {
                 this.tweenFade.play();
@@ -59,9 +59,9 @@ export class Shields extends Phaser.Physics.Arcade.Sprite {
         { leading: true }
     );
 
-    crack(silent = false) {
+    crack(playEffects = true) {
         this.disableBody(true, true);
-        if (!silent && this.ship.soundManager) {
+        if (playEffects && this.ship.soundManager) {
             this.ship.soundManager.play("shield_down", {
                 sourceX: this.x,
                 sourceY: this.y,

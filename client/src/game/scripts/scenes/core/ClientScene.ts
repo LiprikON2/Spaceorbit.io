@@ -5,7 +5,7 @@ import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import { ClientCollisionManager, ClientInputManager, SoundManager } from "~/managers";
 import {
     Spaceship,
-    type ClientState,
+    type ActionsState,
     type SpaceshipServerOptions,
 } from "~/objects/Sprite/Spaceship";
 import { DebugInfo } from "~/objects";
@@ -14,6 +14,10 @@ import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
 import { PingBuffer } from "~/game/utils/ping";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
 
+interface ProducePlayerOptions {
+    isMe?: boolean;
+    playerCreationCallback?: (player: Spaceship) => void;
+}
 export class ClientScene extends BaseMapScene {
     game: GameClient;
     channel?: ClientChannel;
@@ -69,26 +73,33 @@ export class ClientScene extends BaseMapScene {
 
         if (this.isSingleplayer) {
             const serverOptions = this.getPlayerServerOptions();
-            this.player = await this.producePlayer(serverOptions, true);
-            this.allGroup.getChildren().forEach((entity) =>
-                entity.on("enemy:hit", (hitData) => {
-                    const { weaponId, ownerId, enemyId } = hitData;
+            this.player = await this.producePlayer(serverOptions, {
+                isMe: true,
+                playerCreationCallback: (player) => {
+                    player.on("enemy:hit", (hitData) => {
+                        const { weaponId, ownerId, enemyId } = hitData;
 
-                    const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
-                    const weapon = owner.weapons.getWeaponById(weaponId);
-                    const damage = owner.weapons.getDamageByWeapon(weapon);
-                    const [enemy] = this.allGroup.getMatching("id", enemyId) as Spaceship[];
+                        const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
+                        const weapon = owner.weapons.getWeaponById(weaponId);
+                        const damage = owner.weapons.getDamageByWeapon(weapon);
 
-                    enemy.getHit(damage);
-                })
-            );
+                        this.hitEntity(enemyId, damage);
+                    });
+                    player.on("entity:dead", () => this.respawnEntity(player.id));
+                },
+            });
             this.mobManager.spawnMobs(5, this.soundManager);
         } else {
-            this.player = await this.producePlayer(null, true);
+            this.player = await this.producePlayer(null, {
+                isMe: true,
+                playerCreationCallback: (player) => this.setMultiplayerListeners(player),
+            });
 
-            await this.produceConnectedPlayers();
+            await this.produceConnectedPlayers((player) => this.setMultiplayerListeners(player));
             this.channel.on("player:connected", (serverOptions) =>
-                this.producePlayer(serverOptions as SpaceshipServerOptions)
+                this.producePlayer(serverOptions as SpaceshipServerOptions, {
+                    playerCreationCallback: (player) => this.setMultiplayerListeners(player),
+                })
             );
             this.channel.on("player:disconnected", (playerId) =>
                 this.destroyPlayer(playerId as ChannelId)
@@ -96,10 +107,16 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("players:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot as Snapshot)
             );
-            this.player.on("enemy:hit", (hitData) => this.requestHitAssertion(hitData));
-            this.channel.on("all:hit", (hit) =>
-                this.hitEntity(hit as { id: string; damage: number })
+
+            this.player.on("entity:hit", (hitData) => this.requestHitAssertion(hitData));
+            this.channel.on("entity:status", ({ id, status }: any) =>
+                this.updateEntityStatus(id, status)
             );
+
+            this.player.on("entity:dead", () => this.requestRespawn());
+            this.channel.on("entity:respawn", ({ id, point }: any) => {
+                this.respawnEntity(id, point);
+            });
         }
 
         this.debugText = new DebugInfo(this, this.player).setDepth(1000);
@@ -111,9 +128,17 @@ export class ClientScene extends BaseMapScene {
         });
 
         this.isPaused = false;
-        this.game.outEmitter.emit("worldCreate");
+        this.game.outEmitter.emit("world:create");
     }
+
+    setMultiplayerListeners(entity: Spaceship) {
+        // TODO indiscriminate clearing snapshots of all player is not optimal;
+        // Prevents teleportation from being jerky
+        entity.on("entity:teleport", () => this.clearSnapshots());
+    }
+
     requestHitAssertion(hitData: Partial<ClientHitData>) {
+        console.log("player:assert-hit");
         this.channel.emit(
             "player:assert-hit",
             {
@@ -124,15 +149,30 @@ export class ClientScene extends BaseMapScene {
         );
     }
 
-    async producePlayer(serverOptions?: SpaceshipServerOptions, isMe = false): Promise<Spaceship> {
-        if (!serverOptions) {
-            serverOptions = await this.requestPlayer();
-        }
-        const isAlreadyPresent = !!this.playerGroup.getMatching("id", serverOptions.id).length;
-        if (isAlreadyPresent) return;
+    requestRespawn() {
+        console.log("player:request-respawn");
+        this.channel.emit("player:request-respawn", null, { reliable: true });
+    }
+
+    async producePlayer(
+        serverOptions?: SpaceshipServerOptions,
+        options?: ProducePlayerOptions
+    ): Promise<Spaceship> {
+        const defaultOptions = {
+            isMe: false,
+            playerCreationCallback: () => {},
+        };
+        if (!serverOptions) serverOptions = await this.requestPlayer();
+        const { isMe, playerCreationCallback } = { ...defaultOptions, ...options };
+
+        const [alreadyPresentPlayer] = this.playerGroup.getMatching("id", serverOptions.id);
+        if (alreadyPresentPlayer) return alreadyPresentPlayer;
 
         const clientOptions = this.getPlayerClientOptions();
-        return this.createPlayer(serverOptions, clientOptions, isMe);
+        const player = this.createPlayer(serverOptions, clientOptions, isMe);
+
+        playerCreationCallback(player);
+        return player;
     }
 
     async requestPlayer(): Promise<SpaceshipServerOptions> {
@@ -146,9 +186,16 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    async produceConnectedPlayers() {
+    async produceConnectedPlayers(
+        playerCreationCallback: ProducePlayerOptions["playerCreationCallback"]
+    ) {
         const serverOptionsList = await this.requestAlreadyConnectedPlayers();
-        serverOptionsList.forEach((serverOptions) => this.producePlayer(serverOptions));
+
+        serverOptionsList.forEach((serverOptions) =>
+            this.producePlayer(serverOptions, {
+                playerCreationCallback,
+            })
+        );
     }
 
     async requestAlreadyConnectedPlayers(): Promise<SpaceshipServerOptions[]> {
@@ -174,9 +221,14 @@ export class ClientScene extends BaseMapScene {
     }
 
     createClientSnapshot() {
-        const clientState = { player: [this.player.getClientState()] };
+        const clientState = { player: [this.player.getActionsState()] };
         const clientSnapshot = this.si.snapshot.create(clientState);
         this.clientVault.add(clientSnapshot);
+    }
+
+    clearSnapshots() {
+        this.si.vault.clear();
+        this.clientVault.clear();
     }
 
     update(time: number, delta: number) {
@@ -200,6 +252,8 @@ export class ClientScene extends BaseMapScene {
             this.updateOtherPlayersState();
             this.updatePing();
         }
+
+        // console.log("Player2", this.allGroup.getMatching("name", "Player2")[0]?.targetedBy);
     }
 
     sendPlayerActions() {
@@ -213,11 +267,11 @@ export class ClientScene extends BaseMapScene {
             "players"
         );
         if (serverPlayersSnapshot) {
-            const playersState = serverPlayersSnapshot.state as ClientState[];
+            const playersState = serverPlayersSnapshot.state as ActionsState[];
 
             playersState.forEach((playerState) => {
-                const [player] = this.otherPlayersGroup.getMatching("id", playerState.id);
-                if (player) player.setClientState(playerState);
+                const [otherPlayer] = this.otherPlayersGroup.getMatching("id", playerState.id);
+                if (otherPlayer?.active) otherPlayer.setActionsState(playerState);
             });
         }
     }
@@ -229,13 +283,13 @@ export class ClientScene extends BaseMapScene {
             // Get the closest client snapshot that matches the server snapshot time
             const clientSnapshot = this.clientVault.get(serverSnapshot.time, true);
             if (clientSnapshot) {
-                const serverPlayersState = serverSnapshot.state["players"] as ClientState[];
+                const serverPlayersState = serverSnapshot.state["players"] as ActionsState[];
                 // Get the current server state on the server
                 const serverPlayerState = serverPlayersState.find(
                     (playerState) => playerState.id === this.player.id
                 );
 
-                const [clientPlayerState] = clientSnapshot.state["player"] as ClientState[];
+                const [clientPlayerState] = clientSnapshot.state["player"] as ActionsState[];
 
                 // Calculate the offset between server and client
                 const offsetX = clientPlayerState.x - serverPlayerState.x;

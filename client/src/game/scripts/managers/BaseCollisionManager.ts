@@ -51,7 +51,7 @@ export class BaseCollisionManager {
                     projectilePoint,
                 };
 
-                projectile.owner.emit("enemy:hit", hitData);
+                projectile.owner.emit("entity:hit", hitData);
             }
         });
     }

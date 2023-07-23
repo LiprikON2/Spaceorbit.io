@@ -4,7 +4,7 @@ import { ChannelId, ServerChannel } from "@geckos.io/server";
 import { getIsoTime } from "~/server/utils";
 import type { GameServer } from "~/server/game/GameServer";
 import type {
-    ClientState,
+    ActionsState,
     Spaceship,
     SpaceshipServerOptions,
 } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship";
@@ -51,15 +51,15 @@ export class ServerScene extends BaseMapScene {
         );
         const otherPlayersOptions = otherPlayersEntries.map(([key, { player, serverOptions }]) => {
             // TODO update
-            const { x, y, angle } = player.getClientState();
+            const { x, y, angle } = player.getActionsState();
             return { ...serverOptions, x, y, angle };
         });
         return otherPlayersOptions;
     }
 
-    get playersState(): ClientState[] {
+    get playersState(): ActionsState[] {
         const playersState = Object.values(this.players).map(({ player }) =>
-            player.getClientState()
+            player.getActionsState()
         );
 
         return playersState;
@@ -97,11 +97,13 @@ export class ServerScene extends BaseMapScene {
             );
 
             channel.on("player:assert-hit", (hitData) =>
-                this.assertHit(channel, {
+                this.assertHit({
                     ...(hitData as ClientHitData),
                     ownerId: channel.id,
                 })
             );
+
+            channel.on("player:request-respawn", () => this.respawnEntity(channel.id));
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
             channel.onDisconnect((reason) => {
@@ -110,10 +112,14 @@ export class ServerScene extends BaseMapScene {
             });
         });
     }
-    assertHit(
-        channel: ServerChannel,
-        { ownerId, enemyId, firedFromPoint, weaponId, projectilePoint, time }: ServerHitData
-    ) {
+    assertHit({
+        ownerId,
+        enemyId,
+        firedFromPoint,
+        weaponId,
+        projectilePoint,
+        time,
+    }: ServerHitData) {
         console.log("player:assert-hit");
 
         // get the two closest snapshot to the date
@@ -137,7 +143,7 @@ export class ServerScene extends BaseMapScene {
         // if (projectile traveled legit distance)
         // if (firerate is legit)
         // if (firedFromPoint is legit)
-        const playersState = serverPlayersSnapshot.state as ClientState[];
+        const playersState = serverPlayersSnapshot.state as ActionsState[];
 
         const ownerState = playersState.find((playerState) => playerState.id === ownerId);
         const enemyState = playersState.find((playerState) => playerState.id === enemyId);
@@ -159,7 +165,30 @@ export class ServerScene extends BaseMapScene {
 
             const damage = owner.weapons.getDamageByWeapon(weapon);
             enemy.getHit(damage);
-            this.game.server.emit("all:hit", { id: enemyId, damage }, { reliable: true });
+
+            this.sendEntityStatus(enemy.id);
+        }
+    }
+    respawnEntity(entityId: ChannelId) {
+        const [worldX, worldY] = super.respawnEntity(entityId!);
+
+        this.game.server.emit(
+            "entity:respawn",
+            { id: entityId, point: { worldX, worldY } },
+            { reliable: true }
+        );
+
+        return [worldX, worldY];
+    }
+
+    sendEntityStatus(entityId: ChannelId) {
+        const [entity] = this.allGroup.getMatching("id", entityId) as Spaceship[];
+        if (entity) {
+            this.game.server.emit(
+                "entity:status",
+                { id: entity.id, status: entity.status },
+                { reliable: true }
+            );
         }
     }
 

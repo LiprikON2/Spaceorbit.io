@@ -23,26 +23,26 @@ export enum AllegianceEnum {
     Mars = "Mars",
     Earth = "Earth",
 }
-type AllegianceKeys = keyof typeof AllegianceEnum;
+export type AllegianceKeys = keyof typeof AllegianceEnum;
 
 type AllegianceOpposition = {
     [key in AllegianceKeys]: AllegianceKeys[];
 };
 
-type Activity = "moving" | "stopped";
+type MovementActivity = "moving" | "stopped";
 
-export type ClientState = {
+export type ActionsState = {
     id: string;
     x: number;
     y: number;
     angle: number;
-    activity: Activity;
+    activity: MovementActivity;
     worldX: number;
     worldY: number;
     primaryFireAutoattack: 0 | 1;
     primaryFireActive: 0 | 1;
     targetId: string | undefined;
-} & Status;
+};
 
 interface Multipliers {
     speed: number;
@@ -143,7 +143,7 @@ export class Spaceship extends Sprite {
         const speed = Math.sqrt(vx ** 2 + vy ** 2);
         return speed;
     }
-    get activity() {
+    get activity(): MovementActivity {
         return this.speed ? "moving" : "stopped";
     }
 
@@ -158,6 +158,18 @@ export class Spaceship extends Sprite {
             y: this.y,
             r: this.hitboxRadius,
         };
+    }
+
+    get isExplosionPlaying() {
+        return this.boundingBox.body.enable;
+    }
+
+    get isDead() {
+        return this.status.health <= 0;
+    }
+
+    get isDying() {
+        return this.isDead && this.isExplosionPlaying;
     }
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
@@ -196,7 +208,7 @@ export class Spaceship extends Sprite {
         this.status.health = this.maxHealth;
         this.status.shields = this.maxShields;
 
-        if (this.status.shields === 0) this.shields.crack(true);
+        if (this.status.shields === 0) this.shields.crack(false);
 
         // Text
         // TODO make a display class
@@ -259,45 +271,40 @@ export class Spaceship extends Sprite {
         this.boundingBox.destroy(fromScene);
     }
 
-    getHit(damage) {
+    getHit(damage = 0) {
         if (this.status.shields > 0) {
             // Damage to the shield
-            this.shields.playHitAnim();
+            this.shields.playShieldHit();
 
-            this.status.shields -= damage;
+            this.status.shields = Math.max(this.status.shields - damage, 0);
 
-            if (this.status.shields <= 0) {
-                this.status.shields = 0;
-                this.shields.crack();
-            }
+            if (this.status.shields <= 0) this.shields.crack();
         } else {
             // Damage to the hull
-            if (this.soundManager) {
-                this.soundManager.play("hit", {
-                    sourceX: this.x,
-                    sourceY: this.y,
-                    volume: 0.2,
-                });
-            }
+            this.playHullHit();
 
-            // TODO lastHit time variable in order not to bug out the tween, plus make it possible to regen shields
-            this.setTint(0xee4824);
-            this.scene.time.delayedCall(200, () => this.clearTint());
-
-            this.status.health -= damage;
-
-            if (this.status.health <= 0) {
-                this.status.health = 0;
-                this.explode();
-            }
+            this.status.health = Math.max(this.status.health - damage, 0);
         }
+        if (this.isDead) this.explode();
+    }
+    playHullHit() {
+        if (this.soundManager) {
+            this.soundManager.play("hit", {
+                sourceX: this.x,
+                sourceY: this.y,
+                volume: 0.2,
+            });
+        }
+
+        // TODO lastHit time variable in order not to bug out the tween, plus make it possible to regen shields
+        this.setTint(0xee4824);
+        this.scene.time.delayedCall(200, () => this.clearTint());
     }
 
     explode() {
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
         this.resetMovement();
-        // this.emit("dead", this.id);
 
         // TODO add variety ("explosion patterns")
         if (this.isTextured) {
@@ -306,7 +313,10 @@ export class Spaceship extends Sprite {
             });
         }
 
-        this.scene.time.delayedCall(2000, () => this.respawn());
+        const isNotAlreadyDying = !this.isDying;
+        if (isNotAlreadyDying) {
+            this.scene.time.delayedCall(2000, () => this.emit("entity:dead", this));
+        }
     }
 
     toggleAutoattack() {
@@ -322,7 +332,10 @@ export class Spaceship extends Sprite {
     setTarget(target: Spaceship = null) {
         const prevTarget = this.target;
 
-        const isValidNewTarget = target !== prevTarget && target !== this;
+        const notSameTarget = target !== prevTarget;
+        const didNotTargetSelf = target !== this;
+
+        const isValidNewTarget = notSameTarget && didNotTargetSelf;
         if (isValidNewTarget) {
             if (prevTarget) {
                 const { followText } = prevTarget;
@@ -348,7 +361,7 @@ export class Spaceship extends Sprite {
 
     setPointer(worldX?: number, worldY?: number) {
         if (worldX === undefined || worldY === undefined) {
-            const { x, y } = this.getClientState();
+            const { x, y } = this.getActionsState();
             worldX = x;
             worldY = y;
         }
@@ -357,7 +370,7 @@ export class Spaceship extends Sprite {
     get pointer() {
         if (!this.isAutoattacking) return this._pointer;
         else {
-            const { x: worldX, y: worldY } = this.target.getClientState();
+            const { x: worldX, y: worldY } = this.target.getActionsState();
             return { worldX, worldY };
         }
     }
@@ -373,17 +386,19 @@ export class Spaceship extends Sprite {
         this.targetedBy = [];
     }
 
-    teleport(x?: number, y?: number, map?: string) {
+    teleport(worldX: number, worldY: number, map?: string) {
         this.resetMovement();
-        if (typeof x === "undefined" || typeof y === "undefined") {
-            ({ x, y } = this.scene.getRandomPositionOnMap());
-        }
-        this.boundingBox.setPosition(x, y);
+        this.emit("entity:teleport", this, { worldX, worldY });
+        this.boundingBox.setPosition(worldX, worldY);
     }
 
     respawn(x?: number, y?: number) {
         this.breakOffTargeting();
         this.setTarget();
+
+        if (x === undefined || y === undefined) {
+            ({ x, y } = this.scene.getRandomPositionOnMap());
+        }
         this.teleport(x, y);
 
         this.boundingBox.body.enable = true;
@@ -396,7 +411,9 @@ export class Spaceship extends Sprite {
         this.shields.visible = true;
         this.active = true;
         this.onStopMoving();
-        if (this.status.shields === 0) this.shields.crack(true);
+        if (this.status.shields === 0) this.shields.crack(false);
+
+        return [x, y];
     }
 
     setAngle(angle?: number) {
@@ -548,8 +565,8 @@ export class Spaceship extends Sprite {
         }
     }
 
-    getClientState(): ClientState {
-        const { id, x, y, angle, activity, _pointer: pointer, status } = this;
+    getActionsState(): ActionsState {
+        const { id, x, y, angle, activity, _pointer: pointer } = this;
 
         const { active, autoattack } = this.primaryFireState;
         const primaryFireActive = active ? 1 : 0;
@@ -562,14 +579,13 @@ export class Spaceship extends Sprite {
             angle,
             activity,
             ...pointer,
-            ...status,
             primaryFireAutoattack,
             primaryFireActive,
             targetId,
         };
     }
 
-    setClientState({
+    setActionsState({
         x,
         y,
         angle,
@@ -579,7 +595,7 @@ export class Spaceship extends Sprite {
         primaryFireActive,
         primaryFireAutoattack,
         targetId,
-    }: ClientState) {
+    }: ActionsState) {
         this.boundingBox.setPosition(x, y);
         this.setPointer(worldX, worldY);
         this.rotateTo(Phaser.Math.DegToRad(angle - 90));
@@ -595,5 +611,16 @@ export class Spaceship extends Sprite {
             autoattack: !!primaryFireAutoattack,
         };
         if (targetId) this.setTargetById(targetId);
+    }
+
+    setStatus(newStatus: Status, playEffects = true) {
+        if (playEffects) {
+            const shieldDamage = this.status.shields - newStatus.shields;
+            const healthDamage = this.status.health - newStatus.health;
+            const damage = shieldDamage + healthDamage;
+            if (damage > 0) this.getHit(damage);
+        }
+
+        this.status = newStatus;
     }
 }
