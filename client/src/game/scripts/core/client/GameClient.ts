@@ -8,7 +8,10 @@ interface EventsMap {
     [event: string]: any;
 }
 interface DefaultEvents extends EventsMap {
-    [event: string]: (...args: any) => void;
+    [event: string]: {
+        emit: any;
+        on: (...args: any) => void;
+    };
 }
 export interface ClientChannel<Events extends EventsMap = DefaultEvents>
     extends GeckosClientChannel {

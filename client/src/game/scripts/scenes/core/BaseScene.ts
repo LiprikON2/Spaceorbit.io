@@ -34,46 +34,50 @@ export type ProjectileGroup = {
 } & Phaser.GameObjects.Group;
 
 export interface MultiplayerEvents {
-    "player:request-options": {
+    "connection:established"?: {
+        emit: null;
+        on: () => void;
+    };
+    "player:request-options"?: {
         emit: null;
         on: (serverOptions: SpaceshipServerOptions) => void;
     };
-    "player:connected": {
+    "player:connected"?: {
         emit: SpaceshipServerOptions;
         on: (serverOptions: SpaceshipServerOptions) => void;
     };
-    "player:assert-hit": {
+    "player:assert-hit"?: {
         emit: ClientHitData;
         on: () => void;
     };
-    "player:request-respawn": {
+    "player:request-respawn"?: {
         on: () => void;
     };
-    "players:already-connected": {
+    "players:already-connected"?: {
         emit: null;
         on: (serverOptionsList: SpaceshipServerOptions[]) => void;
     };
-    "player:actions": {
+    "player:actions"?: {
         emit: Partial<Actions> & { time: number };
         on: (actionsCompact: Partial<Actions> & { time: number }) => void;
     };
-    "players:server-snapshot": {
+    "players:server-snapshot"?: {
         emit: Snapshot;
         on: (serverSnapshot: Snapshot) => void;
     };
-    "entity:respawn": {
+    "entity:respawn"?: {
         emit: { id: string; point: { worldX: number; worldY: number } };
         on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
     };
-    "entity:status": {
+    "entity:status"?: {
         emit: { id: string; status: Status };
         on: (entityStatusData: { id: string; status: Status }) => void;
     };
-    "player:disconnected": {
+    "player:disconnected"?: {
         emit: ChannelId;
         on: (playerId: ChannelId) => void;
     };
-    message: {
+    message?: {
         emit: { name: string; message: string; isoTime: string };
         on: (messageEntry: { name: string; message: string; isoTime: string }) => void;
     };
