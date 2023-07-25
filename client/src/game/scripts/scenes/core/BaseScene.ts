@@ -1,6 +1,6 @@
 import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
-import type { ChannelId, ClientChannel as GeckosClientChannel } from "@geckos.io/client";
+import type { ChannelId } from "@geckos.io/client";
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import {
@@ -61,7 +61,7 @@ export interface MultiplayerEvents {
         emit: Partial<Actions> & { time: number };
         on: (actionsCompact: Partial<Actions> & { time: number }) => void;
     };
-    "players:server-snapshot"?: {
+    "world:server-snapshot"?: {
         emit: Snapshot;
         on: (serverSnapshot: Snapshot) => void;
     };

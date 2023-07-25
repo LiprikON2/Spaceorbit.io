@@ -103,7 +103,7 @@ export class ClientScene extends BaseMapScene {
                 })
             );
             this.channel.on("player:disconnected", (playerId) => this.destroyPlayer(playerId));
-            this.channel.on("players:server-snapshot", (serverSnapshot) =>
+            this.channel.on("world:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot)
             );
 
@@ -259,7 +259,7 @@ export class ClientScene extends BaseMapScene {
     updateOtherPlayersState() {
         const serverPlayersSnapshot = this.si.calcInterpolation(
             "x y angle(deg) worldX worldY",
-            "players"
+            "entities"
         );
         if (serverPlayersSnapshot) {
             const playersState = serverPlayersSnapshot.state as ActionsState[];
@@ -278,9 +278,9 @@ export class ClientScene extends BaseMapScene {
             // Get the closest client snapshot that matches the server snapshot time
             const clientSnapshot = this.clientVault.get(serverSnapshot.time, true);
             if (clientSnapshot) {
-                const serverPlayersState = serverSnapshot.state["players"] as ActionsState[];
+                const serverEntitiesState = serverSnapshot.state["entities"] as ActionsState[];
                 // Get the current server state on the server
-                const serverPlayerState = serverPlayersState.find(
+                const serverPlayerState = serverEntitiesState.find(
                     (playerState) => playerState.id === this.player.id
                 );
 

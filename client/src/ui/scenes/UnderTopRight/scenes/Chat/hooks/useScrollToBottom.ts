@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
+import { DependencyList, useEffect, useRef } from "react";
 
-export const useScrollToBottom = (dependencies) => {
+/**
+ * Scrolls viewport to the bottom when dependencies are updated
+ */
+export const useScrollToBottom = (dependencies: DependencyList) => {
     const ref = useRef<HTMLDivElement>(null);
     const scrollToBottom = () =>
         ref.current.scrollTo({

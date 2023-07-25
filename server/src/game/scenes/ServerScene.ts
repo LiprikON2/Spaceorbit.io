@@ -57,12 +57,20 @@ export class ServerScene extends BaseMapScene {
         return otherPlayersOptions;
     }
 
-    get playersState(): ActionsState[] {
+    get playersActionsState(): ActionsState[] {
         const playersState = Object.values(this.players).map(({ player }) =>
             player.getActionsState()
         );
 
         return playersState;
+    }
+    // TODO
+    get mobsActionsState(): ActionsState[] {
+        // const playersState = Object.values(this.players).map(({ player }) =>
+        //     player.getActionsState()
+        // );
+
+        return [];
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -132,7 +140,7 @@ export class ServerScene extends BaseMapScene {
             serverSnapshots.newer,
             time,
             "x y",
-            "players"
+            "entities"
         );
         if (!serverPlayersSnapshot) return;
 
@@ -250,12 +258,12 @@ export class ServerScene extends BaseMapScene {
 
     sendServerSnapshot() {
         const serverState = {
-            players: this.playersState,
+            entities: [...this.playersActionsState, ...this.mobsActionsState],
         };
         const serverSnapshot = this.si.snapshot.create(serverState);
         this.si.vault.add(serverSnapshot);
 
-        this.game.server.emit("players:server-snapshot", serverSnapshot);
+        this.game.server.emit("world:server-snapshot", serverSnapshot);
     }
 
     updatePlayersInput(time: number, delta: number) {
