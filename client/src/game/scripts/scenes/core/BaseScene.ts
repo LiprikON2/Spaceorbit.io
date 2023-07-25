@@ -1,4 +1,6 @@
 import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
+import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
+import type { ChannelId, ClientChannel as GeckosClientChannel } from "@geckos.io/client";
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import {
@@ -8,8 +10,8 @@ import {
     type SpaceshipServerOptions,
 } from "~/game/objects/Sprite/Spaceship";
 import type { Projectile } from "~/objects/Sprite/Spaceship/components";
-import { MobManager } from "~/managers";
-import { Status } from "../../..";
+import { type Actions, type ClientHitData, MobManager } from "~/managers";
+import type { Status } from "~/objects/Sprite";
 
 export type SpaceshipGroup = {
     getChildren: () => Spaceship[];
@@ -30,6 +32,52 @@ export type ProjectileGroup = {
         endIndex?: number
     ) => Projectile[];
 } & Phaser.GameObjects.Group;
+
+export interface MultiplayerEvents {
+    "player:request-options": {
+        emit: null;
+        on: (serverOptions: SpaceshipServerOptions) => void;
+    };
+    "player:connected": {
+        emit: SpaceshipServerOptions;
+        on: (serverOptions: SpaceshipServerOptions) => void;
+    };
+    "player:assert-hit": {
+        emit: ClientHitData;
+        on: () => void;
+    };
+    "player:request-respawn": {
+        on: () => void;
+    };
+    "players:already-connected": {
+        emit: null;
+        on: (serverOptionsList: SpaceshipServerOptions[]) => void;
+    };
+    "player:actions": {
+        emit: Partial<Actions> & { time: number };
+        on: (actionsCompact: Partial<Actions> & { time: number }) => void;
+    };
+    "players:server-snapshot": {
+        emit: Snapshot;
+        on: (serverSnapshot: Snapshot) => void;
+    };
+    "entity:respawn": {
+        emit: { id: string; point: { worldX: number; worldY: number } };
+        on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
+    };
+    "entity:status": {
+        emit: { id: string; status: Status };
+        on: (entityStatusData: { id: string; status: Status }) => void;
+    };
+    "player:disconnected": {
+        emit: ChannelId;
+        on: (playerId: ChannelId) => void;
+    };
+    message: {
+        emit: { name: string; message: string; isoTime: string };
+        on: (messageEntry: { name: string; message: string; isoTime: string }) => void;
+    };
+}
 
 /**
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene

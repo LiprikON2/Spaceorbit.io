@@ -1,4 +1,3 @@
-import type { ChannelId, ClientChannel } from "@geckos.io/client";
 import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 
@@ -9,18 +8,20 @@ import {
     type SpaceshipServerOptions,
 } from "~/objects/Sprite/Spaceship";
 import { DebugInfo } from "~/objects";
-import type { GameClient } from "~/game";
+import type { ClientChannel, GameClient } from "~/game";
 import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
 import { PingBuffer } from "~/game/utils/ping";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
+import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
 
 interface ProducePlayerOptions {
     isMe?: boolean;
     playerCreationCallback?: (player: Spaceship) => void;
 }
+
 export class ClientScene extends BaseMapScene {
     game: GameClient;
-    channel?: ClientChannel;
+    channel?: ClientChannel<MultiplayerEvents>;
     si?: SnapshotInterpolation;
     clientVault?: Vault;
 
@@ -97,24 +98,24 @@ export class ClientScene extends BaseMapScene {
 
             await this.produceConnectedPlayers((player) => this.setMultiplayerListeners(player));
             this.channel.on("player:connected", (serverOptions) =>
-                this.producePlayer(serverOptions as SpaceshipServerOptions, {
+                this.producePlayer(serverOptions, {
                     playerCreationCallback: (player) => this.setMultiplayerListeners(player),
                 })
             );
-            this.channel.on("player:disconnected", (playerId) =>
-                this.destroyPlayer(playerId as ChannelId)
-            );
+            this.channel.on("player:disconnected", (playerId) => this.destroyPlayer(playerId));
             this.channel.on("players:server-snapshot", (serverSnapshot) =>
-                this.addServerSnapshot(serverSnapshot as Snapshot)
+                this.addServerSnapshot(serverSnapshot)
             );
 
-            this.player.on("entity:hit", (hitData) => this.requestHitAssertion(hitData));
-            this.channel.on("entity:status", ({ id, status }: any) =>
+            this.player.on("entity:hit", (hitData: ClientHitData) =>
+                this.requestHitAssertion(hitData)
+            );
+            this.channel.on("entity:status", ({ id, status }) =>
                 this.updateEntityStatus(id, status)
             );
 
             this.player.on("entity:dead", () => this.requestRespawn());
-            this.channel.on("entity:respawn", ({ id, point }: any) => {
+            this.channel.on("entity:respawn", ({ id, point }) => {
                 this.respawnEntity(id, point);
             });
         }
@@ -137,7 +138,7 @@ export class ClientScene extends BaseMapScene {
         entity.on("entity:teleport", () => this.clearSnapshots());
     }
 
-    requestHitAssertion(hitData: Partial<ClientHitData>) {
+    requestHitAssertion(hitData: ClientHitData) {
         console.log("player:assert-hit");
         this.channel.emit(
             "player:assert-hit",
@@ -176,12 +177,12 @@ export class ClientScene extends BaseMapScene {
     }
 
     async requestPlayer(): Promise<SpaceshipServerOptions> {
-        this.channel.emit("player:request-options", { reliable: true });
+        this.channel.emit("player:request-options", null, { reliable: true });
 
         return new Promise((resolve) => {
             this.channel.on("player:request-options", (serverOptions) => {
                 console.log("player:request-options");
-                resolve(serverOptions as SpaceshipServerOptions);
+                resolve(serverOptions);
             });
         });
     }
@@ -199,21 +200,15 @@ export class ClientScene extends BaseMapScene {
     }
 
     async requestAlreadyConnectedPlayers(): Promise<SpaceshipServerOptions[]> {
-        this.channel.emit("players:already-connected", { reliable: true });
+        this.channel.emit("players:already-connected", null, { reliable: true });
 
         return new Promise((resolve) => {
             this.channel.on("players:already-connected", (serverOptionsList) => {
                 console.log("players:already-connected", serverOptionsList);
 
-                resolve(serverOptionsList as SpaceshipServerOptions[]);
+                resolve(serverOptionsList);
             });
         });
-    }
-
-    produceOtherPlayerOnConnect(serverOptions: SpaceshipServerOptions) {
-        console.log("player:connected", serverOptions);
-        const clientOptions = this.getPlayerClientOptions();
-        this.createPlayer(serverOptions as SpaceshipServerOptions, clientOptions);
     }
 
     addServerSnapshot(serverState: Snapshot) {

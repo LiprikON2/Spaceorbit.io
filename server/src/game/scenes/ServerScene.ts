@@ -82,7 +82,6 @@ export class ServerScene extends BaseMapScene {
 
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
-            channel.emit("connection:established");
             channel.emit(
                 "message",
                 { name: "System", message: "Pilot, welcome!", isoTime: getIsoTime() },
