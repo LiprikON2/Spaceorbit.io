@@ -127,4 +127,15 @@ export class BaseScene extends Phaser.Scene {
             callback();
         }
     }
+
+    setSingleplayerListeners(entity: Spaceship) {
+        entity.on("entity:hit", (hitData) => {
+            const { weaponId, enemyId } = hitData;
+
+            const weapon = entity.weapons.getWeaponById(weaponId);
+            const damage = entity.weapons.getDamageByWeapon(weapon);
+            this.entityManager.hitEntity(enemyId, damage);
+        });
+        entity.on("entity:dead", () => this.entityManager.respawnEntity(entity.id));
+    }
 }

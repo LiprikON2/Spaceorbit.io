@@ -222,7 +222,7 @@ export class SoundManager {
     update() {
         Object.keys(this.loopingSounds).forEach((id) => {
             const soundObj = this.loopingSounds[id];
-            const soundSource = this.scene.entityManager.getById(id, "all");
+            const soundSource = this.scene.entityManager.getById(id, "entity");
 
             let distanceToSoundSource = 0;
             if (soundSource) {

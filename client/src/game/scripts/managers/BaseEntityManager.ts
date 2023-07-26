@@ -35,27 +35,27 @@ export interface EntityManagerServerOptions {}
 
 export interface EntityManagerClientOptions {
     scene: BaseScene;
-    soundManager?: SoundManager;
     toPassTexture: boolean;
 }
 
 export class BaseEntityManager {
     scene: BaseScene;
 
-    allGroup: SpaceshipGroup;
+    entityGroup: SpaceshipGroup;
     otherPlayersGroup: SpaceshipGroup;
     playerGroup: SpaceshipGroup;
     mobGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
+    soundManager?: SoundManager;
 
     toPassTexture: boolean;
 
-    getById(id: string, from: "all" | "players" | "otherPlayers" | "mob" = "all") {
+    getById(id: string, from: "entity" | "players" | "otherPlayers" | "mob" = "entity") {
         let fromGroup: SpaceshipGroup;
-        if (from === "all") fromGroup = this.allGroup;
-        else if (from === "players") fromGroup = this.allGroup;
-        else if (from === "otherPlayers") fromGroup = this.allGroup;
-        else if (from === "mob") fromGroup = this.allGroup;
+        if (from === "entity") fromGroup = this.entityGroup;
+        else if (from === "players") fromGroup = this.entityGroup;
+        else if (from === "otherPlayers") fromGroup = this.entityGroup;
+        else if (from === "mob") fromGroup = this.entityGroup;
 
         const [entity] = fromGroup.getMatching("id", id);
         return entity;
@@ -72,8 +72,12 @@ export class BaseEntityManager {
         this.playerGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.otherPlayersGroup = this.scene.add.group() as SpaceshipGroup;
         this.mobGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
-        this.allGroup = this.scene.add.group() as SpaceshipGroup;
+        this.entityGroup = this.scene.add.group() as SpaceshipGroup;
         this.projectileGroup = this.scene.add.group() as ProjectileGroup;
+    }
+
+    addSoundManager(soundManager: SoundManager) {
+        this.soundManager = soundManager;
     }
 
     createPlayer(
@@ -83,39 +87,60 @@ export class BaseEntityManager {
     ) {
         const defaultClientOptions = {
             scene: this.scene,
-            allGroup: this.allGroup,
+            allGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
             toPassTexture: this.toPassTexture,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);
 
-        const { soundManager } = mergedClientOptions;
-        if (soundManager) {
-            if (isMe) soundManager.setPlayer(player);
-            else soundManager.initEntity(player);
+        if (clientOptions.soundManager) {
+            if (isMe) clientOptions.soundManager.setPlayer(player);
+            else clientOptions.soundManager.initEntity(player);
         }
 
         if (!isMe) this.otherPlayersGroup.add(player);
         this.playerGroup.add(player);
-        this.allGroup.add(player);
+        this.entityGroup.add(player);
 
         return player;
     }
 
-    destroyPlayer(playerId: string) {
-        const [player] = this.playerGroup.getMatching("id", playerId) as Spaceship[];
-        if (player) {
-            player.on("destroy", () => console.log("Was destroyed:", playerId));
+    createMob(
+        serverOptions: SpaceshipServerOptions,
+        clientOptions?: Partial<SpaceshipClientOptions>
+    ) {
+        const defaultClientOptions = {
+            scene: this.scene,
+            allGroup: this.entityGroup,
+            projectileGroup: this.projectileGroup,
+            toPassTexture: this.toPassTexture,
+        };
+        const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
+        const mob = new Mob(serverOptions, mergedClientOptions);
 
-            this.allGroup.remove(player);
-            this.playerGroup.remove(player);
-            this.allGroup.remove(player);
-            player.destroyFully();
+        if (clientOptions.soundManager) clientOptions.soundManager.initEntity(mob);
+
+        this.entityGroup.add(mob);
+        this.mobGroup.add(mob);
+
+        return mob;
+    }
+
+    destroyEntity(entityId: string) {
+        const entity = this.getById(entityId);
+        if (entity) {
+            entity.on("destroy", () => console.log("Was destroyed:", entityId));
+
+            this.entityGroup.remove(entity);
+            this.playerGroup.remove(entity);
+            this.otherPlayersGroup.remove(entity);
+            this.mobGroup.remove(entity);
+            entity.destroyFully();
         }
     }
 
-    getPlayerServerOptions(id?) {
+    getPlayerServerOptions(id?: string) {
         const playerCount = this.playerGroup.getLength();
         const spaceshipServerOptions: SpaceshipServerOptions = {
             id: id ?? Phaser.Utils.String.UUID(),
@@ -157,9 +182,12 @@ export class BaseEntityManager {
         };
     }
 
-    hitEntity(entityId: string, damage: number) {
-        const [entity] = this.allGroup.getMatching("id", entityId);
-        if (entity) entity.getHit(damage);
+    hitEntity(entityId: string, damage: number, callback: (entity: Spaceship) => void = () => {}) {
+        const [entity] = this.entityGroup.getMatching("id", entityId);
+        if (entity) {
+            entity.getHit(damage);
+            callback(entity);
+        }
     }
 
     respawnEntity(
@@ -169,7 +197,7 @@ export class BaseEntityManager {
     ) {
         console.log("entity:respawn");
         let { worldX, worldY } = point;
-        const [entity] = this.allGroup.getMatching("id", entityId) as Spaceship[];
+        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
 
         if (entity?.isDead) {
             const rogueAllegiances: AllegianceKeys[] = ["Alien", "Unaffiliated"];
@@ -190,14 +218,16 @@ export class BaseEntityManager {
     }
 
     updateEntityStatus(id: string, status: Status) {
-        const [entity] = this.allGroup.getMatching("id", id);
+        const [entity] = this.entityGroup.getMatching("id", id);
         if (entity) entity.setStatus(status);
     }
 
-    spawnMobs(count, soundManager?) {
-        const mobsToSpawn = count - this.mobGroup.getLength();
+    spawnMobs(upToCount, callback: (mob: Spaceship) => void = () => {}) {
+        const mobsToSpawn = upToCount - this.mobGroup.getLength();
+
         for (let i = 0; i < mobsToSpawn; i++) {
             const [worldX, worldY] = this.scene.getRandomPositionOnMap();
+
             const serverOptions: MobServerOptions = {
                 id: Phaser.Utils.String.UUID(),
                 x: worldX,
@@ -212,17 +242,15 @@ export class BaseEntityManager {
             };
             const clientOptions: MobClientOptions = {
                 scene: this.scene,
-                allGroup: this.scene.entityManager.allGroup,
+                allGroup: this.scene.entityManager.entityGroup,
                 projectileGroup: this.scene.entityManager.projectileGroup,
-                soundManager,
+                soundManager: this.soundManager,
                 toPassTexture: true,
             };
-            const mob = new Mob(serverOptions, clientOptions);
-            this.scene.entityManager.allGroup.add(mob);
-            this.scene.entityManager.mobGroup.add(mob);
-            // TODO make it into emit event
-            // Needed to be called when soundManager knows about player, and player knows about soundManager
-            mob.exhausts.initExhaustSound();
+
+            const mob = this.createMob(serverOptions, clientOptions);
+
+            callback(mob);
         }
     }
 

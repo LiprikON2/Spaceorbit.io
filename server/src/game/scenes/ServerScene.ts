@@ -33,11 +33,10 @@ interface ServerHitData extends ClientHitData {
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
-    // @ts-ignore
-    collisionManager: BaseCollisionManager;
+    collisionManager?: BaseCollisionManager;
 
     players: Entities = {};
-    mobs: Entities = {};
+    // mobs: Entities = {};
     tickrate = 30;
 
     get tickrateDeltaTime() {
@@ -68,13 +67,12 @@ export class ServerScene extends BaseMapScene {
 
         return playersState;
     }
-    // TODO
     get mobsActionsState(): ActionsState[] {
-        const playersState = Object.values(this.players).map(({ entity: player }) =>
-            player.getActionsState()
-        );
+        const mobState = this.entityManager.mobGroup
+            .getChildren()
+            .map((mob) => mob.getActionsState());
 
-        return [];
+        return mobState;
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -91,6 +89,19 @@ export class ServerScene extends BaseMapScene {
 
     create() {
         super.create();
+
+        // this.entityManager.spawnMobs(5, (mob) => {
+        //     mob.on("entity:hit", (hitData) => {
+        //         const { weaponId, enemyId } = hitData;
+
+        //         const weapon = mob.weapons.getWeaponById(weaponId);
+        //         const damage = mob.weapons.getDamageByWeapon(weapon);
+        //         this.entityManager.hitEntity(enemyId, damage, (enemy) =>
+        //             this.sendEntityStatus(enemy.id)
+        //         );
+        //     });
+        //     mob.on("entity:dead", () => this.entityManager.respawnEntity(mob.id));
+        // });
 
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
@@ -174,28 +185,27 @@ export class ServerScene extends BaseMapScene {
         const enemyState = playersState.find((playerState) => playerState.id === enemyId);
 
         if (!enemyState || !ownerState) return;
-
-        const enemy = this.entityManager.getById(enemyId, "all") as Spaceship;
-        const didHit = this.collisionManager.isPointInCircle(projectilePoint, {
+        const enemy = this.entityManager.getById(enemyId, "entity") as Spaceship;
+        const didHit = this.collisionManager!.isPointInCircle(projectilePoint, {
             x: enemyState.x,
             y: enemyState.y,
             r: enemy.hitboxRadius,
         });
 
         if (didHit) {
-            const owner = this.entityManager.getById(ownerId, "all") as Spaceship;
+            const owner = this.entityManager.getById(ownerId, "entity") as Spaceship;
             const weapon = owner.weapons.getWeaponById(weaponId);
             if (!weapon) return;
 
             const damage = owner.weapons.getDamageByWeapon(weapon);
-            enemy.getHit(damage);
-
-            this.sendEntityStatus(enemy.id);
+            this.entityManager.hitEntity(enemyId, damage, (enemy) =>
+                this.sendEntityStatus(enemy.id)
+            );
         }
     }
 
     sendEntityStatus(entityId: ChannelId) {
-        const entity = this.entityManager.getById(entityId, "all") as Spaceship;
+        const entity = this.entityManager.getById(entityId, "entity") as Spaceship;
         if (entity) {
             this.game.server.emit(
                 "entity:status",
@@ -218,10 +228,23 @@ export class ServerScene extends BaseMapScene {
         };
     }
 
+    // addMob(serverOptions: SpaceshipServerOptions) {
+    //     const mob = this.entityManager.createMob(serverOptions, {
+    //         toPassTexture: false,
+    //     });
+    //     const inputManager = new BaseInputManager(this, mob);
+
+    //     this.players[serverOptions.id] = {
+    //         entity: mob,
+    //         serverOptions,
+    //         inputManager,
+    //     };
+    // }
+
     removePlayer(channel: ServerChannel) {
         channel.broadcast.emit("player:disconnected", channel.id!);
 
-        this.entityManager.destroyPlayer(channel.id!);
+        this.entityManager.destroyEntity(channel.id!);
         delete this.players[channel.id!];
     }
 
@@ -263,7 +286,8 @@ export class ServerScene extends BaseMapScene {
 
     sendServerSnapshot() {
         const serverState = {
-            entities: [...this.playersActionsState, ...this.mobsActionsState],
+            // entities: [...this.playersActionsState, ...this.mobsActionsState],
+            entities: [...this.playersActionsState],
         };
         const serverSnapshot = this.si.snapshot.create(serverState);
         this.si.vault.add(serverSnapshot);

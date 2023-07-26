@@ -73,7 +73,7 @@ export const SettingsModal = ({ opened, onClose }) => {
     const sendMobs = (e) => {
         e.preventDefault();
         const { mobGroup } = entityManager;
-        entityManager.spawnMobs(mobsCount, [player]);
+        entityManager.spawnMobs(mobsCount);
 
         mobGroup.getChildren().forEach((mob) => {
             mob.moveTo(x, y);

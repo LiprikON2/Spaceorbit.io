@@ -16,7 +16,7 @@ import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
 
 interface ProducePlayerOptions {
     isMe?: boolean;
-    playerCreationCallback?: (player: Spaceship) => void;
+    callback?: (player: Spaceship) => void;
 }
 
 export class ClientScene extends BaseMapScene {
@@ -58,6 +58,7 @@ export class ClientScene extends BaseMapScene {
 
     preload() {
         super.preload();
+        this.entityManager.addSoundManager(this.soundManager);
     }
 
     async create() {
@@ -67,34 +68,24 @@ export class ClientScene extends BaseMapScene {
             const serverOptions = this.entityManager.getPlayerServerOptions();
             this.player = await this.producePlayer(serverOptions, {
                 isMe: true,
-                playerCreationCallback: (player) => {
-                    player.on("entity:hit", (hitData) => {
-                        const { weaponId, ownerId, enemyId } = hitData;
-
-                        const owner = this.entityManager.getById(ownerId);
-                        const weapon = owner.weapons.getWeaponById(weaponId);
-                        const damage = owner.weapons.getDamageByWeapon(weapon);
-                        console.log("damage", damage);
-                        this.entityManager.hitEntity(enemyId, damage);
-                    });
-                    player.on("entity:dead", () => this.entityManager.respawnEntity(player.id));
-                },
+                callback: (player) => this.setSingleplayerListeners(player),
             });
-            this.entityManager.spawnMobs(5, this.soundManager);
+
+            this.entityManager.spawnMobs(5, (mob) => this.setSingleplayerListeners(mob));
         } else {
             this.player = await this.producePlayer(null, {
                 isMe: true,
-                playerCreationCallback: (player) => this.setMultiplayerListeners(player),
+                callback: (player) => this.setMultiplayerListeners(player),
             });
 
             await this.produceConnectedPlayers((player) => this.setMultiplayerListeners(player));
             this.channel.on("player:connected", (serverOptions) =>
                 this.producePlayer(serverOptions, {
-                    playerCreationCallback: (player) => this.setMultiplayerListeners(player),
+                    callback: (player) => this.setMultiplayerListeners(player),
                 })
             );
             this.channel.on("player:disconnected", (playerId) =>
-                this.entityManager.destroyPlayer(playerId)
+                this.entityManager.destroyEntity(playerId)
             );
             this.channel.on("world:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot)
@@ -118,7 +109,7 @@ export class ClientScene extends BaseMapScene {
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
         this.collisionManager = new ClientCollisionManager({
             projectileGroup: this.entityManager.projectileGroup,
-            allGroup: this.entityManager.allGroup,
+            allGroup: this.entityManager.entityGroup,
         });
 
         this.isPaused = false;
@@ -126,8 +117,8 @@ export class ClientScene extends BaseMapScene {
     }
 
     setMultiplayerListeners(entity: Spaceship) {
-        // TODO indiscriminate clearing snapshots of all player is not optimal;
         // Prevents teleportation from being jerky
+        // TODO indiscriminate clearing snapshots of all player may not be optimal;
         entity.on("entity:teleport", () => this.clearSnapshots());
     }
 
@@ -156,23 +147,25 @@ export class ClientScene extends BaseMapScene {
             isMe: false,
             playerCreationCallback: () => {},
         };
-        if (!serverOptions) serverOptions = await this.requestPlayer();
-        const { isMe, playerCreationCallback } = { ...defaultOptions, ...options };
+        const mergedOptions = { ...defaultOptions, ...options };
+        if (!serverOptions) serverOptions = await this.requestServerOptions();
 
-        const alreadyPresentPlayer = this.entityManager.getById(serverOptions.id, "players");
-        if (alreadyPresentPlayer) return alreadyPresentPlayer;
+        // const alreadyPresentPlayer = this.entityManager.getById(serverOptions.id, "players");
+        // if (alreadyPresentPlayer) return alreadyPresentPlayer;
 
+        const { isMe } = mergedOptions;
         const player = this.entityManager.createPlayer(
             serverOptions,
             { soundManager: this.soundManager },
             isMe
         );
 
+        const { callback: playerCreationCallback } = mergedOptions;
         playerCreationCallback(player);
         return player;
     }
 
-    async requestPlayer(): Promise<SpaceshipServerOptions> {
+    async requestServerOptions(): Promise<SpaceshipServerOptions> {
         this.channel.emit("player:request-options", null, { reliable: true });
 
         return new Promise((resolve) => {
@@ -183,14 +176,12 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    async produceConnectedPlayers(
-        playerCreationCallback: ProducePlayerOptions["playerCreationCallback"]
-    ) {
+    async produceConnectedPlayers(playerCreationCallback: ProducePlayerOptions["callback"]) {
         const serverOptionsList = await this.requestAlreadyConnectedPlayers();
 
         serverOptionsList.forEach((serverOptions) =>
             this.producePlayer(serverOptions, {
-                playerCreationCallback,
+                callback: playerCreationCallback,
             })
         );
     }
@@ -260,7 +251,7 @@ export class ClientScene extends BaseMapScene {
 
             entitesState.forEach((entityState) => {
                 if (this.player.id !== entityState.id) {
-                    const entity = this.entityManager.getById(entityState.id, "all");
+                    const entity = this.entityManager.getById(entityState.id, "entity");
                     if (entity?.active) entity.setActionsState(entityState);
                 }
             });
