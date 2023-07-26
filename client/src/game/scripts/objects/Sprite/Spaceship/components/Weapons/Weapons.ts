@@ -20,8 +20,6 @@ export interface Weapon {
 export class Weapons {
     scene: BaseScene;
     ship: Spaceship;
-    // delay = 1000/fps
-    primaryFireRate = 600;
     weaponSlots: Weapon[];
 
     multiplier = 1;
@@ -215,7 +213,7 @@ export class Weapons {
             toPassTexture: this.ship.isTextured,
         };
         const projectile = new Projectile(serverOptions, clientOptions);
-        this.scene.projectileGroup.add(projectile);
+        this.ship.projectileGroup.add(projectile);
     }
 
     getProjectileServerOptions(weaponId: number, targetPoint?: { worldX: number; worldY: number }) {

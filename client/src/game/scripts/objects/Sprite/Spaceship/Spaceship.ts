@@ -2,17 +2,9 @@ import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/containe
 import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
 import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
-import {
-    Explosion,
-    Exhausts,
-    Weapons,
-    Shields,
-    Outfitting,
-    type Outfit,
-    type Projectile,
-} from "./components";
+import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
 import { Sprite, type Status, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
-import type { SpaceshipGroup } from "~/scenes/core/BaseScene";
+import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -61,6 +53,7 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
     allGroup: SpaceshipGroup;
+    projectileGroup: ProjectileGroup;
 }
 
 export class Spaceship extends Sprite {
@@ -83,6 +76,7 @@ export class Spaceship extends Sprite {
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
     allGroup: SpaceshipGroup;
+    projectileGroup: ProjectileGroup;
 
     allegiance: AllegianceEnum | AllegianceKeys;
     allegianceOpposition: AllegianceOpposition = {
@@ -201,6 +195,9 @@ export class Spaceship extends Sprite {
         const { allGroup } = clientOptions;
         this.allGroup = allGroup;
 
+        const { projectileGroup } = clientOptions;
+        this.projectileGroup = projectileGroup;
+
         this.status = {
             health: 0,
             shields: 0,
@@ -249,7 +246,6 @@ export class Spaceship extends Sprite {
         }
 
         if (this.soundManager) {
-            this.soundManager.addShip(this);
             // Make sure relevant sounds are loaded
             this.soundManager.addSounds("hit", ["hit_sound_1", "hit_sound_2"]);
         }
@@ -302,6 +298,9 @@ export class Spaceship extends Sprite {
     }
 
     explode() {
+        this.breakOffTargeting();
+        this.setTarget();
+
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
         this.resetMovement();
@@ -315,7 +314,11 @@ export class Spaceship extends Sprite {
 
         const isNotAlreadyDying = !this.isDying;
         if (isNotAlreadyDying) {
-            this.scene.time.delayedCall(2000, () => this.emit("entity:dead", this));
+            this.scene.time.delayedCall(2000, () => {
+                this.boundingBox.setVisible(false);
+
+                this.emit("entity:dead", this);
+            });
         }
     }
 
@@ -392,15 +395,13 @@ export class Spaceship extends Sprite {
         this.boundingBox.setPosition(worldX, worldY);
     }
 
-    respawn(x?: number, y?: number) {
-        this.breakOffTargeting();
-        this.setTarget();
-
-        if (x === undefined || y === undefined) {
-            ({ x, y } = this.scene.getRandomPositionOnMap());
+    respawn(worldX?: number, worldY?: number) {
+        if (worldX === undefined || worldY === undefined) {
+            [worldX, worldY] = this.scene.getRandomPositionOnMap();
         }
-        this.teleport(x, y);
+        this.teleport(worldX, worldY);
 
+        this.boundingBox.setVisible(true);
         this.boundingBox.body.enable = true;
         this.status.health = this.maxHealth;
         this.status.shields = this.maxShields;
@@ -410,10 +411,10 @@ export class Spaceship extends Sprite {
         this.shields.active = true;
         this.shields.visible = true;
         this.active = true;
-        this.onStopMoving();
+        this.resetMovement();
         if (this.status.shields === 0) this.shields.crack(false);
 
-        return [x, y];
+        return [worldX, worldY];
     }
 
     setAngle(angle?: number) {
@@ -442,7 +443,9 @@ export class Spaceship extends Sprite {
     resetMovement() {
         this.boundingBox.body.stop();
         this.moveToPlugin.stop();
+        this.onStopMoving();
     }
+
     onStartMoving() {
         this.exhausts.startExhaust();
     }

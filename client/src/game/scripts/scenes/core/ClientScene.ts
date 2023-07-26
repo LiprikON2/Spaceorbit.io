@@ -42,15 +42,6 @@ export class ClientScene extends BaseMapScene {
         return Boolean(this.channel);
     }
 
-    getPlayerClientOptions() {
-        return {
-            allGroup: this.allGroup,
-            scene: this,
-            soundManager: this.soundManager,
-            toPassTexture: true,
-        };
-    }
-
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
         this.ping = new PingBuffer(180);
@@ -73,23 +64,23 @@ export class ClientScene extends BaseMapScene {
         super.create();
 
         if (this.isSingleplayer) {
-            const serverOptions = this.getPlayerServerOptions();
+            const serverOptions = this.entityManager.getPlayerServerOptions();
             this.player = await this.producePlayer(serverOptions, {
                 isMe: true,
                 playerCreationCallback: (player) => {
-                    player.on("enemy:hit", (hitData) => {
+                    player.on("entity:hit", (hitData) => {
                         const { weaponId, ownerId, enemyId } = hitData;
 
-                        const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
+                        const owner = this.entityManager.getById(ownerId);
                         const weapon = owner.weapons.getWeaponById(weaponId);
                         const damage = owner.weapons.getDamageByWeapon(weapon);
-
-                        this.hitEntity(enemyId, damage);
+                        console.log("damage", damage);
+                        this.entityManager.hitEntity(enemyId, damage);
                     });
-                    player.on("entity:dead", () => this.respawnEntity(player.id));
+                    player.on("entity:dead", () => this.entityManager.respawnEntity(player.id));
                 },
             });
-            this.mobManager.spawnMobs(5, this.soundManager);
+            this.entityManager.spawnMobs(5, this.soundManager);
         } else {
             this.player = await this.producePlayer(null, {
                 isMe: true,
@@ -102,7 +93,9 @@ export class ClientScene extends BaseMapScene {
                     playerCreationCallback: (player) => this.setMultiplayerListeners(player),
                 })
             );
-            this.channel.on("player:disconnected", (playerId) => this.destroyPlayer(playerId));
+            this.channel.on("player:disconnected", (playerId) =>
+                this.entityManager.destroyPlayer(playerId)
+            );
             this.channel.on("world:server-snapshot", (serverSnapshot) =>
                 this.addServerSnapshot(serverSnapshot)
             );
@@ -111,12 +104,12 @@ export class ClientScene extends BaseMapScene {
                 this.requestHitAssertion(hitData)
             );
             this.channel.on("entity:status", ({ id, status }) =>
-                this.updateEntityStatus(id, status)
+                this.entityManager.updateEntityStatus(id, status)
             );
 
             this.player.on("entity:dead", () => this.requestRespawn());
             this.channel.on("entity:respawn", ({ id, point }) => {
-                this.respawnEntity(id, point);
+                this.entityManager.respawnEntity(id, point);
             });
         }
 
@@ -124,8 +117,8 @@ export class ClientScene extends BaseMapScene {
         this.inputManager = new ClientInputManager(this, this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
         this.collisionManager = new ClientCollisionManager({
-            projectileGroup: this.projectileGroup,
-            allGroup: this.allGroup,
+            projectileGroup: this.entityManager.projectileGroup,
+            allGroup: this.entityManager.allGroup,
         });
 
         this.isPaused = false;
@@ -166,11 +159,14 @@ export class ClientScene extends BaseMapScene {
         if (!serverOptions) serverOptions = await this.requestPlayer();
         const { isMe, playerCreationCallback } = { ...defaultOptions, ...options };
 
-        const [alreadyPresentPlayer] = this.playerGroup.getMatching("id", serverOptions.id);
+        const alreadyPresentPlayer = this.entityManager.getById(serverOptions.id, "players");
         if (alreadyPresentPlayer) return alreadyPresentPlayer;
 
-        const clientOptions = this.getPlayerClientOptions();
-        const player = this.createPlayer(serverOptions, clientOptions, isMe);
+        const player = this.entityManager.createPlayer(
+            serverOptions,
+            { soundManager: this.soundManager },
+            isMe
+        );
 
         playerCreationCallback(player);
         return player;
@@ -244,11 +240,9 @@ export class ClientScene extends BaseMapScene {
                 this.sendPlayerActions();
                 this.updateReconciliation();
             });
-            this.updateOtherPlayersState();
+            this.updateEntitiesActions();
             this.updatePing();
         }
-
-        // console.log("Player2", this.allGroup.getMatching("name", "Player2")[0]?.targetedBy);
     }
 
     sendPlayerActions() {
@@ -256,17 +250,19 @@ export class ClientScene extends BaseMapScene {
         this.channel.emit("player:actions", { ...actionsCompact, time: this.si.serverTime });
     }
 
-    updateOtherPlayersState() {
-        const serverPlayersSnapshot = this.si.calcInterpolation(
+    updateEntitiesActions() {
+        const serverEntitiesSnapshot = this.si.calcInterpolation(
             "x y angle(deg) worldX worldY",
             "entities"
         );
-        if (serverPlayersSnapshot) {
-            const playersState = serverPlayersSnapshot.state as ActionsState[];
+        if (serverEntitiesSnapshot) {
+            const entitesState = serverEntitiesSnapshot.state as ActionsState[];
 
-            playersState.forEach((playerState) => {
-                const [otherPlayer] = this.otherPlayersGroup.getMatching("id", playerState.id);
-                if (otherPlayer?.active) otherPlayer.setActionsState(playerState);
+            entitesState.forEach((entityState) => {
+                if (this.player.id !== entityState.id) {
+                    const entity = this.entityManager.getById(entityState.id, "all");
+                    if (entity?.active) entity.setActionsState(entityState);
+                }
             });
         }
     }

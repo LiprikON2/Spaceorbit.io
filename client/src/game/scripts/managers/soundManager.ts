@@ -72,9 +72,14 @@ export class SoundManager {
         });
     }
 
-    addShip(player: Spaceship) {
+    setPlayer(player: Spaceship) {
+        // TODO maybe use camera's center as sound POV instead?
         this.player = player;
-        this.player.exhausts.initExhaustSound();
+        this.initEntity(player);
+    }
+
+    initEntity(entity: Spaceship) {
+        entity.exhausts.initExhaustSound();
     }
 
     addSounds(type: string, keys: string[]) {
@@ -108,6 +113,7 @@ export class SoundManager {
             rareDistribution: 10,
             checkDistance: true,
         };
+        const mergedOptions = { ...defaults, ...options };
         const {
             sourceX,
             sourceY,
@@ -117,7 +123,7 @@ export class SoundManager {
             random,
             rareDistribution,
             checkDistance,
-        } = Object.assign({}, defaults, options);
+        } = mergedOptions;
 
         let distanceToSoundSource = 0;
         if (checkDistance) {
@@ -216,7 +222,7 @@ export class SoundManager {
     update() {
         Object.keys(this.loopingSounds).forEach((id) => {
             const soundObj = this.loopingSounds[id];
-            const [soundSource] = this.scene.allGroup.getMatching("id", id);
+            const soundSource = this.scene.entityManager.getById(id, "all");
 
             let distanceToSoundSource = 0;
             if (soundSource) {

@@ -17,10 +17,10 @@ import {
     BaseCollisionManager,
 } from "@spaceorbit/client/src/game/scripts/managers/BaseCollisionManager";
 
-interface Players {
+interface Entities {
     [key: string]: {
         serverOptions: SpaceshipServerOptions;
-        player: Spaceship;
+        entity: Spaceship;
         inputManager: BaseInputManager;
     };
 }
@@ -33,9 +33,11 @@ interface ServerHitData extends ClientHitData {
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
+    // @ts-ignore
     collisionManager: BaseCollisionManager;
 
-    players: Players = {};
+    players: Entities = {};
+    mobs: Entities = {};
     tickrate = 30;
 
     get tickrateDeltaTime() {
@@ -49,16 +51,18 @@ export class ServerScene extends BaseMapScene {
         const otherPlayersEntries = Object.entries(this.players).filter(
             ([key]) => key !== playerId
         );
-        const otherPlayersOptions = otherPlayersEntries.map(([key, { player, serverOptions }]) => {
-            // TODO update
-            const { x, y, angle } = player.getActionsState();
-            return { ...serverOptions, x, y, angle };
-        });
+        const otherPlayersOptions = otherPlayersEntries.map(
+            ([key, { entity: player, serverOptions }]) => {
+                // TODO update
+                const { x, y, angle } = player.getActionsState();
+                return { ...serverOptions, x, y, angle };
+            }
+        );
         return otherPlayersOptions;
     }
 
     get playersActionsState(): ActionsState[] {
-        const playersState = Object.values(this.players).map(({ player }) =>
+        const playersState = Object.values(this.players).map(({ entity: player }) =>
             player.getActionsState()
         );
 
@@ -66,23 +70,23 @@ export class ServerScene extends BaseMapScene {
     }
     // TODO
     get mobsActionsState(): ActionsState[] {
-        // const playersState = Object.values(this.players).map(({ player }) =>
-        //     player.getActionsState()
-        // );
+        const playersState = Object.values(this.players).map(({ entity: player }) =>
+            player.getActionsState()
+        );
 
         return [];
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
-        this.collisionManager = new BaseCollisionManager({
-            projectileGroup: this.projectileGroup,
-            allGroup: this.allGroup,
-        });
     }
 
     preload() {
         super.preload();
+        this.collisionManager = new BaseCollisionManager({
+            projectileGroup: this.entityManager.projectileGroup,
+            allGroup: this.entityManager.allGroup,
+        });
     }
 
     create() {
@@ -111,7 +115,19 @@ export class ServerScene extends BaseMapScene {
                 })
             );
 
-            channel.on("player:request-respawn", () => this.respawnEntity(channel.id));
+            channel.on("player:request-respawn", () =>
+                this.entityManager.respawnEntity(
+                    channel.id,
+                    { worldX: null, worldY: null },
+                    (worldX: number, worldY: number) => {
+                        this.game.server.emit(
+                            "entity:respawn",
+                            { id: channel.id, point: { worldX, worldY } },
+                            { reliable: true }
+                        );
+                    }
+                )
+            );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
             channel.onDisconnect((reason) => {
@@ -151,6 +167,7 @@ export class ServerScene extends BaseMapScene {
         // if (projectile traveled legit distance)
         // if (firerate is legit)
         // if (firedFromPoint is legit)
+        // if (player is active)
         const playersState = serverPlayersSnapshot.state as ActionsState[];
 
         const ownerState = playersState.find((playerState) => playerState.id === ownerId);
@@ -158,8 +175,7 @@ export class ServerScene extends BaseMapScene {
 
         if (!enemyState || !ownerState) return;
 
-        const [enemy] = this.allGroup.getMatching("id", enemyId) as Spaceship[];
-
+        const enemy = this.entityManager.getById(enemyId, "all") as Spaceship;
         const didHit = this.collisionManager.isPointInCircle(projectilePoint, {
             x: enemyState.x,
             y: enemyState.y,
@@ -167,7 +183,7 @@ export class ServerScene extends BaseMapScene {
         });
 
         if (didHit) {
-            const [owner] = this.allGroup.getMatching("id", ownerId) as Spaceship[];
+            const owner = this.entityManager.getById(ownerId, "all") as Spaceship;
             const weapon = owner.weapons.getWeaponById(weaponId);
             if (!weapon) return;
 
@@ -177,20 +193,9 @@ export class ServerScene extends BaseMapScene {
             this.sendEntityStatus(enemy.id);
         }
     }
-    respawnEntity(entityId: ChannelId) {
-        const [worldX, worldY] = super.respawnEntity(entityId!);
-
-        this.game.server.emit(
-            "entity:respawn",
-            { id: entityId, point: { worldX, worldY } },
-            { reliable: true }
-        );
-
-        return [worldX, worldY];
-    }
 
     sendEntityStatus(entityId: ChannelId) {
-        const [entity] = this.allGroup.getMatching("id", entityId) as Spaceship[];
+        const entity = this.entityManager.getById(entityId, "all") as Spaceship;
         if (entity) {
             this.game.server.emit(
                 "entity:status",
@@ -201,13 +206,13 @@ export class ServerScene extends BaseMapScene {
     }
 
     addPlayer(serverOptions: SpaceshipServerOptions) {
-        const player = this.createPlayer(serverOptions, {
+        const player = this.entityManager.createPlayer(serverOptions, {
             toPassTexture: false,
         });
         const inputManager = new BaseInputManager(this, player);
 
         this.players[serverOptions.id] = {
-            player,
+            entity: player,
             serverOptions,
             inputManager,
         };
@@ -216,14 +221,14 @@ export class ServerScene extends BaseMapScene {
     removePlayer(channel: ServerChannel) {
         channel.broadcast.emit("player:disconnected", channel.id!);
 
-        this.destroyPlayer(channel.id!);
+        this.entityManager.destroyPlayer(channel.id!);
         delete this.players[channel.id!];
     }
 
     sendPlayerOptions(channel: ServerChannel) {
         console.log("player:request-options");
 
-        const serverOptions = this.getPlayerServerOptions(channel.id);
+        const serverOptions = this.entityManager.getPlayerServerOptions(channel.id);
         channel.emit("player:request-options", serverOptions, { reliable: true });
         channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
 

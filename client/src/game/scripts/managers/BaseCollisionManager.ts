@@ -1,5 +1,5 @@
-import type { ProjectileGroup, SpaceshipGroup } from "~/scenes/core/BaseScene";
 import type { Projectile } from "~/objects/Sprite/Spaceship/components";
+import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 
 interface CollisionManagerClientOptions {
     projectileGroup: ProjectileGroup;
@@ -36,22 +36,24 @@ export class BaseCollisionManager {
 
     emitOnHit(projectile: Projectile) {
         projectile.owner.enemies.forEach((enemy) => {
-            const projectilePoint = { x: projectile.x, y: projectile.y };
-            const { hitboxCircle } = enemy;
+            if (enemy.active) {
+                const projectilePoint = { x: projectile.x, y: projectile.y };
+                const { hitboxCircle } = enemy;
 
-            const didHit = this.isPointInCircle(projectilePoint, hitboxCircle);
-            if (didHit) {
-                // TODO reuse projectiles
-                projectile.destroy();
+                const didHit = this.isPointInCircle(projectilePoint, hitboxCircle);
+                if (didHit) {
+                    // TODO reuse projectiles
+                    projectile.destroy();
 
-                const hitData: Partial<ClientHitData> = {
-                    enemyId: enemy.id,
-                    weaponId: projectile.firedFrom.id,
-                    firedFromPoint: projectile.firedFromPoint,
-                    projectilePoint,
-                };
+                    const hitData: Partial<ClientHitData> = {
+                        enemyId: enemy.id,
+                        weaponId: projectile.firedFrom.id,
+                        firedFromPoint: projectile.firedFromPoint,
+                        projectilePoint,
+                    };
 
-                projectile.owner.emit("entity:hit", hitData);
+                    projectile.owner.emit("entity:hit", hitData);
+                }
             }
         });
     }

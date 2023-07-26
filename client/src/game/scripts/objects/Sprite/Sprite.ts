@@ -17,8 +17,8 @@ export interface SpriteServerOptions {
 
 export interface SpriteClientOptions {
     scene: BaseScene;
-    soundManager?: SoundManager;
     toPassTexture: boolean;
+    soundManager?: SoundManager;
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {

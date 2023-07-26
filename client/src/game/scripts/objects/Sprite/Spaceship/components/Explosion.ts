@@ -1,3 +1,5 @@
+import type { BaseScene } from "~/game/scenes/core/BaseScene";
+
 type ExplosionConfig = {
     keys?: string[];
     scale?: number;
@@ -7,10 +9,12 @@ type ExplosionConfig = {
 };
 
 export class Explosion extends Phaser.GameObjects.Sprite {
+    scene: BaseScene;
     explosionSound: Phaser.Sound.BaseSound;
     options: ExplosionConfig;
+
     constructor(
-        scene: Phaser.Scene,
+        scene: BaseScene,
         x: number,
         y: number,
         targetDepth: number,
@@ -36,11 +40,12 @@ export class Explosion extends Phaser.GameObjects.Sprite {
         // @ts-ignore
         scene.soundManager.addSounds("explosion", ["explosion_sound_1"]);
 
-        if (!mergedOptions.silent) {
+        const { silent, double } = this.options;
+        if (!silent) {
             // @ts-ignore
             scene.soundManager.play("explosion", { sourceX: x, sourceY: y });
         }
-        if (mergedOptions.double) {
+        if (double) {
             this.doublyExplode(scene, x, y, targetDepth);
         }
         this.explode(mergedOptions.keys.at(-1));
@@ -54,7 +59,7 @@ export class Explosion extends Phaser.GameObjects.Sprite {
         });
     }
 
-    doublyExplode(scene: Phaser.Scene, x: number, y: number, targetDepth: number) {
+    doublyExplode(scene: BaseScene, x: number, y: number, targetDepth: number) {
         const underTargetExplosionConf = {
             // @ts-ignore
             keys: [this.options.keys[0]],

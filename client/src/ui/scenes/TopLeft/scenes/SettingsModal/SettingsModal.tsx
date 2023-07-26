@@ -20,7 +20,7 @@ export const SettingsModal = ({ opened, onClose }) => {
     const {
         computed: {
             player,
-            scene: { soundManager, inputManager: inputManager, mobManager },
+            scene: { soundManager, inputManager: inputManager, entityManager },
         },
     } = useGame();
     const {
@@ -72,10 +72,10 @@ export const SettingsModal = ({ opened, onClose }) => {
 
     const sendMobs = (e) => {
         e.preventDefault();
-        const { mobs } = mobManager;
-        mobManager.spawnMobs(mobsCount, [player]);
+        const { mobGroup } = entityManager;
+        entityManager.spawnMobs(mobsCount, [player]);
 
-        mobs.forEach((mob) => {
+        mobGroup.getChildren().forEach((mob) => {
             mob.moveTo(x, y);
             mob.setPointer(x, y);
         });
