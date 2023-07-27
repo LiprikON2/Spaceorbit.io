@@ -1,7 +1,7 @@
 import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 
-import { ClientCollisionManager, ClientInputManager, SoundManager } from "~/managers";
+import { BaseCollisionManager, ClientInputManager, SoundManager } from "~/managers";
 import {
     Spaceship,
     type ActionsState,
@@ -13,6 +13,7 @@ import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
 import { PingBuffer } from "~/game/utils/ping";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
+import { Mob } from "~/game/objects/Sprite/Spaceship/Mob";
 
 interface ProducePlayerOptions {
     isMe?: boolean;
@@ -27,7 +28,7 @@ export class ClientScene extends BaseMapScene {
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
-    collisionManager: ClientCollisionManager;
+    collisionManager: BaseCollisionManager;
     player: Spaceship;
     background;
     debugText: DebugInfo;
@@ -79,6 +80,7 @@ export class ClientScene extends BaseMapScene {
             });
 
             await this.produceConnectedPlayers((player) => this.setMultiplayerListeners(player));
+            await this.produceMobs((mob) => this.setMultiplayerListeners(mob));
             this.channel.on("player:connected", (serverOptions) =>
                 this.producePlayer(serverOptions, {
                     callback: (player) => this.setMultiplayerListeners(player),
@@ -107,9 +109,9 @@ export class ClientScene extends BaseMapScene {
         this.debugText = new DebugInfo(this, this.player).setDepth(1000);
         this.inputManager = new ClientInputManager(this, this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
-        this.collisionManager = new ClientCollisionManager({
+        this.collisionManager = new BaseCollisionManager({
             projectileGroup: this.entityManager.projectileGroup,
-            allGroup: this.entityManager.entityGroup,
+            entityGroup: this.entityManager.entityGroup,
         });
 
         this.isPaused = false;
@@ -145,7 +147,7 @@ export class ClientScene extends BaseMapScene {
     ): Promise<Spaceship> {
         const defaultOptions = {
             isMe: false,
-            playerCreationCallback: () => {},
+            callback: () => {},
         };
         const mergedOptions = { ...defaultOptions, ...options };
         if (!serverOptions) serverOptions = await this.requestServerOptions();
@@ -160,9 +162,25 @@ export class ClientScene extends BaseMapScene {
             isMe
         );
 
-        const { callback: playerCreationCallback } = mergedOptions;
-        playerCreationCallback(player);
+        const { callback } = mergedOptions;
+        callback(player);
         return player;
+    }
+
+    async produceMob(
+        serverOptions?: SpaceshipServerOptions,
+        options?: { callback: (mob: Mob) => void }
+    ): Promise<Mob> {
+        const defaultOptions = {
+            callback: () => {},
+        };
+        const mergedOptions = { ...defaultOptions, ...options };
+        const mob = this.entityManager.createMob(serverOptions, {
+            soundManager: this.soundManager,
+        });
+        const { callback } = mergedOptions;
+        callback(mob);
+        return mob;
     }
 
     async requestServerOptions(): Promise<SpaceshipServerOptions> {
@@ -176,13 +194,11 @@ export class ClientScene extends BaseMapScene {
         });
     }
 
-    async produceConnectedPlayers(playerCreationCallback: ProducePlayerOptions["callback"]) {
+    async produceConnectedPlayers(callback: (player: Spaceship) => void = () => {}) {
         const serverOptionsList = await this.requestAlreadyConnectedPlayers();
 
         serverOptionsList.forEach((serverOptions) =>
-            this.producePlayer(serverOptions, {
-                callback: playerCreationCallback,
-            })
+            this.producePlayer(serverOptions, { callback })
         );
     }
 
@@ -192,6 +208,25 @@ export class ClientScene extends BaseMapScene {
         return new Promise((resolve) => {
             this.channel.on("players:already-connected", (serverOptionsList) => {
                 console.log("players:already-connected", serverOptionsList);
+
+                resolve(serverOptionsList);
+            });
+        });
+    }
+
+    async produceMobs(callback: (mob: Mob) => void = () => {}) {
+        // TODO move this into entity Manager
+        const serverOptionsList = await this.requestMobs();
+
+        serverOptionsList.forEach((serverOptions) => this.produceMob(serverOptions, { callback }));
+    }
+
+    async requestMobs(): Promise<SpaceshipServerOptions[]> {
+        this.channel.emit("world:mobs-options", null, { reliable: true });
+
+        return new Promise((resolve) => {
+            this.channel.on("world:mobs-options", (serverOptionsList) => {
+                console.log("world:mobs-options", serverOptionsList);
 
                 resolve(serverOptionsList);
             });
@@ -220,7 +255,7 @@ export class ClientScene extends BaseMapScene {
         super.update(time, delta);
         this.debugText.update();
         this.soundManager.update();
-        this.collisionManager.update();
+        this.collisionManager.update(time, delta);
 
         // Acts as client predictor in multiplayer
         this.inputManager.update(time, delta);

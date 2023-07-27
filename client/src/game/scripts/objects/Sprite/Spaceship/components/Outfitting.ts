@@ -25,8 +25,8 @@ export class Outfitting {
         this.reoutfit();
     }
 
-    reoutfit(newOutfit?) {
-        if (newOutfit && this.isValidOutfit(newOutfit)) {
+    reoutfit(newOutfit?: Outfit) {
+        if (newOutfit && this.isOutfitValid(newOutfit)) {
             this.#outfit = newOutfit;
         }
         const extraWeapons = this.updateWeapons();
@@ -36,8 +36,8 @@ export class Outfitting {
 
         this.updateInventory(extraItems);
     }
-    isValidOutfit(newOutfit) {
-        // TODO prevent cheating
+    isOutfitValid(newOutfit: Outfit) {
+        // TODO validation
         return true;
     }
 
@@ -46,7 +46,7 @@ export class Outfitting {
     }
 
     updateWeapons() {
-        let extraWeapons: any[] = [];
+        let extraWeapons: Item[] = [];
 
         let weapons = this.#outfit.weapons ?? [];
         weapons = weapons.filter((weapon, index) => {
@@ -57,7 +57,7 @@ export class Outfitting {
             }
             return !isExtraItem;
         });
-        this.#outfit.weapons = this.fillEmptySlots(weapons, this.ship.weapons.getWeaponCount());
+        this.#outfit.weapons = this.fillEmptySlots(weapons, this.ship.weapons.weaponCount);
 
         return extraWeapons;
     }
@@ -73,24 +73,24 @@ export class Outfitting {
             }
             return !isExtraItem;
         });
-        const auxiliaryEngineSize = this.ship.exhausts.getSlotCount() - 1;
+        const auxiliaryEngineSize = this.ship.exhausts.slotCount - 1;
         this.#outfit.engines = this.fillEmptySlots(engines, auxiliaryEngineSize);
         return extraEngines;
     }
-    updateInventory(extraItems) {
+    updateInventory(extraItems: Item[]) {
         const inventorySize = 36;
         let inventory = this.#outfit.inventory;
         inventory = inventory.concat(extraItems);
         this.#outfit.inventory = this.fillEmptySlots(inventory, inventorySize);
     }
 
-    fillEmptySlots(array, upToCount) {
-        if (upToCount >= array.length) {
-            const emptySlotsToAdd = upToCount - array.length;
+    fillEmptySlots(items: Item[], upToCount: number) {
+        if (upToCount >= items.length) {
+            const emptySlotsToAdd = upToCount - items.length;
             const emptySlots = Array(emptySlotsToAdd).fill(null);
 
-            array = array.concat(emptySlots);
+            items = items.concat(emptySlots);
         }
-        return array;
+        return items;
     }
 }

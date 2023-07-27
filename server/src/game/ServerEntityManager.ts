@@ -1,0 +1,148 @@
+import {
+    BaseEntityManager,
+    type EntityManagerClientOptions,
+    type EntityManagerServerOptions,
+} from "@spaceorbit/client/src/game/scripts/managers/BaseEntityManager";
+import BaseInputManager from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
+import type {
+    ActionsState,
+    Spaceship,
+    SpaceshipServerOptions,
+} from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship";
+
+import type {
+    MobServerOptions,
+    MobClientOptions,
+} from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship/Mob";
+import { DeepRequired } from "~/server/types/utility";
+
+interface Entities {
+    [key: string]: {
+        serverOptions: SpaceshipServerOptions;
+        entity: Spaceship;
+        inputManager?: BaseInputManager;
+    };
+}
+
+export interface ServerEntityManagerServerOptions extends EntityManagerServerOptions {}
+
+export interface ServerEntityManagerClientOptions extends EntityManagerClientOptions {}
+
+export class ServerEntityManager extends BaseEntityManager {
+    players: DeepRequired<Entities> = {};
+    mobs: Entities = {};
+
+    get playersActionsState(): ActionsState[] {
+        const playersState = Object.values(this.players).map(({ entity: player }) =>
+            player.getActionsState()
+        );
+
+        return playersState;
+    }
+
+    get mobsActionsState(): ActionsState[] {
+        const mobsState = Object.values(this.mobs).map(({ entity: mob }) => mob.getActionsState());
+
+        return mobsState;
+    }
+
+    getUpdatedServerOptions(serverOptions: SpaceshipServerOptions, entity: Spaceship) {
+        const { x, y, angle } = entity.getActionsState();
+        return { ...serverOptions, x, y, angle };
+    }
+
+    getPlayerById(playerId: string) {
+        return this.players[playerId!];
+    }
+
+    getOtherPlayersOptions(playerId: string): SpaceshipServerOptions[] {
+        const otherPlayersEntries = Object.entries(this.players).filter(
+            ([key]) => key !== playerId
+        );
+        const otherPlayersOptions = otherPlayersEntries.map(
+            ([key, { entity: player, serverOptions }]) =>
+                this.getUpdatedServerOptions(serverOptions, player)
+        );
+        return otherPlayersOptions;
+    }
+    getMobsOptions(): MobServerOptions[] {
+        const mobsOptions = Object.entries(this.mobs).map(
+            ([key, { entity: player, serverOptions }]) =>
+                this.getUpdatedServerOptions(serverOptions, player)
+        );
+        return mobsOptions;
+    }
+
+    constructor(
+        serverOptions: ServerEntityManagerServerOptions,
+        clientOptions: ServerEntityManagerClientOptions
+    ) {
+        super(serverOptions, clientOptions);
+    }
+
+    addPlayer(serverOptions: SpaceshipServerOptions) {
+        const player = this.createPlayer(serverOptions, {
+            toPassTexture: this.toPassTexture,
+        });
+        const inputManager = new BaseInputManager(this, player);
+
+        this.players[serverOptions.id] = {
+            entity: player,
+            serverOptions,
+            inputManager,
+        };
+        return player;
+    }
+
+    removePlayer(playerId: string, callback: (playerId: string) => void = () => {}) {
+        this.destroyEntity(playerId!);
+        delete this.players[playerId!];
+
+        callback(playerId);
+    }
+
+    addMob(serverOptions: SpaceshipServerOptions) {
+        const mob = this.createMob(serverOptions, {
+            toPassTexture: this.toPassTexture,
+        });
+
+        this.mobs[serverOptions.id] = {
+            entity: mob,
+            serverOptions,
+        };
+        return mob;
+    }
+
+    spawnMobs(upToCount: number, callback: (mob: Spaceship) => void = () => {}) {
+        const mobsToSpawn = upToCount - this.mobGroup.getLength();
+
+        for (let i = 0; i < mobsToSpawn; i++) {
+            const [worldX, worldY] = this.scene.getRandomPositionOnMap();
+
+            const serverOptions: MobServerOptions = {
+                id: Phaser.Utils.String.UUID(),
+                x: worldX,
+                y: worldY,
+                angle: 90,
+                outfit: this.getMobKit("normal"),
+                atlasTexture: "F5S4",
+                multipliers: this.getMobMultipliers("normal"),
+                username: "Enemy",
+                allegiance: "Alien",
+                depth: 90,
+            };
+
+            const mob = this.addMob(serverOptions);
+
+            callback(mob);
+        }
+    }
+
+    update(time: number, delta: number) {
+        this.updatePlayersInput(time, delta);
+    }
+
+    updatePlayersInput(time: number, delta: number) {
+        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
+    }
+}

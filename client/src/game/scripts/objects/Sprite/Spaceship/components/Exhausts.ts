@@ -21,6 +21,16 @@ export class Exhausts {
         ],
     };
 
+    get pattern() {
+        return this.exhaustOriginCountPattern[this.slotCount + 1][this.engineCount - 1];
+    }
+    get engineCount() {
+        return this.exhaustEmitters.length;
+    }
+    get slotCount() {
+        return this.exhaustOrigins.length - 1;
+    }
+
     constructor(scene, ship, exhaustOrigins) {
         this.scene = scene;
         this.ship = ship;
@@ -33,11 +43,11 @@ export class Exhausts {
 
     placeEngine(type, slot) {
         let doesFit = false;
-        if (slot <= this.getSlotCount() - 1) {
+        if (slot <= this.slotCount - 1) {
             if (type === "engine") {
                 this.createExhaust();
                 doesFit = true;
-            } else if (!type && slot < this.getEngineCount() - 1) {
+            } else if (!type && slot < this.engineCount - 1) {
                 this.removeExhaust();
             }
         }
@@ -46,7 +56,7 @@ export class Exhausts {
     }
 
     createExhaust(silent = false) {
-        const hasEmptyEngineSlot = this.getEngineCount() <= this.getSlotCount();
+        const hasEmptyEngineSlot = this.engineCount <= this.slotCount;
 
         if (hasEmptyEngineSlot) {
             const exhaustParticles = this.scene.add
@@ -77,7 +87,7 @@ export class Exhausts {
     }
     removeExhaust() {
         let didRemove = false;
-        const willHaveAtLeastOneEngineAfterwards = this.getEngineCount() >= 2;
+        const willHaveAtLeastOneEngineAfterwards = this.engineCount >= 2;
 
         if (willHaveAtLeastOneEngineAfterwards) {
             this.exhaustEmitters.pop();
@@ -85,34 +95,21 @@ export class Exhausts {
         }
         return didRemove;
     }
-    getPattern() {
-        const pattern =
-            this.exhaustOriginCountPattern[this.getSlotCount() + 1][this.getEngineCount() - 1];
 
-        return pattern;
-    }
     updateExhaustPosition() {
-        const pattern = this.getPattern();
-
         this.exhaustEmitters.forEach((exhaustEmitter, index) => {
             const { originX, originY } = this.ship.getRotatedPoint(
-                this.exhaustOrigins[pattern[index]]
+                this.exhaustOrigins[this.pattern[index]]
             );
             exhaustEmitter.followOffset.set(originX, originY);
         });
-    }
-    getEngineCount() {
-        return this.exhaustEmitters.length;
-    }
-    getSlotCount() {
-        return this.exhaustOrigins.length - 1;
     }
     // Init exhaust sound and tween
     initExhaustSound() {
         // The exhaust sound is constantly playing, tween just changes the volume
         this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.id, {
             maxVolume: 0.3,
-            pitchPower: this.getEngineCount() - 1,
+            pitchPower: this.engineCount - 1,
         });
         this.isSoundInit = true;
     }

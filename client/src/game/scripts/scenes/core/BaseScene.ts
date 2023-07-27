@@ -3,15 +3,10 @@ import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import type { ChannelId } from "@geckos.io/client";
 
 import type { GameClient } from "~/game/core/client/GameClient";
-import {
-    type AllegianceKeys,
-    Spaceship,
-    type SpaceshipClientOptions,
-    type SpaceshipServerOptions,
-} from "~/game/objects/Sprite/Spaceship";
-import type { Projectile } from "~/objects/Sprite/Spaceship/components";
+import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
 import { type Actions, type ClientHitData, BaseEntityManager } from "~/managers";
 import type { Status } from "~/objects/Sprite";
+import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
 
 export interface MultiplayerEvents {
     "connection:established"?: {
@@ -37,6 +32,12 @@ export interface MultiplayerEvents {
         emit: null;
         on: (serverOptionsList: SpaceshipServerOptions[]) => void;
     };
+
+    "world:mobs-options"?: {
+        emit: null;
+        on: (serverOptionsList: MobServerOptions[]) => void;
+    };
+
     "player:actions"?: {
         emit: Partial<Actions> & { time: number };
         on: (actionsCompact: Partial<Actions> & { time: number }) => void;
@@ -133,8 +134,10 @@ export class BaseScene extends Phaser.Scene {
             const { weaponId, enemyId } = hitData;
 
             const weapon = entity.weapons.getWeaponById(weaponId);
-            const damage = entity.weapons.getDamageByWeapon(weapon);
-            this.entityManager.hitEntity(enemyId, damage);
+            if (weapon) {
+                const damage = entity.weapons.getDamageByWeapon(weapon);
+                this.entityManager.hitEntity(enemyId, damage);
+            }
         });
         entity.on("entity:dead", () => this.entityManager.respawnEntity(entity.id));
     }

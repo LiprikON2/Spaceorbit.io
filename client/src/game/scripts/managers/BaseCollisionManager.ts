@@ -3,7 +3,7 @@ import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManag
 
 interface CollisionManagerClientOptions {
     projectileGroup: ProjectileGroup;
-    allGroup: SpaceshipGroup;
+    entityGroup: SpaceshipGroup;
 }
 
 export interface ClientHitData {
@@ -16,12 +16,12 @@ export interface ClientHitData {
 
 export class BaseCollisionManager {
     projectileGroup: ProjectileGroup;
-    allGroup: SpaceshipGroup;
+    entityGroup: SpaceshipGroup;
 
     constructor(clientOptions: CollisionManagerClientOptions) {
-        const { projectileGroup, allGroup } = clientOptions;
+        const { projectileGroup, entityGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
-        this.allGroup = allGroup;
+        this.entityGroup = entityGroup;
     }
 
     isPointInCircle = (
@@ -58,7 +58,7 @@ export class BaseCollisionManager {
         });
     }
 
-    update() {
+    update(time: number, delta: number) {
         if (!this.projectileGroup.getLength()) return;
         const projectiles = this.projectileGroup.getChildren();
 

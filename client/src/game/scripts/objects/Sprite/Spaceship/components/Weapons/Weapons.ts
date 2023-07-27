@@ -25,6 +25,26 @@ export class Weapons {
     multiplier = 1;
     projectileId = 0;
 
+    get slotCount() {
+        return this.weaponSlots.length;
+    }
+
+    get weaponCount() {
+        return this.weaponSlots.filter((slot) => slot.type !== null).length;
+    }
+
+    getWeaponsOfType(type: WeaponType) {
+        return this.weaponSlots.filter((slot) => slot.type === type);
+    }
+
+    getWeaponById(weaponId: number) {
+        return this.weaponSlots.find((slot) => slot.id === weaponId);
+    }
+    getDamageByWeapon(weapon: Weapon) {
+        const { projectileDamageMultiplier, projectileBaseDamage } = weapon;
+        return projectileDamageMultiplier * projectileBaseDamage;
+    }
+
     getIncrementalId() {
         return this.projectileId++;
     }
@@ -56,32 +76,13 @@ export class Weapons {
             this.ship.soundManager.addSounds("gatling", ["gatling_sound_1"]);
         }
 
-        const middleSlot = Math.floor((this.getSlotCount() - 1) / 2);
+        const middleSlot = Math.floor((this.slotCount - 1) / 2);
         this.createLaser(middleSlot);
-    }
-
-    getSlotCount() {
-        return this.weaponSlots.length;
-    }
-
-    getWeaponCount() {
-        return this.weaponSlots.filter((slot) => slot.type !== null).length;
-    }
-    getWeaponsOfType(type: WeaponType) {
-        return this.weaponSlots.filter((slot) => slot.type === type);
-    }
-
-    getWeaponById(weaponId: number) {
-        return this.weaponSlots.find((slot) => slot.id === weaponId);
-    }
-    getDamageByWeapon(weapon: Weapon) {
-        const { projectileDamageMultiplier, projectileBaseDamage } = weapon;
-        return projectileDamageMultiplier * projectileBaseDamage;
     }
 
     placeWeapon(type, slot) {
         let doesFit = false;
-        if (slot <= this.getSlotCount() - 1) {
+        if (slot <= this.slotCount - 1) {
             if (type === "laser") {
                 this.createLaser(slot);
                 doesFit = true;

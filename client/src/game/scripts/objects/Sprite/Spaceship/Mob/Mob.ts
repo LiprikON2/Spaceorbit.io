@@ -14,8 +14,8 @@ export class Mob extends Spaceship {
     isSleeping: boolean = false;
     isAggresive: boolean = true;
 
-    readyToFireEvent;
-    sleepEvent;
+    readyToFireEvent: Phaser.Time.TimerEvent | null;
+    sleepEvent: Phaser.Time.TimerEvent | null;
     preferedMovement = Direction.Left;
     reactionTime: number;
     jitter: { x: number; y: number } = { x: 0, y: 0 };
@@ -36,8 +36,7 @@ export class Mob extends Spaceship {
                 const enumLength = Object.keys(Direction).length / 2;
                 this.preferedMovement = Phaser.Math.Between(0, enumLength - 1);
 
-                // TODO adjust
-                const jitter = 25;
+                const jitter = 75;
                 this.jitter.x = Phaser.Math.Between(-jitter, jitter);
                 this.jitter.y = Phaser.Math.Between(-jitter, jitter);
             });
@@ -69,35 +68,30 @@ export class Mob extends Spaceship {
         this.exhausts.updateExhaustPosition();
         let haveMoved = false;
         // TODO they may get stuck in on the boundaries
-
         // If it is wandering
         if (!this.target && !this.isSleeping) {
             const closestEnemy = this.scene.physics.closest(this, this.enemies) as Spaceship;
-            const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
-
-            // TODO emit "got shot by" event to aggro on the shooter
-
-            // Aggro on the closest enemy
-            if (this.isAggresive && dist < 1000) {
-                this.setTarget(closestEnemy);
-            }
-
-            if (!this.moveToPlugin.isRunning) {
-                const { worldX, worldY } = this.getNextPoint();
-                this.moveTo(worldX, worldY);
-                this.setPointer(worldX, worldY);
-                haveMoved = true;
+            if (closestEnemy) {
+                const dist = Phaser.Math.Distance.BetweenPoints(this, closestEnemy);
+                // TODO emit "got shot by" event to aggro on the shooter
+                // Aggro on the closest enemy
+                if (this.isAggresive && dist < 1000) {
+                    this.setTarget(closestEnemy);
+                }
+                if (!this.moveToPlugin.isRunning) {
+                    const { worldX, worldY } = this.getNextPoint();
+                    this.moveTo(worldX, worldY);
+                    this.setPointer(worldX, worldY);
+                    haveMoved = true;
+                }
             }
         }
-
         // If it is aggroed on someone
         if (this.target) {
             const { x, y } = this.target.getActionsState();
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
-
             // Shooting logic
             this.setPointer(x, y);
-
             if (this.isReadyToFire && dist < 900) {
                 // Fire
                 this.primaryFire(time);
@@ -108,13 +102,10 @@ export class Mob extends Spaceship {
                     this.isReadyToFire = true;
                 });
             }
-
             // Movement logic
             this.resetMovement();
-
             if ((dist < 2000 && dist > 900) || (dist < 900 && dist > 700 && !this.isSleeping)) {
                 // I need to be closer
-
                 this.moveTo(x + this.jitter.x, y + this.jitter.y);
                 haveMoved = true;
             } else if (dist < 700 && dist > 400 && !this.isSleeping) {
@@ -136,7 +127,6 @@ export class Mob extends Spaceship {
             } else if (dist >= 2000) {
                 // Target got away
                 this.resetMovement();
-
                 this.setTarget();
                 this.readyToFireEvent.destroy();
                 this.readyToFireEvent = null;

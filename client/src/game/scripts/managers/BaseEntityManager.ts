@@ -5,9 +5,10 @@ import {
     type AllegianceKeys,
     type SpaceshipClientOptions,
     type SpaceshipServerOptions,
+    type Multipliers,
 } from "~/objects/Sprite/Spaceship";
 import type { Status } from "~/objects/Sprite";
-import type { Projectile } from "~/objects/Sprite/Spaceship/components";
+import type { Outfit, Projectile } from "~/objects/Sprite/Spaceship/components";
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
 import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
 
@@ -87,7 +88,7 @@ export class BaseEntityManager {
     ) {
         const defaultClientOptions = {
             scene: this.scene,
-            allGroup: this.entityGroup,
+            entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
             toPassTexture: this.toPassTexture,
         };
@@ -112,7 +113,7 @@ export class BaseEntityManager {
     ) {
         const defaultClientOptions = {
             scene: this.scene,
-            allGroup: this.entityGroup,
+            entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
             toPassTexture: this.toPassTexture,
         };
@@ -192,7 +193,7 @@ export class BaseEntityManager {
 
     respawnEntity(
         entityId: string,
-        point: { worldX: number; worldY: number } = { worldX: null, worldY: null },
+        point: { worldX: number | null; worldY: number | null } = { worldX: null, worldY: null },
         respawnCallback: (worldX: number, worldY: number) => void = () => {}
     ) {
         console.log("entity:respawn");
@@ -242,10 +243,10 @@ export class BaseEntityManager {
             };
             const clientOptions: MobClientOptions = {
                 scene: this.scene,
-                allGroup: this.scene.entityManager.entityGroup,
+                entityGroup: this.scene.entityManager.entityGroup,
                 projectileGroup: this.scene.entityManager.projectileGroup,
                 soundManager: this.soundManager,
-                toPassTexture: true,
+                toPassTexture: this.toPassTexture,
             };
 
             const mob = this.createMob(serverOptions, clientOptions);
@@ -254,7 +255,7 @@ export class BaseEntityManager {
         }
     }
 
-    getMobKit(type) {
+    getMobKit(type): Outfit {
         if (type === "normal") {
             return {
                 weapons: [
@@ -268,7 +269,7 @@ export class BaseEntityManager {
         }
     }
 
-    getMobMultipliers(type) {
+    getMobMultipliers(type): Multipliers {
         if (type === "normal") {
             return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
         }

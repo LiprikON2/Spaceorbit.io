@@ -36,7 +36,7 @@ export type ActionsState = {
     targetId: string | undefined;
 };
 
-interface Multipliers {
+export interface Multipliers {
     speed: number;
     health: number;
     shields: number;
@@ -52,7 +52,7 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
-    allGroup: SpaceshipGroup;
+    entityGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
 }
 
@@ -75,7 +75,7 @@ export class Spaceship extends Sprite {
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
-    allGroup: SpaceshipGroup;
+    entityGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
 
     allegiance: AllegianceEnum | AllegianceKeys;
@@ -102,7 +102,7 @@ export class Spaceship extends Sprite {
     }
 
     get enemies(): Spaceship[] {
-        const all = this.allGroup.getChildren();
+        const all = this.entityGroup.getChildren();
         const enemies = all.filter(
             (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
         );
@@ -125,7 +125,7 @@ export class Spaceship extends Sprite {
         // TODELETE
         const speedBoost = 20;
         const speed = this.baseStats.speed;
-        const countOfAdditionalEngines = this.exhausts.getEngineCount() - 1;
+        const countOfAdditionalEngines = this.exhausts.engineCount - 1;
         const speedMultiplier = this.multipliers.speed;
 
         const shipSpeed = speed + speed * speedBoost * countOfAdditionalEngines;
@@ -192,8 +192,8 @@ export class Spaceship extends Sprite {
         const { allegiance } = serverOptions;
         this.allegiance = allegiance;
 
-        const { allGroup } = clientOptions;
-        this.allGroup = allGroup;
+        const { entityGroup } = clientOptions;
+        this.entityGroup = entityGroup;
 
         const { projectileGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
@@ -358,7 +358,7 @@ export class Spaceship extends Sprite {
     }
 
     setTargetById(targetId: string) {
-        const [target] = this.allGroup.getMatching("id", targetId);
+        const [target] = this.entityGroup.getMatching("id", targetId);
         if (target) this.setTarget(target);
     }
 

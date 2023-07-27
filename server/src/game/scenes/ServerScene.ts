@@ -1,3 +1,4 @@
+import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 import { ChannelId, ServerChannel } from "@geckos.io/server";
 
@@ -6,24 +7,13 @@ import type { GameServer } from "~/server/game/GameServer";
 import type {
     ActionsState,
     Spaceship,
-    SpaceshipServerOptions,
 } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship";
-import { BaseMapScene } from "@spaceorbit/client/src/game/scripts/scenes/maps/BaseMapScene";
-import BaseInputManager, {
-    type Actions,
-} from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
+import { type Actions } from "@spaceorbit/client/src/game/scripts/managers/BaseInputManager";
 import {
     type ClientHitData,
     BaseCollisionManager,
 } from "@spaceorbit/client/src/game/scripts/managers/BaseCollisionManager";
-
-interface Entities {
-    [key: string]: {
-        serverOptions: SpaceshipServerOptions;
-        entity: Spaceship;
-        inputManager: BaseInputManager;
-    };
-}
+import { ServerEntityManager } from "~/server/game/ServerEntityManager";
 
 interface ServerHitData extends ClientHitData {
     ownerId: ChannelId;
@@ -34,45 +24,12 @@ export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
     collisionManager?: BaseCollisionManager;
+    declare entityManager: ServerEntityManager;
 
-    players: Entities = {};
-    // mobs: Entities = {};
     tickrate = 30;
 
     get tickrateDeltaTime() {
         return 1000 / this.tickrate;
-    }
-    getPlayerById(playerId: ChannelId) {
-        return this.players[playerId!];
-    }
-
-    getOtherPlayersOptions(playerId: ChannelId) {
-        const otherPlayersEntries = Object.entries(this.players).filter(
-            ([key]) => key !== playerId
-        );
-        const otherPlayersOptions = otherPlayersEntries.map(
-            ([key, { entity: player, serverOptions }]) => {
-                // TODO update
-                const { x, y, angle } = player.getActionsState();
-                return { ...serverOptions, x, y, angle };
-            }
-        );
-        return otherPlayersOptions;
-    }
-
-    get playersActionsState(): ActionsState[] {
-        const playersState = Object.values(this.players).map(({ entity: player }) =>
-            player.getActionsState()
-        );
-
-        return playersState;
-    }
-    get mobsActionsState(): ActionsState[] {
-        const mobState = this.entityManager.mobGroup
-            .getChildren()
-            .map((mob) => mob.getActionsState());
-
-        return mobState;
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -80,28 +37,36 @@ export class ServerScene extends BaseMapScene {
     }
 
     preload() {
-        super.preload();
+        // super.preload();
+        this.entityManager = new ServerEntityManager(
+            {},
+            {
+                scene: this,
+                toPassTexture: false,
+            }
+        );
         this.collisionManager = new BaseCollisionManager({
             projectileGroup: this.entityManager.projectileGroup,
-            allGroup: this.entityManager.allGroup,
+            entityGroup: this.entityManager.entityGroup,
         });
     }
 
     create() {
         super.create();
 
-        // this.entityManager.spawnMobs(5, (mob) => {
-        //     mob.on("entity:hit", (hitData) => {
-        //         const { weaponId, enemyId } = hitData;
-
-        //         const weapon = mob.weapons.getWeaponById(weaponId);
-        //         const damage = mob.weapons.getDamageByWeapon(weapon);
-        //         this.entityManager.hitEntity(enemyId, damage, (enemy) =>
-        //             this.sendEntityStatus(enemy.id)
-        //         );
-        //     });
-        //     mob.on("entity:dead", () => this.entityManager.respawnEntity(mob.id));
-        // });
+        this.entityManager.spawnMobs(3, (mob: Spaceship) => {
+            mob.on("entity:hit", (hitData: ClientHitData) => {
+                const { weaponId, enemyId } = hitData;
+                const weapon = mob.weapons.getWeaponById(weaponId);
+                if (weapon) {
+                    const damage = mob.weapons.getDamageByWeapon(weapon);
+                    this.entityManager.hitEntity(enemyId, damage, (enemy) =>
+                        this.sendEntityStatus(enemy.id)
+                    );
+                }
+            });
+            mob.on("entity:dead", () => this.entityManager.respawnEntity(mob.id));
+        });
 
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
@@ -114,6 +79,7 @@ export class ServerScene extends BaseMapScene {
 
             channel.on("player:request-options", () => this.sendPlayerOptions(channel));
             channel.on("players:already-connected", () => this.sendAlreadyConnected(channel));
+            channel.on("world:mobs-options", () => this.sendMobsOptions(channel));
 
             channel.on("player:actions", (actions) =>
                 this.emulateActions(channel.id, actions as Actions)
@@ -128,7 +94,7 @@ export class ServerScene extends BaseMapScene {
 
             channel.on("player:request-respawn", () =>
                 this.entityManager.respawnEntity(
-                    channel.id,
+                    channel.id!,
                     { worldX: null, worldY: null },
                     (worldX: number, worldY: number) => {
                         this.game.server.emit(
@@ -143,7 +109,9 @@ export class ServerScene extends BaseMapScene {
 
             channel.onDisconnect((reason) => {
                 console.log(`Channel ${reason}`, channel.id);
-                this.removePlayer(channel);
+                this.entityManager.removePlayer(channel.id!, (playerId) => {
+                    channel.broadcast.emit("player:disconnected", playerId!);
+                });
             });
         });
     }
@@ -193,7 +161,7 @@ export class ServerScene extends BaseMapScene {
         });
 
         if (didHit) {
-            const owner = this.entityManager.getById(ownerId, "entity") as Spaceship;
+            const owner = this.entityManager.getById(ownerId!, "entity") as Spaceship;
             const weapon = owner.weapons.getWeaponById(weaponId);
             if (!weapon) return;
 
@@ -205,7 +173,7 @@ export class ServerScene extends BaseMapScene {
     }
 
     sendEntityStatus(entityId: ChannelId) {
-        const entity = this.entityManager.getById(entityId, "entity") as Spaceship;
+        const entity = this.entityManager.getById(entityId!, "entity") as Spaceship;
         if (entity) {
             this.game.server.emit(
                 "entity:status",
@@ -215,39 +183,6 @@ export class ServerScene extends BaseMapScene {
         }
     }
 
-    addPlayer(serverOptions: SpaceshipServerOptions) {
-        const player = this.entityManager.createPlayer(serverOptions, {
-            toPassTexture: false,
-        });
-        const inputManager = new BaseInputManager(this, player);
-
-        this.players[serverOptions.id] = {
-            entity: player,
-            serverOptions,
-            inputManager,
-        };
-    }
-
-    // addMob(serverOptions: SpaceshipServerOptions) {
-    //     const mob = this.entityManager.createMob(serverOptions, {
-    //         toPassTexture: false,
-    //     });
-    //     const inputManager = new BaseInputManager(this, mob);
-
-    //     this.players[serverOptions.id] = {
-    //         entity: mob,
-    //         serverOptions,
-    //         inputManager,
-    //     };
-    // }
-
-    removePlayer(channel: ServerChannel) {
-        channel.broadcast.emit("player:disconnected", channel.id!);
-
-        this.entityManager.destroyEntity(channel.id!);
-        delete this.players[channel.id!];
-    }
-
     sendPlayerOptions(channel: ServerChannel) {
         console.log("player:request-options");
 
@@ -255,14 +190,20 @@ export class ServerScene extends BaseMapScene {
         channel.emit("player:request-options", serverOptions, { reliable: true });
         channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
 
-        this.addPlayer(serverOptions);
+        this.entityManager.addPlayer(serverOptions);
     }
 
     sendAlreadyConnected(channel: ServerChannel) {
         console.log("players:already-connected");
 
-        const otherPlayersOptions = this.getOtherPlayersOptions(channel.id);
+        const otherPlayersOptions = this.entityManager.getOtherPlayersOptions(channel.id!);
         channel.emit("players:already-connected", otherPlayersOptions, { reliable: true });
+    }
+    sendMobsOptions(channel: ServerChannel) {
+        console.log("world:mobs-options");
+
+        const otherPlayersOptions = this.entityManager.getMobsOptions();
+        channel.emit("world:mobs-options", otherPlayersOptions, { reliable: true });
     }
 
     broadcastMessage(channel: ServerChannel, message) {
@@ -272,7 +213,7 @@ export class ServerScene extends BaseMapScene {
 
     emulateActions(playerId: ChannelId, actions: Partial<Actions>) {
         // console.log("player:actions", actions);
-        const { inputManager } = this.getPlayerById(playerId);
+        const { inputManager } = this.entityManager.getPlayerById(playerId!);
         inputManager.setActions(actions);
     }
 
@@ -281,21 +222,20 @@ export class ServerScene extends BaseMapScene {
             // console.log("thisactualFps", this.game.loop.actualFps);
             this.sendServerSnapshot();
         });
-        this.updatePlayersInput(time, delta);
+        this.entityManager.update(time, delta);
+        this.collisionManager!.update(time, delta);
     }
 
     sendServerSnapshot() {
         const serverState = {
-            // entities: [...this.playersActionsState, ...this.mobsActionsState],
-            entities: [...this.playersActionsState],
+            entities: [
+                ...this.entityManager.playersActionsState,
+                ...this.entityManager.mobsActionsState,
+            ],
         };
         const serverSnapshot = this.si.snapshot.create(serverState);
         this.si.vault.add(serverSnapshot);
 
         this.game.server.emit("world:server-snapshot", serverSnapshot);
-    }
-
-    updatePlayersInput(time: number, delta: number) {
-        Object.values(this.players).forEach(({ inputManager }) => inputManager.update(time, delta));
     }
 }
