@@ -5,7 +5,6 @@ import type { ChannelId } from "@geckos.io/client";
 import type { GameClient } from "~/game/core/client/GameClient";
 import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
 import { type Actions, type ClientHitData, BaseEntityManager } from "~/managers";
-import type { Status } from "~/objects/Sprite";
 import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
 
 export interface MultiplayerEvents {
@@ -51,8 +50,8 @@ export interface MultiplayerEvents {
         on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
     };
     "entity:status"?: {
-        emit: { id: string; status: Status };
-        on: (entityStatusData: { id: string; status: Status }) => void;
+        emit: { id: string; status: { health: number; shields: number } };
+        on: (entityStatusData: { id: string; status: { health: number; shields: number } }) => void;
     };
     "player:disconnected"?: {
         emit: ChannelId;

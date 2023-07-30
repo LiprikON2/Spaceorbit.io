@@ -1,11 +1,6 @@
 import type { BaseScene } from "~/scenes/core/BaseScene";
 import type { SoundManager } from "~/managers";
 
-export type Status = {
-    shields: number;
-    health: number;
-};
-
 export interface SpriteServerOptions {
     id: string | number;
     x: number;

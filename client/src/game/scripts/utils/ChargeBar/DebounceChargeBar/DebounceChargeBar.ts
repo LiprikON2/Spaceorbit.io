@@ -75,15 +75,20 @@ export class DebounceChargeBar extends ChargeBar {
         this.setState(state);
     }
 
+    resetIncreaseDebounce() {
+        this.increaseDebounceBar.setValue(this.increaseDebounceBar.minValue);
+    }
+    resetDecreaseDebounce() {
+        this.decreaseDebounceBar.setValue(this.decreaseDebounceBar.minValue);
+    }
+
     update(time: number, delta: number) {
         this.updateDebounce(time, delta);
         super.update(time, delta);
     }
 
     updateDebounce(time: number, delta: number) {
-        // console.log("this.decreaseDebounceBar BEFORE:", this.decreaseDebounceBar.value);
         this.decreaseDebounceBar.update(time, delta);
-        // console.log("this.decreaseDebounceBar AFTER:", this.decreaseDebounceBar.value);
         this.increaseDebounceBar.update(time, delta);
     }
 }

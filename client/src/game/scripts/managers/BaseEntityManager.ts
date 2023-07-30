@@ -7,7 +7,6 @@ import {
     type SpaceshipServerOptions,
     type Multipliers,
 } from "~/objects/Sprite/Spaceship";
-import type { Status } from "~/objects/Sprite";
 import type { Outfit, Projectile } from "~/objects/Sprite/Spaceship/components";
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
 import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
@@ -168,7 +167,10 @@ export class BaseEntityManager {
                 { itemName: "laser", itemType: "weapons", label: "Wpn", color: "red" },
                 { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
             ],
-            engines: [null, null],
+            engines: [
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+            ],
             inventory: [
                 null,
                 null,
@@ -218,7 +220,7 @@ export class BaseEntityManager {
         return [worldX, worldY];
     }
 
-    updateEntityStatus(id: string, status: Status) {
+    updateEntityStatus(id: string, status: { health: number; shields: number }) {
         const [entity] = this.entityGroup.getMatching("id", id);
         if (entity) entity.setStatus(status);
     }
