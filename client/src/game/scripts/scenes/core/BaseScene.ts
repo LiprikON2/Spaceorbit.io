@@ -6,6 +6,7 @@ import type { GameClient } from "~/game/core/client/GameClient";
 import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
 import { type Actions, type ClientHitData, BaseEntityManager } from "~/managers";
 import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
+import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
 
 export interface MultiplayerEvents {
     "connection:established"?: {
@@ -50,8 +51,8 @@ export interface MultiplayerEvents {
         on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
     };
     "entity:status"?: {
-        emit: { id: string; status: { health: number; shields: number } };
-        on: (entityStatusData: { id: string; status: { health: number; shields: number } }) => void;
+        emit: { id: string; status: StatusState };
+        on: (entityStatusData: { id: string; status: StatusState }) => void;
     };
     "player:disconnected"?: {
         emit: ChannelId;
@@ -67,20 +68,13 @@ export interface MultiplayerEvents {
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
 export class BaseScene extends Phaser.Scene {
-    game: GameClient | Phaser.Game;
+    game: GameClient;
     rootElem: HTMLElement | null;
     plugins: Phaser.Plugins.PluginManager;
     add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
 
     entityManager: BaseEntityManager;
     cumDelta = 0;
-
-    get isClient() {
-        return Boolean(this.rootElem);
-    }
-    get isServer() {
-        return !this.isClient;
-    }
 
     get halfWorldWidth() {
         return this.physics.world.bounds.width / 2;
@@ -97,7 +91,7 @@ export class BaseScene extends Phaser.Scene {
     preload() {
         this.entityManager = new BaseEntityManager(null, {
             scene: this,
-            toPassTexture: this.isClient,
+            isTextured: this.game.isClient,
         });
     }
 

@@ -27,7 +27,22 @@ export interface ClientChannel<Events extends EventsMap = DefaultEvents>
     on<K extends keyof Events>(eventName: K, callback: Events[K]["on"]): void;
 }
 
-export class GameClient extends Phaser.Game {
+export interface Game {
+    get isClient(): boolean;
+    get isServer(): boolean;
+
+    get isSingleplayer(): boolean;
+    get isMultiplayer(): boolean;
+
+    /**
+     * Determines if this instance of the game can act as the authority for server-side calculations
+     * - Singleplayer: always `true`
+     * - Multiplayer: `true` if it's a server
+     */
+    get isAuthority(): boolean;
+}
+
+export class GameClient extends Phaser.Game implements Game {
     settings;
     outEmitter: Emitter<OutEvents> | null;
     channel?: ClientChannel<MultiplayerEvents>;
@@ -42,5 +57,24 @@ export class GameClient extends Phaser.Game {
         this.settings = settings;
         this.outEmitter = outEmitter;
         this.channel = channel;
+    }
+
+    get isClient() {
+        return true;
+    }
+    get isServer() {
+        return !this.isClient;
+    }
+
+    get isSingleplayer() {
+        return !this.isMultiplayer;
+    }
+    get isMultiplayer() {
+        return Boolean(this.channel);
+    }
+
+    get isAuthority() {
+        if (this.isMultiplayer) return this.isServer;
+        return true;
     }
 }

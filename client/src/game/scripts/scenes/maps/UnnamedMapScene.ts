@@ -18,7 +18,7 @@ export function MixinUnnamedMapScene<ClientOrServerScene extends Constructor<Bas
 
             this.loadBackground("map_1-2", 0.5);
 
-            if (this.isClient) {
+            if (this.game.isClient) {
                 this.addLights([
                     [0.3, 0.5],
                     [0.4, 0.25],

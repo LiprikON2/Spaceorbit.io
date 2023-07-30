@@ -10,6 +10,7 @@ import {
 import type { Outfit, Projectile } from "~/objects/Sprite/Spaceship/components";
 import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
 import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
+import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
 
 export type SpaceshipGroup = {
     getChildren: () => Spaceship[];
@@ -35,7 +36,7 @@ export interface EntityManagerServerOptions {}
 
 export interface EntityManagerClientOptions {
     scene: BaseScene;
-    toPassTexture: boolean;
+    isTextured: boolean;
 }
 
 export class BaseEntityManager {
@@ -48,7 +49,7 @@ export class BaseEntityManager {
     projectileGroup: ProjectileGroup;
     soundManager?: SoundManager;
 
-    toPassTexture: boolean;
+    isTextured: boolean;
 
     getById(id: string, from: "entity" | "players" | "otherPlayers" | "mob" = "entity") {
         let fromGroup: SpaceshipGroup;
@@ -65,9 +66,9 @@ export class BaseEntityManager {
         serverOptions: EntityManagerServerOptions,
         clientOptions: EntityManagerClientOptions
     ) {
-        const { scene, toPassTexture } = clientOptions;
+        const { scene, isTextured } = clientOptions;
         this.scene = scene;
-        this.toPassTexture = toPassTexture;
+        this.isTextured = isTextured;
 
         this.playerGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.otherPlayersGroup = this.scene.add.group() as SpaceshipGroup;
@@ -89,11 +90,11 @@ export class BaseEntityManager {
             scene: this.scene,
             entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
-            toPassTexture: this.toPassTexture,
+            isTextured: this.isTextured,
+            depth: isMe ? 110 : 100,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);
-
         if (clientOptions.soundManager) {
             if (isMe) clientOptions.soundManager.setPlayer(player);
             else clientOptions.soundManager.initEntity(player);
@@ -114,7 +115,8 @@ export class BaseEntityManager {
             scene: this.scene,
             entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
-            toPassTexture: this.toPassTexture,
+            isTextured: this.isTextured,
+            depth: 90,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const mob = new Mob(serverOptions, mergedClientOptions);
@@ -153,7 +155,6 @@ export class BaseEntityManager {
             multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
             username: `Player${playerCount + 1}`,
             allegiance: "Unaffiliated",
-            depth: 100,
         };
 
         return spaceshipServerOptions;
@@ -168,8 +169,11 @@ export class BaseEntityManager {
                 { itemName: "gatling", itemType: "weapons", label: "Wpn", color: "red" },
             ],
             engines: [
-                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
-                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                null,
+                null,
+                // TODO server crashes with this
+                // { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                // { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
             ],
             inventory: [
                 null,
@@ -196,7 +200,7 @@ export class BaseEntityManager {
     respawnEntity(
         entityId: string,
         point: { worldX: number | null; worldY: number | null } = { worldX: null, worldY: null },
-        respawnCallback: (worldX: number, worldY: number) => void = () => {}
+        callback: (worldX: number, worldY: number) => void = () => {}
     ) {
         console.log("entity:respawn");
         let { worldX, worldY } = point;
@@ -215,14 +219,14 @@ export class BaseEntityManager {
             }
         }
 
-        respawnCallback(worldX, worldY);
+        callback(worldX, worldY);
 
         return [worldX, worldY];
     }
 
-    updateEntityStatus(id: string, status: { health: number; shields: number }) {
+    updateEntityStatus(id: string, status: StatusState) {
         const [entity] = this.entityGroup.getMatching("id", id);
-        if (entity) entity.setStatus(status);
+        if (entity) entity.setStatusState(status);
     }
 
     spawnMobs(upToCount, callback: (mob: Spaceship) => void = () => {}) {
@@ -241,14 +245,14 @@ export class BaseEntityManager {
                 multipliers: this.getMobMultipliers("normal"),
                 username: "Enemy",
                 allegiance: AllegianceEnum.Alien,
-                depth: 90,
             };
             const clientOptions: MobClientOptions = {
                 scene: this.scene,
                 entityGroup: this.scene.entityManager.entityGroup,
                 projectileGroup: this.scene.entityManager.projectileGroup,
                 soundManager: this.soundManager,
-                toPassTexture: this.toPassTexture,
+                isTextured: this.isTextured,
+                depth: 90,
             };
 
             const mob = this.createMob(serverOptions, clientOptions);

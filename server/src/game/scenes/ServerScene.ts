@@ -42,7 +42,7 @@ export class ServerScene extends BaseMapScene {
             {},
             {
                 scene: this,
-                toPassTexture: false,
+                isTextured: false,
             }
         );
         this.collisionManager = new BaseCollisionManager({
@@ -54,7 +54,7 @@ export class ServerScene extends BaseMapScene {
     create() {
         super.create();
 
-        this.entityManager.spawnMobs(3, (mob: Spaceship) => {
+        this.entityManager.spawnMobs(0, (mob: Spaceship) => {
             mob.on("entity:hit", (hitData: ClientHitData) => {
                 const { weaponId, enemyId } = hitData;
                 const weapon = mob.weapons.getWeaponById(weaponId);
@@ -64,6 +64,9 @@ export class ServerScene extends BaseMapScene {
                         this.sendEntityStatus(enemy.id)
                     );
                 }
+            });
+            mob.on("entity:heal", (id: string) => {
+                this.sendEntityStatus(id);
             });
             mob.on("entity:dead", () => this.entityManager.respawnEntity(mob.id));
         });
@@ -177,7 +180,7 @@ export class ServerScene extends BaseMapScene {
         if (entity) {
             this.game.server.emit(
                 "entity:status",
-                { id: entity.id, status: entity.status },
+                { id: entity.id, status: entity.getStatusState() },
                 { reliable: true }
             );
         }
@@ -190,7 +193,11 @@ export class ServerScene extends BaseMapScene {
         channel.emit("player:request-options", serverOptions, { reliable: true });
         channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
 
-        this.entityManager.addPlayer(serverOptions);
+        this.entityManager.spawnPlayer(serverOptions, (player) => {
+            player.on("entity:heal", (id: string) => {
+                this.sendEntityStatus(id);
+            });
+        });
     }
 
     sendAlreadyConnected(channel: ServerChannel) {

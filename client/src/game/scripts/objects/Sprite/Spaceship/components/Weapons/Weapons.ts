@@ -211,7 +211,8 @@ export class Weapons {
         const serverOptions = this.getProjectileServerOptions(weaponId, targetPoint);
         const clientOptions = {
             scene: this.scene,
-            toPassTexture: this.ship.isTextured,
+            isTextured: this.ship.isTextured,
+            depth: this.ship.depth - 1,
         };
         const projectile = new Projectile(serverOptions, clientOptions);
         this.ship.projectileGroup.add(projectile);
@@ -233,12 +234,12 @@ export class Weapons {
             y: originPoint.originY,
             angle: Phaser.Math.RadToDeg(rotation - Math.PI / 2),
             atlasTexture: weapon.type,
-            depth: this.ship.depth - 1,
             scale: { scaleX: weapon.projectileScale.x, scaleY: weapon.projectileScale.y },
             velocity: { velocityX, velocityY },
             firedFrom: weapon,
             weapons: this,
             travelDistance: 900000,
+            isAuthority: this.scene.game.isAuthority,
         };
     }
 }

@@ -1,3 +1,4 @@
+import type { SoundManager } from "~/game/managers/SoundManager";
 import type { BaseScene } from "~/game/scenes/core/BaseScene";
 
 type ExplosionConfig = {
@@ -8,9 +9,12 @@ type ExplosionConfig = {
     doubleDiff?: number;
 };
 
+// TODO add more variety
+
 export class Explosion extends Phaser.GameObjects.Sprite {
     scene: BaseScene;
     explosionSound: Phaser.Sound.BaseSound;
+    soundManager: SoundManager;
     options: ExplosionConfig;
 
     constructor(
@@ -18,6 +22,7 @@ export class Explosion extends Phaser.GameObjects.Sprite {
         x: number,
         y: number,
         targetDepth: number,
+        soundManager: SoundManager,
         options?: ExplosionConfig
     ) {
         const defaults = {
@@ -30,20 +35,21 @@ export class Explosion extends Phaser.GameObjects.Sprite {
         const mergedOptions = Object.assign({}, defaults, options);
 
         super(scene, x, y, mergedOptions.keys[0]);
-        this.options = mergedOptions;
         scene.add.existing(this);
+
+        this.options = mergedOptions;
+
+        this.soundManager = soundManager;
 
         this.setDepth(targetDepth + 1);
         this.setScale(mergedOptions.scale);
         this.setAngle(Phaser.Math.Angle.Random());
 
-        // @ts-ignore
-        scene.soundManager.addSounds("explosion", ["explosion_sound_1"]);
-
         const { silent, double } = this.options;
         if (!silent) {
+            soundManager.addSounds("explosion", ["explosion_sound_1"]);
             // @ts-ignore
-            scene.soundManager.play("explosion", { sourceX: x, sourceY: y });
+            soundManager.play("explosion", { sourceX: x, sourceY: y });
         }
         if (double) {
             this.doublyExplode(scene, x, y, targetDepth);
@@ -68,6 +74,6 @@ export class Explosion extends Phaser.GameObjects.Sprite {
             double: false,
         };
 
-        new Explosion(scene, x, y, targetDepth - 1, underTargetExplosionConf);
+        new Explosion(scene, x, y, targetDepth - 1, this.soundManager, underTargetExplosionConf);
     }
 }

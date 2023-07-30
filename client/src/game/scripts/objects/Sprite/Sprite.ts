@@ -7,12 +7,12 @@ export interface SpriteServerOptions {
     y: number;
     angle: number;
     atlasTexture: string | Phaser.Textures.Texture;
-    depth: number;
 }
 
 export interface SpriteClientOptions {
     scene: BaseScene;
-    toPassTexture: boolean;
+    isTextured: boolean;
+    depth: number;
     soundManager?: SoundManager;
 }
 
@@ -50,16 +50,22 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         return this.atlas.metadata;
     }
 
+    get isAuthority() {
+        return this.scene.game.isAuthority;
+    }
+
     constructor(serverOptions: SpriteServerOptions, clientOptions: SpriteClientOptions) {
         const { x, y, atlasTexture } = serverOptions;
-        const { scene, toPassTexture } = clientOptions;
-        super(scene, x, y, toPassTexture ? atlasTexture : "");
-        this.isTextured = toPassTexture;
+        const { scene, isTextured } = clientOptions;
+        super(scene, x, y, isTextured ? atlasTexture : "");
+
+        this.isTextured = isTextured;
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        const { depth, angle } = serverOptions;
+        const { depth } = clientOptions;
+        const { angle } = serverOptions;
         this.setOrigin(0.5).setDepth(depth).setAngle(angle);
 
         const { soundManager } = clientOptions;

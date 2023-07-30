@@ -36,13 +36,6 @@ export class ClientScene extends BaseMapScene {
     isPaused = true;
     ping: PingBuffer;
 
-    get isSingleplayer() {
-        return !this.isMultiplayer;
-    }
-    get isMultiplayer() {
-        return Boolean(this.channel);
-    }
-
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
         this.ping = new PingBuffer(180);
@@ -65,7 +58,7 @@ export class ClientScene extends BaseMapScene {
     async create() {
         super.create();
 
-        if (this.isSingleplayer) {
+        if (this.game.isSingleplayer) {
             const serverOptions = this.entityManager.getPlayerServerOptions();
             this.player = await this.producePlayer(serverOptions, {
                 isMe: true,
@@ -260,7 +253,7 @@ export class ClientScene extends BaseMapScene {
         // Acts as client predictor in multiplayer
         this.inputManager.update(time, delta);
 
-        if (this.isMultiplayer) {
+        if (this.game.isMultiplayer) {
             this.createClientSnapshot();
             this.everyTick(30, delta, () => {
                 this.sendPlayerActions();

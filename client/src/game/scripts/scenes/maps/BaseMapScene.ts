@@ -11,7 +11,7 @@ export class BaseMapScene extends BaseScene {
     create() {
         super.create();
 
-        if (this.isClient) {
+        if (this.game.isClient) {
             this.loadTileBackground(
                 this,
                 this.physics.world.bounds.width,
@@ -69,7 +69,7 @@ export class BaseMapScene extends BaseScene {
             width,
             height
         );
-        if (this.isClient) {
+        if (this.game.isClient) {
             this.add
                 .image(imageOffset.x, imageOffset.y, textureKey)
                 .setOrigin(0, 0)

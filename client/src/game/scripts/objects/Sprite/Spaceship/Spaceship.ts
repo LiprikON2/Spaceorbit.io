@@ -5,7 +5,7 @@ import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
-import { Status } from "./components/Status";
+import { Status, type StatusState } from "./components/Status";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -153,7 +153,6 @@ export class Spaceship extends Sprite {
 
         const { modules } = this.atlasMetadata;
         this.modules = modules;
-
         // Modules
         const { scene } = clientOptions;
         const damageMultiplier = this.multipliers.damage;
@@ -235,24 +234,18 @@ export class Spaceship extends Sprite {
         this.boundingBox.destroy(fromScene);
     }
 
-    getHit(damage = 0) {
-        console.log("getHit", damage);
+    getHit(damage: number) {
         if (this.status.shields > 0) this.getShieldsHit(damage);
         else this.getHullHit(damage);
     }
+
     getShieldsHit(damage: number) {
-        console.log("getShieldsHit", damage);
-
-        // Damage to the shield
         this.shields.playShieldHit();
-
         this.status.damageShields(damage);
 
         if (this.status.shields <= 0) this.shields.crack();
     }
     getHullHit(damage: number) {
-        console.log("getHullHit", damage);
-
         this.playHullHit();
         this.status.damageHealth(damage);
 
@@ -281,9 +274,8 @@ export class Spaceship extends Sprite {
         this.disableBody(true, false);
         this.resetMovement();
 
-        // TODO add variety ("explosion patterns")
         if (this.isTextured) {
-            new Explosion(this.scene, this.x, this.y, this.depth, {
+            new Explosion(this.scene, this.x, this.y, this.depth, this.soundManager, {
                 double: true,
             });
         }
@@ -533,7 +525,7 @@ export class Spaceship extends Sprite {
 
     update(time: number, delta: number) {
         this.lookAtPointer();
-        this.status.update(time, delta);
+        if (this.isAuthority) this.status.update(time, delta);
 
         if (this.isAutoattacking) {
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
@@ -593,11 +585,23 @@ export class Spaceship extends Sprite {
         if (targetId) this.setTargetById(targetId);
     }
 
-    setStatus(newStatus: { health: number; shields: number }) {
+    getStatusState() {
+        return this.status.getState();
+    }
+
+    setStatusState(newStatus: StatusState) {
         const shieldDiff = this.status.shields - newStatus.shields;
         if (shieldDiff > 0) this.getShieldsHit(shieldDiff);
+        else if (shieldDiff < 0) this.status.healShields(shieldDiff);
 
         const healthDiff = this.status.health - newStatus.health;
         if (healthDiff > 0) this.getHullHit(healthDiff);
+        else if (healthDiff < 0) this.status.healHealth(healthDiff);
+
+        // if (shieldDiff > 0) console.log("shield damage", shieldDiff);
+        // else if (shieldDiff < 0) console.log("shield heal", shieldDiff);
+
+        // if (healthDiff > 0) console.log("health damage", healthDiff);
+        // else if (healthDiff < 0) console.log("health heal", healthDiff);
     }
 }

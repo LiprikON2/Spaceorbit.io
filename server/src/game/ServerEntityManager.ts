@@ -82,7 +82,7 @@ export class ServerEntityManager extends BaseEntityManager {
 
     addPlayer(serverOptions: SpaceshipServerOptions) {
         const player = this.createPlayer(serverOptions, {
-            toPassTexture: this.toPassTexture,
+            isTextured: this.isTextured,
         });
         const inputManager = new BaseInputManager(this, player);
 
@@ -101,9 +101,17 @@ export class ServerEntityManager extends BaseEntityManager {
         callback(playerId);
     }
 
+    spawnPlayer(
+        serverOptions: SpaceshipServerOptions,
+        callback: (player: Spaceship) => void = () => {}
+    ) {
+        const player = this.addPlayer(serverOptions);
+        callback(player);
+    }
+
     addMob(serverOptions: SpaceshipServerOptions) {
         const mob = this.createMob(serverOptions, {
-            toPassTexture: this.toPassTexture,
+            isTextured: this.isTextured,
         });
 
         this.mobs[serverOptions.id] = {
@@ -129,7 +137,6 @@ export class ServerEntityManager extends BaseEntityManager {
                 multipliers: this.getMobMultipliers("normal"),
                 username: "Enemy",
                 allegiance: "Alien",
-                depth: 90,
             };
 
             const mob = this.addMob(serverOptions);

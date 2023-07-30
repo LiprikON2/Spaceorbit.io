@@ -1,6 +1,11 @@
 import { DebounceChargeBar } from "~/game/utils/ChargeBar";
 import type { Multipliers, Spaceship } from "../Spaceship";
 
+export interface StatusState {
+    health: number;
+    shields: number;
+}
+
 interface BaseStats {
     health: number;
     hitboxRadius: number;
@@ -86,12 +91,27 @@ export class Status {
     }
 
     damageHealth(damage: number) {
-        this.healthBar.setValue(this.healthBar.value - damage);
-        this.healthBar.resetIncreaseDebounce();
+        this.healthBar.setValue(this.healthBar.value - Math.abs(damage));
+        this.resetDebounce();
     }
     damageShields(damage: number) {
-        this.shieldsBar.setValue(this.shieldsBar.value - damage);
+        this.shieldsBar.setValue(this.shieldsBar.value - Math.abs(damage));
+        this.resetDebounce();
+    }
+
+    /**
+     * Resets debounce progress to 0
+     */
+    resetDebounce() {
+        this.healthBar.resetIncreaseDebounce();
         this.shieldsBar.resetIncreaseDebounce();
+    }
+
+    healHealth(heal: number) {
+        this.healthBar.setValue(this.healthBar.value + Math.abs(heal));
+    }
+    healShields(heal: number) {
+        this.shieldsBar.setValue(this.shieldsBar.value + Math.abs(heal));
     }
 
     setToMaxHealth() {
@@ -102,11 +122,16 @@ export class Status {
         this.shieldsBar.setValue(this.maxHealth);
     }
 
-    set(newStatus: { health: number; shields: number }) {}
+    getState() {
+        return { health: this.health, shields: this.shields };
+    }
 
     update(time: number, delta: number) {
         if (this.ship.activity === "moving") {
             this.healthBar.resetIncreaseDebounce();
+        }
+        if (this.healthBar.isIncreasing || this.shieldsBar.isIncreasing) {
+            this.ship.emit("entity:heal", this.ship.id);
         }
 
         this.healthBar.update(time, delta);
