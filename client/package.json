@@ -14,7 +14,8 @@
         "quest": "npx cap run android --target 1WMHHB63B02031",
         "quest-build": "npm run prod-build && npx cap run android --target 1WMHHB63B02031",
         "apk-build": "sh scripts/apk-build.sh",
-        "release": "sh scripts/release.sh"
+        "release": "sh scripts/release.sh",
+        "test": "vitest --reporter=verbose"
     },
     "keywords": [
         "Phaser",
@@ -80,6 +81,7 @@
         "style-loader": "~3.3.3",
         "ts-loader": "~9.4.4",
         "typescript": "4.5.5",
+        "vitest": "^0.33.0",
         "webpack": "~5.65.0",
         "webpack-cli": "^4.10.0",
         "webpack-dev-server": "~4.6.0",
