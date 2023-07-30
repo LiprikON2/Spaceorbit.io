@@ -99,7 +99,8 @@ export class Exhausts {
     updateExhaustPosition() {
         this.exhaustEmitters.forEach((exhaustEmitter, index) => {
             const { originX, originY } = this.ship.getRotatedPoint(
-                this.exhaustOrigins[this.pattern[index]]
+                this.exhaustOrigins[this.pattern[index]],
+                false
             );
             exhaustEmitter.followOffset.set(originX, originY);
         });

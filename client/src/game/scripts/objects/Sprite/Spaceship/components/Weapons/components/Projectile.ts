@@ -17,7 +17,9 @@ export class Projectile extends Sprite {
     firedFromPoint: { x: number; y: number };
 
     constructor(serverOptions: ProjectileServerOptions, clientOptions: ProjectileClientOptions) {
-        super(serverOptions, { ...clientOptions });
+        super(serverOptions, clientOptions);
+        // if absent, disalignes body and texture
+        this.setCircularHitbox(1);
 
         const { x, y } = serverOptions;
         this.firedFromPoint = { x, y };

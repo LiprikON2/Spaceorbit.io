@@ -219,7 +219,7 @@ export class Weapons {
 
     getProjectileServerOptions(weaponId: number, targetPoint?: { worldX: number; worldY: number }) {
         const weapon = this.getWeaponById(weaponId);
-        const originPoint = this.ship.getRotatedPoint(weapon, true);
+        const originPoint = this.ship.getRotatedPoint(weapon);
         const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
         const { velocityX, velocityY } = this.toVelocityVector(
             weapon.projectileVelocity,

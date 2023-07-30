@@ -95,7 +95,7 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         );
     }
 
-    getRotatedPoint(point: { x: number; y: number }, absolute = false) {
+    getRotatedPoint(point: { x: number; y: number }, absolute = true) {
         // The center of the ship is xOy
         // Distance from center of a ship to a point on a ship; Corresponds to Y
         const r = Phaser.Math.Distance.Between(
