@@ -7,7 +7,7 @@ const getServers = async () =>
 
 export const useNetlify = () => {
     const useNetlify = useQuery(["servers"], getServers, {
-        select: ({ json }) => json,
+        select: ({ json }) => json.servers,
         useErrorBoundary: false,
         retry: false,
         // onError: (error: FetchError) => {
