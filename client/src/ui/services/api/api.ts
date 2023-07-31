@@ -10,10 +10,13 @@ export class FetchError extends Error {
     }
 }
 
-export const getFromBackend = async (pathSegments: string[] = [], token = "") => {
-    const path = pathSegments.join("/");
+export const getFromBackend = async (pathSegments: string[] | string, token = "") => {
+    let url: string;
 
-    const res = await fetch(`${backendUrl}/${path}`, {
+    if (typeof pathSegments === "string") url = pathSegments;
+    else url = `${backendUrl}/${pathSegments.join("/")}`;
+
+    const res = await fetch(url, {
         method: "GET",
         mode: "cors",
         headers: {
@@ -24,7 +27,7 @@ export const getFromBackend = async (pathSegments: string[] = [], token = "") =>
         },
     });
 
-    console.log("GET ->", `${backendUrl}/${path}`);
+    console.log("GET ->", url);
     if (!res.ok) {
         throw new FetchError(res, res.statusText);
     }
@@ -33,10 +36,18 @@ export const getFromBackend = async (pathSegments: string[] = [], token = "") =>
     return { json, ok: res.ok };
 };
 
-export const postToBackend = async (pathSegments = [], method = "POST", body = {}, token = "") => {
-    let path = pathSegments.join("/");
+export const postToBackend = async (
+    pathSegments: string[] | string,
+    method = "POST",
+    body = {},
+    token = ""
+) => {
+    let url: string;
 
-    const res = await fetch(`${backendUrl}/${path}`, {
+    if (typeof pathSegments === "string") url = pathSegments;
+    else url = `${backendUrl}/${pathSegments.join("/")}`;
+
+    const res = await fetch(url, {
         method,
         headers: {
             Accept: "application/json",
@@ -47,7 +58,7 @@ export const postToBackend = async (pathSegments = [], method = "POST", body = {
         credentials: "same-origin",
         body: JSON.stringify(body),
     });
-    console.log("POST ->", `${backendUrl}/${path}`);
+    console.log("POST ->", url);
 
     const json = await res.json();
     console.log("<-", json);

@@ -10,8 +10,6 @@ exports.handler = async (event, context) => {
     });
 
     const json = await res.json();
-    console.log("json", json);
-
     const servers = json["endpoints"].map((endpoint) => endpoint.public_url);
 
     return {

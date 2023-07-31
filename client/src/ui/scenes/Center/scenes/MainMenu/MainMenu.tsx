@@ -3,6 +3,7 @@ import { Paper, Stack } from "@mantine/core";
 
 import { Button } from "~/ui/components";
 import { useGame, useSettings } from "~/ui/hooks";
+import { useNetlify } from "./hooks";
 
 export const MainMenu = () => {
     const { mode, loadSingleplayer, loadMultiplayer } = useGame();
@@ -18,6 +19,9 @@ export const MainMenu = () => {
             loadMultiplayer(settings);
         }
     };
+
+    const [servers, status] = useNetlify();
+
     return (
         <>
             <Paper>
@@ -28,6 +32,11 @@ export const MainMenu = () => {
                     <Button variant="light" color="cyan" fullWidth onClick={handleMultiplayer}>
                         Multiplayer
                     </Button>
+                    <div>
+                        {status === "loading" && "Loading..."}
+                        {status === "error" && "Error"}
+                        {status === "success" && servers.map((server) => <p>{server}</p>)}
+                    </div>
                 </Stack>
             </Paper>
         </>
