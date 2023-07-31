@@ -1,8 +1,9 @@
 const path = require("path");
-const { merge, mergeWithCustomize, unique } = require("webpack-merge");
-const common = require("./webpack.common");
+const { mergeWithCustomize, unique } = require("webpack-merge");
 const { InjectManifest } = require("workbox-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+const common = require("./webpack.common");
 
 // const WebpackObfuscator = require('webpack-obfuscator')
 
@@ -45,6 +46,23 @@ const prod = {
             maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
         }),
     ],
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$|\.jsx?$/,
+                include: path.join(__dirname, "../src"),
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            // ignores typescript errors on build
+                            transpileOnly: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    },
 };
 
 module.exports = mergeWithCustomize({

@@ -270,6 +270,7 @@ export class ClientScene extends BaseMapScene {
     }
 
     updateEntitiesActions() {
+        // TODO if some of the entities are not present on client, produce them
         const serverEntitiesSnapshot = this.si.calcInterpolation(
             "x y angle(deg) worldX worldY",
             "entities"

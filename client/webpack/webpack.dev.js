@@ -1,4 +1,6 @@
 const { merge } = require("webpack-merge");
+const path = require("path");
+
 const common = require("./webpack.common");
 
 const dev = {
@@ -8,6 +10,16 @@ const dev = {
     devServer: {
         // Auto-open browser
         open: false,
+    },
+
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$|\.jsx?$/,
+                include: path.join(__dirname, "../src"),
+                loader: "ts-loader",
+            },
+        ],
     },
 };
 

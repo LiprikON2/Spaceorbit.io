@@ -36,11 +36,6 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$|\.jsx?$/,
-                include: path.join(__dirname, "../src"),
-                loader: "ts-loader",
-            },
-            {
                 test: /\.css$/i,
                 exclude: /node_modules/,
                 use: [

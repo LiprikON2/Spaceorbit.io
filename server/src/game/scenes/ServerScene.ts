@@ -52,7 +52,7 @@ export class ServerScene extends BaseMapScene {
     create() {
         super.create();
 
-        this.entityManager.spawnMobs(0, (mob: Spaceship) => {
+        this.entityManager.spawnMobs(2, (mob: Spaceship) => {
             mob.on("entity:hit", (hitData: ClientHitData) => {
                 const { weaponId, enemyId } = hitData;
                 const weapon = mob.weapons.getWeaponById(weaponId);
