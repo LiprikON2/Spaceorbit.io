@@ -1,10 +1,21 @@
 exports.handler = async (event, context) => {
-    console.log("event", event);
-    console.log("context", context);
-    console.log("process.env.ngrok_api", process.env.NGROK_API);
+    const res = await fetch(`https://api.ngrok.com/endpoints`, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+            "Ngrok-Version": "2",
+            Authorization: `Bearer ${process.env.NGROK_API}`,
+        },
+    });
+
+    const json = await res.json();
+    console.log("json", json);
+
+    const servers = json["endpoints"].map((endpoint) => endpoint.public_url);
 
     return {
         statusCode: 200,
-        body: JSON.stringify({ api: `hmm: ${process.env.NGROK_API}` }),
+        body: JSON.stringify({ servers }),
     };
 };
