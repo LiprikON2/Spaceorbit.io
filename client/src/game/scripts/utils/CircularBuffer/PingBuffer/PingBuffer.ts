@@ -1,4 +1,4 @@
-import { CircularBuffer } from "./CircularBuffer";
+import { CircularBuffer } from "../CircularBuffer";
 
 export class PingBuffer extends CircularBuffer {
     buffer: number[] = [];

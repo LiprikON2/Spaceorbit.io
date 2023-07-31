@@ -1,3 +1,3 @@
 export * from "./ChargeBar";
-export * from "./ping";
+export * from "./CircularBuffer";
 export * from "./EveryTick";
