@@ -1,4 +1,4 @@
-import type { OutEvents } from "~/game/core/GameManager";
+import type { OutEvents } from "~/game/core/GameManager/GameManager";
 import { GameClient } from "~/game/core/client/GameClient";
 
 import map_11 from "~/assets/maps/map_1-1.jpg";

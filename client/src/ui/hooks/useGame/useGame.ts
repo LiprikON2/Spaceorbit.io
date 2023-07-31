@@ -1,7 +1,7 @@
 import { produce } from "immer";
 import { create } from "zustand";
 
-import { gameManager, type GameManager } from "~/game/core/GameManager";
+import { gameManager, type GameManager } from "~/game/core/GameManager/GameManager";
 import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
 

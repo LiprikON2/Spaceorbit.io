@@ -1,7 +1,7 @@
 import type { Emitter } from "nanoevents";
 import type { ClientChannel as GeckosClientChannel } from "@geckos.io/client";
 
-import type { OutEvents } from "~/game/core/GameManager";
+import type { OutEvents } from "~/game/core/GameManager/GameManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
 
 interface EventsMap {
