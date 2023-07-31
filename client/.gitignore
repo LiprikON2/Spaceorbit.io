@@ -6,3 +6,4 @@
 /ios
 /releases
 /Raw*assets
+.env

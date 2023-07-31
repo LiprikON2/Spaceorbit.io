@@ -77,7 +77,7 @@ if [ -z "$1" ] || [ $1 == "--skip-build" ]; then
 
     apks=$(find ./releases -maxdepth 1 -name "*$choosen_version*")
 
-    gh release create $choosen_version $apks
+    EDITOR=code gh release create $choosen_version $apks
 
 else 
     echo "Unknown argument: $1"

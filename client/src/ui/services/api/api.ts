@@ -1,5 +1,7 @@
 // TODO
-export const backendUrl = `${location.protocol}//192.168.1.246:${3010}`;
+// export const backendUrl = `${location.protocol}//192.168.1.246:${3010}`;
+export const backendUrl = `http://192.168.1.246:${3010}`;
+// export const backendUrl = `https://8549-104-28-230-247.ngrok-free.app`;
 
 // https://github.com/TanStack/query/discussions/562
 export class FetchError extends Error {
