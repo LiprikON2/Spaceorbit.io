@@ -1,4 +1,4 @@
-import type { SoundManager } from "~/game/managers/SoundManager";
+import type { SoundManager } from "~/game/managers/SoundManager/SoundManager";
 import type { BaseScene } from "~/game/scenes/core/BaseScene";
 
 type ExplosionConfig = {
