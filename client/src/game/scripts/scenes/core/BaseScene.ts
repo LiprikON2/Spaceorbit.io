@@ -112,16 +112,6 @@ export class BaseScene extends Phaser.Scene {
         return [randomWorldX, randomWorldY];
     }
 
-    everyTick(tickrate: number, delta: number, callback: Function) {
-        const tickrateDeltaTime = 1000 / tickrate;
-
-        this.cumDelta += delta;
-        if (this.cumDelta > tickrateDeltaTime) {
-            this.cumDelta = 0;
-            callback();
-        }
-    }
-
     setSingleplayerListeners(entity: Spaceship) {
         entity.on("entity:hit", (hitData) => {
             const { weaponId, enemyId } = hitData;

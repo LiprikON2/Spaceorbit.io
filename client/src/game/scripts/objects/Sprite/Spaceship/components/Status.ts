@@ -1,5 +1,5 @@
-import { DebounceChargeBar } from "~/game/utils/ChargeBar";
 import type { Multipliers, Spaceship } from "../Spaceship";
+import { EveryTick, DebounceChargeBar } from "~/game/utils";
 
 export interface StatusState {
     health: number;
@@ -26,6 +26,8 @@ export class Status {
     ship: Spaceship;
     baseStats: BaseStats;
     multipliers: Multipliers;
+
+    everyTick = new EveryTick(10);
 
     get maxHealth() {
         const healthMultiplier = this.multipliers.health;
@@ -130,9 +132,12 @@ export class Status {
         if (this.ship.activity === "moving") {
             this.healthBar.resetIncreaseDebounce();
         }
-        if (this.healthBar.isIncreasing || this.shieldsBar.isIncreasing) {
-            this.ship.emit("entity:heal", this.ship.id);
-        }
+
+        this.everyTick.update(time, delta, () => {
+            if (this.healthBar.isIncreasing || this.shieldsBar.isIncreasing) {
+                this.ship.emit("entity:heal", this.ship.id);
+            }
+        });
 
         this.healthBar.update(time, delta);
         this.shieldsBar.update(time, delta);

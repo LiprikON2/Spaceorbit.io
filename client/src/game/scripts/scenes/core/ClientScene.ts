@@ -10,7 +10,7 @@ import {
 import { DebugInfo } from "~/objects";
 import type { ClientChannel, GameClient } from "~/game";
 import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
-import { PingBuffer } from "~/game/utils/ping";
+import { PingBuffer, EveryTick } from "~/game/utils";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
 import { Mob } from "~/game/objects/Sprite/Spaceship/Mob";
@@ -25,6 +25,8 @@ export class ClientScene extends BaseMapScene {
     channel?: ClientChannel<MultiplayerEvents>;
     si?: SnapshotInterpolation;
     clientVault?: Vault;
+    everyTick = new EveryTick(30);
+    ping = new PingBuffer(180);
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
@@ -34,11 +36,9 @@ export class ClientScene extends BaseMapScene {
     debugText: DebugInfo;
     mobs = [];
     isPaused = true;
-    ping: PingBuffer;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
-        this.ping = new PingBuffer(180);
     }
 
     init({ channel }: { channel?: ClientChannel }) {
@@ -255,7 +255,7 @@ export class ClientScene extends BaseMapScene {
 
         if (this.game.isMultiplayer) {
             this.createClientSnapshot();
-            this.everyTick(30, delta, () => {
+            this.everyTick.update(time, delta, () => {
                 this.sendPlayerActions();
                 this.updateReconciliation();
             });

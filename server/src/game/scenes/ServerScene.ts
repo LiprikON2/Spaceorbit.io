@@ -14,6 +14,7 @@ import {
     BaseCollisionManager,
 } from "@spaceorbit/client/src/game/scripts/managers/BaseCollisionManager";
 import { ServerEntityManager } from "~/server/game/ServerEntityManager";
+import { EveryTick } from "@spaceorbit/client/src/game/scripts/utils/EveryTick";
 
 interface ServerHitData extends ClientHitData {
     ownerId: ChannelId;
@@ -23,14 +24,11 @@ interface ServerHitData extends ClientHitData {
 export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
+
     collisionManager?: BaseCollisionManager;
     declare entityManager: ServerEntityManager;
 
-    tickrate = 30;
-
-    get tickrateDeltaTime() {
-        return 1000 / this.tickrate;
-    }
+    everyTick = new EveryTick(30);
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -61,7 +59,7 @@ export class ServerScene extends BaseMapScene {
                 if (weapon) {
                     const damage = mob.weapons.getDamageByWeapon(weapon);
                     this.entityManager.hitEntity(enemyId, damage, (enemy) =>
-                        this.sendEntityStatus(enemy.id)
+                        this.sendEntityStatus(enemy.id, true)
                     );
                 }
             });
@@ -175,13 +173,13 @@ export class ServerScene extends BaseMapScene {
         }
     }
 
-    sendEntityStatus(entityId: ChannelId) {
+    sendEntityStatus(entityId: ChannelId, reliable = false) {
         const entity = this.entityManager.getById(entityId!, "entity") as Spaceship;
         if (entity) {
             this.game.server.emit(
                 "entity:status",
                 { id: entity.id, status: entity.getStatusState() },
-                { reliable: true }
+                { reliable }
             );
         }
     }
@@ -225,7 +223,7 @@ export class ServerScene extends BaseMapScene {
     }
 
     update(time: number, delta: number) {
-        this.everyTick(this.tickrate, delta, () => {
+        this.everyTick.update(time, delta, () => {
             // console.log("thisactualFps", this.game.loop.actualFps);
             this.sendServerSnapshot();
         });
