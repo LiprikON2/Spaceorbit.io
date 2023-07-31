@@ -1,8 +1,8 @@
-import type { ClientScene } from "~/scenes/core";
-import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import { produce } from "immer";
 import { create } from "zustand";
 
+import type { ClientScene } from "~/scenes/core";
+import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import { gameManager, type GameManager } from "~/game/core/GameManager";
 
 interface GameStore {
