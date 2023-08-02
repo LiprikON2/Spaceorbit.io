@@ -6,6 +6,7 @@
     "main": "src/game/index.ts",
     "scripts": {
         "dev": "npm start",
+        "netlify": "set NODE_OPTIONS=--inspect && npx netlify functions:serve --port 8081",
         "start": "webpack serve --config webpack/webpack.dev.js",
         "prod": "serve dist",
         "prod-build": "rimraf dist && webpack --config webpack/webpack.prod.js",
@@ -45,6 +46,7 @@
         "@mantine/core": "~6.0.14",
         "@mantine/form": "~6.0.14",
         "@mantine/hooks": "~6.0.14",
+        "@netlify/functions": "^1.6.0",
         "@spaceorbit/server": "file:../server",
         "@tanstack/react-query": "~4.29.13",
         "core-js": "~3.31.0",
@@ -71,6 +73,7 @@
         "html-webpack-plugin": "~5.5.0",
         "javascript-obfuscator": "~4.0.2",
         "mini-css-extract-plugin": "~2.6.0",
+        "netlify-cli": "^15.10.0",
         "postcss": "~8.4.24",
         "postcss-loader": "~7.3.3",
         "postcss-nested": "~6.0.1",

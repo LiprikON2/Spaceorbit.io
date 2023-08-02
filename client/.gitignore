@@ -7,3 +7,4 @@
 /releases
 /Raw*assets
 .env
+.netlify

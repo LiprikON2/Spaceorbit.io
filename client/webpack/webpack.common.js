@@ -2,6 +2,7 @@ const path = require("path");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// const { EnvironmentPlugin } = require("webpack");
 
 module.exports = {
     entry: ["./src/ui/Root.tsx"],
@@ -81,5 +82,6 @@ module.exports = {
                 { from: "src/favicon.ico", to: "" },
             ],
         }),
+        // new EnvironmentPlugin(["NODE_ENV"]),
     ],
 };

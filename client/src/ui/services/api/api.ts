@@ -66,3 +66,9 @@ export const postToBackend = async (
     if (res.status === 204) return { json: {}, ok: res.ok };
     return { json, ok: res.ok };
 };
+
+export let netlifyUrl;
+if (process.env.NODE_ENV === "development") {
+    const { protocol, hostname, port } = window.location;
+    netlifyUrl = `${protocol}//${hostname}:${Number(port) + 1}`;
+} else netlifyUrl = `${window.location.origin}/.netlify/functions/ngrok`;
