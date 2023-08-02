@@ -15,17 +15,20 @@ interface GameStore {
         scene: ClientScene | null;
     };
     errors: string[];
+    selectedServer: string | null;
     loadSingleplayer: (settings) => Promise<void>;
     loadMultiplayer: (settings) => Promise<void>;
     loadMainMenu: () => void;
     exit: (initiatedByUser?: boolean) => void;
     clearErrors: () => void;
+    setSelectedServer: (server: string) => void;
 }
 
 export const useGame = create<GameStore>((set, get) => ({
     gameManager: null,
     mode: "mainMenu",
     errors: [],
+    selectedServer: null,
 
     // https://github.com/pmndrs/zustand/issues/132
     computed: {
@@ -105,6 +108,13 @@ export const useGame = create<GameStore>((set, get) => ({
         set(
             produce((state) => {
                 state.errors = [];
+            })
+        );
+    },
+    setSelectedServer: (server) => {
+        set(
+            produce((state) => {
+                state.selectedServer = server;
             })
         );
     },

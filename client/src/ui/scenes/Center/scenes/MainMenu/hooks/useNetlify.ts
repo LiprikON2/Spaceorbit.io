@@ -6,10 +6,12 @@ const getServers = async () => await getFromBackend(`${netlifyUrl}/.netlify/func
 
 export const useNetlify = () => {
     const useNetlify = useQuery(["servers"], getServers, {
-        select: ({ json }) => json.servers,
+        // select: ({ json }) => json.servers,
+        select: ({ json }) => ["test", "another"],
         useErrorBoundary: false,
         retry: false,
     });
 
-    return [useNetlify.data, useNetlify.status];
+    const netlify: [string[], typeof useNetlify.status] = [useNetlify.data, useNetlify.status];
+    return netlify;
 };
