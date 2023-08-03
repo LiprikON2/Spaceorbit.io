@@ -7,7 +7,7 @@ import { AccordionButton } from "./components";
 import { ServerList } from "./scenes/ServerList";
 
 export const MainMenu = () => {
-    const { mode, loadSingleplayer, loadMultiplayer } = useGame();
+    const { mode, selectedServer, loadSingleplayer, loadMultiplayer } = useGame();
     const { settings } = useSettings();
 
     const handleSingleplayer = () => {
@@ -20,7 +20,6 @@ export const MainMenu = () => {
             loadMultiplayer(settings);
         }
     };
-
     return (
         <>
             <Paper>
@@ -35,7 +34,7 @@ export const MainMenu = () => {
                         label="Multiplayer"
                         color="cyan"
                         onClick={() => {
-                            console.log("multi!");
+                            console.log("multi!", selectedServer);
                         }}
                     >
                         <ServerList />

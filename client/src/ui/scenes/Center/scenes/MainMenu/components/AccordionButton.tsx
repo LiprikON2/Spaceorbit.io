@@ -20,6 +20,7 @@ export const AccordionButton = ({
         <Accordion
             value={value}
             variant="separated"
+            transitionDuration={3000}
             styles={(theme) => {
                 const buttonStyles = theme.fn.variant({
                     color,
