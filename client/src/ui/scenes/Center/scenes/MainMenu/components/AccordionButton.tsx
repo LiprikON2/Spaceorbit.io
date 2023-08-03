@@ -12,15 +12,16 @@ export const AccordionButton = ({
     label: string;
     color: MantineColor;
     onClick?: () => void;
-    children: React.ReactNode;
+    children: (collapsed: boolean) => React.ReactNode;
 }) => {
     const [value, setValue] = useState<string | null>(null);
+    const isCollapsed = value === null;
 
     return (
         <Accordion
             value={value}
             variant="separated"
-            transitionDuration={3000}
+            transitionDuration={300}
             styles={(theme) => {
                 const buttonStyles = theme.fn.variant({
                     color,
@@ -40,9 +41,6 @@ export const AccordionButton = ({
                         paddingLeft: `calc(3.125rem + ${theme.spacing.xs})`,
                         borderRadius: theme.fn.radius(theme.defaultRadius),
                         ...buttonStyles,
-                        "&[data-active]": {
-                            background: buttonStyles.hover,
-                        },
                         "&:hover": {
                             background: buttonStyles.hover,
                         },
@@ -72,7 +70,7 @@ export const AccordionButton = ({
                     {label}
                 </AccordionControl>
 
-                <Accordion.Panel>{children}</Accordion.Panel>
+                <Accordion.Panel>{children(isCollapsed)}</Accordion.Panel>
             </Accordion.Item>
         </Accordion>
     );

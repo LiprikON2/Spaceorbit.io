@@ -5,7 +5,7 @@ import { useOfficialServers } from "./hooks";
 import { useGame } from "~/ui/hooks";
 import { Servers } from "./components/Servers";
 
-export const ServerList = () => {
+export const ServerList = ({ collapsed }) => {
     const [officialServers, officialServersStatus] = useOfficialServers();
     const { selectedServer, setSelectedServer } = useGame();
     const localServers = {};
@@ -25,8 +25,9 @@ export const ServerList = () => {
                     label="Official Servers"
                     servers={officialServers}
                     status={officialServersStatus}
-                ></Servers>
-                {/* <Servers label="Local Servers" servers={localServers} status="loading"></Servers> */}
+                    collapsed={collapsed}
+                />
+                {/* <Servers label="Local Servers" servers={localServers} status="loading"/> */}
             </Stack>
         </Chip.Group>
     );

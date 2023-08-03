@@ -1,27 +1,22 @@
 import React from "react";
-import { Paper, Text } from "@mantine/core";
+import { Collapse, Paper, Text, Transition } from "@mantine/core";
 
-export const withLabel = (label, inline = false) => {
-    const Labeled = ({ children }) => {
-        if (!inline) {
-            return (
-                <Paper p="xs">
-                    <Text display="flex">{label}</Text>
-                    {/* <Stack p="xs" sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}> */}
-                    {children}
-                    {/* </Stack> */}
-                </Paper>
-            );
-        } else {
-            return (
-                <Paper p="xs">
-                    <Text display="flex">
-                        {label} ― {children}
-                    </Text>
-                </Paper>
-            );
-        }
-    };
-
-    return Labeled;
+export const WithLabel = ({ label, collapsed, children = null, ...rest }) => {
+    return (
+        <Paper p="xs" {...rest} style={{ overflow: "hidden" }}>
+            <Text display="flex" px="0.2rem">
+                {label}
+            </Text>
+            <Collapse in={!collapsed && children}>
+                <Transition
+                    mounted={children}
+                    transition="slide-right"
+                    duration={400}
+                    timingFunction="ease"
+                >
+                    {(styles) => <div style={styles}>{children}</div>}
+                </Transition>
+            </Collapse>
+        </Paper>
+    );
 };

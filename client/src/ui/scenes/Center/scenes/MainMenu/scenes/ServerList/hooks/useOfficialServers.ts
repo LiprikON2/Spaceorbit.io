@@ -17,6 +17,7 @@ export const useOfficialServers = () => {
     const useNetlify = useQuery(["servers"], getServers, {
         // select: ({ json }) => json.servers,
         select: ({ json }) => ["test", "another"],
+        // select: ({ json }) => [],
         useErrorBoundary: false,
         retry: false,
         staleTime: 10000,

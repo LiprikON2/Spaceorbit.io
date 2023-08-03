@@ -118,4 +118,6 @@ export const useGame = create<GameStore>((set, get) => ({
             })
         );
     },
+
+    // setOfficialServers: ()
 }));

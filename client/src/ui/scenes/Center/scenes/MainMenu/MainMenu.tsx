@@ -36,8 +36,10 @@ export const MainMenu = () => {
                         onClick={() => {
                             console.log("multi!", selectedServer);
                         }}
-                    >
-                        <ServerList />
+                    >{(collapsed) => 
+                        <ServerList collapsed={collapsed}/>
+
+                    }
                     </AccordionButton>
                 </Stack>
             </Paper>
