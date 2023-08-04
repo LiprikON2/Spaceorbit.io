@@ -45,6 +45,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use("/", (req, res) => {
+    res.status(200).json({ type: "spaceorbit-server", name: "Europe 1" });
+});
+
 app.use("/", rootRoutes);
 
 app.use("/endpoints", (req, res) => {
@@ -55,7 +59,7 @@ app.use("/endpoints", (req, res) => {
         )
         .join("\n\n");
 
-    res.send(endpointsStr);
+    res.status(200).send(endpointsStr);
 });
 
 // Workaround to allow websockets on development using vite-plugin-node

@@ -28,9 +28,7 @@ export const getFromBackend = async (pathSegments: string[] | string, token = ""
     });
 
     console.log("GET ->", url);
-    if (!res.ok) {
-        throw new FetchError(res, res.statusText);
-    }
+    if (!res.ok) throw new FetchError(res, res.statusText);
 
     const json = await res.json();
     return { json, ok: res.ok };
@@ -72,3 +70,36 @@ if (process.env.NODE_ENV === "development") {
     const { protocol, hostname, port } = window.location;
     netlifyUrl = `${protocol}//${hostname}:${Number(port) + 1}`;
 } else netlifyUrl = `${window.location.origin}/.netlify/functions/ngrok`;
+
+export const pingBackend = (url: string, timeout = 6000) => {
+    const unreachableState = {
+        url,
+        online: false,
+        ping: null,
+    };
+
+    return new Promise((resolve, reject) => {
+        const timeStart = new Date().getTime();
+        try {
+            fetch(url)
+                .then((res) => {
+                    const ping = new Date().getTime() - timeStart;
+
+                    res.json().then(({ name }) => {
+                        resolve({
+                            url,
+                            name,
+                            online: true,
+                            ping,
+                        });
+                    });
+                })
+                .catch(() => resolve(unreachableState));
+            setTimeout(() => {
+                resolve(unreachableState);
+            }, timeout);
+        } catch (e) {
+            reject(e);
+        }
+    });
+};

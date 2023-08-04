@@ -8,13 +8,20 @@ import { Servers } from "./components/Servers";
 export const ServerList = ({ collapsed }) => {
     const [officialServers, officialServersStatus] = useOfficialServers();
     const { selectedServer, setSelectedServer } = useGame();
-    const localServers = {};
+    const localServers = [];
+
+    const servers = [...officialServers, ...localServers];
 
     useLayoutEffect(() => {
         if (!selectedServer) {
-            if (officialServersStatus === "success" && Object.keys(officialServers).length) {
-                setSelectedServer(Object.keys(officialServers)[0]);
+            if (officialServersStatus === "success" && officialServers.length) {
+                setSelectedServer(officialServers[0].url);
+            } else if (localServers.length) {
+                setSelectedServer(localServers[0].url);
             }
+        } else {
+            const serverNoLongerInList = !servers.find((server) => server.url === selectedServer);
+            if (serverNoLongerInList) setSelectedServer(null);
         }
     }, [officialServers]);
 
@@ -27,7 +34,12 @@ export const ServerList = ({ collapsed }) => {
                     status={officialServersStatus}
                     collapsed={collapsed}
                 />
-                {/* <Servers label="Local Servers" servers={localServers} status="loading"/> */}
+                <Servers
+                    label="Local Servers"
+                    servers={localServers}
+                    status="loading"
+                    collapsed={collapsed}
+                />
             </Stack>
         </Chip.Group>
     );

@@ -1,55 +1,54 @@
-import { useSetState } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useListState, useSetState } from "@mantine/hooks";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-import { getFromBackend, netlifyUrl } from "~/ui/services/api";
+import { getFromBackend, netlifyUrl, pingBackend } from "~/ui/services/api";
+
+// export interface ServersState {
+//     [key: string]: {
+//         ping: number | null;
+//         online: boolean;
+//     };
+// }
+export interface ServersState {
+    url: string;
+    name: string;
+    ping: number | null;
+    online: boolean;
+}
 
 const getServers = async () => await getFromBackend(`${netlifyUrl}/.netlify/functions/servers`);
 
-export interface ServersState {
-    [key: string]: {
-        ping: number | null;
-        online: boolean;
-    };
-}
-
 export const useOfficialServers = () => {
-    const useNetlify = useQuery(["servers"], getServers, {
-        // select: ({ json }) => json.servers,
-        select: ({ json }) => ["test", "another"],
-        // select: ({ json }) => [],
+    const useServers = useQuery(["servers"], getServers, {
+        select: ({ json }) => json.servers,
         useErrorBoundary: false,
-        retry: false,
-        staleTime: 10000,
+        retry: true,
+        refetchInterval: 5000,
+
         keepPreviousData: true,
     });
 
-    const [servers, setServers] = useSetState<ServersState>({});
+    const serverList: string[] = useServers.data ?? [];
 
-    const serverList = useNetlify.data;
+    const useServerPings = useQueries({
+        queries: serverList.map((serverKey) => {
+            return {
+                select: (data) => data as ServersState,
+                queryKey: ["servers", serverKey],
+                queryFn: () => pingBackend(serverKey),
+                useErrorBoundary: false,
+                retry: true,
+                refetchInterval: 1500,
+                keepPreviousData: false,
+                retryDelay: (attempt) =>
+                    Math.min(attempt > 1 ? 2 ** attempt * 1000 : 1000, 30 * 1000),
+            };
+        }),
+    });
+    const serverStateList = useServerPings
+        .map((q) => q.data)
+        .filter((serverState) => !!serverState);
 
-    useEffect(() => {
-        if (useNetlify.status === "success" && serverList.length) {
-            setServers((current) => {
-                let updatedServers = { ...current };
-
-                const wentOfflineList = Object.keys(current).filter(
-                    (key) => !serverList.includes(key)
-                );
-                wentOfflineList.forEach(
-                    (serverKey) => (updatedServers[serverKey] = { ping: null, online: false })
-                );
-                const newServerList = serverList.filter(
-                    (serverKey) => !wentOfflineList.includes(serverKey)
-                );
-                newServerList.forEach(
-                    (serverKey) => (updatedServers[serverKey] = { ping: null, online: true })
-                );
-
-                return updatedServers;
-            });
-        }
-    }, [serverList]);
-
-    return [servers, useNetlify.status] as [ServersState, typeof useNetlify.status];
+    return [serverStateList, useServers.status] as [ServersState[], typeof useServers.status];
 };

@@ -9,9 +9,7 @@ import { useEffect, useState } from "react";
  */
 export const useDebounceEmptySuccess = (status, list, timeout = 1000) => {
     const [populated, setPopulated] = useState(false);
-    // const isPopulatingServers = status === "success" && !list.length && !populated;
-    // TODELETE
-    const isPopulatingServers = status === "success" && !populated;
+    const isPopulatingServers = status === "success" && !list.length && !populated;
     useEffect(() => {
         if (isPopulatingServers) {
             const timeId = setTimeout(() => {
