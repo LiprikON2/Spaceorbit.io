@@ -1,70 +1,16 @@
 import React from "react";
-import { Alert, Center, Chip, List, Loader, Space, ThemeIcon } from "@mantine/core";
+import { Alert, Center, Chip, List as MantineList, Loader, Space, ThemeIcon } from "@mantine/core";
 import type { QueryStatus } from "@tanstack/react-query";
-import { World } from "tabler-icons-react";
 
 import { ServersState } from "../../hooks/useOfficialServers";
 import { useDebounceEmptySuccess } from "./hooks/useDebounceEmptySuccess";
 import { WithLabel } from "./components";
 
-const getLabel = (label, status, isPopulating, isEmpty) => {
-    if (status === "loading" || isPopulating) {
-        return (
-            <>
-                <Center>
-                    <World size={18} strokeWidth={1.5} color="white" />
-                </Center>
-                <Space w="0.25rem" />
-                {`${label} ― Searching`}
-                <Space w="xs" />
-                <Loader />
-            </>
-            // <>
-            //     <Alert
-            //         icon={<World size={18} strokeWidth={1.5} color="white" />}
-            //         title="Official Servers!"
-            //         color="gray"
-            //         w="100%"
-            //     >
-            //         No servers for you
-            //     </Alert>
-            // </>
-        );
-    } else if (status === "error") {
-        return (
-            <>
-                <Center>
-                    <World size={18} strokeWidth={1.5} color="white" />
-                </Center>
-                <Space w="0.25rem" />
-                {`${label} ― Failed to find servers`}
-            </>
-        );
-    } else if (isEmpty) {
-        return (
-            <>
-                <Center>
-                    <World size={18} strokeWidth={1.5} color="white" />
-                </Center>
-                <Space w="0.25rem" />
-                {`${label} ― No servers were found!`}
-            </>
-        );
-    } else if (status === "success") {
-        return (
-            <>
-                <Center>
-                    <World size={18} strokeWidth={1.5} color="white" />
-                </Center>
-                <Space w="0.25rem" />
-                {label}
-            </>
-        );
-    }
-};
-
-const Label = ({ label, status, isPopulating, isEmpty }) => {
-    return <></>;
+const getStatusLabel = (status, isPopulating, isEmpty) => {
+    if (status === "loading" || isPopulating) return "Searching";
+    else if (status === "error") return "Failed to find servers";
+    else if (isEmpty) return "No servers were found!";
+    else if (status === "success") return "";
 };
 
 export const Servers = ({
@@ -80,19 +26,29 @@ export const Servers = ({
 }) => {
     const [isPopulating] = useDebounceEmptySuccess(status, servers);
     const isEmpty = !(status === "success" && servers.length);
+    const statusLabel = getStatusLabel(status, isPopulating, isEmpty);
+    const isLoading = status === "loading" || isPopulating;
 
     if (status === "error" || status === "loading" || isPopulating || isEmpty) {
         return (
             <WithLabel
-                label={getLabel(label, status, isPopulating, isEmpty)}
+                label={label}
+                statusLabel={statusLabel}
+                showLoader={isLoading}
                 collapsed={collapsed}
             />
         );
     } else {
         return (
-            <WithLabel label={getLabel(label, status, isPopulating, isEmpty)} collapsed={collapsed}>
-                <List
-                    p="xs"
+            <WithLabel
+                label={label}
+                statusLabel={statusLabel}
+                showLoader={isLoading}
+                collapsed={collapsed}
+            >
+                <MantineList
+                    py="xs"
+                    px={0}
                     center
                     styles={(theme) => ({
                         item: {
@@ -102,19 +58,21 @@ export const Servers = ({
                         },
                         itemIcon: {
                             marginRight: `calc(${theme.spacing.xs} / 1.5)`,
-                            height: "32px",
                         },
                     })}
-                    withPadding
+                    style={{
+                        transform: "translateX(-34.64px)",
+                    }}
                 >
                     {servers.map(({ url, ping, online }) => (
-                        <List.Item
+                        <MantineList.Item
                             key={url}
                             icon={
                                 <ThemeIcon
                                     color={online ? (ping > 150 ? "orange" : "teal") : "red"}
-                                    size={32}
+                                    size={28}
                                     radius="xl"
+                                    fz="sm"
                                 >
                                     {online
                                         ? ping ?? <Loader variant="oval" color="white" size="sm" />
@@ -122,12 +80,12 @@ export const Servers = ({
                                 </ThemeIcon>
                             }
                         >
-                            <Chip value={url} color="cyan" size="md">
+                            <Chip value={url} color="cyan" size="sm">
                                 {url}
                             </Chip>
-                        </List.Item>
+                        </MantineList.Item>
                     ))}
-                </List>
+                </MantineList>
             </WithLabel>
         );
     }

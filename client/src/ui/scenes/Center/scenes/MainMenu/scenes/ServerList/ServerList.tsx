@@ -27,7 +27,7 @@ export const ServerList = ({ collapsed }) => {
 
     return (
         <Chip.Group multiple={false} value={selectedServer} onChange={setSelectedServer}>
-            <Stack sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}>
+            <Stack spacing="xs">
                 <Servers
                     label="Official Servers"
                     servers={officialServers}

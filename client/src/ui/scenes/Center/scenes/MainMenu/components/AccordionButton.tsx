@@ -70,6 +70,7 @@ export const AccordionButton = ({
                     {label}
                 </AccordionControl>
 
+                {/* https://stackoverflow.com/a/32371612 */}
                 <Accordion.Panel>{children(isCollapsed)}</Accordion.Panel>
             </Accordion.Item>
         </Accordion>
