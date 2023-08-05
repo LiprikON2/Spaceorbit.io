@@ -95,15 +95,6 @@ export const App = () => {
 
     useMainMenu();
 
-    // const errors = [...(connectionError ? [connectionError] : [])];
-    // const errors = [...[]];
-    // const clearErrors = () => {
-    //     const timeUntilModalIsDismissed = 500;
-    //     setTimeout(() => {
-    //         // clearConnectionError();
-    //     }, timeUntilModalIsDismissed);
-    // };
-
     const {
         errors,
         clearErrors,

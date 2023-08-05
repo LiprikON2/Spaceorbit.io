@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Accordion, type MantineColor } from "@mantine/core";
 import { AccordionControl } from "./components";
 
+// TODO add active style ("pressed")
 export const AccordionButton = ({
     label,
     color,

@@ -64,6 +64,7 @@
     },
     "devDependencies": {
         "@capacitor/cli": "5.0.1",
+        "@tanstack/react-query-devtools": "^4.29.13",
         "@types/react": "~18.2.13",
         "@yandeu/prettier-config": "~0.0.3",
         "autoprefixer": "~10.4.14",

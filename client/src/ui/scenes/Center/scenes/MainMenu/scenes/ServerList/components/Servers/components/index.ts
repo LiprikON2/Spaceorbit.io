@@ -1,1 +1,1 @@
-export * from "./WithLabel";
+export * from "./List";
