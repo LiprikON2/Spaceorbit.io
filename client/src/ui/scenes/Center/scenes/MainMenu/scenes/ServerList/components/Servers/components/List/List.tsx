@@ -8,7 +8,8 @@ const List = ({
     visible = true,
     icon = null,
     placeholder = null,
-    showLoader = false,
+    bottom = null,
+    right = null,
     itemHeight = 28,
     children = null,
     ...rest
@@ -27,15 +28,20 @@ const List = ({
                     {title}
                 </Title>
                 <Space style={{ flexGrow: 1 }} />
-                {showLoader && <Loader size={itemHeight} variant="oval" />}
+                {right && right}
             </Group>
 
             {!children.length && placeholder}
-            <Collapse transitionDuration={300} in={uncollapse}>
+            <Collapse
+                display={children.length ? "block" : "none"}
+                transitionDuration={200}
+                in={uncollapse}
+            >
                 <Stack sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}>
                     {children}
                 </Stack>
             </Collapse>
+            {bottom && bottom}
         </Stack>
     );
 };

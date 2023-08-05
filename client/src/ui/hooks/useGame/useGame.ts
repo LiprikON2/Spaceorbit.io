@@ -17,7 +17,7 @@ interface GameStore {
     errors: string[];
     selectedServer: string | null;
     loadSingleplayer: (settings) => Promise<void>;
-    loadMultiplayer: (settings) => Promise<void>;
+    loadMultiplayer: (settings, url: string) => Promise<void>;
     loadMainMenu: () => void;
     exit: (initiatedByUser?: boolean) => void;
     clearErrors: () => void;
@@ -61,13 +61,13 @@ export const useGame = create<GameStore>((set, get) => ({
             })
         );
     },
-    loadMultiplayer: async (settings) => {
+    loadMultiplayer: async (settings, url) => {
         set(
             produce((state) => {
                 state.mode = "multiplayer";
             })
         );
-        const multiplayerGame = await gameManager.init(settings, true);
+        const multiplayerGame = await gameManager.init(settings, true, url);
 
         set(
             produce((state) => {

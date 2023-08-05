@@ -1,1 +1,2 @@
-export * from "./useOfficialServers";
+export * from "./hooks";
+export * from "./useServerPings";

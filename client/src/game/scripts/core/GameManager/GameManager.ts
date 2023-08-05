@@ -35,13 +35,11 @@ export class GameManager {
         return this.emitter.on(event, callback);
     };
 
-    init = async (settings, isMultiplayer = false, channelPort = 3010) => {
+    init = async (settings, isMultiplayer = false, url = "http://localhost:3010") => {
         let channel;
         if (isMultiplayer)
             channel = geckos({
-                // TODO
-                // url: `${location.protocol}//${location.hostname}:${channelPort}`,
-                url: `${location.protocol}//192.168.1.246:${channelPort}`,
+                url,
                 port: null,
             });
 

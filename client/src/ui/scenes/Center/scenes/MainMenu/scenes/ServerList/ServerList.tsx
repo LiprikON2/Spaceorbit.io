@@ -2,14 +2,15 @@ import React, { useLayoutEffect } from "react";
 import { Chip, Stack } from "@mantine/core";
 import { BuildingCommunity, World } from "tabler-icons-react";
 
-import { useOfficialServers } from "./hooks";
+import { useLocalServers, useOfficialServers } from "./hooks/hooks";
 import { useGame } from "~/ui/hooks";
 import { Servers } from "./components/Servers";
 
 export const ServerList = ({ collapsed }) => {
     const [officialServers, officialServersStatus, officialServersFetching] = useOfficialServers();
+    const [localServers, localServersStatus, addLocalServer] = useLocalServers();
+
     const { selectedServer, setSelectedServer } = useGame();
-    const localServers = [];
 
     const servers = [...officialServers, ...localServers];
 
@@ -41,9 +42,10 @@ export const ServerList = ({ collapsed }) => {
                     collapsed={collapsed}
                     label="Local Servers"
                     servers={localServers}
-                    status="loading"
+                    status={localServersStatus}
                     isFetching={false}
                     IconComponent={BuildingCommunity}
+                    addServer={addLocalServer}
                 />
             </Stack>
         </Chip.Group>

@@ -1,14 +1,25 @@
-import React from "react";
-import { Chip, Loader, ThemeIcon, Paper, Group, Space, Text } from "@mantine/core";
+import React, { useState } from "react";
+import {
+    Chip,
+    Loader,
+    ThemeIcon,
+    Paper,
+    Group,
+    Space,
+    Text,
+    TextInput,
+    FocusTrap,
+} from "@mantine/core";
 import type { QueryStatus } from "@tanstack/react-query";
 
-import { ServersState } from "../../hooks/useOfficialServers";
-import { useDebounceEmptySuccess } from "./hooks/useDebounceEmptySuccess";
+import type { ServersState } from "../../hooks";
 import { List } from "./components";
-import type { Icon } from "tabler-icons-react";
+import { Plus, type Icon } from "tabler-icons-react";
+import { Button } from "~/ui/components";
+import { useClickOutside } from "@mantine/hooks";
 
 const getStatusLabel = (status, isEmpty) => {
-    if (status === "loading" || status === "success") return "Searching";
+    if (status === "loading") return "Retrieving";
     else if (status === "error") return "Failed to find servers";
     else if (isEmpty) return "No servers were found!";
     else if (status === "success") return "";
@@ -23,6 +34,7 @@ export const Servers = ({
     status,
     isFetching,
     IconComponent,
+    addServer = null,
 }: {
     collapsed: boolean;
     label: string;
@@ -30,10 +42,35 @@ export const Servers = ({
     status: QueryStatus;
     isFetching: boolean;
     IconComponent: Icon;
+    addServer?: (serverIp: string) => void;
 }) => {
     const isEmpty = !(status === "success" && servers.length);
     const statusLabel = getStatusLabel(status, isEmpty);
-    const isLoading = status === "loading" || status === "success";
+    const isLoading = status === "loading";
+
+    const conditionalLoader =
+        isFetching && status !== "loading" ? <Loader size={iconSize} variant="oval" /> : null;
+
+    const [showInput, setShowInput] = useState(false);
+    const conditionalAddButton =
+        addServer && !showInput ? (
+            <Button isSquare h={iconSize} style={{ border: 0 }} onClick={() => setShowInput(true)}>
+                <Plus size={iconSize} strokeWidth={1.25} color="white" />
+            </Button>
+        ) : null;
+
+    const ref = useClickOutside(() => {
+        console.log("CLICK");
+        setShowInput(false);
+    });
+    const conditionalInput = showInput ? (
+        <Group ref={ref}>
+            <Space h={iconSize} w={iconSize} />
+            <FocusTrap active={true}>
+                <TextInput data-autofocus placeholder="127.0.0.1:3010" />
+            </FocusTrap>
+        </Group>
+    ) : null;
 
     return (
         <Paper
@@ -55,7 +92,7 @@ export const Servers = ({
                 visible={!collapsed}
                 icon={<IconComponent size={iconSize} strokeWidth={1.25} color="white" />}
                 itemHeight={iconSize}
-                showLoader={isFetching && status !== "loading"}
+                right={addServer ? conditionalAddButton : conditionalLoader}
                 placeholder={
                     <Group>
                         <Space h={iconSize} w={iconSize} />
@@ -63,6 +100,7 @@ export const Servers = ({
                         {isLoading && <Loader />}
                     </Group>
                 }
+                bottom={conditionalInput}
             >
                 {servers.map(({ url, ping, online }, index) => (
                     <List.Item

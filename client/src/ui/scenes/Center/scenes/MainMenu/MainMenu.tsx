@@ -16,8 +16,8 @@ export const MainMenu = () => {
         }
     };
     const handleMultiplayer = () => {
-        if (mode === "mainMenu") {
-            loadMultiplayer(settings);
+        if (mode === "mainMenu" && selectedServer) {
+            loadMultiplayer(settings, selectedServer);
         }
     };
     return (
@@ -27,16 +27,7 @@ export const MainMenu = () => {
                     <Button variant="light" color="cyan" fullWidth onClick={handleSingleplayer}>
                         Singleplayer
                     </Button>
-                    <Button variant="light" color="cyan" fullWidth onClick={handleMultiplayer}>
-                        Multiplayer
-                    </Button>
-                    <AccordionButton
-                        label="Multiplayer"
-                        color="cyan"
-                        onClick={() => {
-                            console.log("multi!", selectedServer);
-                        }}
-                    >
+                    <AccordionButton label="Multiplayer" color="cyan" onClick={handleMultiplayer}>
                         {(collapsed) => <ServerList collapsed={collapsed} />}
                     </AccordionButton>
                 </Stack>
