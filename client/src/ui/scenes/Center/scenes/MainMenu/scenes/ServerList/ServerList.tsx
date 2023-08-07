@@ -8,7 +8,7 @@ import { Servers } from "./components/Servers";
 
 export const ServerList = ({ collapsed }) => {
     const [officialServers, officialServersStatus, officialServersFetching] = useOfficialServers();
-    const [localServers, localServersStatus, addLocalServer] = useLocalServers();
+    const [localServers, localServersStatus, customServersHandler] = useLocalServers();
 
     const { selectedServer, setSelectedServer } = useGame();
 
@@ -45,7 +45,7 @@ export const ServerList = ({ collapsed }) => {
                     status={localServersStatus}
                     isFetching={false}
                     IconComponent={BuildingCommunity}
-                    addServer={addLocalServer}
+                    customServersHandler={customServersHandler}
                 />
             </Stack>
         </Chip.Group>

@@ -9,14 +9,16 @@ import {
     Text,
     TextInput,
     FocusTrap,
+    ActionIcon,
 } from "@mantine/core";
+import { getHotkeyHandler, useClickOutside } from "@mantine/hooks";
 import type { QueryStatus } from "@tanstack/react-query";
 
-import type { ServersState } from "../../hooks";
-import { List } from "./components";
-import { Plus, type Icon } from "tabler-icons-react";
+import { List, Placeholder } from "./components";
+import { Plus, type Icon, ArrowUpRight, Trash } from "tabler-icons-react";
 import { Button } from "~/ui/components";
-import { useClickOutside } from "@mantine/hooks";
+import type { ServersState } from "~/ui/services/api";
+import type { CustomServersHandler } from "../../hooks";
 
 const getStatusLabel = (status, isEmpty) => {
     if (status === "loading") return "Retrieving";
@@ -34,7 +36,7 @@ export const Servers = ({
     status,
     isFetching,
     IconComponent,
-    addServer = null,
+    customServersHandler = null,
 }: {
     collapsed: boolean;
     label: string;
@@ -42,7 +44,7 @@ export const Servers = ({
     status: QueryStatus;
     isFetching: boolean;
     IconComponent: Icon;
-    addServer?: (serverIp: string) => void;
+    customServersHandler?: CustomServersHandler;
 }) => {
     const isEmpty = !(status === "success" && servers.length);
     const statusLabel = getStatusLabel(status, isEmpty);
@@ -53,24 +55,51 @@ export const Servers = ({
 
     const [showInput, setShowInput] = useState(false);
     const conditionalAddButton =
-        addServer && !showInput ? (
+        customServersHandler && !showInput ? (
             <Button isSquare h={iconSize} style={{ border: 0 }} onClick={() => setShowInput(true)}>
                 <Plus size={iconSize} strokeWidth={1.25} color="white" />
             </Button>
         ) : null;
 
-    const ref = useClickOutside(() => {
-        console.log("CLICK");
-        setShowInput(false);
-    });
+    const enterServer = () => {
+        if (value.trim().length) {
+            customServersHandler.add(value.trim());
+            setShowInput(false);
+            setValue("");
+        }
+    };
+
+    const ref = useClickOutside(() => setShowInput(false));
+    const [value, setValue] = useState("");
     const conditionalInput = showInput ? (
         <Group ref={ref}>
             <Space h={iconSize} w={iconSize} />
-            <FocusTrap active={true}>
-                <TextInput data-autofocus placeholder="127.0.0.1:3010" />
+            <FocusTrap>
+                <TextInput
+                    value={value}
+                    onChange={(e) => setValue(e.currentTarget.value)}
+                    data-autofocus
+                    placeholder="127.0.0.1:3010"
+                    onKeyDown={getHotkeyHandler([["Enter", enterServer]])}
+                />
             </FocusTrap>
+            <ActionIcon size="lg" variant="light" onClick={enterServer}>
+                <ArrowUpRight />
+            </ActionIcon>
         </Group>
     ) : null;
+
+    const conditionalInputPlaceholder = customServersHandler &&
+        customServersHandler.status === "loading" && (
+            <Placeholder label="Adding" size={iconSize} loading />
+        );
+
+    const conditionalBottom = (
+        <>
+            {conditionalInput}
+            {conditionalInputPlaceholder}
+        </>
+    );
 
     return (
         <Paper
@@ -92,17 +121,13 @@ export const Servers = ({
                 visible={!collapsed}
                 icon={<IconComponent size={iconSize} strokeWidth={1.25} color="white" />}
                 itemHeight={iconSize}
-                right={addServer ? conditionalAddButton : conditionalLoader}
+                right={customServersHandler ? conditionalAddButton : conditionalLoader}
                 placeholder={
-                    <Group>
-                        <Space h={iconSize} w={iconSize} />
-                        {statusLabel && <Text c="dimmed">{statusLabel}</Text>}
-                        {isLoading && <Loader />}
-                    </Group>
+                    <Placeholder label={statusLabel} size={iconSize} loading={isLoading} />
                 }
-                bottom={conditionalInput}
+                bottom={conditionalBottom}
             >
-                {servers.map(({ url, ping, online }, index) => (
+                {servers.map(({ url, ping, online, removeable }, index) => (
                     <List.Item
                         visible={!collapsed}
                         key={url}
@@ -125,6 +150,17 @@ export const Servers = ({
                         <Chip value={url} color="cyan" size="sm">
                             {url}
                         </Chip>
+
+                        {customServersHandler && removeable && (
+                            <ActionIcon
+                                color="red"
+                                size="md"
+                                variant="subtle"
+                                onClick={() => customServersHandler.remove(url)}
+                            >
+                                <Trash size={16} strokeWidth={1.25} color="white" />
+                            </ActionIcon>
+                        )}
                     </List.Item>
                 ))}
             </List>

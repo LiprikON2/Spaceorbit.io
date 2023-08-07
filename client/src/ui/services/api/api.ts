@@ -3,6 +3,14 @@
 export const backendUrl = `http://192.168.1.246:${3010}`;
 // export const backendUrl = `https://8549-104-28-230-247.ngrok-free.app`;
 
+export interface ServersState {
+    url: string;
+    ping: number | null;
+    online: boolean;
+    name?: string;
+    removeable: boolean;
+}
+
 // https://github.com/TanStack/query/discussions/562
 export class FetchError extends Error {
     constructor(public res: Response, message?: string) {
@@ -72,10 +80,11 @@ if (process.env.NODE_ENV === "development") {
 } else netlifyUrl = `${window.location.origin}/.netlify/functions/ngrok`;
 
 export const pingBackend = (url: string, timeout = 6000) => {
-    const unreachableState = {
+    const unreachableState: ServersState = {
         url,
         online: false,
         ping: null,
+        removeable: false,
     };
 
     return new Promise((resolve, reject) => {
@@ -91,7 +100,7 @@ export const pingBackend = (url: string, timeout = 6000) => {
                             name,
                             online: true,
                             ping,
-                        });
+                        } as ServersState);
                     });
                 })
                 .catch(() => resolve(unreachableState));

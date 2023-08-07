@@ -1,5 +1,5 @@
 import React from "react";
-import { Collapse, Group, Loader, Space, Stack, Title } from "@mantine/core";
+import { Collapse, Group, Space, Stack, Title } from "@mantine/core";
 
 import { Item } from "./components";
 

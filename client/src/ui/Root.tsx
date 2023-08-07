@@ -131,7 +131,7 @@ root.render(
 
 // Stops clicking-through of the UI
 // https://github.com/photonstorm/phaser/issues/4447
-const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "touchcancel"];
-events.forEach((event) => {
-    container.addEventListener(event, (e) => e.stopPropagation());
-});
+// const events = ["mouseup", "mousedown", "touchstart", "touchmove", "touchend", "touchcancel"];
+// events.forEach((event) => {
+//     container.addEventListener(event, (e) => e.stopPropagation());
+// });

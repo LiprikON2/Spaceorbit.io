@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getFromBackend, netlifyUrl } from "~/ui/services/api";
-import { useServerPings, type ServersState } from "..";
+import { type ServersState, getFromBackend, netlifyUrl } from "~/ui/services/api";
+import { useServerPings } from "..";
 
 const getServers = async () => await getFromBackend(`${netlifyUrl}/.netlify/functions/servers`);
 

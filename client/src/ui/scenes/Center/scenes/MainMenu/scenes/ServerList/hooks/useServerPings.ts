@@ -1,13 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 
-import { pingBackend } from "~/ui/services/api";
-
-export interface ServersState {
-    url: string;
-    ping: number | null;
-    online: boolean;
-    name?: string;
-}
+import { type ServersState, pingBackend } from "~/ui/services/api";
 
 export const useServerPings = (serverList: string[] = [], removeOffline = false) => {
     const useServerPings = useQueries({
