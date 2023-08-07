@@ -4,7 +4,7 @@ import { useServerPings } from "..";
 import type { ServersState } from "~/ui/services/api";
 
 const schemas = ["http://", "https://"];
-const ips = ["localhost", "192.168.1.246", "192.168.1.143"];
+const ips = ["localhost", "192.168.1.246", "192.168.1.143", "10.147.18.41"];
 const ports = [":3010"];
 
 const defaultServerList = schemas

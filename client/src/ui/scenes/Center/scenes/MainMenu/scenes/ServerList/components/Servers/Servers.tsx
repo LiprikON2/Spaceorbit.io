@@ -6,7 +6,6 @@ import {
     Paper,
     Group,
     Space,
-    Text,
     TextInput,
     FocusTrap,
     ActionIcon,
@@ -15,7 +14,7 @@ import { getHotkeyHandler, useClickOutside } from "@mantine/hooks";
 import type { QueryStatus } from "@tanstack/react-query";
 
 import { List, Placeholder } from "./components";
-import { Plus, type Icon, ArrowUpRight, Trash } from "tabler-icons-react";
+import { type Icon, Plus, ArrowUpRight, Trash } from "tabler-icons-react";
 import { Button } from "~/ui/components";
 import type { ServersState } from "~/ui/services/api";
 import type { CustomServersHandler } from "../../hooks";
@@ -96,8 +95,8 @@ export const Servers = ({
 
     const conditionalBottom = (
         <>
-            {conditionalInput}
             {conditionalInputPlaceholder}
+            {conditionalInput}
         </>
     );
 
@@ -118,7 +117,6 @@ export const Servers = ({
                 title={label}
                 py="xs"
                 px={0}
-                visible={!collapsed}
                 icon={<IconComponent size={iconSize} strokeWidth={1.25} color="white" />}
                 itemHeight={iconSize}
                 right={customServersHandler ? conditionalAddButton : conditionalLoader}

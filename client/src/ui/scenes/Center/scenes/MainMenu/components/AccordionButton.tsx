@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Accordion, type MantineColor } from "@mantine/core";
 import { AccordionControl } from "./components";
 
-// TODO add active style ("pressed")
 export const AccordionButton = ({
     label,
     color,
@@ -44,6 +43,9 @@ export const AccordionButton = ({
                         ...buttonStyles,
                         "&:hover": {
                             background: buttonStyles.hover,
+                        },
+                        "&:active": {
+                            transform: `translateY(calc(${theme.spacing.xs} * 0.1))`,
                         },
                     },
                     item: {

@@ -1,11 +1,11 @@
 import React from "react";
-import { Collapse, Group, Space, Stack, Title } from "@mantine/core";
+import { Group, ScrollArea, Space, Stack, Title, rem } from "@mantine/core";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 import { Item } from "./components";
 
 const List = ({
     title = null,
-    visible = true,
     icon = null,
     placeholder = null,
     bottom = null,
@@ -14,14 +14,11 @@ const List = ({
     children = null,
     ...rest
 }) => {
-    const uncollapse = children.length && visible;
+    const [listRef] = useAutoAnimate();
+    const [itemsRef] = useAutoAnimate();
 
     return (
-        <Stack
-            spacing="sm"
-            style={{ padding: 0, minHeight: `calc(${itemHeight}px + 2.5rem)` }}
-            {...rest}
-        >
+        <Stack spacing="sm" style={{ padding: 0 }} ref={listRef} {...rest}>
             <Group>
                 {icon}
                 <Title order={2} size="md" weight={400}>
@@ -32,15 +29,19 @@ const List = ({
             </Group>
 
             {!children.length && placeholder}
-            <Collapse
-                display={children.length ? "block" : "none"}
-                transitionDuration={200}
-                in={uncollapse}
+            {/* TODO during animation scrollbars are flickering */}
+            {/* <ScrollArea display={children.length ? "block" : "none"} mah={rem(150)}> */}
+            <Stack
+                ref={itemsRef}
+                py={2}
+                display={children.length ? "flex" : "none"}
+                style={{ overflow: "hidden hidden" }}
+                mah={rem(138)}
+                sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}
             >
-                <Stack sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}>
-                    {children}
-                </Stack>
-            </Collapse>
+                {children}
+            </Stack>
+            {/* </ScrollArea> */}
             {bottom && bottom}
         </Stack>
     );

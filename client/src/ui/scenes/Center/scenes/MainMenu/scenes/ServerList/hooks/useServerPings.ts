@@ -23,7 +23,7 @@ export const useServerPings = (serverList: string[] = [], removeOffline = false)
         .map((q) => q.data)
         .filter((serverState) => (removeOffline ? serverState?.online : !!serverState));
 
-    const status = useServerPings?.[0]?.status ?? "success";
+    const status = useServerPings?.at(-1)?.status ?? "success";
 
     return [serverStateList, status] as [ServersState[], "loading" | "error" | "success"];
 };
