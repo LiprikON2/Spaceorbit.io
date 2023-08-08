@@ -6,7 +6,6 @@ export const AccordionButton = ({
     label,
     color,
     onClick,
-
     children,
 }: {
     label: string;

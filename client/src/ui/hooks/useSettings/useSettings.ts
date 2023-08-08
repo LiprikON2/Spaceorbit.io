@@ -14,7 +14,7 @@ interface SettingsStore {
     setMasterVolumeSetting: (volume: number) => void;
     setEffectsVolumeSetting: (volume: number) => void;
     setMusicVolumeSetting: (volume: number) => void;
-    setGraphicsSettingsSetting: (value: number) => void;
+    setGraphicsSettingsSetting: (value: string) => void;
     toggleTouchControlsSetting: () => void;
 }
 
@@ -24,7 +24,7 @@ const defaultSettings = {
     masterVolume: 1,
     effectsVolume: 0.1,
     musicVolume: 0.05,
-    graphicsSettings: 1,
+    graphicsSettings: "1",
     isTouchMode: isTouchDevice(),
     showDeviceInfo: false,
 };

@@ -24,7 +24,13 @@ export const MainMenu = () => {
         <>
             <Paper>
                 <Stack>
-                    <Button variant="light" color="cyan" fullWidth onClick={handleSingleplayer}>
+                    <Button
+                        fs="lg"
+                        variant="light"
+                        color="cyan"
+                        fullWidth
+                        onClick={handleSingleplayer}
+                    >
                         Singleplayer
                     </Button>
                     <AccordionButton label="Multiplayer" color="cyan" onClick={() => {}}>

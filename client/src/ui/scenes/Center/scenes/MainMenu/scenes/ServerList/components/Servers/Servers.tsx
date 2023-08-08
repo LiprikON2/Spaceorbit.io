@@ -54,7 +54,7 @@ export const Servers = ({
 
     const [showInput, setShowInput] = useState(false);
     const conditionalAddButton =
-        customServersHandler && !showInput ? (
+        customServersHandler && !showInput && servers.length < 4 ? (
             <Button isSquare h={iconSize} style={{ border: 0 }} onClick={() => setShowInput(true)}>
                 <Plus size={iconSize} strokeWidth={1.25} color="white" />
             </Button>

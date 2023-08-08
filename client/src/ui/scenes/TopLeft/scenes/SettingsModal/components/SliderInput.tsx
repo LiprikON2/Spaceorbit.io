@@ -6,6 +6,7 @@ export const SliderInput = ({
     title,
     onChangeEnd,
     defaultValue,
+    value,
     min = 0,
     max = 1,
 }) => {
@@ -26,6 +27,7 @@ export const SliderInput = ({
                 ]}
                 min={min}
                 max={max}
+                precision={4}
                 step={max * 0.01}
                 onChangeEnd={onChangeEnd}
                 defaultValue={defaultValue}

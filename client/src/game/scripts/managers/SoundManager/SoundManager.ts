@@ -14,6 +14,9 @@ type SoundManagerConfig = {
     pauseOnBlur: boolean;
 };
 
+export type VolumeKeys = "masterVolume" | "musicVolume" | "effectsVolume";
+export type MuteKeys = "effectsMute" | "musicMute";
+
 export class SoundManager {
     scene: BaseScene;
     player: Spaceship;
@@ -52,11 +55,11 @@ export class SoundManager {
         // Prevent sound mute when tabbing out
         scene.sound.pauseOnBlur = this.options.pauseOnBlur;
     }
-    setVolume(key: string, newVolume: number) {
+    setVolume(key: VolumeKeys, newVolume: number) {
         this.options[key] = newVolume;
         this.updateVolumes();
     }
-    toggleMute(key: string) {
+    toggleMute(key: MuteKeys) {
         this.options[key] = !this.options[key];
         this.updateVolumes();
     }

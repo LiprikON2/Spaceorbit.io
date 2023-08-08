@@ -14,7 +14,7 @@ const List = ({
     children = null,
     ...rest
 }) => {
-    const [listRef] = useAutoAnimate();
+    const [listRef] = useAutoAnimate({ duration: 250 });
     const [itemsRef] = useAutoAnimate();
 
     return (
@@ -36,7 +36,7 @@ const List = ({
                 py={2}
                 display={children.length ? "flex" : "none"}
                 style={{ overflow: "hidden hidden" }}
-                mah={rem(138)}
+                mah={rem(135)}
                 sx={(theme) => ({ gap: `calc(${theme.spacing.xs} / 1.5)` })}
             >
                 {children}

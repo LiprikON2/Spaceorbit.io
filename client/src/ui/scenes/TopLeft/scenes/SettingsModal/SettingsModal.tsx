@@ -15,8 +15,9 @@ import React, { useState } from "react";
 import { Button } from "~/ui/components";
 import { SliderInput } from "./components";
 import { useGame, useSettings } from "~/ui/hooks";
+import { VolumeKeys } from "~/game/managers/SoundManager";
 
-export const SettingsModal = ({ opened, onClose }) => {
+export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: () => void }) => {
     const {
         computed: {
             player,
@@ -37,29 +38,24 @@ export const SettingsModal = ({ opened, onClose }) => {
     const removeEngine = () => {
         player.exhausts.removeExhaust();
     };
-    const addLaser = (slot) => {
+    const addLaser = (slot: number) => {
         player.weapons.createLaser(slot);
     };
-    const addGatling = (slot) => {
+    const addGatling = (slot: number) => {
         player.weapons.createGatling(slot);
     };
 
-    const setVolume = (key, volume) => {
-        const isValidKey =
-            key === "masterVolume" || key === "musicVolume" || key === "effectsVolume";
-
-        if (isValidKey) {
-            soundManager.setVolume(key, volume);
-            if (key === "masterVolume") {
-                setMasterVolumeSetting(volume);
-            } else if (key === "musicVolume") {
-                setMusicVolumeSetting(volume);
-            } else if (key === "effectsVolume") {
-                setEffectsVolumeSetting(volume);
-            }
+    const setVolume = (key: VolumeKeys, volume: number) => {
+        soundManager.setVolume(key, volume);
+        if (key === "masterVolume") {
+            setMasterVolumeSetting(volume);
+        } else if (key === "musicVolume") {
+            setMusicVolumeSetting(volume);
+        } else if (key === "effectsVolume") {
+            setEffectsVolumeSetting(volume);
         }
     };
-    const handleGraphicSettings = (value) => {
+    const handleGraphicSettings = (value: string) => {
         setGraphicsSettingsSetting(value);
     };
 
@@ -70,24 +66,24 @@ export const SettingsModal = ({ opened, onClose }) => {
     const [touchControlChecked, handleTouchControls] = useDisclosure(settings.isTouchMode);
     const [activeTab, setActiveTab] = useState<string | null>("audio");
 
-    const sendMobs = (e) => {
-        e.preventDefault();
-        const { mobGroup } = entityManager;
-        entityManager.spawnMobs(mobsCount);
+    // const sendMobs = (e) => {
+    //     e.preventDefault();
+    //     const { mobGroup } = entityManager;
+    //     entityManager.spawnMobs(mobsCount);
 
-        mobGroup.getChildren().forEach((mob) => {
-            mob.moveTo(x, y);
-            mob.setPointer(x, y);
-        });
-    };
+    //     mobGroup.getChildren().forEach((mob) => {
+    //         mob.moveTo(x, y);
+    //         mob.setPointer(x, y);
+    //     });
+    // };
 
-    const teleport = () => {
-        player.teleport(x, y);
-    };
+    // const teleport = () => {
+    //     player.teleport(x, y);
+    // };
 
-    const [x, setx] = useState(120);
-    const [y, sety] = useState(120);
-    const [mobsCount, setMobsCount] = useState(0);
+    // const [x, setx] = useState(120);
+    // const [y, sety] = useState(120);
+    // const [mobsCount, setMobsCount] = useState(0);
 
     return (
         <>
@@ -124,6 +120,7 @@ export const SettingsModal = ({ opened, onClose }) => {
                                                 setVolume("masterVolume", value)
                                             }
                                             defaultValue={settings.masterVolume}
+                                            value={settings.masterVolume}
                                         />
                                         <SliderInput
                                             title="Music Volume"
@@ -131,6 +128,7 @@ export const SettingsModal = ({ opened, onClose }) => {
                                             max={0.025}
                                             onChangeEnd={(value) => setVolume("musicVolume", value)}
                                             defaultValue={settings.musicVolume}
+                                            value={settings.musicVolume}
                                         />
                                         <SliderInput
                                             title="Effects Volume"
@@ -140,6 +138,7 @@ export const SettingsModal = ({ opened, onClose }) => {
                                                 setVolume("effectsVolume", value)
                                             }
                                             defaultValue={settings.effectsVolume}
+                                            value={settings.effectsVolume}
                                         />
                                     </Stack>
                                 </Container>
@@ -205,7 +204,7 @@ export const SettingsModal = ({ opened, onClose }) => {
                                     </Stack>
                                 </Container>
                             </Tabs.Panel>
-                            <Tabs.Panel value="cheats">
+                            {/* <Tabs.Panel value="cheats">
                                 <Container>
                                     <Stack>
                                         <Title order={3}>General</Title>
@@ -236,7 +235,7 @@ export const SettingsModal = ({ opened, onClose }) => {
                                         </form>
                                     </Stack>
                                 </Container>
-                            </Tabs.Panel>
+                            </Tabs.Panel> */}
                         </Tabs>
                     </Modal.Body>
                 </Modal.Content>

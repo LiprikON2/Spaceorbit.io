@@ -7,9 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { App } from "./App";
+import { CustomFonts } from "./components/CustomFonts";
 
 const theme: Partial<MantineTheme> = {
     colorScheme: "dark",
+    fontFamily: "Carter One, sans-serif",
     focusRingStyles: {
         // reset styles are applied to <button /> and <a /> elements
         // in &:focus:not(:focus-visible) selector to mimic
@@ -120,6 +122,7 @@ const root = createRoot(container!);
 
 root.render(
     <MantineProvider theme={theme}>
+        <CustomFonts />
         <QueryClientProvider client={queryClient}>
             <React.StrictMode>
                 <App />

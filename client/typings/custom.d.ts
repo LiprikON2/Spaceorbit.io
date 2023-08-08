@@ -6,3 +6,4 @@ declare module "*.svg";
 declare module "*.webp";
 declare module "*.mp3";
 declare module "*.json";
+declare module "*.ttf";
