@@ -24,16 +24,10 @@ export const MainMenu = () => {
         <>
             <Paper>
                 <Stack>
-                    <Button
-                        fs="lg"
-                        variant="light"
-                        color="cyan"
-                        fullWidth
-                        onClick={handleSingleplayer}
-                    >
+                    <Button variant="light" color="cyan" fullWidth onClick={handleSingleplayer}>
                         Singleplayer
                     </Button>
-                    <AccordionButton label="Multiplayer" color="cyan" onClick={() => {}}>
+                    <AccordionButton label="Multiplayer" color="cyan" onClick={handleMultiplayer}>
                         {(collapsed) => <ServerList collapsed={collapsed} />}
                     </AccordionButton>
                 </Stack>

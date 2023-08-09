@@ -25,7 +25,7 @@ export const TopLeft = ({ GroupComponent }) => {
         <>
             <GroupComponent>
                 <Button isSquare onClick={toggleSettings}>
-                    <Settings />
+                    <Settings strokeWidth={2.5} />
                 </Button>
                 <EffectsMuteBtn />
                 <MusicMuteBtn />

@@ -2,6 +2,7 @@ import React from "react";
 import { Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
+import { ErrorModal, BackgroundImage } from "./components";
 import { useGame, useMainMenu, useSyncSettingsToSession } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
 import { TopRight } from "./scenes/TopRight";
@@ -11,9 +12,8 @@ import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
 import { UnderTopRight } from "./scenes/UnderTopRight";
 import background from "~/assets/ui/background-space.webp";
-import { ErrorModal, BackgroundImage } from "./components";
+import { TopCenter } from "./scenes/TopCenter";
 
-// @ts-ignore
 const StyledUI = styled(BackgroundImage)`
     position: absolute;
     inset: 0;
@@ -26,14 +26,14 @@ const StyledUI = styled(BackgroundImage)`
     grid-auto-columns: 1fr;
     grid-auto-rows: 1fr;
     grid-template-areas:
-        "top-l top-l top-l    .    .    .    .    .    . top-r top-r top-r"
-        "    .     .     .    .    .    .    .    .    .     .     .     ."
-        "    .     .     .    .    .    .    .    .    .     .     .     ."
-        " left  left  left cent cent cent cent cent cent right right right"
-        " left  left  left cent cent cent cent cent cent right right right"
-        "    .     .     . cent cent cent cent cent cent     .     .     ."
-        "    .     .     .    .    .    .    .    .    .     .     .     ."
-        "bot-l bot-l bot-l    .    .    .    .    .    . bot-r bot-r bot-r";
+        "top-l top-l top-l     .     .     .     .     .     . top-r top-r top-r"
+        "    .     .     . top-c top-c top-c top-c top-c top-c     .     .     ."
+        "    .     .     . top-c top-c top-c top-c top-c top-c     .     .     ."
+        " left  left  left  cent  cent  cent  cent  cent  cent right right right"
+        " left  left  left  cent  cent  cent  cent  cent  cent right right right"
+        "    .     .     .  cent  cent  cent  cent  cent  cent     .     .     ."
+        "    .     .     .     .     .     .     .     .     .     .     .     ."
+        "bot-l bot-l bot-l     .     .     .     .     .     . bot-r bot-r bot-r";
 
     & > * {
         margin: 1rem;
@@ -53,6 +53,11 @@ const StyledTopRightGroup = styled(Group)`
     grid-area: top-r;
     justify-self: end;
     align-self: start;
+`;
+const StyledTopCenterGroup = styled(Group)`
+    grid-area: top-c;
+    justify-self: center;
+    align-self: end;
 `;
 const StyledCenterGroup = styled(Group)`
     grid-area: cent;
@@ -98,13 +103,14 @@ export const App = () => {
     const {
         errors,
         clearErrors,
-        computed: { isLoaded },
+        computed: { isLoaded, isLoading },
     } = useGame();
 
     return (
         <StyledUI src={background} showBg={!isLoaded}>
             {isLoaded && <TopLeft GroupComponent={StyledTopLeftGroup} />}
             {isLoaded && <TopRight GroupComponent={StyledTopRightGroup} />}
+            {!isLoaded && !isLoading && <TopCenter GroupComponent={StyledTopCenterGroup} />}
             {!isLoaded && <Center GroupComponent={StyledCenterGroup} />}
             {isLoaded && <UnderTopRight GroupComponent={StyledUnderTopRightGroup} />}
             <Right GroupComponent={StyledRightGroup} />

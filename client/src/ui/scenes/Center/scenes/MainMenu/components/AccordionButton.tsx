@@ -31,8 +31,6 @@ export const AccordionButton = ({
                     chevron: { display: "none" },
                     label: {
                         textAlign: "center",
-                        fontSize: theme.fontSizes.lg,
-                        fontWeight: 600,
                     },
                     control: {
                         padding: 0,

@@ -21,7 +21,7 @@ const List = ({
         <Stack spacing="sm" style={{ padding: 0 }} ref={listRef} {...rest}>
             <Group>
                 {icon}
-                <Title order={2} size="md" weight={400}>
+                <Title order={2} size="h4" weight={400}>
                     {title}
                 </Title>
                 <Space style={{ flexGrow: 1 }} />

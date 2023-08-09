@@ -23,6 +23,11 @@ export const EffectsMuteBtn = () => {
     };
 
     return (
-        <ToggleButton on={on} iconOn={<Volume />} iconOff={<VolumeOff />} onClick={handleClick} />
+        <ToggleButton
+            on={on}
+            iconOn={<Volume strokeWidth={2.5} />}
+            iconOff={<VolumeOff strokeWidth={2.5} />}
+            onClick={handleClick}
+        />
     );
 };

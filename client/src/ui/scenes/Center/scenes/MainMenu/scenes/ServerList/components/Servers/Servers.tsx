@@ -55,8 +55,25 @@ export const Servers = ({
     const [showInput, setShowInput] = useState(false);
     const conditionalAddButton =
         customServersHandler && !showInput && servers.length < 4 ? (
-            <Button isSquare h={iconSize} style={{ border: 0 }} onClick={() => setShowInput(true)}>
-                <Plus size={iconSize} strokeWidth={1.25} color="white" />
+            <Button
+                isSquare
+                styles={{
+                    root: {
+                        transition: "opacity 0.15s ease",
+                        opacity: 0.5,
+                        "&:hover": {
+                            opacity: 1,
+                        },
+                        "&:active": {
+                            opacity: 1,
+                        },
+                    },
+                }}
+                h={iconSize}
+                style={{ border: 0 }}
+                onClick={() => setShowInput(true)}
+            >
+                <Plus size={iconSize} strokeWidth={2} color="white" />
             </Button>
         ) : null;
 
@@ -117,7 +134,7 @@ export const Servers = ({
                 title={label}
                 py="xs"
                 px={0}
-                icon={<IconComponent size={iconSize} strokeWidth={1.25} color="white" />}
+                icon={<IconComponent size={iconSize} strokeWidth={2} color="white" />}
                 itemHeight={iconSize}
                 right={customServersHandler ? conditionalAddButton : conditionalLoader}
                 placeholder={

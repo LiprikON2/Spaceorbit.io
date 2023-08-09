@@ -32,7 +32,7 @@ export const BottomLeft = ({ GroupComponent }) => {
             <GroupComponent>
                 <Indicator inline label="New" color="cyan" size={16} withBorder>
                     <Button isSquare onClick={toggleOutfitting}>
-                        <Tool />
+                        <Tool strokeWidth={2.5} />
                     </Button>
                 </Indicator>
             </GroupComponent>

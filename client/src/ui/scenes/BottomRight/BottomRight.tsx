@@ -31,12 +31,12 @@ export const BottomRight = ({ GroupComponent }) => {
             <GroupComponent>
                 {isLoaded && (
                     <Button isSquare onClick={() => exit(true)}>
-                        <Home />
+                        <Home strokeWidth={2.5} />
                     </Button>
                 )}
                 {!isLoading && (
                     <Button isSquare onClick={toggleProfile}>
-                        <User />
+                        <User strokeWidth={2.5} />
                     </Button>
                 )}
             </GroupComponent>

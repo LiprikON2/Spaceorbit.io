@@ -17,8 +17,8 @@ export const FullscreenBtn = () => {
     return (
         <ToggleButton
             on={on}
-            iconOn={<ArrowsMinimize />}
-            iconOff={<Maximize />}
+            iconOn={<ArrowsMinimize strokeWidth={2.5} />}
+            iconOff={<Maximize strokeWidth={2.5} />}
             onClick={handleClick}
         />
     );

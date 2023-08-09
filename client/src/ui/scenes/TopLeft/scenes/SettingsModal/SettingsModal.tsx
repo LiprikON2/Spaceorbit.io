@@ -105,15 +105,14 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                 <Tabs.Tab value="audio">Audio</Tabs.Tab>
                                 <Tabs.Tab value="graphics">Graphics</Tabs.Tab>
                                 <Tabs.Tab value="controls">Controls</Tabs.Tab>
-                                <Tabs.Tab value="ship">Ship</Tabs.Tab>
-                                <Tabs.Tab value="cheats">Cheats</Tabs.Tab>
+                                {/* <Tabs.Tab value="cheats">Cheats</Tabs.Tab> */}
                             </Tabs.List>
                             <Tabs.Panel value="audio">
                                 <Container>
                                     <Stack>
                                         <Title order={3}>Volume</Title>
                                         <SliderInput
-                                            title="Master Volume"
+                                            label="Master Volume"
                                             min={0}
                                             max={1}
                                             onChangeEnd={(value) =>
@@ -123,7 +122,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                             value={settings.masterVolume}
                                         />
                                         <SliderInput
-                                            title="Music Volume"
+                                            label="Music Volume"
                                             min={0}
                                             max={0.025}
                                             onChangeEnd={(value) => setVolume("musicVolume", value)}
@@ -131,7 +130,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                             value={settings.musicVolume}
                                         />
                                         <SliderInput
-                                            title="Effects Volume"
+                                            label="Effects Volume"
                                             min={0}
                                             max={0.1}
                                             onChangeEnd={(value) =>
@@ -170,37 +169,6 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                             checked={touchControlChecked}
                                             onChange={toggleTouchControls}
                                         />
-                                    </Stack>
-                                </Container>
-                            </Tabs.Panel>
-                            <Tabs.Panel value="ship">
-                                <Container>
-                                    <Stack>
-                                        <Title order={3}>Modules</Title>
-                                        <Button className="addEngine" onClick={addEngine}>
-                                            Add: Engine
-                                        </Button>
-                                        <Button className="addEngine" onClick={removeEngine}>
-                                            Remove: Engine
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addLaser(0)}>
-                                            Add: Weapon slot 1 - Laser
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addLaser(1)}>
-                                            Add: Weapon slot 2 - Laser
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addLaser(2)}>
-                                            Add: Weapon slot 3 - Laser
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addGatling(0)}>
-                                            Add: Weapon slot 1 - Gatling Gun
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addGatling(1)}>
-                                            Add: Weapon slot 2 - Gatling Gun
-                                        </Button>
-                                        <Button className="addWeapon" onClick={() => addGatling(2)}>
-                                            Add: Weapon slot 3 - Gatling Gun
-                                        </Button>
                                     </Stack>
                                 </Container>
                             </Tabs.Panel>

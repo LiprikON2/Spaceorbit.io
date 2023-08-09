@@ -34,7 +34,7 @@ export const AccordionControl = ({
                         ...(isExpanded && { transform: "rotate(180deg)" }),
                     })}
                 >
-                    <ChevronDown />
+                    <ChevronDown strokeWidth={3} />
                 </Box>
             </ActionIcon>
         </Box>

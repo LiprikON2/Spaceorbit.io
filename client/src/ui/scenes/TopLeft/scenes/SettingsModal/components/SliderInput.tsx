@@ -1,20 +1,18 @@
-import { Title, Slider, Space } from "@mantine/core";
+import { Text, Slider, Space } from "@mantine/core";
 import React from "react";
 
 export const SliderInput = ({
     color = "cyan",
-    title,
-    onChangeEnd,
-    defaultValue,
-    value,
+    label = null,
+    onChangeEnd = (value: number) => {},
+    defaultValue = undefined,
+    value = undefined,
     min = 0,
     max = 1,
 }) => {
     return (
         <>
-            <Title order={4} size="h6">
-                {title}
-            </Title>
+            {label && <Text>{label}</Text>}
             <Slider
                 color={color}
                 label={(value) => `${(value * 100 * (1 / max)).toFixed(0)}%`}
@@ -31,6 +29,7 @@ export const SliderInput = ({
                 step={max * 0.01}
                 onChangeEnd={onChangeEnd}
                 defaultValue={defaultValue}
+                value={value}
             />
             <Space h="md" />
         </>
