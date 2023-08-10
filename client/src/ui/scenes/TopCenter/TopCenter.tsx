@@ -6,8 +6,9 @@ import background from "~/assets/ui/background-space.webp";
 import galaxy from "~/assets/ui/galaxy.webp";
 
 const StyledTitle = styled(Title)`
-    font-size: var(--responsive-size);
     margin-bottom: calc(var(--responsive-size) * 0.25);
+
+    font-size: var(--responsive-size);
     letter-spacing: 0.6rem;
     user-select: none;
 
@@ -64,6 +65,7 @@ export const TopCenter = ({ GroupComponent }) => {
     const StyledGroupComponent = styled(GroupComponent)`
         --responsive-size: clamp(5rem, 1rem + 8vw, 9rem);
 
+        margin-top: calc(var(--responsive-size) * 0.5);
         position: relative;
 
         &::before {

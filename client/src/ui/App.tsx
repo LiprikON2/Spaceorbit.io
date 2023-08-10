@@ -26,7 +26,7 @@ const StyledUI = styled(BackgroundImage)`
     grid-auto-columns: 1fr;
     grid-auto-rows: 1fr;
     grid-template-areas:
-        "top-l top-l top-l     .     .     .     .     .     . top-r top-r top-r"
+        "top-l top-l top-l top-c top-c top-c top-c top-c top-c top-r top-r top-r"
         "    .     .     . top-c top-c top-c top-c top-c top-c     .     .     ."
         "    .     .     . top-c top-c top-c top-c top-c top-c     .     .     ."
         " left  left  left  cent  cent  cent  cent  cent  cent right right right"
@@ -57,7 +57,7 @@ const StyledTopRightGroup = styled(Group)`
 const StyledTopCenterGroup = styled(Group)`
     grid-area: top-c;
     justify-self: center;
-    align-self: end;
+    align-self: center;
 `;
 const StyledCenterGroup = styled(Group)`
     grid-area: cent;
