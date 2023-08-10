@@ -34,6 +34,7 @@ export const AccordionButton = ({
                     },
                     control: {
                         padding: 0,
+                        userSelect: "none",
                         height: "3.125rem",
                         paddingLeft: `calc(3.125rem + ${theme.spacing.xs})`,
                         borderRadius: theme.fn.radius(theme.defaultRadius),

@@ -1,38 +1,117 @@
+import React from "react";
 import styled from "@emotion/styled";
 import { Title } from "@mantine/core";
-import React from "react";
+
+import background from "~/assets/ui/background-space.webp";
+import galaxy from "~/assets/ui/galaxy.png";
 
 const StyledTitle = styled(Title)`
-    --responsive-size: clamp(5rem, 1rem + 8vw, 9rem);
-
     font-size: var(--responsive-size);
-    margin-bottom: calc(var(--responsive-size) * 0.2);
+    margin-bottom: calc(var(--responsive-size) * 0.25);
     letter-spacing: 0.6rem;
+    user-select: none;
 
-    /* text-shadow: teal 4px 4px; */
-    /* -webkit-text-stroke: 2px teal; */
-    /* color: #99e6f2; */
+    background-image: url(${background});
+    background-position: 50% 21%;
+    background-size: 196%;
+
+    background-clip: text;
+    color: #0000005e;
+
+    animation: wobble 12s infinite linear;
+
+    @keyframes wobble {
+        0% {
+            transform: translate(0, 0) rotate3d(0, 0, 1, 0deg);
+            background-size: 196%;
+        }
+        12% {
+            transform: translate(-0.5%, -0.12%) rotate3d(0, 0, 1, -1deg);
+            background-size: 206%;
+        }
+        25% {
+            transform: translate(-0.75%, -0.25%) rotate3d(0, 0, 1, -2deg);
+            background-size: 216%;
+        }
+        37% {
+            transform: translate(-0.5%, -0.12%) rotate3d(0, 0, 1, -1deg);
+            background-size: 206%;
+        }
+        50% {
+            transform: translate(0, 0) rotate3d(0, 0, 1, 0deg);
+            background-size: 196%;
+        }
+        62% {
+            transform: translate(0.5%, 0.12%) rotate3d(0, 0, 1, 1deg);
+            background-size: 206%;
+        }
+        75% {
+            transform: translate(0.75%, 0.25%) rotate3d(0, 0, 1, 2deg);
+            background-size: 216%;
+        }
+        87% {
+            transform: translate(0.5%, 0.12%) rotate3d(0, 0, 1, 1deg);
+            background-size: 206%;
+        }
+        100% {
+            transform: translate(0, 0) rotate3d(0, 0, 1, 0deg);
+            background-size: 196%;
+        }
+    }
 `;
 
 export const TopCenter = ({ GroupComponent }) => {
+    const StyledGroupComponent = styled(GroupComponent)`
+        --responsive-size: clamp(5rem, 1rem + 8vw, 9rem);
+
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            background-image: url(${galaxy});
+            background-position: 50%;
+            background-size: calc(var(--responsive-size) * 7) calc(var(--responsive-size) * 2.5);
+            background-repeat: no-repeat;
+
+            height: 200%;
+            width: 100%;
+            z-index: -1;
+
+            animation: opacity-breathe 3s infinite ease;
+
+            @keyframes opacity-breathe {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.75;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+        }
+    `;
     return (
-        <GroupComponent>
+        <StyledGroupComponent>
             <StyledTitle
                 order={1}
-                c="cyan.2"
+                c="black"
                 sx={(theme) => ({
                     WebkitTextStroke: `${theme.colors.cyan[8]} 2px`,
-                    textShadow: `
-                        ${theme.colors.cyan[8]} 1px 1px,
-                        ${theme.colors.cyan[8]} 2px 2px,
-                        ${theme.colors.cyan[8]} 3px 3px,
-                        ${theme.colors.cyan[8]} 4px 4px,
-                        black 0 10px 8px
+                    filter: `
+                        drop-shadow(4px 4px 0 ${theme.colors.cyan[8]})
+                        drop-shadow(4px 4px 0 black)
                     `,
                 })}
             >
                 Spaceorbit
             </StyledTitle>
-        </GroupComponent>
+        </StyledGroupComponent>
     );
 };

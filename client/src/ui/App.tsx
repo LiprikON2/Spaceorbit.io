@@ -2,6 +2,7 @@ import React from "react";
 import { Group } from "@mantine/core";
 import styled from "@emotion/styled";
 
+import background from "~/assets/ui/background-space.webp";
 import { ErrorModal, BackgroundImage } from "./components";
 import { useGame, useMainMenu, useSyncSettingsToSession } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
@@ -11,7 +12,6 @@ import { Right } from "./scenes/Right";
 import { BottomLeft } from "./scenes/BottomLeft";
 import { BottomRight } from "./scenes/BottomRight";
 import { UnderTopRight } from "./scenes/UnderTopRight";
-import background from "~/assets/ui/background-space.webp";
 import { TopCenter } from "./scenes/TopCenter";
 
 const StyledUI = styled(BackgroundImage)`
