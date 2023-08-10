@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { Title } from "@mantine/core";
 
 import background from "~/assets/ui/background-space.webp";
-import galaxy from "~/assets/ui/galaxy.png";
+import galaxy from "~/assets/ui/galaxy.webp";
 
 const StyledTitle = styled(Title)`
     font-size: var(--responsive-size);
@@ -16,7 +16,7 @@ const StyledTitle = styled(Title)`
     background-size: 196%;
 
     background-clip: text;
-    color: #0000005e;
+    color: #00000096;
 
     animation: wobble 12s infinite linear;
 
@@ -82,14 +82,14 @@ export const TopCenter = ({ GroupComponent }) => {
             width: 100%;
             z-index: -1;
 
-            animation: opacity-breathe 3s infinite ease;
+            animation: opacity-breath 3s infinite ease;
 
-            @keyframes opacity-breathe {
+            @keyframes opacity-breath {
                 0% {
                     opacity: 1;
                 }
                 50% {
-                    opacity: 0.75;
+                    opacity: 0.85;
                 }
                 100% {
                     opacity: 1;
@@ -101,7 +101,6 @@ export const TopCenter = ({ GroupComponent }) => {
         <StyledGroupComponent>
             <StyledTitle
                 order={1}
-                c="black"
                 sx={(theme) => ({
                     WebkitTextStroke: `${theme.colors.cyan[8]} 2px`,
                     filter: `
