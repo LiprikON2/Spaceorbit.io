@@ -21,23 +21,13 @@
         />
         <meta name="msapplication-starturl" content="./" />
 
-        <link rel="icon" type="image/png" sizes="192x192" href="./icons/icons-192.png" />
-        <link
-            rel="apple-touch-icon"
-            type="image/png"
-            sizes="192x192"
-            href="./icons/icons-192.png"
-        />
+        <link rel="icon" type="image/png" sizes="192x192" href="./icons/logo-192.png" />
+        <link rel="apple-touch-icon" type="image/png" sizes="192x192" href="./icons/logo-192.png" />
 
-        <link rel="icon" type="image/png" sizes="512x512" href="./icons/icons-512.png" />
-        <link
-            rel="apple-touch-icon"
-            type="image/png"
-            sizes="512x512"
-            href="./icons/icons-512.png"
-        />
+        <link rel="icon" type="image/png" sizes="512x512" href="./icons/logo-512.png" />
+        <link rel="apple-touch-icon" type="image/png" sizes="512x512" href="./icons/logo-512.png" />
 
-        <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="./icons/favicon.ico" type="image/x-icon" />
 
         <title><%= htmlWebpackPlugin.options.gameName %></title>
         <style>
@@ -57,21 +47,74 @@
         <noscript>Please enable javascript to continue using this application.</noscript>
 
         <!-- installs the serviceWorker -->
+        <!-- https://github.com/dfabulich/service-worker-refresh-sample/blob/master/index.html -->
         <% if (!htmlWebpackPlugin.options.dev){ %>
         <script>
+            const showRefreshUI = (registration) => {
+                var button = document.createElement("button");
+                button.style.position = "absolute";
+                button.style.bottom = "24px";
+                button.style.left = "24px";
+                button.style.zIndex = 1000;
+                button.textContent = "Update was found. Please click here to refresh.";
+
+                button.addEventListener("click", () => {
+                    // Just to ensure registration.waiting is available before
+                    // calling postMessage()
+                    if (!registration.waiting) return;
+
+                    button.disabled = true;
+
+                    registration.waiting.postMessage("skipWaiting");
+                });
+
+                document.body.appendChild(button);
+            };
+            const onNewServiceWorker = (registration, callback) => {
+                // SW is waiting to activate. Can occur if multiple clients open and
+                // one of the clients is refreshed.
+                if (registration.waiting) return callback();
+
+                const listenInstalledStateChange = () => {
+                    registration.installing.addEventListener("statechange", (event) => {
+                        // A new service worker is available, inform the user
+                        if (event.target.state === "installed") callback();
+                    });
+                };
+
+                if (registration.installing) return listenInstalledStateChange();
+
+                // We are currently controlled so a new SW may be found...
+                // Add a listener in case a new SW is found,
+                registration.addEventListener("updatefound", listenInstalledStateChange);
+            };
+
             if ("serviceWorker" in navigator) {
+                let refreshing;
+                // When the user asks to refresh the UI, we'll need to reload the window
+                navigator.serviceWorker.addEventListener("controllerchange", function (event) {
+                    if (refreshing) return; // prevent infinite refresh loop when you use "Update on Reload"
+                    refreshing = true;
+                    console.log("Controller loaded");
+                    window.location.reload();
+                });
+
                 window.addEventListener("load", () => {
-                    navigator.serviceWorker.register("./sw.js");
+                    navigator.serviceWorker.register("./sw.js").then((registration) => {
+                        // The window client isn't currently controlled so it's a new service
+                        // worker that will activate immediately
+                        if (!navigator.serviceWorker.controller) return;
+
+                        registration.update();
+
+                        onNewServiceWorker(registration, () => {
+                            showRefreshUI(registration);
+                        });
+                    });
                 });
             }
         </script>
         <% } %>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Carter+One&family=Kanit:wght@300&display=swap"
-            rel="stylesheet"
-        />
     </head>
     <body>
         <div id="phaser-game" />

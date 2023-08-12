@@ -3,7 +3,7 @@ import { Group, Space, Text, Loader } from "@mantine/core";
 
 export const Placeholder = ({ label = "", size = 28, loading = false }) => {
     return (
-        <Group>
+        <Group noWrap>
             <Space h={size} w={size} />
             {label && (
                 <Text c="dimmed" fw={300} italic lts="0.1rem">

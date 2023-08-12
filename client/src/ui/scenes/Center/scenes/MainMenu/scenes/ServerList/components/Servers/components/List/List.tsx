@@ -19,7 +19,7 @@ const List = ({
 
     return (
         <Stack spacing="sm" style={{ padding: 0 }} ref={listRef} {...rest}>
-            <Group>
+            <Group noWrap>
                 {icon}
                 <Title order={2} size="h4" weight={400}>
                     {title}

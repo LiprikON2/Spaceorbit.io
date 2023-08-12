@@ -24,7 +24,7 @@ export const Item = ({
             timingFunction="ease"
         >
             {(styles) => (
-                <Group style={styles} {...rest}>
+                <Group noWrap style={styles} {...rest}>
                     {icon}
                     {children}
                 </Group>

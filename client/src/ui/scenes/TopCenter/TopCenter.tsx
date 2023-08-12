@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "@emotion/styled";
 import { Title } from "@mantine/core";
 
@@ -11,6 +11,7 @@ const StyledTitle = styled(Title)`
     font-size: var(--responsive-size);
     letter-spacing: 0.6rem;
     user-select: none;
+    text-align: center;
 
     background-image: url(${background});
     background-position: 50% 21%;
@@ -63,7 +64,7 @@ const StyledTitle = styled(Title)`
 
 export const TopCenter = ({ GroupComponent }) => {
     const StyledGroupComponent = styled(GroupComponent)`
-        --responsive-size: clamp(5rem, 1rem + 8vw, 9rem);
+        --responsive-size: clamp(4rem, 1rem + 8vw, 9rem);
 
         margin-top: calc(var(--responsive-size) * 0.5);
         position: relative;
@@ -71,6 +72,7 @@ export const TopCenter = ({ GroupComponent }) => {
         &::before {
             content: "";
             position: absolute;
+            z-index: -1;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -81,8 +83,7 @@ export const TopCenter = ({ GroupComponent }) => {
             background-repeat: no-repeat;
 
             height: 200%;
-            width: 100%;
-            z-index: -1;
+            width: 100vw;
 
             animation: opacity-breath 3s infinite ease;
 
@@ -99,8 +100,9 @@ export const TopCenter = ({ GroupComponent }) => {
             }
         }
     `;
+
     return (
-        <StyledGroupComponent>
+        <StyledGroupComponent id="logo">
             <StyledTitle
                 order={1}
                 sx={(theme) => ({
