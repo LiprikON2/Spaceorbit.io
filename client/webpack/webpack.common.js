@@ -79,7 +79,7 @@ module.exports = {
             patterns: [
                 { from: "src/game/assets", to: "assets" },
                 { from: "pwa", to: "" },
-                // { from: "src/favicon.ico", to: "" },
+                { from: "src/favicon.ico", to: "" },
             ],
         }),
         // new EnvironmentPlugin(["NODE_ENV"]),
