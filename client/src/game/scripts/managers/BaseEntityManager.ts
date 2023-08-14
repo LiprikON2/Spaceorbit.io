@@ -146,8 +146,8 @@ export class BaseEntityManager {
         const playerCount = this.playerGroup.getLength();
         const spaceshipServerOptions: SpaceshipServerOptions = {
             id: id ?? Phaser.Utils.String.UUID(),
-            x: 400,
-            y: 400,
+            x: 0,
+            y: 0,
             angle: 0,
             // TODO spaceship factory pattern
             outfit: this.getPlayerKit(),

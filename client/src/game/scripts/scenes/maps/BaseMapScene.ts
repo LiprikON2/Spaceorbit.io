@@ -1,3 +1,4 @@
+import { TouchSensor } from "@dnd-kit/core";
 import { BaseScene } from "../core/BaseScene";
 
 export class BaseMapScene extends BaseScene {
@@ -60,28 +61,65 @@ export class BaseMapScene extends BaseScene {
         }
     }
 
-    loadBackground(textureKey: string, parallaxCoef: number) {
+    loadBackground(textureKey: string, parallaxCoef: number, bounds = true, debug = true) {
         const json = this.getTextureJson(textureKey);
-
         const { w: width, h: height } = json.meta.size;
-        const [imageOffset, boundsSize] = this.getScrollingFactorCollisionAdjustment(
-            parallaxCoef,
-            width,
-            height
-        );
+
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
         if (this.game.isClient) {
             this.add
-                .image(imageOffset.x, imageOffset.y, textureKey)
-                .setOrigin(0, 0)
+                .image(centerX, centerX, textureKey)
+                .setOrigin(0.5)
                 .setScrollFactor(parallaxCoef);
         }
 
-        // TODO solve magic numbers
-        // TODO make it obvious when you hit world bounds
-        this.physics.world.setBounds(0, 0, boundsSize.width - 500, boundsSize.height - 700);
+        if (debug) {
+            // Physics of Parralaxed rectangle
+            const red = this.add
+                .rectangle(0, 0, width, height)
+                .setOrigin(0.5)
+                .setStrokeStyle(2, 0xff0000)
+                .setScrollFactor(1);
+
+            // Position (texture) of Parralaxed rectangle
+            const blue = this.add
+                .rectangle(centerX, centerY, width, height)
+                .setOrigin(0.5)
+                .setStrokeStyle(3, 0x1a65ac)
+                .setScrollFactor(parallaxCoef);
+
+            // Physics of Parralaxed rectangle,
+            // scaled to match the parralax
+            const pink = this.add
+                .rectangle(0, 0, width * (1 / parallaxCoef), height * (1 / parallaxCoef))
+                .setOrigin(0.5)
+                .setStrokeStyle(2, 0xffc0cb)
+                .setScrollFactor(1);
+        }
+
+        const parallaxWidth = width * (1 / parallaxCoef);
+        const parallaxHeight = height * (1 / parallaxCoef);
+
+        this.physics.world.setBounds(
+            -(parallaxWidth / 2),
+            -(parallaxHeight / 2),
+            parallaxWidth,
+            parallaxHeight
+        );
+        if (!bounds) this.physics.world.setBoundsCollision(false, false, false, false);
 
         const color = json.meta.bgColor;
         this.updateRootBackground(color);
+    }
+
+    getCameraParallaxCenterOffset(scrollFactor): [number, number] {
+        const { main } = this.cameras;
+        const { centerX, centerY, scrollX, scrollY } = main;
+
+        const offsetX = (centerX - scrollX) * (1 - scrollFactor);
+        const offsetY = (centerY - scrollY) * (1 - scrollFactor);
+
+        return [offsetX, offsetY];
     }
 
     // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor

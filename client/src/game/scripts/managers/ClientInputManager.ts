@@ -88,16 +88,16 @@ export class ClientInputManager extends BaseInputManager {
         return { worldX, worldY };
     }
 
-    constructor(scene, player, zoom = 1) {
+    constructor(scene: ClientScene, player, zoom = 1) {
         super(scene, player);
         this.zoom = zoom;
-
         scene.cameras.main.startFollow(player);
         scene.cameras.main.setZoom(this.zoom);
 
+        // @ts-ignore
         const scroller: MouseWheelScroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
-        });
+        }) as MouseWheelScroller;
         scroller.on("scroll", (inc, gameObject, scroller) => {
             this.zoom -= inc;
             // Enforce min zoom

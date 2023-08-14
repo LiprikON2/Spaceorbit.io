@@ -65,7 +65,7 @@ export class ClientScene extends BaseMapScene {
                 callback: (player) => this.setSingleplayerListeners(player),
             });
 
-            this.entityManager.spawnMobs(5, (mob) => this.setSingleplayerListeners(mob));
+            this.entityManager.spawnMobs(0, (mob) => this.setSingleplayerListeners(mob));
         } else {
             this.player = await this.producePlayer(null, {
                 isMe: true,
