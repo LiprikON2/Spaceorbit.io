@@ -24,19 +24,24 @@ export const getFromBackend = async (pathSegments: string[] | string, token = ""
     if (typeof pathSegments === "string") url = pathSegments;
     else url = `${backendUrl}/${pathSegments.join("/")}`;
 
-    const res = await fetch(url, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            ...(token && { Authorization: `Bearer ${token}` }),
-        },
-    });
-
-    console.log("GET ->", url);
-    if (!res.ok) throw new FetchError(res, res.statusText);
+    let res;
+    try {
+        console.log("GET ->", url);
+        res = await fetch(url, {
+            method: "GET",
+            mode: "cors",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                ...(token && { Authorization: `Bearer ${token}` }),
+            },
+        });
+        if (!res.ok) throw new FetchError(res, res.statusText);
+    } catch (err) {
+        // throw new Error("Failed to fetch");
+        return { json: {}, ok: false };
+    }
 
     const json = await res.json();
     return { json, ok: res.ok };
@@ -53,21 +58,29 @@ export const postToBackend = async (
     if (typeof pathSegments === "string") url = pathSegments;
     else url = `${backendUrl}/${pathSegments.join("/")}`;
 
-    const res = await fetch(url, {
-        method,
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        credentials: "same-origin",
-        body: JSON.stringify(body),
-    });
-    console.log("POST ->", url);
+    let res;
+    try {
+        console.log("POST ->", url);
+        res = await fetch(url, {
+            method,
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                ...(token && { Authorization: `Bearer ${token}` }),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new FetchError(res, res.statusText);
+    } catch (err) {
+        // throw new Error("Failed to fetch");
+        return { json: {}, ok: false };
+    }
 
     const json = await res.json();
     console.log("<-", json);
+
     // Handle empty responses
     if (res.status === 204) return { json: {}, ok: res.ok };
     return { json, ok: res.ok };

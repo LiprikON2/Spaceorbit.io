@@ -47,7 +47,6 @@ export const Servers = ({
 }) => {
     const isEmpty = !(status === "success" && servers.length);
     const statusLabel = getStatusLabel(status, isEmpty);
-    const isLoading = status === "loading";
 
     const conditionalLoader =
         isFetching && status !== "loading" ? <Loader size={iconSize} variant="oval" /> : null;
@@ -138,7 +137,11 @@ export const Servers = ({
                 itemHeight={iconSize}
                 right={customServersHandler ? conditionalAddButton : conditionalLoader}
                 placeholder={
-                    <Placeholder label={statusLabel} size={iconSize} loading={isLoading} />
+                    <Placeholder
+                        label={statusLabel}
+                        size={iconSize}
+                        loading={status === "loading"}
+                    />
                 }
                 bottom={conditionalBottom}
             >

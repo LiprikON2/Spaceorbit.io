@@ -180,9 +180,13 @@ export class Spaceship extends Sprite {
         const { username, x, y } = serverOptions;
         this.setName(username);
 
-        const textOffsetY = this.body.height * this.scale;
+        const textOffsetY = this.body.height * this.scale + 50;
         this.followText = this.scene.add
-            .text(x, y + textOffsetY, username, { fontSize: "2rem" })
+            .text(x, y + textOffsetY, username, {
+                color: "rgba(255, 255, 255, 0.75)",
+                fontSize: "2rem",
+                fontFamily: "Kanit",
+            })
             .setAlign("center")
             .setOrigin(0.5)
             .setAlpha(1)

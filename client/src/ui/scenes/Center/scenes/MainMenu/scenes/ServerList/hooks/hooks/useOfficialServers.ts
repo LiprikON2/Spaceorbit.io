@@ -8,9 +8,8 @@ const getServers = async () => await getFromBackend(`${netlifyUrl}/.netlify/func
 export const useOfficialServers = () => {
     const useServers = useQuery(["servers"], getServers, {
         select: ({ json }) => json.servers,
-        // select: ({ json }) => [],
         refetchInterval: 5000,
-        retry: true,
+        retry: false,
         useErrorBoundary: false,
 
         keepPreviousData: true,

@@ -1,14 +1,39 @@
 import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
+import type { Keys } from "../managers/BaseInputManager";
 export class DebugInfo extends Phaser.GameObjects.Text {
     scene: ClientScene;
     player: Spaceship;
+    keys: Keys;
 
     constructor(scene, player) {
-        super(scene, scene.game.config.width * 0.82, 100, "", { color: "white", fontSize: "2rem" });
+        super(scene, scene.game.config.width * 0.9, 100, "", {
+            color: "rgba(255, 255, 255, 0.6)",
+            font: "300 1.5rem Kanit",
+        });
         scene.add.existing(this);
         this.setOrigin(0).setScrollFactor(0);
         this.player = player;
+
+        this.keys = this.scene.input.keyboard.addKeys("F3,F4") as Keys;
+
+        this.setVisible(false);
+        this.keys.F3.on("down", () => this.setVisible(!this.visible));
+
+        this.hideHitboxes();
+        this.keys.F4.on("down", () => this.toggleHitboxes());
+    }
+
+    showHitboxes() {
+        this.scene.physics.world.drawDebug = true;
+    }
+    hideHitboxes() {
+        this.scene.physics.world.drawDebug = false;
+        this.scene.physics.world.debugGraphic.clear();
+    }
+    toggleHitboxes() {
+        if (this.scene.physics.world.drawDebug) this.hideHitboxes();
+        else this.showHitboxes();
     }
 
     getSpriteInfo(sprite) {
