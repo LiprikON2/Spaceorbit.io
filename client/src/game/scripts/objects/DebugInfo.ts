@@ -64,9 +64,11 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);
 
+        // (top right corner of viewport)
         text += `camera scroll:\n\tx: ${this.rounded(
             this.scene.cameras.main.scrollX
         )} y: ${this.rounded(this.scene.cameras.main.scrollY)}\n`;
+        // (center of viewport)
         text += `camera midPoint:\n\tx: ${this.rounded(
             this.scene.cameras.main.midPoint.x
         )} y: ${this.rounded(this.scene.cameras.main.midPoint.y)}\n`;

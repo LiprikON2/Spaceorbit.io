@@ -13,55 +13,33 @@ export class BaseMapScene extends BaseScene {
         super.create();
 
         if (this.game.isClient) {
-            this.loadTileBackground(
-                this,
-                this.physics.world.bounds.width,
-                this.physics.world.bounds.height,
-                "particles",
-                0.75
-            );
-            this.loadTileBackground(
-                this,
-                this.physics.world.bounds.width,
-                this.physics.world.bounds.height,
-                "particles",
-                1,
-                180
-            );
+            this.loadTileBackground("particles", 0.75, 0);
+            this.loadTileBackground("particles", 1, 180);
         }
     }
 
-    // https://blog.ourcade.co/posts/2020/add-pizazz-parallax-scrolling-phaser-3/
-    // TODO a way to optimize it further would be to recylcle the tiles
     loadTileBackground(
-        scene: Phaser.Scene,
-        totalWidth: number,
-        totalHeight: number,
         texture: string,
-        scrollFactor: number,
-        angle: number = 0
+        parallaxCoef = 1,
+        angle = 0,
+        paddingPercent = 0.5,
+        totalWidth = this.physics.world.bounds.width,
+        totalHeight = this.physics.world.bounds.height
     ) {
-        const { width: w, height: h } = scene.textures.get(texture).getSourceImage();
-        const countX = Math.floor(totalWidth / w) * scrollFactor;
-        const countY = Math.floor(totalHeight / h) * scrollFactor;
+        const widthWithPadding = totalWidth * (1 + paddingPercent) * (1 * parallaxCoef);
+        const heightWithPadding = totalHeight * (1 + paddingPercent) * (1 * parallaxCoef);
 
-        let y = -h;
-        for (let i = 0; i < countY + 3; i++) {
-            let x = -w;
-            for (let j = 0; j < countX + 3; ++j) {
-                const m = scene.add
-                    .image(x, y, texture)
-                    .setOrigin(0, 1)
-                    .setScrollFactor(scrollFactor)
-                    .setAngle(angle);
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
 
-                x += m.width;
-            }
-            y += scene.scale.height;
-        }
+        const tileLayer = this.add
+            .tileSprite(centerX, centerY, widthWithPadding, heightWithPadding, texture)
+            .setOrigin(0.5)
+            .setScrollFactor(parallaxCoef)
+            .setDepth(1)
+            .setAngle(angle);
     }
 
-    loadBackground(textureKey: string, parallaxCoef: number, bounds = true, debug = true) {
+    loadBackground(textureKey: string, parallaxCoef: number, bounds = false, debug = true) {
         const json = this.getTextureJson(textureKey);
         const { w: width, h: height } = json.meta.size;
 
@@ -70,6 +48,7 @@ export class BaseMapScene extends BaseScene {
             this.add
                 .image(centerX, centerX, textureKey)
                 .setOrigin(0.5)
+                .setDepth(0)
                 .setScrollFactor(parallaxCoef);
         }
 
@@ -79,6 +58,7 @@ export class BaseMapScene extends BaseScene {
                 .rectangle(0, 0, width, height)
                 .setOrigin(0.5)
                 .setStrokeStyle(2, 0xff0000)
+                .setDepth(100)
                 .setScrollFactor(1);
 
             // Position (texture) of Parralaxed rectangle
@@ -86,6 +66,7 @@ export class BaseMapScene extends BaseScene {
                 .rectangle(centerX, centerY, width, height)
                 .setOrigin(0.5)
                 .setStrokeStyle(3, 0x1a65ac)
+                .setDepth(100)
                 .setScrollFactor(parallaxCoef);
 
             // Physics of Parralaxed rectangle,
@@ -94,6 +75,7 @@ export class BaseMapScene extends BaseScene {
                 .rectangle(0, 0, width * (1 / parallaxCoef), height * (1 / parallaxCoef))
                 .setOrigin(0.5)
                 .setStrokeStyle(2, 0xffc0cb)
+                .setDepth(100)
                 .setScrollFactor(1);
         }
 

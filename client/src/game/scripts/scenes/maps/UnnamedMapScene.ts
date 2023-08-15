@@ -14,8 +14,6 @@ export function MixinUnnamedMapScene<ClientOrServerScene extends Constructor<Bas
         }
 
         async create() {
-            super.create();
-
             this.loadBackground("map_1-2", 0.5);
 
             if (this.game.isClient) {
@@ -27,6 +25,8 @@ export function MixinUnnamedMapScene<ClientOrServerScene extends Constructor<Bas
                     [0.7, 0.5],
                 ]);
             }
+
+            super.create();
         }
     };
 }

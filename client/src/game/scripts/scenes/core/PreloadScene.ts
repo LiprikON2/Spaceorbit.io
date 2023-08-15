@@ -36,6 +36,7 @@ import track_1 from "~/assets/music/SMP1_THEME_Cargoship.mp3";
 import track_2 from "~/assets/music/SMP1_THEME_Gliese 1214b.mp3";
 import track_3 from "~/assets/music/SMP1_THEME_Space caravan.mp3";
 import track_4 from "~/assets/music/SMP1_THEME_Voyager.mp3";
+import missing from "~/assets/missing.webp";
 
 interface TextureWithJsonOptions {
     type?: "image" | "atlas" | "spritesheet";
@@ -179,6 +180,9 @@ export class PreloadScene extends Phaser.Scene {
             this.load.audio("track_2", track_2);
             this.load.audio("track_3", track_3);
             this.load.audio("track_4", track_4);
+
+            // Other
+            this.load.image("missing", missing);
         }
         this.emitOut("loading", {
             name: "Preload Scene",
