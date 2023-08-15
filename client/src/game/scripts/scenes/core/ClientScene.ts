@@ -32,7 +32,6 @@ export class ClientScene extends BaseMapScene {
     soundManager: SoundManager;
     collisionManager: BaseCollisionManager;
     player: Spaceship;
-    background;
     debugText: DebugInfo;
     mobs = [];
     isPaused = true;

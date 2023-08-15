@@ -2,6 +2,8 @@ import { TouchSensor } from "@dnd-kit/core";
 import { BaseScene } from "../core/BaseScene";
 
 export class BaseMapScene extends BaseScene {
+    background: Phaser.GameObjects.Image = null;
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
@@ -13,7 +15,9 @@ export class BaseMapScene extends BaseScene {
         super.create();
 
         if (this.game.isClient) {
-            this.loadTileBackground("particles", 0.75, 0);
+            this.loadTileBackground("particles", 0.65, 0);
+            this.loadTileBackground("particles", 0.75, 90);
+            this.loadTileBackground("particles", 0.85, -90);
             this.loadTileBackground("particles", 1, 180);
         }
     }
@@ -26,17 +30,35 @@ export class BaseMapScene extends BaseScene {
         totalWidth = this.physics.world.bounds.width,
         totalHeight = this.physics.world.bounds.height
     ) {
-        const widthWithPadding = totalWidth * (1 + paddingPercent) * (1 * parallaxCoef);
-        const heightWithPadding = totalHeight * (1 + paddingPercent) * (1 * parallaxCoef);
+        const widthWithPadding = totalWidth * (1 * parallaxCoef + paddingPercent);
+        const heightWithPadding = totalHeight * (1 * parallaxCoef + paddingPercent);
+
+        const rightAngle = Math.floor(angle / 90) * 90;
+        const isOrientationFlipped = rightAngle % 180 !== 0;
+
+        const widthWithRespectToOrientation = isOrientationFlipped
+            ? heightWithPadding
+            : widthWithPadding;
+        const heightWithRespectToOrientation = isOrientationFlipped
+            ? widthWithPadding
+            : heightWithPadding;
 
         const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
 
         const tileLayer = this.add
-            .tileSprite(centerX, centerY, widthWithPadding, heightWithPadding, texture)
+            .tileSprite(
+                centerX,
+                centerY,
+                widthWithRespectToOrientation,
+                heightWithRespectToOrientation,
+                texture
+            )
             .setOrigin(0.5)
             .setScrollFactor(parallaxCoef)
             .setDepth(1)
-            .setAngle(angle);
+            .setAngle(rightAngle);
+
+        return tileLayer;
     }
 
     loadBackground(textureKey: string, parallaxCoef: number, bounds = false, debug = true) {
@@ -44,8 +66,9 @@ export class BaseMapScene extends BaseScene {
         const { w: width, h: height } = json.meta.size;
 
         const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
+        let background: Phaser.GameObjects.Image = null;
         if (this.game.isClient) {
-            this.add
+            background = this.add
                 .image(centerX, centerX, textureKey)
                 .setOrigin(0.5)
                 .setDepth(0)
@@ -92,8 +115,28 @@ export class BaseMapScene extends BaseScene {
 
         const color = json.meta.bgColor;
         this.updateRootBackground(color);
+
+        return background;
     }
 
+    /**
+     * Because:
+     * - Scrolling factor in Phaser based around `scrollX`, `scrollY` point
+     * - `scrollX` and `scrollY` corresponds to the top left corner of the viewport
+     *
+     * The positions of *camera scroll* and *world* is off by half width and height of the viewport.
+     *
+     * ---
+     * For example:
+     * - Viewport `1920x1080`
+     * - Player at `worldX = 0`, `worldY = 0`
+     * - Camera centered on player
+     * - Camera scrolls are `scrollX = 960`, `scrollY = 540`
+     * - Offsets from this functions are are `offsetX = 960`, `offsetY = 540`
+     *
+     * @param scrollFactor equivalent to parallax coefficient
+     * @returns offsetX, offsetY
+     */
     getCameraParallaxCenterOffset(scrollFactor): [number, number] {
         const { main } = this.cameras;
         const { centerX, centerY, scrollX, scrollY } = main;
@@ -102,29 +145,6 @@ export class BaseMapScene extends BaseScene {
         const offsetY = (centerY - scrollY) * (1 - scrollFactor);
 
         return [offsetX, offsetY];
-    }
-
-    // https://newdocs.phaser.io/docs/3.54.0/focus/Phaser.GameObjects.Container-setScrollFactor
-    // Scrolling factor doesn't adjust the collision boundaries,
-    // so they need to be adjusted manually
-    // TODO look at 'space' example
-    getScrollingFactorCollisionAdjustment(
-        parallax,
-        textureWidth,
-        textureHeight
-    ): [{ x: number; y: number }, { width: number; height: number }] {
-        const csx = this.cameras.main.scrollX;
-        const csy = this.cameras.main.scrollY;
-
-        const px = 0 + csx * parallax - csx;
-        const py = 0 + csy * parallax - csy;
-
-        const imageOffset: { x: number; y: number } = { x: px, y: py };
-        const boundsSize: { width: number; height: number } = {
-            width: (textureWidth * 1) / parallax,
-            height: (textureHeight * 1) / parallax,
-        };
-        return [imageOffset, boundsSize];
     }
 
     updateRootBackground(color = "#1d252c") {
