@@ -73,8 +73,10 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
     transparent: true,
     scale: {
         parent: "phaser-game",
-        mode: Phaser.Scale.FIT,
-        // mode: Phaser.Scale.RESIZE,
+        // mode: Phaser.Scale.FIT,
+
+        mode: Phaser.Scale.ENVELOP, // modifies viewport size, keeps aspect ratio
+        // mode: Phaser.Scale.RESIZE, // modifies both: viewport size, render size
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,

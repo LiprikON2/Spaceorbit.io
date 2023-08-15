@@ -7,7 +7,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
     keys: Keys;
 
     constructor(scene, player) {
-        super(scene, scene.game.config.width * 0.9, 100, "", {
+        super(scene, scene.scale.baseSize.width * 0.87, 100, "", {
             color: "rgba(255, 255, 255, 0.6)",
             font: "300 1.5rem Kanit",
         });
@@ -22,14 +22,20 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
         this.hideHitboxes();
         this.keys.F4.on("down", () => this.toggleHitboxes());
+
+        // this.scene.scale.on("resize", (gameSize, baseSize, displaySize) => {
+        //     this.setX(baseSize.width * 0.8);
+        // });
     }
 
     showHitboxes() {
         this.scene.physics.world.drawDebug = true;
+        this.scene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(true));
     }
     hideHitboxes() {
         this.scene.physics.world.drawDebug = false;
         this.scene.physics.world.debugGraphic.clear();
+        this.scene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(false));
     }
     toggleHitboxes() {
         if (this.scene.physics.world.drawDebug) this.hideHitboxes();
@@ -47,19 +53,40 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
         return textLines.join("\n");
     }
+    getDisplayInfo() {
+        const { width: gameWidth, height: gameHeight } = this.scene.scale.gameSize;
+        const { width: baseWidth, height: baseSize } = this.scene.scale.baseSize;
+        const { width: displayWidth, height: displaySize } = this.scene.scale.displaySize;
+
+        const textLines = [
+            "Display",
+            `\tgameSize: ${gameWidth}x${gameHeight}`,
+            `\tbaseSize: ${baseWidth}x${baseSize}`,
+            `\tdisplaySize: ${this.rounded(displayWidth)}x${this.rounded(displaySize)}`,
+            "\n",
+        ];
+
+        return textLines.join("\n");
+    }
+
+    getFpsPing() {
+        const fps = this.rounded(this.scene.game.loop.actualFps);
+        const ping = this.scene.ping.avgDebounced;
+
+        const textLines = [`fps: ${fps} ping: ${ping}`, "\n"];
+
+        return textLines.join("\n");
+    }
+
     rounded(number: number | string) {
         return Math.floor(Number(number));
     }
 
     public update() {
         let text = "";
-        // text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
-        text += `fps: ${this.rounded(this.scene.game.loop.actualFps)} ping: ${
-            this.scene.ping.avgDebounced
-        }\n`;
-        text += `${this.rounded(this.scene.game.config.width)}x${this.rounded(
-            this.scene.game.config.height
-        )}\n\n`;
+        text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
+        text += this.getFpsPing();
+        text += this.getDisplayInfo();
 
         text += this.getSpriteInfo(this.player);
         text += this.getSpriteInfo(this.player.boundingBox);

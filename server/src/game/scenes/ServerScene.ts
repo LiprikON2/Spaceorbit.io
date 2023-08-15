@@ -229,12 +229,6 @@ export class ServerScene extends BaseMapScene {
         });
         this.entityManager.update(time, delta);
         this.collisionManager!.update(time, delta);
-
-        console.log(
-            " this.physics.world.bounds.height",
-            this.physics.world.bounds.height,
-            this.physics.world.bounds.width
-        );
     }
 
     sendServerSnapshot() {

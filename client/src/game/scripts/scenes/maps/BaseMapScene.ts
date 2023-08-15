@@ -3,6 +3,7 @@ import { BaseScene } from "../core/BaseScene";
 
 export class BaseMapScene extends BaseScene {
     background: Phaser.GameObjects.Image = null;
+    parallaxDebug: Phaser.GameObjects.Shape[] = [];
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -15,10 +16,10 @@ export class BaseMapScene extends BaseScene {
         super.create();
 
         if (this.game.isClient) {
-            this.loadTileBackground("particles", 0.65, 0);
-            this.loadTileBackground("particles", 0.75, 90);
-            this.loadTileBackground("particles", 0.85, -90);
-            this.loadTileBackground("particles", 1, 180);
+            // this.loadTileBackground("particles", 0.65, 0);
+            // this.loadTileBackground("particles", 0.75, 90);
+            // this.loadTileBackground("particles", 0.85, -90);
+            // this.loadTileBackground("particles", 1, 180);
         }
     }
 
@@ -61,45 +62,19 @@ export class BaseMapScene extends BaseScene {
         return tileLayer;
     }
 
-    loadBackground(textureKey: string, parallaxCoef: number, bounds = false, debug = true) {
+    loadBackground(textureKey: string, parallaxCoef: number, bounds = false) {
         const json = this.getTextureJson(textureKey);
         const { w: width, h: height } = json.meta.size;
 
-        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
+        const renderCoef = this.scale.baseSize.width / 1920;
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
         let background: Phaser.GameObjects.Image = null;
         if (this.game.isClient) {
             background = this.add
-                .image(centerX, centerX, textureKey)
+                .image(centerX, centerY, textureKey)
                 .setOrigin(0.5)
                 .setDepth(0)
-                .setScrollFactor(parallaxCoef);
-        }
-
-        if (debug) {
-            // Physics of Parralaxed rectangle
-            const red = this.add
-                .rectangle(0, 0, width, height)
-                .setOrigin(0.5)
-                .setStrokeStyle(2, 0xff0000)
-                .setDepth(100)
-                .setScrollFactor(1);
-
-            // Position (texture) of Parralaxed rectangle
-            const blue = this.add
-                .rectangle(centerX, centerY, width, height)
-                .setOrigin(0.5)
-                .setStrokeStyle(3, 0x1a65ac)
-                .setDepth(100)
-                .setScrollFactor(parallaxCoef);
-
-            // Physics of Parralaxed rectangle,
-            // scaled to match the parralax
-            const pink = this.add
-                .rectangle(0, 0, width * (1 / parallaxCoef), height * (1 / parallaxCoef))
-                .setOrigin(0.5)
-                .setStrokeStyle(2, 0xffc0cb)
-                .setDepth(100)
-                .setScrollFactor(1);
+                .setScrollFactor(parallaxCoef * renderCoef);
         }
 
         const parallaxWidth = width * (1 / parallaxCoef);
@@ -115,8 +90,55 @@ export class BaseMapScene extends BaseScene {
 
         const color = json.meta.bgColor;
         this.updateRootBackground(color);
+        this.addToParallaxDebug(width, height, parallaxCoef);
+
+        this.resize(background);
 
         return background;
+    }
+    addToParallaxDebug(textureWidth, textureHeight, parallaxCoef) {
+        const renderCoef = this.scale.baseSize.width / 1920;
+
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
+
+        // Texture borders without adjustments
+        // - Is static
+        // - Original dimensions
+        // - Corresponds to (default, inaccurate) physics
+        const redFrame = this.add
+            .rectangle(0, 0, textureWidth, textureHeight)
+            .setOrigin(0.5)
+            .setStrokeStyle(3, 0xff0000)
+            .setDepth(100)
+            .setScrollFactor(1)
+            .setVisible(false);
+        this.parallaxDebug.push(redFrame);
+
+        // Texture borders with scrolling adjustment
+        // - Moves along with camera with respect to the scrolling factor
+        // - Original dimensions
+        // - Corresponds to visuals
+        const blueFrame = this.add
+            .rectangle(centerX, centerY, textureWidth * renderCoef, textureHeight * renderCoef)
+            .setOrigin(0.5)
+            .setStrokeStyle(4, 0x1a65ac)
+            .setDepth(100)
+            .setScrollFactor(parallaxCoef * renderCoef)
+            .setVisible(false);
+        this.parallaxDebug.push(blueFrame);
+
+        // Texture borders with adjustment to scrolling factor
+        // - Is static
+        // - Resized to match parallax
+        // - Corresponds to (accurate) physics
+        const pinkFrame = this.add
+            .rectangle(0, 0, textureWidth * (1 / parallaxCoef), textureHeight * (1 / parallaxCoef))
+            .setOrigin(0.5)
+            .setStrokeStyle(3, 0xffc0cb)
+            .setDepth(100)
+            .setScrollFactor(1)
+            .setVisible(false);
+        this.parallaxDebug.push(pinkFrame);
     }
 
     /**
@@ -128,7 +150,7 @@ export class BaseMapScene extends BaseScene {
      *
      * ---
      * For example:
-     * - Viewport `1920x1080`
+     * - Render resolution `1920x1080`
      * - Player at `worldX = 0`, `worldY = 0`
      * - Camera centered on player
      * - Camera scrolls are `scrollX = 960`, `scrollY = 540`

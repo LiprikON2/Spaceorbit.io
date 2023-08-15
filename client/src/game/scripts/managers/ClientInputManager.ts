@@ -108,7 +108,8 @@ export class ClientInputManager extends BaseInputManager {
             }
             scene.cameras.main.setZoom(this.zoom);
 
-            this.scene.background.setScale(1 / this.zoom);
+            // todo
+            // this.scene.resize(this.scene.background, 1 / this.zoom);
         });
 
         if (this.scene.game instanceof GameClient) {

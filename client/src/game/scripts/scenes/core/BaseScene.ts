@@ -97,6 +97,17 @@ export class BaseScene extends Phaser.Scene {
 
     create() {}
 
+    resize(
+        gameObject: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image | Phaser.GameObjects.Shape,
+        scale = 1
+    ) {
+        const resizeCoef = gameObject.width / 1920;
+        // Makes texture the same size, regardless of render size
+        gameObject.displayWidth = this.scale.baseSize.width * resizeCoef * scale;
+        // Maintains 1:1 aspect ratio
+        gameObject.scaleY = gameObject.scaleX;
+    }
+
     update(time: number, delta: number) {}
 
     getTextureJson(textureKey) {
