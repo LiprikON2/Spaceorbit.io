@@ -83,10 +83,9 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
             width: textureWidth,
         };
 
-        const { scale } = this.atlasMetadata;
-        this.scale = scale;
-
-        this.scene.resize(this);
+        // const { scale } = this.atlasMetadata;
+        // this.scale = scale;
+        // this.scene.resize(this);
     }
 
     setCircularHitbox(hitboxRadius: number) {

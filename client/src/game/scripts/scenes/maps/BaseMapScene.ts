@@ -66,7 +66,8 @@ export class BaseMapScene extends BaseScene {
         const json = this.getTextureJson(textureKey);
         const { w: width, h: height } = json.meta.size;
 
-        const renderCoef = this.scale.baseSize.width / 1920;
+        const renderCoef = 1;
+        // const renderCoef = this.scale.baseSize.width / 1920;
         const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
         let background: Phaser.GameObjects.Image = null;
         if (this.game.isClient) {
@@ -92,12 +93,11 @@ export class BaseMapScene extends BaseScene {
         this.updateRootBackground(color);
         this.addToParallaxDebug(width, height, parallaxCoef);
 
-        this.resize(background);
-
         return background;
     }
     addToParallaxDebug(textureWidth, textureHeight, parallaxCoef) {
-        const renderCoef = this.scale.baseSize.width / 1920;
+        // const renderCoef = this.scale.baseSize.width / 1920;
+        const renderCoef = 1;
 
         const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
 

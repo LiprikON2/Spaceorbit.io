@@ -49,7 +49,11 @@ const makeButton = (scene, enable) => {
 export class ClientInputManager extends BaseInputManager {
     touchControls = { joystick: null, virtualBtn: null };
     scene: ClientScene;
-    zoom: number;
+    zoom = 1;
+
+    get baseZoom() {
+        return this.scene.scale.baseSize.width / 1920;
+    }
 
     get isGameInFocus() {
         return this.scene.input.activePointer.downElement?.tagName === "CANVAS";
@@ -88,29 +92,16 @@ export class ClientInputManager extends BaseInputManager {
         return { worldX, worldY };
     }
 
-    constructor(scene: ClientScene, player, zoom = 1) {
+    constructor(scene: ClientScene, player) {
         super(scene, player);
-        this.zoom = zoom;
         scene.cameras.main.startFollow(player);
-        scene.cameras.main.setZoom(this.zoom);
+        this.updateZoom();
 
         // @ts-ignore
         const scroller: MouseWheelScroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
         }) as MouseWheelScroller;
-        scroller.on("scroll", (inc, gameObject, scroller) => {
-            this.zoom -= inc;
-            // Enforce min zoom
-            this.zoom = Math.max(this.zoom, 0.1);
-            // Snap to normal zoom
-            if (Math.abs(this.zoom - 1) < 0.08) {
-                this.zoom = 1;
-            }
-            scene.cameras.main.setZoom(this.zoom);
-
-            // todo
-            // this.scene.resize(this.scene.background, 1 / this.zoom);
-        });
+        scroller.on("scroll", (diff, gameObject, scroller) => this.updateZoom(diff));
 
         if (this.scene.game instanceof GameClient) {
             const isTouchMode = this.scene.game.settings?.localStorageSettings?.isTouchMode;
@@ -127,6 +118,22 @@ export class ClientInputManager extends BaseInputManager {
         toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());
 
         this.initTouchControls();
+    }
+
+    updateZoom(diff = 0) {
+        this.zoom -= diff;
+
+        // Enforce min zoom
+        this.zoom = Math.max(this.zoom, 0.1);
+        // Snap to normal zoom
+        if (Math.abs(this.zoom - 1) < 0.08) {
+            this.zoom = 1;
+        }
+
+        this.scene.cameras.main.setZoom(this.baseZoom * this.zoom);
+
+        // todo
+        // this.scene.resize(this.scene.background, 1 / this.zoom);
     }
 
     initTouchControls() {
