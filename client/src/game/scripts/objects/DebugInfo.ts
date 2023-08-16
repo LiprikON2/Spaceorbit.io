@@ -1,19 +1,18 @@
-import type { ClientScene } from "~/scenes/core";
-import type { Spaceship } from "~/objects/Sprite/Spaceship";
+import type { HudScene } from "~/scenes/core";
 import type { Keys } from "../managers/BaseInputManager";
+
 export class DebugInfo extends Phaser.GameObjects.Text {
-    scene: ClientScene;
-    player: Spaceship;
+    scene: HudScene;
     keys: Keys;
 
-    constructor(scene, player) {
-        super(scene, scene.scale.baseSize.width * 0.87, 100, "", {
-            color: "rgba(255, 255, 255, 0.6)",
+    constructor(scene) {
+        super(scene, 0, 0, "", {
+            color: "rgba(255, 255, 255, 0.75)",
             font: "300 1.5rem Kanit",
         });
         scene.add.existing(this);
-        this.setOrigin(0).setScrollFactor(0);
-        this.player = player;
+
+        this.setOrigin(1, 0).setScrollFactor(0);
 
         this.keys = this.scene.input.keyboard.addKeys("F3,F4") as Keys;
 
@@ -23,26 +22,33 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         this.hideHitboxes();
         this.keys.F4.on("down", () => this.toggleHitboxes());
 
-        // this.scene.scale.on("resize", (gameSize, baseSize, displaySize) => {
-        //     this.setX(baseSize.width * 0.8);
-        // });
+        this.updatePos(this.scene.scale.displaySize);
+        this.scene.scale.on("resize", (gameSize, baseSize, displaySize) =>
+            this.updatePos(displaySize)
+        );
+    }
+
+    updatePos(displaySize: { width: number; height: number }) {
+        this.setX(displaySize.width - 25);
+        this.setY(100);
     }
 
     showHitboxes() {
-        this.scene.physics.world.drawDebug = true;
-        this.scene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(true));
+        this.scene.parentScene.physics.world.drawDebug = true;
+        this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(true));
     }
     hideHitboxes() {
         this.scene.physics.world.drawDebug = false;
         this.scene.physics.world.debugGraphic.clear();
-        this.scene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(false));
+        this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(false));
     }
     toggleHitboxes() {
         if (this.scene.physics.world.drawDebug) this.hideHitboxes();
         else this.showHitboxes();
     }
 
-    getSpriteInfo(sprite) {
+    getSpriteInfo(sprite: any) {
+        if (!sprite) return "";
         const textLines = [
             sprite.constructor.name,
             `\tx: ${Math.floor(sprite.x)} y: ${Math.floor(sprite.y)}`,
@@ -71,7 +77,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
     getFpsPing() {
         const fps = this.rounded(this.scene.game.loop.actualFps);
-        const ping = this.scene.ping.avgDebounced;
+        const ping = this.scene.parentScene.ping.avgDebounced;
 
         const textLines = [`fps: ${fps} ping: ${ping}`, "\n"];
 
@@ -79,7 +85,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
     }
 
     rounded(number: number | string) {
-        return Math.floor(Number(number));
+        return Math.floor(Number(number)) ?? 0;
     }
 
     public update() {
@@ -88,8 +94,8 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         text += this.getFpsPing();
         text += this.getDisplayInfo();
 
-        text += this.getSpriteInfo(this.player);
-        text += this.getSpriteInfo(this.player.boundingBox);
+        text += this.getSpriteInfo(this.scene.parentScene.player);
+        text += this.getSpriteInfo(this.scene.parentScene.player?.boundingBox);
 
         // (top left corner of viewport)
         text += `camera scroll:\n\tx: ${this.rounded(
@@ -101,8 +107,8 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         )} y: ${this.rounded(this.scene.cameras.main.midPoint.y)}\n`;
 
         text += `world: ${this.scene.physics.world.bounds.width}x${this.scene.physics.world.bounds.height}\n\n`;
-        text += `hp: ${this.rounded(this.player.status.health)}\n`;
-        text += `shields: ${this.rounded(this.player.status.shields)}\n`;
+        text += `hp: ${this.rounded(this.scene.parentScene.player?.status?.health)}\n`;
+        text += `shields: ${this.rounded(this.scene.parentScene.player?.status?.shields)}\n`;
 
         this.setText(text);
     }

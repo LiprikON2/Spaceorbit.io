@@ -7,13 +7,13 @@ import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-p
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugin.js";
 
-import { ClientScene, PreloadScene } from "~/scenes/core";
+import { ClientScene, HudScene, PreloadScene } from "~/scenes/core";
 import { MixinUnnamedMapScene } from "~/scenes/maps/UnnamedMapScene";
 
-// const DEFAULT_WIDTH = 1920;
-// const DEFAULT_HEIGHT = 1080;
-const DEFAULT_WIDTH = 960;
-const DEFAULT_HEIGHT = 540;
+const DEFAULT_WIDTH = 1920;
+const DEFAULT_HEIGHT = 1080;
+// const DEFAULT_WIDTH = 960;
+// const DEFAULT_HEIGHT = 540;
 
 // const graphicsSettings = { best: 1, medium: 0.75, low: 0.5 };
 // const DPR = window.devicePixelRatio * graphicsSettings.low;
@@ -74,14 +74,13 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
     scale: {
         parent: "phaser-game",
         // mode: Phaser.Scale.FIT,
-
-        mode: Phaser.Scale.ENVELOP, // modifies viewport size, keeps aspect ratio
-        // mode: Phaser.Scale.RESIZE, // modifies both: viewport size, render size
+        // mode: Phaser.Scale.ENVELOP, // modifies viewport size, keeps aspect ratio
+        mode: Phaser.Scale.RESIZE, // modifies both: viewport size, render size
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    scene: [PreloadScene, UnnamedMapSceneClient],
+    scene: [PreloadScene, HudScene, UnnamedMapSceneClient],
     physics: {
         default: "arcade",
         arcade: {

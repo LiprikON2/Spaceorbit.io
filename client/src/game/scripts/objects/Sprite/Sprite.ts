@@ -57,12 +57,12 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     constructor(serverOptions: SpriteServerOptions, clientOptions: SpriteClientOptions) {
         const { x, y, atlasTexture } = serverOptions;
         const { scene, isTextured } = clientOptions;
+
         super(scene, x, y, isTextured ? atlasTexture : "");
-
-        this.isTextured = isTextured;
-
         scene.add.existing(this);
         scene.physics.add.existing(this);
+
+        this.isTextured = isTextured;
 
         const { depth } = clientOptions;
         const { angle } = serverOptions;
@@ -83,9 +83,8 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
             width: textureWidth,
         };
 
-        // const { scale } = this.atlasMetadata;
-        // this.scale = scale;
-        // this.scene.resize(this);
+        const { scale } = this.atlasMetadata;
+        this.setScale(scale);
     }
 
     setCircularHitbox(hitboxRadius: number) {

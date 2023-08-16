@@ -16,10 +16,10 @@ export class BaseMapScene extends BaseScene {
         super.create();
 
         if (this.game.isClient) {
-            // this.loadTileBackground("particles", 0.65, 0);
-            // this.loadTileBackground("particles", 0.75, 90);
-            // this.loadTileBackground("particles", 0.85, -90);
-            // this.loadTileBackground("particles", 1, 180);
+            this.loadTileBackground("particles", 0.65, 0);
+            this.loadTileBackground("particles", 0.75, 90);
+            this.loadTileBackground("particles", 0.85, -90);
+            this.loadTileBackground("particles", 1, 180);
         }
     }
 
@@ -66,16 +66,14 @@ export class BaseMapScene extends BaseScene {
         const json = this.getTextureJson(textureKey);
         const { w: width, h: height } = json.meta.size;
 
-        const renderCoef = 1;
-        // const renderCoef = this.scale.baseSize.width / 1920;
-        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
         let background: Phaser.GameObjects.Image = null;
         if (this.game.isClient) {
             background = this.add
                 .image(centerX, centerY, textureKey)
                 .setOrigin(0.5)
                 .setDepth(0)
-                .setScrollFactor(parallaxCoef * renderCoef);
+                .setScrollFactor(parallaxCoef);
         }
 
         const parallaxWidth = width * (1 / parallaxCoef);
@@ -95,11 +93,9 @@ export class BaseMapScene extends BaseScene {
 
         return background;
     }
-    addToParallaxDebug(textureWidth, textureHeight, parallaxCoef) {
-        // const renderCoef = this.scale.baseSize.width / 1920;
-        const renderCoef = 1;
 
-        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef * renderCoef);
+    addToParallaxDebug(textureWidth, textureHeight, parallaxCoef) {
+        const [centerX, centerY] = this.getCameraParallaxCenterOffset(parallaxCoef);
 
         // Texture borders without adjustments
         // - Is static
@@ -119,11 +115,11 @@ export class BaseMapScene extends BaseScene {
         // - Original dimensions
         // - Corresponds to visuals
         const blueFrame = this.add
-            .rectangle(centerX, centerY, textureWidth * renderCoef, textureHeight * renderCoef)
+            .rectangle(centerX, centerY, textureWidth, textureHeight)
             .setOrigin(0.5)
             .setStrokeStyle(4, 0x1a65ac)
             .setDepth(100)
-            .setScrollFactor(parallaxCoef * renderCoef)
+            .setScrollFactor(parallaxCoef)
             .setVisible(false);
         this.parallaxDebug.push(blueFrame);
 

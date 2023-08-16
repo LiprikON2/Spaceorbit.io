@@ -32,7 +32,6 @@ export class ClientScene extends BaseMapScene {
     soundManager: SoundManager;
     collisionManager: BaseCollisionManager;
     player: Spaceship;
-    debugInfo: DebugInfo;
     mobs = [];
     isPaused = true;
 
@@ -52,6 +51,7 @@ export class ClientScene extends BaseMapScene {
     preload() {
         super.preload();
         this.entityManager.addSoundManager(this.soundManager);
+        this.scene.launch("HudScene", this);
     }
 
     async create() {
@@ -98,7 +98,6 @@ export class ClientScene extends BaseMapScene {
             });
         }
 
-        this.debugInfo = new DebugInfo(this, this.player).setDepth(1000);
         this.inputManager = new ClientInputManager(this, this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
         this.collisionManager = new BaseCollisionManager({
@@ -245,7 +244,6 @@ export class ClientScene extends BaseMapScene {
         if (this.isPaused) return;
 
         super.update(time, delta);
-        this.debugInfo.update();
         this.soundManager.update();
         this.collisionManager.update(time, delta);
 

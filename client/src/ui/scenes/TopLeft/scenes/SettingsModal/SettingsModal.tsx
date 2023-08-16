@@ -4,10 +4,12 @@ import {
     NumberInput,
     SegmentedControl,
     Space,
+    Text,
     Stack,
     Switch,
     Tabs,
     Title,
+    Select,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
@@ -146,6 +148,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                 <Container>
                                     <Stack>
                                         <Title order={3}>General</Title>
+                                        <Text>Lighting</Text>
                                         <SegmentedControl
                                             color="cyan"
                                             data={[
@@ -156,6 +159,15 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                             transitionDuration={0}
                                             value={String(settings.graphicsSettings)}
                                             onChange={handleGraphicSettings}
+                                        />
+
+                                        <Select
+                                            label="Resolution"
+                                            data={[
+                                                { value: "auto", label: "auto" },
+                                                { value: "1920x1080", label: "1920x1080" },
+                                            ]}
+                                            defaultValue="auto"
                                         />
                                     </Stack>
                                 </Container>

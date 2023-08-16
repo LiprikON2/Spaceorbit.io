@@ -52,7 +52,8 @@ export class ClientInputManager extends BaseInputManager {
     zoom = 1;
 
     get baseZoom() {
-        return this.scene.scale.baseSize.width / 1920;
+        const coef = 0.75;
+        return (this.scene.scale.baseSize.width / 1920) * coef;
     }
 
     get isGameInFocus() {
@@ -102,6 +103,7 @@ export class ClientInputManager extends BaseInputManager {
             speed: 0.001,
         }) as MouseWheelScroller;
         scroller.on("scroll", (diff, gameObject, scroller) => this.updateZoom(diff));
+        this.scene.scale.on("resize", (gameSize, baseSize, displaySize) => this.updateZoom());
 
         if (this.scene.game instanceof GameClient) {
             const isTouchMode = this.scene.game.settings?.localStorageSettings?.isTouchMode;
@@ -129,10 +131,10 @@ export class ClientInputManager extends BaseInputManager {
         if (Math.abs(this.zoom - 1) < 0.08) {
             this.zoom = 1;
         }
+        const scaledZoom = this.baseZoom * this.zoom;
 
-        this.scene.cameras.main.setZoom(this.baseZoom * this.zoom);
+        this.scene.cameras.main.setZoom(scaledZoom);
 
-        // todo
         // this.scene.resize(this.scene.background, 1 / this.zoom);
     }
 
