@@ -135,6 +135,15 @@ export class BaseMapScene extends BaseScene {
             .setScrollFactor(1)
             .setVisible(false);
         this.parallaxDebug.push(pinkFrame);
+
+        const yellowFrame = this.add
+            .ellipse(0, 0, textureWidth * (1 / parallaxCoef), textureHeight * (1 / parallaxCoef))
+            .setOrigin(0.5)
+            .setStrokeStyle(3, 0xffff00)
+            .setDepth(100)
+            .setScrollFactor(1)
+            .setVisible(false);
+        this.parallaxDebug.push(yellowFrame);
     }
 
     /**

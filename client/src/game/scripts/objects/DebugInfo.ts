@@ -7,7 +7,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
     constructor(scene) {
         super(scene, 0, 0, "", {
-            color: "rgba(255, 255, 255, 0.75)",
+            color: "rgba(255, 255, 255, 0.7)",
             font: "300 1.5rem Kanit",
         });
         scene.add.existing(this);
@@ -28,6 +28,10 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         );
     }
 
+    rounded(number: number | string) {
+        return Math.floor(Number(number)) ?? 0;
+    }
+
     updatePos(displaySize: { width: number; height: number }) {
         this.setX(displaySize.width - 25);
         this.setY(100);
@@ -36,14 +40,16 @@ export class DebugInfo extends Phaser.GameObjects.Text {
     showHitboxes() {
         this.scene.parentScene.physics.world.drawDebug = true;
         this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(true));
+        this.scene.parentScene.redLine?.setVisible(true);
     }
     hideHitboxes() {
-        this.scene.physics.world.drawDebug = false;
-        this.scene.physics.world.debugGraphic.clear();
+        this.scene.parentScene.physics.world.drawDebug = false;
+        this.scene.parentScene.physics.world.debugGraphic.clear();
         this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(false));
+        this.scene.parentScene.redLine?.setVisible(false);
     }
     toggleHitboxes() {
-        if (this.scene.physics.world.drawDebug) this.hideHitboxes();
+        if (this.scene.parentScene.physics.world.drawDebug) this.hideHitboxes();
         else this.showHitboxes();
     }
 
@@ -60,9 +66,10 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         return textLines.join("\n");
     }
     getDisplayInfo() {
-        const { width: gameWidth, height: gameHeight } = this.scene.scale.gameSize;
-        const { width: baseWidth, height: baseSize } = this.scene.scale.baseSize;
-        const { width: displayWidth, height: displaySize } = this.scene.scale.displaySize;
+        const { width: gameWidth, height: gameHeight } = this.scene.parentScene.scale.gameSize;
+        const { width: baseWidth, height: baseSize } = this.scene.parentScene.scale.baseSize;
+        const { width: displayWidth, height: displaySize } =
+            this.scene.parentScene.scale.displaySize;
 
         const textLines = [
             "Display",
@@ -84,31 +91,36 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         return textLines.join("\n");
     }
 
-    rounded(number: number | string) {
-        return Math.floor(Number(number)) ?? 0;
+    getCamInfo() {
+        const { scrollX, scrollY } = this.scene.cameras.main;
+        const { x: midPointX, y: midPointY } = this.scene.cameras.main;
+
+        const textLines = [
+            // Top left corner of viewport
+            "Camera scroll:",
+            `\tx: ${this.rounded(scrollX)} y: ${this.rounded(scrollY)}`,
+            // Center of viewport
+            "Camera midPoint:",
+            `\tx: ${this.rounded(midPointX)} y: ${this.rounded(midPointY)}`,
+            "\n",
+        ];
+        return textLines.join("\n");
     }
 
     public update() {
         let text = "";
-        text += `zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
+        text += `Zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
         text += this.getFpsPing();
         text += this.getDisplayInfo();
 
         text += this.getSpriteInfo(this.scene.parentScene.player);
         text += this.getSpriteInfo(this.scene.parentScene.player?.boundingBox);
 
-        // (top left corner of viewport)
-        text += `camera scroll:\n\tx: ${this.rounded(
-            this.scene.cameras.main.scrollX
-        )} y: ${this.rounded(this.scene.cameras.main.scrollY)}\n`;
-        // (center of viewport)
-        text += `camera midPoint:\n\tx: ${this.rounded(
-            this.scene.cameras.main.midPoint.x
-        )} y: ${this.rounded(this.scene.cameras.main.midPoint.y)}\n`;
+        text += this.getCamInfo();
 
-        text += `world: ${this.scene.physics.world.bounds.width}x${this.scene.physics.world.bounds.height}\n\n`;
-        text += `hp: ${this.rounded(this.scene.parentScene.player?.status?.health)}\n`;
-        text += `shields: ${this.rounded(this.scene.parentScene.player?.status?.shields)}\n`;
+        text += `World: ${this.scene.parentScene.physics.world.bounds.width}x${this.scene.parentScene.physics.world.bounds.height}\n\n`;
+        text += `HP: ${this.rounded(this.scene.parentScene.player?.status?.health)}\n`;
+        text += `Shields: ${this.rounded(this.scene.parentScene.player?.status?.shields)}\n`;
 
         this.setText(text);
     }

@@ -15,8 +15,6 @@ export class HudScene extends Phaser.Scene {
     }
 
     create() {
-        console.log("created!");
-
         this.debugInfo = new DebugInfo(this);
     }
 

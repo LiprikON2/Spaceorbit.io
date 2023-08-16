@@ -7,13 +7,12 @@ import {
     type ActionsState,
     type SpaceshipServerOptions,
 } from "~/objects/Sprite/Spaceship";
-import { DebugInfo } from "~/objects";
 import type { ClientChannel, GameClient } from "~/game";
 import { BaseMapScene } from "~/scenes/maps/BaseMapScene";
 import { PingBuffer, EveryTick } from "~/game/utils";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
-import { Mob } from "~/game/objects/Sprite/Spaceship/Mob";
+import type { Mob } from "~/game/objects/Sprite/Spaceship/Mob";
 
 interface ProducePlayerOptions {
     isMe?: boolean;
@@ -34,6 +33,7 @@ export class ClientScene extends BaseMapScene {
     player: Spaceship;
     mobs = [];
     isPaused = true;
+    redLine: Phaser.GameObjects.Line;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -107,6 +107,8 @@ export class ClientScene extends BaseMapScene {
 
         this.isPaused = false;
         this.game.outEmitter.emit("world:create");
+
+        this.redLine = this.add.line(0, 0, 0, 0, 0, 0, 0xff0000).setDepth(1000).setVisible(false);
     }
 
     setMultiplayerListeners(entity: Spaceship) {
@@ -259,6 +261,14 @@ export class ClientScene extends BaseMapScene {
             this.updateEntitiesActions();
             this.updatePing();
         }
+
+        const [closestX, closestY] = this.collisionManager.closestPointOnEllipse(
+            this.physics.world.bounds.width,
+            this.physics.world.bounds.height,
+            [this.player.x, this.player.y]
+        );
+
+        this.redLine.setTo(this.player.x, this.player.y, closestX, closestY);
     }
 
     sendPlayerActions() {
