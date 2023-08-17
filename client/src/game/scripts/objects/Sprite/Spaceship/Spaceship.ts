@@ -18,6 +18,12 @@ export enum AllegianceEnum {
 }
 export type AllegianceKeys = keyof typeof AllegianceEnum;
 
+interface MovementVector {
+    rotation: number;
+    magnitude: number;
+    accelerationMultiplier: number;
+}
+
 type AllegianceOpposition = {
     [key in AllegianceKeys]: AllegianceKeys[];
 };
@@ -66,7 +72,10 @@ export class Spaceship extends Sprite {
     exhausts: Exhausts;
     weapons: Weapons;
     shields: Shields;
-    lastMoveInput: { rotation: number; force: number } = { rotation: 0, force: 0 };
+    #thrust: { rotation: number; velocityPercentage: number } = {
+        rotation: 0,
+        velocityPercentage: 0,
+    };
 
     outfitting;
     followText;
@@ -142,7 +151,6 @@ export class Spaceship extends Sprite {
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
         super(serverOptions, clientOptions);
-
         const { baseStats } = this.atlasMetadata;
         this.baseStats = baseStats;
         this.setCircularHitbox(this.baseStats.hitboxRadius);
@@ -210,7 +218,7 @@ export class Spaceship extends Sprite {
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
         // @ts-ignore
         this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.boundingBox);
-        this.moveToPlugin.on("complete", () => this.onStopMoving());
+        this.moveToPlugin.on("complete", () => this.onStopThrust());
 
         if (this.isTextured) {
             this.setPipeline("Light2D");
@@ -276,7 +284,7 @@ export class Spaceship extends Sprite {
 
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
-        this.resetMovement();
+        this.stopThrust();
 
         if (this.isTextured) {
             new Explosion(this.scene, this.x, this.y, this.depth, this.soundManager, {
@@ -362,7 +370,7 @@ export class Spaceship extends Sprite {
     }
 
     teleport(worldX: number, worldY: number, map?: string) {
-        this.resetMovement();
+        this.stopThrust();
         this.emit("entity:teleport", this, { worldX, worldY });
         this.boundingBox.setPosition(worldX, worldY);
     }
@@ -383,7 +391,7 @@ export class Spaceship extends Sprite {
         this.shields.active = true;
         this.shields.visible = true;
         this.active = true;
-        this.resetMovement();
+        this.stopThrust();
         if (this.status.shields === 0) this.shields.crack(false);
 
         return [worldX, worldY];
@@ -409,118 +417,151 @@ export class Spaceship extends Sprite {
         this.moveToPlugin.setSpeed(this.status.maxSpeed);
 
         this.moveToPlugin.moveTo(x, y);
-        this.onStartMoving();
+        this.onStartThrust();
     }
 
-    resetMovement() {
-        this.boundingBox.body.stop();
+    stopThrust() {
+        // this.boundingBox.body.stop();
         this.moveToPlugin.stop();
-        this.onStopMoving();
+        this.setThrust();
+        this.onStopThrust();
     }
 
-    onStartMoving() {
+    onStartThrust() {
         this.exhausts.startExhaust();
     }
-    onStopMoving() {
+    onStopThrust() {
         this.exhausts.stopExhaust();
     }
 
-    moveUp() {
-        if (this.active && !this.isUsingJoystick()) {
-            this.boundingBox.body.setVelocityY(-this.status.maxSpeed);
-            this.onStartMoving();
+    thrustUp() {
+        if (this.active) {
+            const rotation = -Math.PI / 2;
+            this.setThrust(rotation, 1);
         }
     }
-    moveDown() {
-        if (this.active && !this.isUsingJoystick()) {
-            this.boundingBox.body.setVelocityY(this.status.maxSpeed);
-            this.onStartMoving();
+    thrustDown() {
+        if (this.active) {
+            const rotation = Math.PI / 2;
+            this.setThrust(rotation, 1);
         }
     }
-    moveLeft() {
-        if (this.active && !this.isUsingJoystick()) {
-            this.boundingBox.body.setVelocityX(-this.status.maxSpeed);
-            this.onStartMoving();
+    thrustLeft() {
+        if (this.active) {
+            const rotation = Math.PI;
+            this.setThrust(rotation, 1);
         }
     }
-    moveRight() {
-        if (this.active && !this.isUsingJoystick()) {
-            this.boundingBox.body.setVelocityX(this.status.maxSpeed);
-            this.onStartMoving();
+    thrustRight() {
+        if (this.active) {
+            const rotation = 0;
+            this.setThrust(rotation, 1);
         }
     }
 
-    moveUpRight() {
-        if (this.active && !this.isUsingJoystick()) {
-            const angle = -Math.PI / 4;
-            this.boundingBox.body.velocity.setToPolar(angle, this.status.maxSpeed);
-            this.onStartMoving();
+    thrustUpRight() {
+        if (this.active) {
+            const rotation = -Math.PI / 4;
+            this.setThrust(rotation, 1);
         }
     }
-    moveUpLeft() {
-        if (this.active && !this.isUsingJoystick()) {
-            const angle = -Math.PI / 4 - Math.PI / 2;
-            this.boundingBox.body.velocity.setToPolar(angle, this.status.maxSpeed);
-            this.onStartMoving();
+    thrustUpLeft() {
+        if (this.active) {
+            const rotation = -Math.PI / 4 - Math.PI / 2;
+            this.setThrust(rotation, 1);
         }
     }
-    moveDownRight() {
-        if (this.active && !this.isUsingJoystick()) {
-            const angle = Math.PI / 4;
-            this.boundingBox.body.velocity.setToPolar(angle, this.status.maxSpeed);
-            this.onStartMoving();
+    thrustDownRight() {
+        if (this.active) {
+            const rotation = Math.PI / 4;
+            this.setThrust(rotation, 1);
         }
     }
-    moveDownLeft() {
-        if (this.active && !this.isUsingJoystick()) {
-            const angle = Math.PI / 4 + Math.PI / 2;
-            this.boundingBox.body.velocity.setToPolar(angle, this.status.maxSpeed);
-            this.onStartMoving();
+    thrustDownLeft() {
+        if (this.active) {
+            const rotation = Math.PI / 4 + Math.PI / 2;
+            this.setThrust(rotation, 1);
         }
     }
     /**
      * Moves ship right, relative to the ship rotation, instead of to the screen's right side
      */
-    moveRightRelative() {
-        if (this.active && !this.isUsingJoystick()) {
+    thrustSidewaysRight() {
+        if (this.active) {
             const rotation = this.rotation;
-            this.boundingBox.body.velocity.setToPolar(rotation, this.status.maxSpeed);
-            this.onStartMoving();
+            this.setThrust(rotation, 1);
         }
     }
     /**
      * Moves ship left relative to the ship rotation, instead of to the screen's left side
      */
-    moveLeftRelative() {
-        if (this.active && !this.isUsingJoystick()) {
+    thrustSidewaysLeft() {
+        if (this.active) {
             const rotation = this.rotation + Math.PI;
-            this.boundingBox.body.velocity.setToPolar(rotation, this.status.maxSpeed);
-            this.onStartMoving();
+            this.setThrust(rotation, 1);
         }
     }
 
-    isUsingJoystick() {
-        return this.lastMoveInput.force !== 0;
-    }
+    thrust() {
+        let movedFromThrust = false;
+        if (this.active) {
+            const { rotation, velocityPercentage } = this.#thrust;
+            const speed = this.status.maxSpeed * velocityPercentage;
 
-    // For using virtual omni-directional joystick
-    move() {
-        let moved = false;
-        if (this.active && this.isUsingJoystick()) {
-            const rotation = this.lastMoveInput.rotation;
-            const speed = this.status.maxSpeed * this.lastMoveInput.force;
+            // const gravity = { rotation: 0, magnitude: 40, accelerationMultiplier: 1 };
 
-            this.boundingBox.body.velocity.setToPolar(rotation, speed);
-            this.onStartMoving();
-            moved = true;
+            const gravity = { ...this.scene.getGravity(this), accelerationMultiplier: 10 };
+
+            this.move([{ rotation, magnitude: speed, accelerationMultiplier: 7 }, gravity]);
+            movedFromThrust = velocityPercentage > 0;
         }
 
-        return moved;
+        if (movedFromThrust) this.onStartThrust();
+        else this.onStopThrust();
     }
 
-    setMove(angle: number, force: number) {
-        this.lastMoveInput.rotation = Phaser.Math.DegToRad(angle);
-        this.lastMoveInput.force = force;
+    setThrust(rotation: number = this.#thrust.rotation, velocityPercentage: number = 0) {
+        this.#thrust.rotation = rotation;
+        this.#thrust.velocityPercentage = velocityPercentage;
+    }
+
+    move(movements: MovementVector[]) {
+        // Velocity
+        let vx = 0;
+        let vy = 0;
+        // Acceleration
+        let ax = 0;
+        let ay = 0;
+
+        movements.forEach(({ rotation, magnitude, accelerationMultiplier }) => {
+            const velocityX = magnitude * Math.cos(rotation);
+            const velocityY = magnitude * Math.sin(rotation);
+
+            vx += velocityX;
+            vy += velocityY;
+            ax += velocityX * accelerationMultiplier;
+            ay += velocityY * accelerationMultiplier;
+        });
+        const targetSpeed = (vx ** 2 + vy ** 2) ** 0.5;
+
+        this.boundingBox.body.setAcceleration(ax, ay);
+        this.boundingBox.body.setMaxSpeed(targetSpeed);
+        // if (vx + vy !== 0) {
+        //     this.boundingBox.body.setMaxSpeed(300);
+        //     this.boundingBox.body.setAcceleration(vx * 5, vy * 5);
+        // } else {
+        //     this.boundingBox.body.setAcceleration(
+        //         -this.boundingBox.body.velocity.x * 5,
+        //         -this.boundingBox.body.velocity.y * 5
+        //     );
+        // }
+
+        // TODO multiple accelerations are actually not being applied
+        // this.boundingBox.body.setGravity(0, 200);
+        // this.boundingBox.body.setDrag(1000, 1000).setAllowDrag(true);
+
+        // this.boundingBox.body.setVelocity(vx, vy);
+        // this.boundingBox.body.velocity.setToPolar(rotation, speed);
     }
 
     primaryFire(time: number) {
@@ -577,9 +618,9 @@ export class Spaceship extends Sprite {
         this.rotateTo(Phaser.Math.DegToRad(angle - 90));
 
         if (activity === "moving") {
-            this.onStartMoving();
+            this.onStartThrust();
         } else if (activity === "stopped") {
-            this.onStopMoving();
+            this.onStopThrust();
         }
 
         this.primaryFireState = {

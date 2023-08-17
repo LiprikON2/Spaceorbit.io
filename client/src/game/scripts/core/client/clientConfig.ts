@@ -85,7 +85,7 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
         default: "arcade",
         arcade: {
             debug: true,
-            gravity: {},
+            // gravity: {},
         },
     },
     plugins: {

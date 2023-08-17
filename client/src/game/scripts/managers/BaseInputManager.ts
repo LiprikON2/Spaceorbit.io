@@ -69,39 +69,21 @@ export default class BaseInputManager {
     }
 
     update(time: number, delta: number) {
-        let moved = false;
-
-        this.player.resetMovement();
-        moved = this.player.move();
-
         // Movement
+        this.player.setThrust();
+
         const { up, left, down, right } = this.actions;
-        if (up && !left && !down && !right) {
-            this.player.moveUp();
-            moved = true;
-        } else if (!up && left && !down && !right) {
-            this.player.moveLeft();
-            moved = true;
-        } else if (!up && !left && down && !right) {
-            this.player.moveDown();
-            moved = true;
-        } else if (!up && !left && !down && right) {
-            this.player.moveRight();
-            moved = true;
-        } else if (up && left && !down && !right) {
-            this.player.moveUpLeft();
-            moved = true;
-        } else if (up && !left && !down && right) {
-            this.player.moveUpRight();
-            moved = true;
-        } else if (!up && left && down && !right) {
-            this.player.moveDownLeft();
-            moved = true;
-        } else if (!up && !left && down && right) {
-            this.player.moveDownRight();
-            moved = true;
-        }
-        if (!moved) this.player.onStopMoving();
+        if (up && !left && !down && !right) this.player.thrustUp();
+        else if (!up && left && !down && !right) this.player.thrustLeft();
+        else if (!up && !left && down && !right) this.player.thrustDown();
+        else if (!up && !left && !down && right) this.player.thrustRight();
+        else if (up && left && !down && !right) this.player.thrustUpLeft();
+        else if (up && !left && !down && right) this.player.thrustUpRight();
+        else if (!up && left && down && !right) this.player.thrustDownLeft();
+        else if (!up && !left && down && right) this.player.thrustDownRight();
+
+        this.player.thrust();
+        // if (!moved) this.player.onStopThrust();
 
         // Aiming
         const { worldX, worldY } = this.actions;

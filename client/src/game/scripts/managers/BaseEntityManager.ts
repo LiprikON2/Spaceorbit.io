@@ -72,7 +72,7 @@ export class BaseEntityManager {
 
         this.playerGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.otherPlayersGroup = this.scene.add.group() as SpaceshipGroup;
-        this.mobGroup = this.scene.add.group({ runChildUpdate: false }) as SpaceshipGroup;
+        this.mobGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.entityGroup = this.scene.add.group() as SpaceshipGroup;
         this.projectileGroup = this.scene.add.group() as ProjectileGroup;
     }

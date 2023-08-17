@@ -4,7 +4,12 @@ import type { ChannelId } from "@geckos.io/client";
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
-import { type Actions, type ClientHitData, BaseEntityManager } from "~/managers";
+import {
+    type Actions,
+    type ClientHitData,
+    BaseEntityManager,
+    BaseCollisionManager,
+} from "~/managers";
 import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
 import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
 
@@ -74,6 +79,7 @@ export class BaseScene extends Phaser.Scene {
     add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
 
     entityManager: BaseEntityManager;
+    collisionManager: BaseCollisionManager;
     cumDelta = 0;
 
     get halfWorldWidth() {
@@ -92,6 +98,11 @@ export class BaseScene extends Phaser.Scene {
         this.entityManager = new BaseEntityManager(null, {
             scene: this,
             isTextured: this.game.isClient,
+        });
+
+        this.collisionManager = new BaseCollisionManager({
+            projectileGroup: this.entityManager.projectileGroup,
+            entityGroup: this.entityManager.entityGroup,
         });
     }
 
@@ -134,5 +145,33 @@ export class BaseScene extends Phaser.Scene {
             }
         });
         entity.on("entity:dead", () => this.entityManager.respawnEntity(entity.id));
+    }
+
+    // TODO tickrate limit and/or memoize
+    getClosestPointInsideWorldBorder(originPoint: { x: number; y: number }): [number, number] {
+        const ellipticalWorldBorder = {
+            x: 0,
+            y: 0,
+            width: this.physics.world.bounds.width,
+            height: this.physics.world.bounds.height,
+        };
+
+        if (!this.collisionManager.isPointInEllipse(originPoint, ellipticalWorldBorder)) {
+            return this.collisionManager.closestPointOnEllipse(originPoint, ellipticalWorldBorder);
+        }
+        return [originPoint.x, originPoint.y];
+    }
+
+    getGravity(entity: Phaser.GameObjects.Sprite, magnitudeMultiplier = 0.1) {
+        const [closestX, closestY] = this.getClosestPointInsideWorldBorder({
+            x: entity.x,
+            y: entity.y,
+        });
+        const distance = Phaser.Math.Distance.Between(entity.x, entity.y, closestX, closestY);
+
+        const rotation = Phaser.Math.Angle.Between(entity.x, entity.y, closestX, closestY);
+        const magnitude = distance * magnitudeMultiplier;
+
+        return { rotation, magnitude };
     }
 }

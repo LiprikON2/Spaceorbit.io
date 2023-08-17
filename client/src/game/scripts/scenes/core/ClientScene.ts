@@ -1,7 +1,7 @@
 import { SnapshotInterpolation, Vault } from "@geckos.io/snapshot-interpolation";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 
-import { BaseCollisionManager, ClientInputManager, SoundManager } from "~/managers";
+import { ClientInputManager, SoundManager } from "~/managers";
 import {
     Spaceship,
     type ActionsState,
@@ -29,11 +29,10 @@ export class ClientScene extends BaseMapScene {
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
-    collisionManager: BaseCollisionManager;
     player: Spaceship;
     mobs = [];
     isPaused = true;
-    redLine: Phaser.GameObjects.Line;
+    gravityDebugVector: Phaser.GameObjects.Line;
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
@@ -100,15 +99,14 @@ export class ClientScene extends BaseMapScene {
 
         this.inputManager = new ClientInputManager(this, this.player);
         this.soundManager.addMusic(["track_1", "track_2", "track_3"], true);
-        this.collisionManager = new BaseCollisionManager({
-            projectileGroup: this.entityManager.projectileGroup,
-            entityGroup: this.entityManager.entityGroup,
-        });
 
         this.isPaused = false;
         this.game.outEmitter.emit("world:create");
 
-        this.redLine = this.add.line(0, 0, 0, 0, 0, 0, 0xff0000).setDepth(1000).setVisible(false);
+        this.gravityDebugVector = this.add
+            .line(0, 0, 0, 0, 0, 0, 0xff0000)
+            .setDepth(1000)
+            .setVisible(false);
     }
 
     setMultiplayerListeners(entity: Spaceship) {
@@ -262,13 +260,14 @@ export class ClientScene extends BaseMapScene {
             this.updatePing();
         }
 
-        const [closestX, closestY] = this.collisionManager.closestPointOnEllipse(
-            this.physics.world.bounds.width,
-            this.physics.world.bounds.height,
-            [this.player.x, this.player.y]
-        );
-
-        this.redLine.setTo(this.player.x, this.player.y, closestX, closestY);
+        this.updateDebug();
+    }
+    updateDebug() {
+        const [closestX, closestY] = this.getClosestPointInsideWorldBorder({
+            x: this.player.x,
+            y: this.player.y,
+        });
+        this.gravityDebugVector.setTo(this.player.x, this.player.y, closestX, closestY);
     }
 
     sendPlayerActions() {

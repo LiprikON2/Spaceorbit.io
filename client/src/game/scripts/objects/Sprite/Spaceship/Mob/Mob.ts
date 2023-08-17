@@ -66,7 +66,7 @@ export class Mob extends Spaceship {
         super.update(time, delta);
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
-        let haveMoved = false;
+        let moved = false;
         // TODO they may get stuck in on the boundaries
         // If it is wandering
         if (!this.target && !this.isSleeping) {
@@ -82,7 +82,7 @@ export class Mob extends Spaceship {
                     const { worldX, worldY } = this.getNextPoint();
                     this.moveTo(worldX, worldY);
                     this.setPointer(worldX, worldY);
-                    haveMoved = true;
+                    moved = true;
                 }
             }
         }
@@ -103,30 +103,33 @@ export class Mob extends Spaceship {
                 });
             }
             // Movement logic
-            this.resetMovement();
+            this.stopThrust();
             if ((dist < 2000 && dist > 900) || (dist < 900 && dist > 700 && !this.isSleeping)) {
                 // I need to be closer
                 this.moveTo(x + this.jitter.x, y + this.jitter.y);
-                haveMoved = true;
+                moved = true;
             } else if (dist < 700 && dist > 400 && !this.isSleeping) {
                 // Perfect, stay still
                 // Now I act according to my preference
                 if (this.preferedMovement === Direction.Left) {
-                    this.moveLeftRelative();
-                    haveMoved = true;
+                    this.thrustSidewaysLeft();
+                    this.thrust();
+                    moved = true;
                 } else if (this.preferedMovement === Direction.Right) {
-                    this.moveRightRelative();
-                    haveMoved = true;
+                    this.thrustSidewaysRight();
+                    this.thrust();
+                    moved = true;
                 }
             } else if (dist < 400 && !this.isSleeping) {
                 // Too close; I need to back away
+                // Position of a target, mirrored to the position of oneself
                 const mirrorX = -(x - this.x) + this.x;
                 const mirrorY = -(y - this.y) + this.y;
                 this.moveTo(mirrorX, mirrorY);
-                haveMoved = true;
+                moved = true;
             } else if (dist >= 2000) {
                 // Target got away
-                this.resetMovement();
+                this.stopThrust();
                 this.setTarget();
                 this.readyToFireEvent.destroy();
                 this.readyToFireEvent = null;
@@ -134,6 +137,6 @@ export class Mob extends Spaceship {
                 // TODO forget target on death
             }
         }
-        if (!haveMoved) this.onStopMoving();
+        if (!moved) this.onStopThrust();
     }
 }

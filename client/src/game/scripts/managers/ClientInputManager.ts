@@ -144,12 +144,12 @@ export class ClientInputManager extends BaseInputManager {
 
         const joystick = makeJoystick(this.scene, this.isTouchMode);
         joystick.on("update", () => {
-            const force = Math.min(1, Math.floor(joystick.force) / 100);
-            const rotationDegree = Math.floor(joystick.angle * 100) / 100;
-            this.player.setMove(rotationDegree, force);
+            const accelerationPercentage = Math.min(1, Math.floor(joystick.force) / 100);
+            const rotation = Phaser.Math.DegToRad(Math.floor(joystick.angle * 100) / 100);
+            this.player.setThrust(rotation, accelerationPercentage);
 
             if (!this.player.primaryFireState.autoattack) {
-                this.player.rotateTo(Phaser.Math.DegToRad(rotationDegree));
+                this.player.rotateTo(Phaser.Math.DegToRad(rotation));
             }
         });
 

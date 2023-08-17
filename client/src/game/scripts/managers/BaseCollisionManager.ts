@@ -46,73 +46,46 @@ export class BaseCollisionManager {
     }
 
     /**
-     * Uses approximation ot find the closest point on ellipse from arbitrary point
+     * From arbitrary point, uses an approximation to find the closest point on the ellipse
      * https://stackoverflow.com/a/46007540
      */
-    closestPointOnEllipse(width, height, p: [number, number]) {
-        let px = Math.abs(p[0]);
-        let py = Math.abs(p[1]);
+    closestPointOnEllipse(
+        point: { x: number; y: number },
+        ellipse: { x: number; y: number; width: number; height: number }
+    ): [number, number] {
+        const px = Math.abs(point.x - ellipse.x);
+        const py = Math.abs(point.y - ellipse.y);
 
         let tx = 0.707;
         let ty = 0.707;
 
-        let a = width / 2;
-        let b = height / 2;
+        const a = ellipse.width / 2;
+        const b = ellipse.height / 2;
 
         for (let x = 0; x < 3; x++) {
-            let x_val = a * tx;
-            let y = b * ty;
+            const xVal = a * tx;
+            const y = b * ty;
 
-            let ex = ((a * a - b * b) * Math.pow(tx, 3)) / a;
-            let ey = ((b * b - a * a) * Math.pow(ty, 3)) / b;
+            let ex = ((a * a - b * b) * tx ** 3) / a;
+            const ey = ((b * b - a * a) * ty ** 3) / b;
 
-            let rx = x_val - ex;
-            let ry = y - ey;
+            const rx = xVal - ex;
+            const ry = y - ey;
 
-            let qx = px - ex;
-            let qy = py - ey;
+            const qx = px - ex;
+            const qy = py - ey;
 
-            let r = Math.hypot(ry, rx);
-            let q = Math.hypot(qy, qx);
+            const r = Math.hypot(ry, rx);
+            const q = Math.hypot(qy, qx);
 
             tx = Math.min(1, Math.max(0, ((qx * r) / q + ex) / a));
             ty = Math.min(1, Math.max(0, ((qy * r) / q + ey) / b));
-            let t = Math.hypot(ty, tx);
+            const t = Math.hypot(ty, tx);
             tx /= t;
             ty /= t;
         }
-        return [copySign(a * tx, p[0]), copySign(b * ty, p[1])];
+        return [copySign(a * tx, point.x - ellipse.x), copySign(b * ty, point.y - ellipse.y)];
     }
-
-    // getVectorToClosestEllipseFoci(
-    //     point: { x: number; y: number },
-    //     ellipse: { x: number; y: number; width: number; height: number }
-    // ) {
-    //     const { x, y } = point;
-    //     const { x: ellipseX, y: ellipseY, width, height } = ellipse;
-
-    //     const a = width / 2;
-    //     const b = height / 2;
-
-    //     const c = (a ** 2 - b ** 2) ** 0.5;
-
-    //     const isXMajor = width > height;
-
-    //     let focus1: { x: number; y: number }, focus2: { x: number; y: number };
-    //     if (isXMajor) {
-    //         // Left focus
-    //         focus1 = { x: ellipseX - c, y: ellipseY };
-    //         // Right focus
-    //         focus2 = { x: ellipseX + c, y: ellipseY };
-    //     } else {
-    //         // Top focus
-    //         focus1 = { x: ellipseX, y: ellipseY + c };
-    //         // Bottom focus
-    //         focus2 = { x: ellipseX, y: ellipseY - c };
-    //     }
-
-    //     return { focus1, focus2, isXMajor, isYMajor: !isXMajor };
-    // }
 
     emitOnHit(projectile: Projectile) {
         projectile.owner.enemies.forEach((enemy) => {

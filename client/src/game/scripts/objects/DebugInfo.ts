@@ -40,13 +40,13 @@ export class DebugInfo extends Phaser.GameObjects.Text {
     showHitboxes() {
         this.scene.parentScene.physics.world.drawDebug = true;
         this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(true));
-        this.scene.parentScene.redLine?.setVisible(true);
+        this.scene.parentScene.gravityDebugVector?.setVisible(true);
     }
     hideHitboxes() {
         this.scene.parentScene.physics.world.drawDebug = false;
         this.scene.parentScene.physics.world.debugGraphic.clear();
         this.scene.parentScene.parallaxDebug.forEach((hitbox) => hitbox.setVisible(false));
-        this.scene.parentScene.redLine?.setVisible(false);
+        this.scene.parentScene.gravityDebugVector?.setVisible(false);
     }
     toggleHitboxes() {
         if (this.scene.parentScene.physics.world.drawDebug) this.hideHitboxes();
@@ -57,9 +57,14 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         if (!sprite) return "";
         const textLines = [
             sprite.constructor.name,
-            `\tx: ${Math.floor(sprite.x)} y: ${Math.floor(sprite.y)}`,
-            `\tangle: ${Math.floor(sprite.angle)}`,
-            `\tvx: ${Math.floor(sprite.body.velocity.x)} vy: ${Math.floor(sprite.body.velocity.y)}`,
+            `\tx: ${this.rounded(sprite.x)} y: ${this.rounded(sprite.y)}`,
+            `\tangle: ${this.rounded(sprite.angle)} speed: ${this.rounded(sprite.body.speed)}`,
+            `\tvx: ${this.rounded(sprite.body.velocity.x)} vy: ${this.rounded(
+                sprite.body.velocity.y
+            )}`,
+            `\tax: ${this.rounded(sprite.body.acceleration.x)} ay: ${this.rounded(
+                sprite.body.acceleration.y
+            )}`,
             "\n",
         ];
 
@@ -73,8 +78,8 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
         const textLines = [
             "Display",
-            `\tgameSize: ${gameWidth}x${gameHeight}`,
-            `\tbaseSize: ${baseWidth}x${baseSize}`,
+            `\tgameSize: ${this.rounded(gameWidth)}x${this.rounded(gameHeight)}`,
+            `\tbaseSize: ${this.rounded(baseWidth)}x${this.rounded(baseSize)}`,
             `\tdisplaySize: ${this.rounded(displayWidth)}x${this.rounded(displaySize)}`,
             "\n",
         ];
@@ -109,7 +114,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
 
     public update() {
         let text = "";
-        text += `Zoom: ${this.scene.cameras.main.zoom.toFixed(2)}\n`;
+        text += `Zoom: ${this.scene.parentScene.cameras.main.zoom.toFixed(2)}\n`;
         text += this.getFpsPing();
         text += this.getDisplayInfo();
 
