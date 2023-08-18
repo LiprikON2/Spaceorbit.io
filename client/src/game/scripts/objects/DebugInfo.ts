@@ -53,6 +53,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         else this.showHitboxes();
     }
 
+    // TODO use circular buffer
     getSpriteInfo(sprite: any) {
         if (!sprite) return "";
         const textLines = [

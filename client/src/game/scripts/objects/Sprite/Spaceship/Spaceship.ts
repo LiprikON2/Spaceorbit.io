@@ -508,8 +508,7 @@ export class Spaceship extends Sprite {
             const { rotation, velocityPercentage } = this.#thrust;
             const speed = this.status.maxSpeed * velocityPercentage;
 
-            // const gravity = { rotation: 0, magnitude: 40, accelerationMultiplier: 1 };
-
+            // TODO tweak magnitude and acceleration multipliers
             const gravity = { ...this.scene.getGravity(this), accelerationMultiplier: 10 };
 
             this.move([{ rotation, magnitude: speed, accelerationMultiplier: 7 }, gravity]);

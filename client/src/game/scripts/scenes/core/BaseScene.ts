@@ -162,6 +162,7 @@ export class BaseScene extends Phaser.Scene {
         return [originPoint.x, originPoint.y];
     }
 
+    // TODO make magnitude nonlinear
     getGravity(entity: Phaser.GameObjects.Sprite, magnitudeMultiplier = 0.1) {
         const [closestX, closestY] = this.getClosestPointInsideWorldBorder({
             x: entity.x,
