@@ -25,6 +25,7 @@ export class ClientScene extends BaseMapScene {
     si?: SnapshotInterpolation;
     clientVault?: Vault;
     everyTick = new EveryTick(30);
+    everyOnceInAWhile = new EveryTick(0.1);
     ping = new PingBuffer(180);
 
     inputManager: ClientInputManager;
@@ -93,6 +94,7 @@ export class ClientScene extends BaseMapScene {
 
             this.player.on("entity:dead", () => this.requestRespawn());
             this.channel.on("entity:respawn", ({ id, point }) => {
+                console.log("RESPAWN", id, point);
                 this.entityManager.respawnEntity(id, point);
             });
         }
@@ -143,8 +145,8 @@ export class ClientScene extends BaseMapScene {
         const mergedOptions = { ...defaultOptions, ...options };
         if (!serverOptions) serverOptions = await this.requestServerOptions();
 
-        // const alreadyPresentPlayer = this.entityManager.getById(serverOptions.id, "players");
-        // if (alreadyPresentPlayer) return alreadyPresentPlayer;
+        const alreadyPresentPlayer = this.entityManager.getById(serverOptions.id, "players");
+        if (alreadyPresentPlayer) return alreadyPresentPlayer;
 
         const { isMe } = mergedOptions;
         const player = this.entityManager.createPlayer(
@@ -159,13 +161,17 @@ export class ClientScene extends BaseMapScene {
     }
 
     async produceMob(
-        serverOptions?: SpaceshipServerOptions,
+        serverOptions: SpaceshipServerOptions,
         options?: { callback: (mob: Mob) => void }
     ): Promise<Mob> {
+        const alreadyPresentMob = this.entityManager.getById(serverOptions.id, "mob") as Mob;
+        if (alreadyPresentMob) return alreadyPresentMob;
+
         const defaultOptions = {
             callback: () => {},
         };
         const mergedOptions = { ...defaultOptions, ...options };
+
         const mob = this.entityManager.createMob(serverOptions, {
             soundManager: this.soundManager,
         });
@@ -206,7 +212,6 @@ export class ClientScene extends BaseMapScene {
     }
 
     async produceMobs(callback: (mob: Mob) => void = () => {}) {
-        // TODO move this into entity Manager
         const serverOptionsList = await this.requestMobs();
 
         serverOptionsList.forEach((serverOptions) => this.produceMob(serverOptions, { callback }));
@@ -254,10 +259,14 @@ export class ClientScene extends BaseMapScene {
             this.createClientSnapshot();
             this.everyTick.update(time, delta, () => {
                 this.sendPlayerActions();
-                this.updateReconciliation();
+                this.reconciliatePlayerPos();
             });
             this.updateEntitiesActions();
             this.updatePing();
+
+            this.everyOnceInAWhile.update(time, delta, () => {
+                this.reconciliateMissingEntites();
+            });
         }
 
         this.updateDebug();
@@ -275,12 +284,15 @@ export class ClientScene extends BaseMapScene {
         this.channel.emit("player:actions", { ...actionsCompact, time: this.si.serverTime });
     }
 
+    /**
+     * Updates actions of everyone except for the player to match that of the server
+     */
     updateEntitiesActions() {
-        // TODO if some of the entities are not present on client, produce them
         const serverEntitiesSnapshot = this.si.calcInterpolation(
             "x y angle(deg) worldX worldY",
             "entities"
         );
+
         if (serverEntitiesSnapshot) {
             const entitesState = serverEntitiesSnapshot.state as ActionsState[];
 
@@ -293,7 +305,11 @@ export class ClientScene extends BaseMapScene {
         }
     }
 
-    updateReconciliation() {
+    /**
+     * Reconciliates (slowly shifts) position of the player
+     * to match client predicition to the server state
+     */
+    reconciliatePlayerPos() {
         // Get the latest snapshot from the server
         const serverSnapshot = this.si.vault.get();
         if (serverSnapshot) {
@@ -303,7 +319,7 @@ export class ClientScene extends BaseMapScene {
                 const serverEntitiesState = serverSnapshot.state["entities"] as ActionsState[];
                 // Get the current server state on the server
                 const serverPlayerState = serverEntitiesState.find(
-                    (playerState) => playerState.id === this.player.id
+                    (entityState) => entityState.id === this.player.id
                 );
 
                 const [clientPlayerState] = clientSnapshot.state["player"] as ActionsState[];
@@ -319,6 +335,30 @@ export class ClientScene extends BaseMapScene {
                 this.player.boundingBox.x -= offsetX / correction;
                 this.player.boundingBox.y -= offsetY / correction;
             }
+        }
+    }
+
+    /**
+     * If some of the entities are not present on client, re-request them
+     */
+    reconciliateMissingEntites() {
+        const serverSnapshot = this.si.vault.get();
+        if (serverSnapshot) {
+            const serverEntitiesState = serverSnapshot.state["entities"] as ActionsState[];
+
+            const missingEntites = {
+                mob: [],
+                players: [],
+            };
+            serverEntitiesState.forEach(({ id, groupName }) => {
+                const isMissing = !this.entityManager.getById(id, groupName);
+                if (isMissing) missingEntites[groupName].push(id);
+            });
+
+            if (missingEntites.mob.length)
+                this.produceMobs((mob) => this.setMultiplayerListeners(mob));
+            if (missingEntites.players.length)
+                this.produceConnectedPlayers((player) => this.setMultiplayerListeners(player));
         }
     }
 

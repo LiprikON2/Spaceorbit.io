@@ -126,11 +126,22 @@ export class BaseScene extends Phaser.Scene {
     }
 
     getRandomPositionOnMap(worldMargin = 300) {
-        const maxX = this.physics.world.bounds.width;
-        const maxY = this.physics.world.bounds.height;
-        const randomWorldX = Phaser.Math.Between(worldMargin, maxX - worldMargin);
-        const randomWorldY = Phaser.Math.Between(worldMargin, maxY - worldMargin);
+        const worldWidth = this.physics.world.bounds.width;
+        const worldHeight = this.physics.world.bounds.height;
+        const randomWorldX = Phaser.Math.Between(
+            -(worldWidth / 2) + worldMargin,
+            worldWidth / 2 - worldMargin
+        );
+        const randomWorldY = Phaser.Math.Between(
+            -(worldHeight / 2) + worldMargin,
+            worldHeight / 2 - worldMargin
+        );
+        const isInEllipse = this.collisionManager.isPointInEllipse(
+            { x: randomWorldX, y: randomWorldY },
+            { x: 0, y: 0, width: worldWidth, height: worldHeight }
+        );
 
+        if (!isInEllipse) return this.getRandomPositionOnMap(worldMargin);
         return [randomWorldX, randomWorldY];
     }
 

@@ -25,7 +25,6 @@ export class ServerScene extends BaseMapScene {
     declare game: GameServer;
     si = new SnapshotInterpolation();
 
-    collisionManager?: BaseCollisionManager;
     declare entityManager: ServerEntityManager;
 
     everyTick = new EveryTick(30);
@@ -66,7 +65,13 @@ export class ServerScene extends BaseMapScene {
             mob.on("entity:heal", (id: string) => {
                 this.sendEntityStatus(id);
             });
-            mob.on("entity:dead", () => this.entityManager.respawnEntity(mob.id));
+            mob.on("entity:dead", () =>
+                this.entityManager.respawnEntity(
+                    mob.id,
+                    { worldX: null, worldY: null },
+                    (worldX, worldY) => this.sendRespawned(mob.id, worldX, worldY)
+                )
+            );
         });
 
         this.game.server.onConnection((channel) => {
@@ -97,13 +102,7 @@ export class ServerScene extends BaseMapScene {
                 this.entityManager.respawnEntity(
                     channel.id!,
                     { worldX: null, worldY: null },
-                    (worldX: number, worldY: number) => {
-                        this.game.server.emit(
-                            "entity:respawn",
-                            { id: channel.id, point: { worldX, worldY } },
-                            { reliable: true }
-                        );
-                    }
+                    (worldX, worldY) => this.sendRespawned(channel.id!, worldX, worldY)
                 )
             );
             channel.on("message", (message) => this.broadcastMessage(channel, message));
@@ -116,6 +115,15 @@ export class ServerScene extends BaseMapScene {
             });
         });
     }
+
+    sendRespawned(entityId: string, worldX: number, worldY: number) {
+        this.game.server.emit(
+            "entity:respawn",
+            { id: entityId, point: { worldX, worldY } },
+            { reliable: true }
+        );
+    }
+
     assertHit({
         ownerId,
         enemyId,

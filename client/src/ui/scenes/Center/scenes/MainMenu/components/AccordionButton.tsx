@@ -6,11 +6,13 @@ export const AccordionButton = ({
     label,
     color,
     onClick,
-    children,
+    disabled = false,
+    children = undefined,
 }: {
     label: string;
     color: MantineColor;
     onClick?: () => void;
+    disabled: boolean;
     children: (collapsed: boolean) => React.ReactNode;
 }) => {
     const [value, setValue] = useState<string | null>(null);
@@ -61,6 +63,7 @@ export const AccordionButton = ({
         >
             <Accordion.Item value={label}>
                 <AccordionControl
+                    disabled={disabled}
                     onClick={onClick}
                     onChevronClick={() => {
                         if (value === null) setValue(label);

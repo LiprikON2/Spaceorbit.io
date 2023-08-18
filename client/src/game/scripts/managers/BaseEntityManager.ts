@@ -39,6 +39,8 @@ export interface EntityManagerClientOptions {
     isTextured: boolean;
 }
 
+type GroupNames = "entity" | "players" | "otherPlayers" | "mob";
+
 export class BaseEntityManager {
     scene: BaseScene;
 
@@ -51,15 +53,15 @@ export class BaseEntityManager {
 
     isTextured: boolean;
 
-    getById(id: string, from: "entity" | "players" | "otherPlayers" | "mob" = "entity") {
+    getById(id: string, from: GroupNames = "entity") {
         let fromGroup: SpaceshipGroup;
         if (from === "entity") fromGroup = this.entityGroup;
-        else if (from === "players") fromGroup = this.entityGroup;
-        else if (from === "otherPlayers") fromGroup = this.entityGroup;
-        else if (from === "mob") fromGroup = this.entityGroup;
+        else if (from === "players") fromGroup = this.playerGroup;
+        else if (from === "otherPlayers") fromGroup = this.otherPlayersGroup;
+        else if (from === "mob") fromGroup = this.mobGroup;
 
         const [entity] = fromGroup.getMatching("id", id);
-        return entity;
+        return entity ?? null;
     }
 
     constructor(
@@ -216,10 +218,9 @@ export class BaseEntityManager {
                 } else {
                     [worldX, worldY] = entity.respawn(0, 0);
                 }
+                callback(worldX, worldY);
             }
         }
-
-        callback(worldX, worldY);
 
         return [worldX, worldY];
     }

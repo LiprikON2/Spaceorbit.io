@@ -1,6 +1,6 @@
 {
     "name": "@spaceorbit/client",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "description": "",
     "homepage": "",
     "main": "src/game/index.ts",

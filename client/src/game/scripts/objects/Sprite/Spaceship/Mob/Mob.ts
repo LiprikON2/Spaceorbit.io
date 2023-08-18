@@ -20,6 +20,10 @@ export class Mob extends Spaceship {
     reactionTime: number;
     jitter: { x: number; y: number } = { x: 0, y: 0 };
 
+    get isMob() {
+        return true;
+    }
+
     constructor(serverOptions: MobServerOptions, clientOptions: MobClientOptions) {
         super(serverOptions, clientOptions);
         this.reactionTime = Phaser.Math.Between(2500, 4500);

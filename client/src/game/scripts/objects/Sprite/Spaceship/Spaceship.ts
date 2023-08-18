@@ -32,6 +32,7 @@ type MovementActivity = "moving" | "stopped";
 
 export type ActionsState = {
     id: string;
+    groupName: "mob" | "players";
     x: number;
     y: number;
     angle: number;
@@ -147,6 +148,13 @@ export class Spaceship extends Sprite {
 
     get isDying() {
         return this.isDead && this.isExplosionPlaying;
+    }
+
+    get isMob() {
+        return false;
+    }
+    get isPlayer() {
+        return !this.isMob;
     }
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
@@ -590,6 +598,7 @@ export class Spaceship extends Sprite {
         const targetId = this.target?.id;
         return {
             id,
+            groupName: this.isPlayer ? "players" : "mob",
             x,
             y,
             angle,
