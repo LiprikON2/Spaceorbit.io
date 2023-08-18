@@ -24,7 +24,7 @@ export class ClientScene extends BaseMapScene {
     channel?: ClientChannel<MultiplayerEvents>;
     si?: SnapshotInterpolation;
     clientVault?: Vault;
-    everyTick = new EveryTick(30);
+    every30Ticks = new EveryTick(30);
     everyOnceInAWhile = new EveryTick(0.1);
     ping = new PingBuffer(180);
 
@@ -93,10 +93,9 @@ export class ClientScene extends BaseMapScene {
             );
 
             this.player.on("entity:dead", () => this.requestRespawn());
-            this.channel.on("entity:respawn", ({ id, point }) => {
-                console.log("RESPAWN", id, point);
-                this.entityManager.respawnEntity(id, point);
-            });
+            this.channel.on("entity:respawn", ({ id, point }) =>
+                this.entityManager.respawnEntity(id, point)
+            );
         }
 
         this.inputManager = new ClientInputManager(this, this.player);
@@ -257,7 +256,7 @@ export class ClientScene extends BaseMapScene {
 
         if (this.game.isMultiplayer) {
             this.createClientSnapshot();
-            this.everyTick.update(time, delta, () => {
+            this.every30Ticks.update(time, delta, () => {
                 this.sendPlayerActions();
                 this.reconciliatePlayerPos();
             });

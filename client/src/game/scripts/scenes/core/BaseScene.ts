@@ -1,6 +1,7 @@
 import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import type { ChannelId } from "@geckos.io/client";
+import BezierEasing from "bezier-easing";
 
 import type { GameClient } from "~/game/core/client/GameClient";
 import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
@@ -81,6 +82,8 @@ export class BaseScene extends Phaser.Scene {
     entityManager: BaseEntityManager;
     collisionManager: BaseCollisionManager;
     cumDelta = 0;
+
+    gravityBezier = BezierEasing(0.115, 0.35, 1.0, -0.15);
 
     get halfWorldWidth() {
         return this.physics.world.bounds.width / 2;
@@ -173,16 +176,16 @@ export class BaseScene extends Phaser.Scene {
         return [originPoint.x, originPoint.y];
     }
 
-    // TODO make magnitude nonlinear
-    getGravity(entity: Phaser.GameObjects.Sprite, magnitudeMultiplier = 0.1) {
+    getGravity(entity: Phaser.GameObjects.Sprite, maxDistance = 2000, maxSpeed = 500) {
         const [closestX, closestY] = this.getClosestPointInsideWorldBorder({
             x: entity.x,
             y: entity.y,
         });
-        const distance = Phaser.Math.Distance.Between(entity.x, entity.y, closestX, closestY);
-
         const rotation = Phaser.Math.Angle.Between(entity.x, entity.y, closestX, closestY);
-        const magnitude = distance * magnitudeMultiplier;
+
+        const distance = Phaser.Math.Distance.Between(entity.x, entity.y, closestX, closestY);
+        const normalizedDistance = distance / maxDistance;
+        const magnitude = this.gravityBezier(normalizedDistance) * maxSpeed;
 
         return { rotation, magnitude };
     }

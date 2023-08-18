@@ -173,9 +173,8 @@ export class BaseEntityManager {
             engines: [
                 null,
                 null,
-                // TODO server crashes with this
-                // { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
-                // { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
+                { itemName: "engine", itemType: "engines", label: "Eng", color: "yellow" },
             ],
             inventory: [
                 null,

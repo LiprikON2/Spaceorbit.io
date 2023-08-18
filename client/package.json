@@ -50,6 +50,7 @@
         "@netlify/functions": "^1.6.0",
         "@spaceorbit/server": "file:../server",
         "@tanstack/react-query": "~4.29.13",
+        "bezier-easing": "^2.1.0",
         "core-js": "~3.31.0",
         "immer": "~10.0.2",
         "lodash": "~4.17.21",

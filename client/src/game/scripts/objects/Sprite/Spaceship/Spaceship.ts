@@ -517,7 +517,7 @@ export class Spaceship extends Sprite {
             const speed = this.status.maxSpeed * velocityPercentage;
 
             // TODO tweak magnitude and acceleration multipliers
-            const gravity = { ...this.scene.getGravity(this), accelerationMultiplier: 10 };
+            const gravity = { ...this.scene.getGravity(this), accelerationMultiplier: 5 };
 
             this.move([{ rotation, magnitude: speed, accelerationMultiplier: 7 }, gravity]);
             movedFromThrust = velocityPercentage > 0;
@@ -553,22 +553,6 @@ export class Spaceship extends Sprite {
 
         this.boundingBox.body.setAcceleration(ax, ay);
         this.boundingBox.body.setMaxSpeed(targetSpeed);
-        // if (vx + vy !== 0) {
-        //     this.boundingBox.body.setMaxSpeed(300);
-        //     this.boundingBox.body.setAcceleration(vx * 5, vy * 5);
-        // } else {
-        //     this.boundingBox.body.setAcceleration(
-        //         -this.boundingBox.body.velocity.x * 5,
-        //         -this.boundingBox.body.velocity.y * 5
-        //     );
-        // }
-
-        // TODO multiple accelerations are actually not being applied
-        // this.boundingBox.body.setGravity(0, 200);
-        // this.boundingBox.body.setDrag(1000, 1000).setAllowDrag(true);
-
-        // this.boundingBox.body.setVelocity(vx, vy);
-        // this.boundingBox.body.velocity.setToPolar(rotation, speed);
     }
 
     primaryFire(time: number) {
@@ -650,11 +634,5 @@ export class Spaceship extends Sprite {
         const healthDiff = this.status.health - newStatus.health;
         if (healthDiff > 0) this.getHullHit(healthDiff);
         else if (healthDiff < 0) this.status.healHealth(healthDiff);
-
-        // if (shieldDiff > 0) console.log("shield damage", shieldDiff);
-        // else if (shieldDiff < 0) console.log("shield heal", shieldDiff);
-
-        // if (healthDiff > 0) console.log("health damage", healthDiff);
-        // else if (healthDiff < 0) console.log("health heal", healthDiff);
     }
 }
