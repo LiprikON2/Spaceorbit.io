@@ -2,8 +2,12 @@ import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
-const StyledDraggableItem = styled.div(({ $transform }: any) => ({
-    filter: $transform && "brightness(50%)",
+interface StyledDraggableItemProps {
+    readonly $dimmed?: boolean;
+}
+
+const StyledDraggableItem = styled.div<StyledDraggableItemProps>(({ $dimmed }) => ({
+    filter: $dimmed && "brightness(50%)",
     width: "4rem",
     height: "4rem",
     cursor: "pointer",
@@ -18,7 +22,7 @@ export const DraggableItem = ({ data, itemId, ...rest }) => {
     return (
         <StyledDraggableItem
             ref={setNodeRef}
-            $transform={transform}
+            $dimmed={!!transform}
             {...listeners}
             {...attributes}
             {...rest}

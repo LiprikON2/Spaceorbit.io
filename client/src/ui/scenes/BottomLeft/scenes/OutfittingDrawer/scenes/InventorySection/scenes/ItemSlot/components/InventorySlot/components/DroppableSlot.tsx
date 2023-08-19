@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import styled from "@emotion/styled";
 
 interface StyledDroppableSlotProps {
-    readonly $isOver?: boolean;
+    readonly $dimmed?: boolean;
 }
 
 // TODO Use 'CanDropHere' to color slots red
@@ -18,7 +18,7 @@ const StyledDroppableSlot = styled.div<StyledDroppableSlotProps>`
     border-radius: 6px;
     background: hsl(225, 7%, 13%);
     box-shadow: 5px 5px 13px #0e0e10, -5px -5px 13px #26282c;
-    filter: ${({ $isOver }) => $isOver && "brightness(80%)"};
+    filter: ${({ $dimmed }) => $dimmed && "brightness(80%)"};
 `;
 
 export const DroppableSlot = ({
@@ -35,5 +35,5 @@ export const DroppableSlot = ({
         data,
     });
 
-    return <StyledDroppableSlot ref={setNodeRef} $isOver={isOver} {...rest} />;
+    return <StyledDroppableSlot ref={setNodeRef} $dimmed={isOver} {...rest} />;
 };

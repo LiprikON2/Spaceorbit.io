@@ -31,6 +31,7 @@ export class Outfitting {
     get outfit() {
         return this.#outfit;
     }
+
     setOutfit(newOutfit: Outfit, toEmit = true) {
         if (this.isValid(newOutfit)) {
             const nonOverflowedOutfit = this.#pushExtraItemsToInv(newOutfit);
@@ -64,6 +65,29 @@ export class Outfitting {
             return true;
         }
         return false;
+    }
+
+    getItems(outfit: Outfit = this.outfit) {
+        const allItems = [...outfit.weapons, ...outfit.engines, ...outfit.inventory].filter(
+            (item) => item !== null
+        );
+        return allItems;
+    }
+
+    diffOutfitItems(newOutfit: Outfit, currentOutfit: Outfit = this.outfit): [Item[], Item[]] {
+        const allItemsOutfit1 = this.getItems(newOutfit);
+        const allItemsOutfit2 = this.getItems(currentOutfit);
+
+        const itemsAdded = allItemsOutfit1.filter(
+            ({ itemName: newItem }) =>
+                !allItemsOutfit2.some(({ itemName: currentItem }) => newItem === currentItem)
+        );
+        const itemsRemoved = allItemsOutfit2.filter(
+            ({ itemName: currentItem }) =>
+                !allItemsOutfit1.some(({ itemName: newItem }) => newItem === currentItem)
+        );
+
+        return [itemsAdded, itemsRemoved];
     }
 
     add(items: Item[], to: keyof Outfit = "inventory") {

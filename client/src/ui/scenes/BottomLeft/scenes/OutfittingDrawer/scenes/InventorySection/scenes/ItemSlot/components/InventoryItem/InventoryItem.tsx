@@ -10,12 +10,12 @@ const indicatorStyle = {
 };
 
 export const InventoryItem = ({ inventoryType, slotIndex, itemName, itemType, label, color }) => {
-    const getItemId = () => [inventoryType, slotIndex, itemName, itemType].join("-");
+    const itemId = [inventoryType, slotIndex, itemName, itemType].join("-");
 
     return (
         <DraggableItem
             data={{ inventoryType, slotIndex, itemName, itemType, label, color }}
-            itemId={getItemId()}
+            itemId={itemId}
         >
             <Indicator
                 style={indicatorStyle}

@@ -224,6 +224,12 @@ export class BaseEntityManager {
         return [worldX, worldY];
     }
 
+    /**
+     * Reoutfits the entity, ensuring no new items were added
+     * @param entityId
+     * @param newOutfit
+     * @param callback
+     */
     reoutfitEntity(
         entityId: string,
         newOutfit: Outfit,
@@ -233,9 +239,14 @@ export class BaseEntityManager {
         console.log("entity:reoutfit");
 
         const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
-        if (entity) entity.outfitting.setOutfit(newOutfit, false);
+        if (entity) {
+            const [added] = entity.outfitting.diffOutfitItems(newOutfit);
 
-        callback(entity.outfitting.outfit);
+            if (added.length === 0) {
+                entity.outfitting.setOutfit(newOutfit, false);
+                callback(entity.outfitting.outfit);
+            }
+        }
     }
 
     updateEntityStatus(id: string, status: StatusState) {

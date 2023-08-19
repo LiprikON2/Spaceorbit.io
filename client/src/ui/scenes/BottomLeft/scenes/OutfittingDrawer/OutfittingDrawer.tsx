@@ -7,6 +7,7 @@ import { InventorySection } from "./scenes/InventorySection";
 import { InventoryItem } from "./scenes/InventorySection/scenes/ItemSlot/components/InventoryItem";
 import { useGame } from "~/ui/hooks";
 import type { Item, Outfit } from "~/game/objects/Sprite/Spaceship/components/Outfitting";
+import { ScrollArea } from "./components";
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
@@ -85,7 +86,6 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     };
 
     const reoutfit = () => {
-        console.log("REOUTFIT");
         const activeOutfit = player?.outfitting.outfit;
         if (activeOutfit) {
             player.outfitting.setOutfit(outfit);
@@ -100,14 +100,19 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [draggedItem, setDraggedItem] = useState<any>(null);
 
     return (
-        <Drawer.Root opened={shouldBeOpened && didLoad} onClose={close} padding="xl" size="md">
+        <Drawer.Root
+            opened={shouldBeOpened && didLoad}
+            onClose={close}
+            size="md"
+            scrollAreaComponent={ScrollArea}
+        >
             <Drawer.Overlay />
-            <Drawer.Content>
-                <Drawer.Header>
+            <Drawer.Content style={{ overflow: "hidden" }} p="xl" pt={0} pr={0}>
+                <Drawer.Header pt="2.25rem" mr="xl">
                     <Title order={2}>Outfitting</Title>
                     <Drawer.CloseButton />
                 </Drawer.Header>
-                <Drawer.Body>
+                <Drawer.Body mr="xl">
                     <DndContext
                         onDragStart={startDragging}
                         onDragEnd={stopDragging}

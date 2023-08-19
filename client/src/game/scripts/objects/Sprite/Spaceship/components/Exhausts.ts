@@ -59,7 +59,6 @@ export class Exhausts {
 
     createExhaust(silent = false) {
         const hasEmptyEngineSlot = this.engineCount <= this.slotCount;
-
         if (hasEmptyEngineSlot) {
             const exhaustParticles = this.scene.add
                 .particles("exhaust")
@@ -109,12 +108,14 @@ export class Exhausts {
     }
     // Init exhaust sound and tween
     initExhaustSound() {
-        // The exhaust sound is constantly playing, tween just changes the volume
-        this.scene.soundManager.playLooping("exhaust_sound_1", this.ship.id, {
-            maxVolume: 0.3,
-            pitchPower: this.engineCount - 1,
-        });
-        this.isSoundInit = true;
+        if (this.ship.soundManager) {
+            // The exhaust sound is constantly playing, tween just changes the volume
+            this.ship.soundManager.playLooping("exhaust_sound_1", this.ship.id, {
+                maxVolume: 0.3,
+                pitchPower: this.engineCount - 1,
+            });
+            this.isSoundInit = true;
+        }
     }
 
     isRunning() {
