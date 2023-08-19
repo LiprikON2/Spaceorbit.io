@@ -41,18 +41,20 @@ export class Exhausts {
         this.updateExhaustPosition();
     }
 
-    placeEngine(type, slot) {
-        let doesFit = false;
+    placeEngine(type: string, slot: number) {
         if (slot <= this.slotCount - 1) {
             if (type === "engine") {
                 this.createExhaust();
-                doesFit = true;
             } else if (!type && slot < this.engineCount - 1) {
                 this.removeExhaust();
             }
         }
+    }
 
-        return doesFit;
+    canBePlaced(type: string, slot: number) {
+        const isEnoughSlots = slot <= this.slotCount - 1;
+        const isEngineType = [null, "engine"].includes(type);
+        return isEnoughSlots && isEngineType;
     }
 
     createExhaust(silent = false) {

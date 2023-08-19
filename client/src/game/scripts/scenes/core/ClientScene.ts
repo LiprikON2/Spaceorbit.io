@@ -13,6 +13,7 @@ import { PingBuffer, EveryTick } from "~/game/utils";
 import type { ClientHitData } from "~/managers/BaseCollisionManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
 import type { Mob } from "~/game/objects/Sprite/Spaceship/Mob";
+import type { Outfit } from "~/game/objects/Sprite/Spaceship/components";
 
 interface ProducePlayerOptions {
     isMe?: boolean;
@@ -96,6 +97,11 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("entity:respawn", ({ id, point }) =>
                 this.entityManager.respawnEntity(id, point)
             );
+
+            this.player.on("entity:reoutfit", (outfit: Outfit) => this.requestReoutfit(outfit));
+            this.channel.on("entity:reoutfit", ({ id, outfit }) =>
+                this.entityManager.reoutfitEntity(id, outfit)
+            );
         }
 
         this.inputManager = new ClientInputManager(this, this.player);
@@ -108,6 +114,16 @@ export class ClientScene extends BaseMapScene {
             .line(0, 0, 0, 0, 0, 0, 0xff0000)
             .setDepth(1000)
             .setVisible(false);
+    }
+
+    requestRespawn() {
+        console.log("player:request-respawn");
+        this.channel.emit("player:request-respawn", null, { reliable: true });
+    }
+
+    requestReoutfit(outfit: Outfit) {
+        console.log("player:request-reoutfit");
+        this.channel.emit("player:request-reoutfit", outfit, { reliable: true });
     }
 
     setMultiplayerListeners(entity: Spaceship) {
@@ -126,11 +142,6 @@ export class ClientScene extends BaseMapScene {
             },
             { reliable: true }
         );
-    }
-
-    requestRespawn() {
-        console.log("player:request-respawn");
-        this.channel.emit("player:request-respawn", null, { reliable: true });
     }
 
     async producePlayer(

@@ -6,6 +6,7 @@ import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { InventorySection } from "./scenes/InventorySection";
 import { InventoryItem } from "./scenes/InventorySection/scenes/ItemSlot/components/InventoryItem";
 import { useGame } from "~/ui/hooks";
+import type { Item, Outfit } from "~/game/objects/Sprite/Spaceship/components/Outfitting";
 
 export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     const [didLoad, setDidLoad] = useState(false);
@@ -16,7 +17,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     useDidUpdate(() => {
         if (!didLoad) {
             // TODO: to not mutate state
-            const activeOutfit = player.outfitting.getOutfit();
+            const activeOutfit = player.outfitting.outfit;
             if (activeOutfit) {
                 setDidLoad(() => true);
                 setOutfit(activeOutfit);
@@ -24,7 +25,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         }
     }, [shouldBeOpened]);
 
-    const handleDragStart = (event) => {
+    const startDragging = (event) => {
         const { active } = event;
         if (active) {
             const currentDraggedItem = active.data.current;
@@ -32,7 +33,7 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
         }
     };
 
-    const handleDragEnd = (event) => {
+    const stopDragging = (event) => {
         const { over, active } = event;
         const isEmpty = over?.data?.current?.isEmpty;
 
@@ -57,13 +58,13 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
 
             const canBePlacedHere = areInvTypesCompatible && isNotSameSlot;
             if (canBePlacedHere) {
-                const updatedInventory = [...outfit[inventoryType]];
+                const updatedInventory: Item[] = [...outfit[inventoryType]];
                 // Target slot
                 updatedInventory[slotIndex] = { itemName, itemType, label, color };
 
                 const didInvTypeChange = prevInvType !== inventoryType;
                 if (didInvTypeChange) {
-                    const updatedPrevInventory = [...outfit[prevInvType]];
+                    const updatedPrevInventory: Item[] = [...outfit[prevInvType]];
                     // Clear prev slot
                     updatedPrevInventory[prevSlotIndex] = null;
                     // Update target slot
@@ -84,13 +85,13 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
     };
 
     const reoutfit = () => {
-        const activeOutfit = player?.outfitting.getOutfit();
+        console.log("REOUTFIT");
+        const activeOutfit = player?.outfitting.outfit;
         if (activeOutfit) {
-            // TODO: to not mutate state
-            player.outfitting.reoutfit(outfit);
+            player.outfitting.setOutfit(outfit);
         }
     };
-    const [outfit, setOutfit] = useSetState({});
+    const [outfit, setOutfit] = useSetState<Outfit>({ weapons: [], engines: [], inventory: [] });
 
     useDidUpdate(() => {
         reoutfit();
@@ -108,8 +109,8 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
                 </Drawer.Header>
                 <Drawer.Body>
                     <DndContext
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
+                        onDragStart={startDragging}
+                        onDragEnd={stopDragging}
                         autoScroll={false}
                     >
                         {outfit && (

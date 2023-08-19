@@ -78,8 +78,8 @@ export class Spaceship extends Sprite {
         velocityPercentage: 0,
     };
 
-    outfitting;
-    followText;
+    outfitting: Outfitting;
+    followText: Phaser.GameObjects.Text;
     status: Status;
     baseStats: { health: number; hitboxRadius: number; speed: number };
     multipliers: Multipliers;

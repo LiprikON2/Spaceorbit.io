@@ -9,7 +9,7 @@ export interface Item {
 
 export interface Outfit {
     weapons: Item[];
-    engines: any[];
+    engines: Item[];
     inventory: Item[];
 }
 export class Outfitting {
@@ -17,80 +17,128 @@ export class Outfitting {
     ship: Spaceship;
     #outfit: Outfit;
 
+    get inventorySlotCount() {
+        return 36;
+    }
+    get weaponSlotCount() {
+        return this.ship.weapons.weaponCount;
+    }
+    get engineSlotCount() {
+        const auxiliaryEngineCount = this.ship.exhausts.slotCount - 1;
+        return auxiliaryEngineCount;
+    }
+
+    get outfit() {
+        return this.#outfit;
+    }
+    setOutfit(newOutfit: Outfit, toEmit = true) {
+        if (this.isValid(newOutfit)) {
+            const nonOverflowedOutfit = this.#pushExtraItemsToInv(newOutfit);
+            const completeOutfit = this.#fillEmptySlotsOutfit(nonOverflowedOutfit);
+
+            this.#outfit = completeOutfit;
+            this.#syncEngines(completeOutfit.engines);
+            this.#syncWeapons(completeOutfit.weapons);
+
+            if (toEmit) this.ship.emit("entity:reoutfit", completeOutfit);
+            return true;
+        }
+        return false;
+    }
+
     constructor(scene: Phaser.Scene, ship: Spaceship, outfit: Outfit) {
         this.scene = scene;
         this.ship = ship;
-        this.#outfit = outfit;
 
-        this.reoutfit();
+        this.setOutfit(outfit, false);
     }
 
-    reoutfit(newOutfit?: Outfit) {
-        if (newOutfit && this.isOutfitValid(newOutfit)) {
-            this.#outfit = newOutfit;
+    isValid(newOutfit: Outfit) {
+        const isWpnInvPresent = Array.isArray(newOutfit.weapons);
+        const isEngInvPresent = Array.isArray(newOutfit.engines);
+        const isInvPresent = Array.isArray(newOutfit.inventory);
+
+        const areAllInvTypesPresent = isWpnInvPresent && isEngInvPresent && isInvPresent;
+
+        if (areAllInvTypesPresent) {
+            return true;
         }
-        const extraWeapons = this.updateWeapons();
-        const extraEngines = this.updateEngines();
-
-        const extraItems = [...extraWeapons, ...extraEngines];
-
-        this.updateInventory(extraItems);
-    }
-    isOutfitValid(newOutfit: Outfit) {
-        // TODO validation
-        return true;
+        return false;
     }
 
-    getOutfit() {
-        return this.#outfit;
+    add(items: Item[], to: keyof Outfit = "inventory") {
+        const updatedItems = [...this.outfit[to], ...items];
+
+        const updatedOutfit = {
+            ...this.outfit,
+            [to]: updatedItems,
+        };
+
+        this.setOutfit(updatedOutfit);
     }
 
-    updateWeapons() {
-        let extraWeapons: Item[] = [];
-
-        let weapons = this.#outfit.weapons ?? [];
-        weapons = weapons.filter((weapon, index) => {
-            const doesFit = this.ship.weapons.placeWeapon(weapon?.itemName, index);
-            const isExtraItem = !doesFit && weapon !== null;
-            if (isExtraItem) {
-                extraWeapons.push(weapon);
-            }
-            return !isExtraItem;
-        });
-        this.#outfit.weapons = this.fillEmptySlots(weapons, this.ship.weapons.weaponCount);
-
-        return extraWeapons;
-    }
-    updateEngines() {
-        let extraEngines: any[] = [];
-
-        let engines = this.#outfit.engines ?? [];
-        engines = engines.filter((engine, index) => {
-            const doesFit = this.ship.exhausts.placeEngine(engine?.itemName, index);
-            const isExtraItem = !doesFit && engine !== null;
-            if (isExtraItem) {
-                extraEngines.push(engine);
-            }
-            return !isExtraItem;
-        });
-        const auxiliaryEngineSize = this.ship.exhausts.slotCount - 1;
-        this.#outfit.engines = this.fillEmptySlots(engines, auxiliaryEngineSize);
-        return extraEngines;
-    }
-    updateInventory(extraItems: Item[]) {
-        const inventorySize = 36;
-        let inventory = this.#outfit.inventory;
-        inventory = inventory.concat(extraItems);
-        this.#outfit.inventory = this.fillEmptySlots(inventory, inventorySize);
+    #fillEmptySlotsOutfit(outfit: Outfit) {
+        const { engines, weapons, inventory } = outfit;
+        return {
+            engines: this.#fillEmptySlotsItems(engines, this.engineSlotCount),
+            weapons: this.#fillEmptySlotsItems(weapons, this.weaponSlotCount),
+            inventory: this.#fillEmptySlotsItems(inventory, this.inventorySlotCount),
+        };
     }
 
-    fillEmptySlots(items: Item[], upToCount: number) {
+    #fillEmptySlotsItems(items: Item[], upToCount: number) {
         if (upToCount >= items.length) {
             const emptySlotsToAdd = upToCount - items.length;
             const emptySlots = Array(emptySlotsToAdd).fill(null);
 
-            items = items.concat(emptySlots);
+            items = [...items, ...emptySlots];
         }
         return items;
+    }
+    #syncWeapons(weapons: Item[]) {
+        weapons.forEach((weapon, index) => this.ship.weapons.placeWeapon(weapon?.itemName, index));
+    }
+    #syncEngines(engines: Item[]) {
+        engines.forEach((engine, index) => this.ship.exhausts.placeEngine(engine?.itemName, index));
+    }
+
+    #pushExtraItemsToInv(outfit: Outfit) {
+        const [weapons, extraWeapons] = this.#splitExtraWeapons(outfit.weapons);
+        const [engines, extraEngines] = this.#splitExtraEngines(outfit.engines);
+
+        const extraItems = [...extraWeapons, ...extraEngines];
+        const inventory = [...outfit.inventory, ...extraItems];
+
+        return {
+            weapons,
+            engines,
+            inventory,
+        };
+    }
+    #splitExtraWeapons(weapons: Item[]): [Item[], Item[]] {
+        let extraWeapons: Item[] = [];
+
+        const weaponsInv = weapons.filter((weapon, index) => {
+            const doesFit = this.ship.weapons.canBePlaced(weapon?.itemName, index);
+            const isExtraItem = !doesFit && weapon !== null;
+            if (isExtraItem) extraWeapons.push(weapon);
+
+            return !isExtraItem;
+        });
+
+        return [weaponsInv, extraWeapons];
+    }
+    #splitExtraEngines(engines: Item[]): [Item[], Item[]] {
+        let extraEngines: Item[] = [];
+
+        const enginesInv = engines.filter((engine, index) => {
+            const doesFit = this.ship.exhausts.canBePlaced(engine?.itemName, index);
+            const isExtraItem = !doesFit && engine !== null;
+            if (isExtraItem) extraEngines.push(engine);
+
+            return !isExtraItem;
+        });
+
+        return [enginesInv, extraEngines];
     }
 }

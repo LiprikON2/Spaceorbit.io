@@ -41,12 +41,10 @@ export const AccordionButton = ({
                         paddingLeft: `calc(3.125rem + ${theme.spacing.xs})`,
                         borderRadius: theme.fn.radius(theme.defaultRadius),
                         ...buttonStyles,
-                        "&:hover": {
-                            background: buttonStyles.hover,
-                        },
-                        "&:active": {
-                            transform: `translateY(calc(${theme.spacing.xs} * 0.1))`,
-                        },
+
+                        "&:hover": { background: buttonStyles.hover },
+                        "&:active": { transform: `translateY(calc(${theme.spacing.xs} * 0.1))` },
+                        "&:disabled:hover": { background: buttonStyles.hover },
                     },
                     item: {
                         backgroundColor: "transparent",

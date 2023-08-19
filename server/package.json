@@ -9,7 +9,7 @@
     },
     "scripts": {
         "dev": "npm run prod",
-        "prod": "npx nodemon --exec \"vite build && node dist/app.js\" -e ts --ignore dist/",
+        "prod": "npx nodemon --verbose --exec \"vite build && node dist/app.js\" -e ts --ignore dist/",
         "prod-https": "npm-run-all -p -r prod ngrok",
         "build": "vite build",
         "migrate": "npx prisma migrate dev --name ' ' && npx prisma generate",

@@ -20,6 +20,7 @@ const fontFamilyMonospace =
 const theme: Partial<MantineTheme> = {
     colorScheme: "dark",
     loader: "dots",
+    primaryColor: "cyan",
 
     focusRingStyles: {
         // reset styles are applied to <button /> and <a /> elements

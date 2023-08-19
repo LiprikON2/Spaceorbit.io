@@ -15,6 +15,7 @@ import {
 } from "@spaceorbit/client/src/game/scripts/managers/BaseCollisionManager";
 import { ServerEntityManager } from "~/server/game/ServerEntityManager";
 import { EveryTick } from "@spaceorbit/client/src/game/scripts/utils/EveryTick";
+import type { Outfit } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship/components";
 
 interface ServerHitData extends ClientHitData {
     ownerId: ChannelId;
@@ -105,6 +106,13 @@ export class ServerScene extends BaseMapScene {
                     (worldX, worldY) => this.sendRespawned(channel.id!, worldX, worldY)
                 )
             );
+
+            channel.on("player:request-reoutfit", (outfit) =>
+                this.entityManager.reoutfitEntity(channel.id!, outfit as Outfit, (outfit) =>
+                    this.sendReoutfitted(channel.id!, outfit)
+                )
+            );
+
             channel.on("message", (message) => this.broadcastMessage(channel, message));
 
             channel.onDisconnect((reason) => {
@@ -122,6 +130,10 @@ export class ServerScene extends BaseMapScene {
             { id: entityId, point: { worldX, worldY } },
             { reliable: true }
         );
+    }
+    sendReoutfitted(entityId: string, outfit: Outfit) {
+        console.log("entity:reoutfit");
+        this.game.server.emit("entity:reoutfit", { id: entityId, outfit }, { reliable: true });
     }
 
     assertHit({
@@ -150,7 +162,7 @@ export class ServerScene extends BaseMapScene {
 
         // TODO make some validations
         // if (hit is not already marked as successfull)
-        // if (projectile origin weapon slot is legit)
+        // if (projectile origin weapon slot is legit) (if not REOUTFIT)
         // if (projectile type is legit)
         // if (projectile traveled legit distance)
         // if (firerate is legit)

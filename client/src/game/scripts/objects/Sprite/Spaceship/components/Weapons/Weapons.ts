@@ -80,21 +80,21 @@ export class Weapons {
         this.createLaser(middleSlot);
     }
 
-    placeWeapon(type, slot) {
-        let doesFit = false;
+    placeWeapon(type: string, slot: number) {
         if (slot <= this.slotCount - 1) {
             if (type === "laser") {
                 this.createLaser(slot);
-                doesFit = true;
             } else if (type === "gatling") {
                 this.createGatling(slot);
-                doesFit = true;
             } else if (!type) {
                 this.clearSlot(slot);
             }
         }
-
-        return doesFit;
+    }
+    canBePlaced(type: string, slot: number) {
+        const isEnoughSlots = slot <= this.slotCount - 1;
+        const isWeaponType = [null, "laser", "gatling"].includes(type);
+        return isEnoughSlots && isWeaponType;
     }
 
     createLaser(slot: number) {

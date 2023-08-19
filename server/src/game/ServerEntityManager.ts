@@ -48,7 +48,8 @@ export class ServerEntityManager extends BaseEntityManager {
 
     getUpdatedServerOptions(serverOptions: SpaceshipServerOptions, entity: Spaceship) {
         const { x, y, angle } = entity.getActionsState();
-        return { ...serverOptions, x, y, angle };
+        const { outfit } = entity.outfitting;
+        return { ...serverOptions, x, y, angle, outfit };
     }
 
     getPlayerById(playerId: string) {

@@ -224,6 +224,20 @@ export class BaseEntityManager {
         return [worldX, worldY];
     }
 
+    reoutfitEntity(
+        entityId: string,
+        newOutfit: Outfit,
+
+        callback: (outfit: Outfit) => void = () => {}
+    ) {
+        console.log("entity:reoutfit");
+
+        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
+        if (entity) entity.outfitting.setOutfit(newOutfit, false);
+
+        callback(entity.outfitting.outfit);
+    }
+
     updateEntityStatus(id: string, status: StatusState) {
         const [entity] = this.entityGroup.getMatching("id", id);
         if (entity) entity.setStatusState(status);

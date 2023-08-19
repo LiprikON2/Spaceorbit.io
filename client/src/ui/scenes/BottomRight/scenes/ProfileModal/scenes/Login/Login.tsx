@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDidUpdate } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
-import { TextInput, PasswordInput, Space, Stack, Anchor } from "@mantine/core";
+import { Text, TextInput, PasswordInput, Space, Stack, Anchor } from "@mantine/core";
 
 import { Button, Errors } from "~/ui/components";
 import { useLoginMutation } from "./hooks";
@@ -44,9 +44,13 @@ export const Login = ({ setShowLogIn, initEmailPass = {}, setInitEmailPass }) =>
                 />
                 <Space h="sm" />
                 <Button type="submit">Log In</Button>
-                <Anchor type="button" onClick={() => setShowLogIn(false)}>
-                    Sign Up
-                </Anchor>
+                <Text ta="center">
+                    {"No account? "}
+                    <Anchor type="button" onClick={() => setShowLogIn(false)}>
+                        Sign Up
+                    </Anchor>
+                    {"."}
+                </Text>
             </Stack>
         </form>
     );

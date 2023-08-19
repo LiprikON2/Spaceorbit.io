@@ -19,7 +19,9 @@ export const AccordionControl = ({
                 height: "3.125rem",
             })}
         >
+            {/* Main Button */}
             <Accordion.Control {...rest} />
+            {/* Chevron button */}
             <ActionIcon
                 className="mantine-Accordion-chevron"
                 onClick={onChevronClick}

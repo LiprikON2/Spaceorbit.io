@@ -13,6 +13,7 @@ import {
 } from "~/managers";
 import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
 import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
+import type { Outfit } from "~/game/objects/Sprite/Spaceship/components";
 
 export interface MultiplayerEvents {
     "connection:established"?: {
@@ -32,6 +33,7 @@ export interface MultiplayerEvents {
         on: () => void;
     };
     "player:request-respawn"?: {
+        emit: null;
         on: () => void;
     };
     "players:already-connected"?: {
@@ -55,6 +57,13 @@ export interface MultiplayerEvents {
     "entity:respawn"?: {
         emit: { id: string; point: { worldX: number; worldY: number } };
         on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
+    };
+    "player:request-reoutfit"?: {
+        emit: Outfit;
+        on: (outfit: Outfit) => void;
+    };
+    "entity:reoutfit"?: {
+        on: (entityRespawnData: { id: string; outfit: Outfit }) => void;
     };
     "entity:status"?: {
         emit: { id: string; status: StatusState };
