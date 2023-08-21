@@ -6,7 +6,7 @@ import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 import { Status, type StatusState } from "./components/Status";
-import { Healthbar } from "~/game/objects/Healthbar/Healthbar";
+import { HealthbarUI } from "~/game/objects/Healthbar/HealthbarUI";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -80,12 +80,9 @@ export class Spaceship extends Sprite {
     };
 
     outfitting: Outfitting;
-    followText: Phaser.GameObjects.Text;
-    healthbar: Healthbar;
-    shieldbar: Healthbar;
+
     status: Status;
     baseStats: { health: number; hitboxRadius: number; speed: number };
-    multipliers: Multipliers;
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
@@ -166,18 +163,30 @@ export class Spaceship extends Sprite {
         this.baseStats = baseStats;
         this.setCircularHitbox(this.baseStats.hitboxRadius);
 
-        const { multipliers } = serverOptions;
-        this.multipliers = multipliers;
-        this.status = new Status({ ship: this, baseStats, multipliers });
+        const { x, y } = serverOptions;
+        this.boundingBox = this.scene.add.rexContainerLite(
+            x,
+            y,
+            this.body.width * this.scale,
+            this.body.height * this.scale
+        );
+        this.scene.physics.world.enable(this.boundingBox);
+        this.scene.physics.world.enableBody(this.boundingBox);
+        this.boundingBox.body.setCollideWorldBounds(true);
 
+        this.shields = new Shields(this);
+        this.boundingBox.pin(this, { syncRotation: false });
+        this.boundingBox.pin(this.shields, { syncRotation: false });
+
+        // Modules
         const { modules } = this.atlasMetadata;
         this.modules = modules;
-        // Modules
+
         const { scene } = clientOptions;
-        const damageMultiplier = this.multipliers.damage;
         this.exhausts = new Exhausts(scene, this, this.modules.exhaustOrigins);
-        this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, damageMultiplier);
-        this.shields = new Shields(this);
+
+        const { multipliers } = serverOptions;
+        this.weapons = new Weapons(scene, this, this.modules.weaponOrigins, multipliers.damage);
 
         const { outfit } = serverOptions;
         this.outfitting = new Outfitting(scene, this, outfit);
@@ -191,60 +200,11 @@ export class Spaceship extends Sprite {
         const { projectileGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
 
-        if (this.status.shields === 0) this.shields.crack(false);
-
-        // Text
-        const { username, x, y } = serverOptions;
+        const { username } = serverOptions;
         this.setName(username);
 
-        const shieldbarOffsetY = this.body.height * this.scale + 50;
-        this.shieldbar = new Healthbar({
-            y: shieldbarOffsetY,
-            ship: this,
-            scene: this.scene,
-
-            fillColor: 0x00ffe1,
-        });
-        const healthbarOffsetY = shieldbarOffsetY + 15;
-        // const healthbarOffsetY = shieldbarOffsetY + 25;
-        this.healthbar = new Healthbar({
-            y: healthbarOffsetY,
-            ship: this,
-            scene: this.scene,
-            toFlip: true,
-
-            fillColor: 0x00ab17,
-        });
-
-        const textOffsetY = healthbarOffsetY + 30;
-        this.followText = this.scene.add
-            .text(x, y + textOffsetY, username, {
-                color: "rgba(255, 255, 255, 0.75)",
-                fontSize: "1.75rem",
-                fontFamily: "Kanit",
-            })
-            .setAlign("center")
-            .setOrigin(0.5)
-            .setAlpha(1)
-            .setDepth(this.depth + 5);
-
-        // Movement
-        this.boundingBox = this.scene.add.rexContainerLite(
-            x,
-            y,
-            this.body.width * this.scale,
-            this.body.height * this.scale
-        );
-        this.scene.physics.world.enable(this.boundingBox);
-        this.scene.physics.world.enableBody(this.boundingBox);
-        this.boundingBox.pin(this, { syncRotation: false });
-        this.boundingBox.pin(
-            [this.shields, this.followText, this.shieldbar.box, this.healthbar.box],
-            {
-                syncRotation: false,
-            }
-        );
-        this.boundingBox.body.setCollideWorldBounds(true);
+        this.status = new Status({ ship: this, baseStats, multipliers }, { scene: this.scene });
+        if (this.status.shields === 0) this.shields.crack(false);
 
         // @ts-ignore
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
@@ -316,6 +276,7 @@ export class Spaceship extends Sprite {
 
         this.boundingBox.body.enable = false;
         this.disableBody(true, false);
+        this.status.updateUI();
         this.stopThrust();
 
         if (this.isTextured) {
@@ -353,7 +314,7 @@ export class Spaceship extends Sprite {
         const isValidNewTarget = notSameTarget && didNotTargetSelf;
         if (isValidNewTarget) {
             if (prevTarget) {
-                const { followText } = prevTarget;
+                const { followText } = prevTarget.status;
                 followText.setText(followText.text.slice(1, -1));
                 prevTarget.targetedBy = prevTarget.targetedBy.filter(
                     (targetee) => targetee !== this
@@ -362,7 +323,7 @@ export class Spaceship extends Sprite {
             }
 
             if (target) {
-                target.followText.setText("[" + target.followText.text + "]");
+                target.status.followText.setText("[" + target.status.followText.text + "]");
                 target.targetedBy.push(this);
             }
             this.target = target;
@@ -595,9 +556,6 @@ export class Spaceship extends Sprite {
         } else if (this.primaryFireState.active) {
             this.primaryFire(time);
         }
-
-        this.healthbar.update(time, delta);
-        this.shieldbar.update(time, delta);
     }
 
     getActionsState(): ActionsState {

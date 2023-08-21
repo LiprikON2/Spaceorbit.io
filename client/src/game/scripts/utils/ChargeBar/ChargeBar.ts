@@ -39,6 +39,10 @@ export class ChargeBar {
     get value() {
         return this.#value;
     }
+
+    get normalizedValue() {
+        return (this.#value - this.minValue) / (this.maxValue - this.minValue);
+    }
     setValue(newValue: number) {
         this.#value = clamp(newValue, this.minValue, this.maxValue);
     }

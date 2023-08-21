@@ -1,5 +1,7 @@
 import type { Multipliers, Spaceship } from "../Spaceship";
 import { EveryTick, DebounceChargeBar } from "~/game/utils";
+import { HealthbarUI } from "~/game/objects";
+import type { BaseScene } from "~/game/scenes/core";
 
 export interface StatusState {
     health: number;
@@ -17,15 +19,22 @@ export interface StatusServerOptions {
     baseStats: BaseStats;
     multipliers: Multipliers;
 }
-export interface StatusClientOptions {}
+export interface StatusClientOptions {
+    scene: BaseScene;
+}
 
 export class Status {
+    ship: Spaceship;
+    scene: BaseScene;
+    baseStats: BaseStats;
+    multipliers: Multipliers;
+
     healthBar: DebounceChargeBar;
     shieldsBar: DebounceChargeBar;
 
-    ship: Spaceship;
-    baseStats: BaseStats;
-    multipliers: Multipliers;
+    healthbarUI: HealthbarUI;
+    shieldbarUI: HealthbarUI;
+    followText: Phaser.GameObjects.Text;
 
     everyTick = new EveryTick(10);
 
@@ -60,7 +69,9 @@ export class Status {
         return speed;
     }
 
-    constructor(serverOptions: StatusServerOptions, clientOptions?: StatusClientOptions) {
+    constructor(serverOptions: StatusServerOptions, clientOptions: StatusClientOptions) {
+        const { scene } = clientOptions;
+        this.scene = scene;
         const { ship } = serverOptions;
         this.ship = ship;
 
@@ -89,6 +100,41 @@ export class Status {
             state: "increasing",
 
             decreasePerSecond: 0,
+        });
+
+        const shieldbarOffsetY = this.ship.body.height * this.ship.scale + 50;
+        this.shieldbarUI = new HealthbarUI({
+            y: shieldbarOffsetY,
+            ship: this.ship,
+            scene: this.scene,
+
+            fillColor: 0x00ffe1,
+        });
+        const healthbarOffsetY = shieldbarOffsetY + 15;
+        // const healthbarOffsetY = shieldbarOffsetY + 25;
+        this.healthbarUI = new HealthbarUI({
+            y: healthbarOffsetY,
+            ship: this.ship,
+            scene: this.scene,
+            toFlip: true,
+
+            fillColor: 0x00ab17,
+        });
+
+        const textOffsetY = healthbarOffsetY + 30;
+        this.followText = this.scene.add
+            .text(this.ship.x, this.ship.y + textOffsetY, this.ship.name, {
+                color: "rgba(255, 255, 255, 0.75)",
+                fontSize: "1.75rem",
+                fontFamily: "Kanit",
+            })
+            .setAlign("center")
+            .setOrigin(0.5)
+            .setAlpha(1)
+            .setDepth(this.ship.depth + 5);
+
+        this.ship.boundingBox.pin([this.followText, this.shieldbarUI.box, this.healthbarUI.box], {
+            syncRotation: false,
         });
     }
 
@@ -141,5 +187,12 @@ export class Status {
 
         this.healthBar.update(time, delta);
         this.shieldsBar.update(time, delta);
+
+        this.updateUI();
+    }
+
+    updateUI() {
+        this.healthbarUI.setProgress(this.healthBar.normalizedValue);
+        this.shieldbarUI.setProgress(this.shieldsBar.normalizedValue);
     }
 }

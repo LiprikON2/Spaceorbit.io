@@ -30,7 +30,7 @@ const defaultClientOptions = {
     strokeWidth: 2,
 };
 
-export class Healthbar {
+export class HealthbarUI {
     frameShape: BarShape;
     fillShape: BarShape;
     ship: Spaceship;
@@ -71,33 +71,29 @@ export class Healthbar {
             .setStrokeStyle(undefined, undefined, undefined);
 
         const { x, y } = mergedClientOptions;
-        this.frameShape.setPosition(x, y);
-        this.fillShape.setPosition(x, y);
+        this.frameShape.setPosition(this.ship.x + x, this.ship.y + y);
+        this.fillShape.setPosition(this.ship.x + x, this.ship.y + y);
 
         this.box = this.scene.add.rexContainerLite();
         this.box.pin([this.frameShape, this.fillShape]);
-    }
-
-    flip(point: Point, height: number): Point {
-        return { x: point.x, y: point.y * -1 + height };
     }
 
     setProgress(progressPercentage: number = 1) {
         this.fillShape.setProgress(progressPercentage);
     }
 
-    update(time: number, delta: number) {
-        const nextVal = (val, min = 0, max = 0.1, step = 0.001) => {
-            // // 0% - 2.9%
-            // const nextVal = (val, min = 0, max = 0.029, step = 0.001) => {
-            // // 2.9% - 10%
-            // const nextVal = (val, min = 0.029, max = 0.1, step = 0.005) => {
-            const newVal = val + step;
-            if (newVal > max) return min;
-            else return newVal;
-        };
-        if (Phaser.Math.FloatBetween(0, 1) > 0.95) {
-            this.setProgress(nextVal(this.fillShape.progress));
-        }
-    }
+    // update(time: number, delta: number) {
+    //     const nextVal = (val, min = 0, max = 0.1, step = 0.001) => {
+    //         // // 0% - 2.9%
+    //         // const nextVal = (val, min = 0, max = 0.029, step = 0.001) => {
+    //         // // 2.9% - 10%
+    //         // const nextVal = (val, min = 0.029, max = 0.1, step = 0.005) => {
+    //         const newVal = val + step;
+    //         if (newVal > max) return min;
+    //         else return newVal;
+    //     };
+    //     if (Phaser.Math.FloatBetween(0, 1) > 0.95) {
+    //         this.setProgress(nextVal(this.fillShape.progress));
+    //     }
+    // }
 }

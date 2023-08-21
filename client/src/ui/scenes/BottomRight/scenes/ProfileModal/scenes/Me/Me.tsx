@@ -27,7 +27,7 @@ export const Me = ({ onLogout }) => {
     const handleLoad = () => {
         if (isLoaded) {
             player.respawn(me.x, me.y);
-            player.followText.setText(me.username);
+            player.status.followText.setText(me.username);
         }
     };
     const [nonFieldErrors, setNonFieldErrors] = useState("");

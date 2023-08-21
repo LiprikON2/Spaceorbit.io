@@ -20,7 +20,6 @@ export class BarShape extends CustomShape {
     constructor(options: BarShapeClientOptions) {
         super(options.scene, {
             create: [{ name: "bar", type: "lines" }],
-            // create: { lines: 1 },
         });
         this.scene.add.existing(this);
         this.setOrigin(0.5);
@@ -29,8 +28,6 @@ export class BarShape extends CustomShape {
         this.width = width;
         this.height = height;
         this.flipped = toFlip;
-
-        // window["test"] = this;
 
         this.setUpdateShapesCallback(() => {
             const shape = this.getShapes()[0] as Lines;
@@ -54,7 +51,7 @@ export class BarShape extends CustomShape {
         return this.progress / this.cornerWidthRatio;
     }
     /**
-     * Inversed five sided or less progress
+     * Inversed progress for five sided or less bar
      */
     get invFiveSidedOrLessProgress() {
         return 1 - this.fiveSidedOrLessProgress;
@@ -81,7 +78,6 @@ export class BarShape extends CustomShape {
         const progressWidth = this.width * this.sixSidedProgress;
 
         shape
-            // @ts-ignore
             .startAt(left.x, left.y)
             .lineTo(topLeft.x, topLeft.y)
             .lineTo(topRight.x + progressWidth, topRight.y)
@@ -106,7 +102,6 @@ export class BarShape extends CustomShape {
         const bottomIntersec = this.#getBottomIntersection(rightX, bottomRightX);
 
         shape
-            // @ts-ignore
             .startAt(left.x, left.y)
             .lineTo(topIntersec?.x ?? topRightX, topIntersec?.y ?? topRight.y)
             .lineTo(rightX, right.y)
@@ -128,7 +123,6 @@ export class BarShape extends CustomShape {
         const bottomIntersec = this.#getBottomIntersection(rightX, bottomRightX);
 
         shape
-            // @ts-ignore
             .startAt(left.x, left.y)
             .lineTo(topIntersec?.x ?? topRightX, topIntersec?.y ?? topRight.y)
             .lineTo(rightX, right.y)
