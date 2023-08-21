@@ -30,68 +30,142 @@ export class BarShape extends CustomShape {
         this.height = height;
         this.flipped = toFlip;
 
-        window["test"] = this;
+        // window["test"] = this;
 
         this.setUpdateShapesCallback(() => {
-            const progress = this.progress;
-            const { left, topLeft, topRight, right, bottomRight, bottomLeft } = this.getPoints();
+            const shape = this.getShapes()[0] as Lines;
+            shape
+                .lineStyle(this.lineWidth, this.strokeColor, this.strokeAlpha)
+                .fillStyle(this.fillColor, this.fillAlpha);
 
-            const shape = this.getShapes()[0];
-
-            // const cornerWidth = topLeft.x - left.x;
-            // const cornerWidthRatio = cornerWidth / width;
-
-            // console.log("widht", width);
-            // console.log("cornerWidth", cornerWidth);
-            // console.log("cornerWidthRatio", cornerWidthRatio);
-            if (progress > this.cornerWidthRatio) {
-                // Range: 0.028 - 1 -> becomes: 0 - 1
-                const normalizedProgress =
-                    (progress - this.cornerWidthRatio) / (1 - this.cornerWidthRatio);
-                const progressWidth = width * normalizedProgress;
-                shape
-                    .lineStyle(this.lineWidth, this.strokeColor, this.strokeAlpha)
-                    .fillStyle(this.fillColor, this.fillAlpha)
-                    // @ts-ignore
-                    .startAt(left.x, left.y)
-                    .lineTo(topLeft.x, topLeft.y)
-                    .lineTo(topRight.x + progressWidth, topRight.y)
-                    .lineTo(right.x + progressWidth, right.y)
-                    .lineTo(bottomRight.x + progressWidth, bottomRight.y)
-                    .lineTo(bottomLeft.x, bottomLeft.y)
-                    .lineTo(left.x, left.y)
-                    .close()
-                    .offset(-(height * 0.4), 0);
-            } else {
-                // Range: 0 - 0.028 -> becomes: 0 - 1
-                const normalizedProgress = (progress - 0) / (this.cornerWidthRatio - 0);
-                const inverseProgress = 1 - normalizedProgress;
-
-                shape
-                    .lineStyle(this.lineWidth, this.strokeColor, this.strokeAlpha)
-                    .fillStyle(this.fillColor, this.fillAlpha)
-                    // @ts-ignore
-                    .startAt(left.x - left.x * inverseProgress, left.y)
-                    .lineTo(topLeft.x - topLeft.x * inverseProgress, topLeft.y)
-                    .lineTo(topRight.x - topRight.x * inverseProgress, topRight.y)
-                    .lineTo(right.x - right.x * inverseProgress, right.y)
-                    .lineTo(bottomRight.x - bottomRight.x * inverseProgress, bottomRight.y)
-                    .lineTo(bottomLeft.x - bottomLeft.x * inverseProgress, bottomLeft.y)
-                    .lineTo(left.x - left.x * inverseProgress, left.y)
-                    .close()
-                    .offset(-(height * 0.4), 0);
-            }
-            // .offset(-(topLeft.x + topRight.x + width / 2), -(height / 2));
+            if (this.isSixSided) this.#makeShapeSixSided(shape);
+            else if (this.isFiveSided) this.#makeShapeFiveSided(shape);
+            else if (this.isFourSided) this.#makeShapeFourSided(shape);
         });
     }
 
+    get sixSidedProgress() {
+        // Progress: 0.028 - 1 -> becomes: 0 - 1
+        return (this.progress - this.cornerWidthRatio) / (1 - this.cornerWidthRatio);
+    }
+
+    get fiveSidedOrLessProgress() {
+        // Progress: 0 - 0.028 -> becomes: 0 - 1
+        return this.progress / this.cornerWidthRatio;
+    }
+    /**
+     * Inversed five sided or less progress
+     */
+    get invFiveSidedOrLessProgress() {
+        return 1 - this.fiveSidedOrLessProgress;
+    }
+
+    get isSixSided() {
+        return this.progress > this.cornerWidthRatio;
+    }
+    get isFiveSided() {
+        const { topLeft, topRight, right, bottomRight, bottomLeft } = this.getPoints();
+
+        const topRightX = topRight.x - right.x * this.invFiveSidedOrLessProgress;
+        const bottomRightX = bottomRight.x - right.x * this.invFiveSidedOrLessProgress;
+
+        return topLeft.x >= topRightX && bottomLeft.x < bottomRightX;
+    }
+    get isFourSided() {
+        return !this.isFiveSided && !this.isSixSided;
+    }
+
+    #makeShapeSixSided(shape: Lines) {
+        const { left, topLeft, topRight, right, bottomRight, bottomLeft } = this.getPoints();
+
+        const progressWidth = this.width * this.sixSidedProgress;
+
+        shape
+            // @ts-ignore
+            .startAt(left.x, left.y)
+            .lineTo(topLeft.x, topLeft.y)
+            .lineTo(topRight.x + progressWidth, topRight.y)
+            .lineTo(right.x + progressWidth, right.y)
+            .lineTo(bottomRight.x + progressWidth, bottomRight.y)
+            .lineTo(bottomLeft.x, bottomLeft.y)
+            .lineTo(left.x, left.y)
+            .close()
+            .offset(-topLeft.x, 0);
+
+        return shape;
+    }
+
+    #makeShapeFiveSided(shape: Lines) {
+        const { left, topLeft, topRight, right, bottomRight, bottomLeft } = this.getPoints();
+
+        const topRightX = topRight.x - right.x * this.invFiveSidedOrLessProgress;
+        const rightX = right.x - right.x * this.invFiveSidedOrLessProgress;
+        const bottomRightX = bottomRight.x - right.x * this.invFiveSidedOrLessProgress;
+
+        const topIntersec = this.#getTopIntersection(rightX, topRightX);
+        const bottomIntersec = this.#getBottomIntersection(rightX, bottomRightX);
+
+        shape
+            // @ts-ignore
+            .startAt(left.x, left.y)
+            .lineTo(topIntersec?.x ?? topRightX, topIntersec?.y ?? topRight.y)
+            .lineTo(rightX, right.y)
+            .lineTo(bottomRightX, bottomIntersec?.y ?? bottomRight.y)
+            .lineTo(bottomIntersec?.x ?? bottomLeft.x, bottomIntersec?.y ?? bottomLeft.y)
+            .lineTo(left.x, left.y)
+            .close()
+            .offset(-topLeft.x, 0);
+    }
+
+    #makeShapeFourSided(shape: Lines) {
+        const { left, topLeft, topRight, right, bottomRight } = this.getPoints();
+
+        const topRightX = topRight.x - right.x * this.invFiveSidedOrLessProgress;
+        const rightX = right.x - right.x * this.invFiveSidedOrLessProgress;
+        const bottomRightX = bottomRight.x - right.x * this.invFiveSidedOrLessProgress;
+
+        const topIntersec = this.#getTopIntersection(rightX, topRightX);
+        const bottomIntersec = this.#getBottomIntersection(rightX, bottomRightX);
+
+        shape
+            // @ts-ignore
+            .startAt(left.x, left.y)
+            .lineTo(topIntersec?.x ?? topRightX, topIntersec?.y ?? topRight.y)
+            .lineTo(rightX, right.y)
+            .lineTo(bottomIntersec?.x ?? bottomRightX, bottomIntersec?.y ?? bottomRight.y)
+            .lineTo(left.x, left.y)
+            .close()
+            .offset(-topLeft.x, 0);
+    }
+
+    #getTopIntersection(rightX: number, topRightX: number) {
+        const { left, topLeft, topRight, right } = this.getPoints();
+
+        const topIntersec = Phaser.Geom.Intersects.GetLineToLine(
+            new Phaser.Geom.Line(left.x, left.y, topLeft.x, topLeft.y),
+            new Phaser.Geom.Line(rightX, right.y, topRightX, topRight.y)
+        );
+
+        return topIntersec;
+    }
+
+    #getBottomIntersection(rightX: number, bottomRightX: number) {
+        const { left, right, bottomRight, bottomLeft } = this.getPoints();
+
+        const bottomIntersec = Phaser.Geom.Intersects.GetLineToLine(
+            new Phaser.Geom.Line(left.x, left.y, bottomLeft.x, bottomLeft.y),
+            new Phaser.Geom.Line(rightX, right.y, bottomRightX, bottomRight.y)
+        );
+        return bottomIntersec;
+    }
+
+    /**
+     * Ratio, after which, the bar becomes 6 -> 5 sided
+     */
     get cornerWidthRatio() {
         const { topLeft, left } = this.getPoints();
         const cornerWidth = topLeft.x - left.x;
         const cornerWidthRatio = cornerWidth / this.width;
-        // console.log("widht", width);
-        // console.log("cornerWidth", cornerWidth);
-        // console.log("cornerWidthRatio", cornerWidthRatio);
 
         return cornerWidthRatio;
     }
@@ -105,12 +179,6 @@ export class BarShape extends CustomShape {
             bottomLeft: Point;
         const { height } = this;
 
-        // left = { x: -0.4 * height, y: 0.6 * height };
-        // topLeft = { x: 0 * height, y: 0 * height };
-        // topRight = { x: 0 * height, y: 0 * height };
-        // right = { x: 0.4 * height, y: 0.6 * height };
-        // bottomRight = { x: 0.2 * height, y: 1 * height };
-        // bottomLeft = { x: -0.2 * height, y: 1 * height };
         left = { x: 0 * height, y: 0.6 * height };
         topLeft = { x: 0.4 * height, y: 0 * height };
         topRight = { x: 0.4 * height, y: 0 * height };
@@ -135,12 +203,6 @@ export class BarShape extends CustomShape {
     }
 
     setProgress(progress: number) {
-        // // if (progress <= 0.01)
-        // this.subPercentCoef = Math.min(progress * 100, 1);
-
-        // if (progress <= 0.001) this.setVisible(false);
-        // else this.setVisible(true);
-
         this.progress = progress;
         this.setDirty();
 

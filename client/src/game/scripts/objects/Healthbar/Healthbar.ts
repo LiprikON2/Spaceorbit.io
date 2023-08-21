@@ -21,8 +21,8 @@ type Point = { x: number; y: number };
 
 const defaultClientOptions = {
     width: 200,
-    // height: 8,
-    height: 16,
+    height: 8,
+    // height: 16,
     toFlip: false,
     x: 0,
     y: 0,
@@ -87,17 +87,17 @@ export class Healthbar {
     }
 
     update(time: number, delta: number) {
-        // // 0% - 2.9%
-        // const nextVal = (val, min = 0, max = 0.029, step = 0.002) => {
-        // 2.9% - 10%
-        const nextVal = (val, min = 0.029, max = 0.1, step = 0.005) => {
+        const nextVal = (val, min = 0, max = 0.1, step = 0.001) => {
+            // // 0% - 2.9%
+            // const nextVal = (val, min = 0, max = 0.029, step = 0.001) => {
+            // // 2.9% - 10%
+            // const nextVal = (val, min = 0.029, max = 0.1, step = 0.005) => {
             const newVal = val + step;
             if (newVal > max) return min;
             else return newVal;
         };
-
-        // if (Phaser.Math.FloatBetween(0, 1) > 0.99) {
-        //     this.setProgress(nextVal(this.fillShape.progress));
-        // }
+        if (Phaser.Math.FloatBetween(0, 1) > 0.95) {
+            this.setProgress(nextVal(this.fillShape.progress));
+        }
     }
 }

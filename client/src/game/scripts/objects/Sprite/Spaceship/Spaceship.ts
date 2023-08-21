@@ -205,8 +205,8 @@ export class Spaceship extends Sprite {
 
             fillColor: 0x00ffe1,
         });
-        // const healthbarOffsetY = shieldbarOffsetY + 15;
-        const healthbarOffsetY = shieldbarOffsetY + 25;
+        const healthbarOffsetY = shieldbarOffsetY + 15;
+        // const healthbarOffsetY = shieldbarOffsetY + 25;
         this.healthbar = new Healthbar({
             y: healthbarOffsetY,
             ship: this,
