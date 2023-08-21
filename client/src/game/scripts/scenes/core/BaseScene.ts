@@ -1,4 +1,6 @@
-import Factory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
+import type ContainerLiteFactory from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/Factory";
+import type CustomShapeFactory from "phaser3-rex-plugins/plugins/gameobjects/shape/customshapes/Factory.js";
+
 import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import type { ChannelId } from "@geckos.io/client";
 import BezierEasing from "bezier-easing";
@@ -86,7 +88,10 @@ export class BaseScene extends Phaser.Scene {
     game: GameClient;
     rootElem: HTMLElement | null;
     plugins: Phaser.Plugins.PluginManager;
-    add: Phaser.GameObjects.GameObjectFactory & { rexContainerLite: Factory };
+    add: Phaser.GameObjects.GameObjectFactory & {
+        rexContainerLite: ContainerLiteFactory;
+        rexCustomShapes: CustomShapeFactory;
+    };
 
     entityManager: BaseEntityManager;
     collisionManager: BaseCollisionManager;

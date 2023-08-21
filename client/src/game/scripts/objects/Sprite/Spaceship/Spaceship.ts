@@ -6,6 +6,7 @@ import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 import { Status, type StatusState } from "./components/Status";
+import { Healthbar } from "~/game/objects/Healthbar/Healthbar";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -80,6 +81,8 @@ export class Spaceship extends Sprite {
 
     outfitting: Outfitting;
     followText: Phaser.GameObjects.Text;
+    healthbar: Healthbar;
+    shieldbar: Healthbar;
     status: Status;
     baseStats: { health: number; hitboxRadius: number; speed: number };
     multipliers: Multipliers;
@@ -191,16 +194,33 @@ export class Spaceship extends Sprite {
         if (this.status.shields === 0) this.shields.crack(false);
 
         // Text
-        // TODO make a display class
-        // TODO use `Nine Slice Game Object` to display hp
         const { username, x, y } = serverOptions;
         this.setName(username);
 
-        const textOffsetY = this.body.height * this.scale + 50;
+        const shieldbarOffsetY = this.body.height * this.scale + 50;
+        this.shieldbar = new Healthbar({
+            y: shieldbarOffsetY,
+            ship: this,
+            scene: this.scene,
+
+            fillColor: 0x00ffe1,
+        });
+        // const healthbarOffsetY = shieldbarOffsetY + 15;
+        const healthbarOffsetY = shieldbarOffsetY + 25;
+        this.healthbar = new Healthbar({
+            y: healthbarOffsetY,
+            ship: this,
+            scene: this.scene,
+            toFlip: true,
+
+            fillColor: 0x00ab17,
+        });
+
+        const textOffsetY = healthbarOffsetY + 30;
         this.followText = this.scene.add
             .text(x, y + textOffsetY, username, {
                 color: "rgba(255, 255, 255, 0.75)",
-                fontSize: "2rem",
+                fontSize: "1.75rem",
                 fontFamily: "Kanit",
             })
             .setAlign("center")
@@ -218,8 +238,12 @@ export class Spaceship extends Sprite {
         this.scene.physics.world.enable(this.boundingBox);
         this.scene.physics.world.enableBody(this.boundingBox);
         this.boundingBox.pin(this, { syncRotation: false });
-        this.boundingBox.pin(this.shields, { syncRotation: false });
-        this.boundingBox.pin(this.followText, { syncRotation: false });
+        this.boundingBox.pin(
+            [this.shields, this.followText, this.shieldbar.box, this.healthbar.box],
+            {
+                syncRotation: false,
+            }
+        );
         this.boundingBox.body.setCollideWorldBounds(true);
 
         // @ts-ignore
@@ -571,6 +595,9 @@ export class Spaceship extends Sprite {
         } else if (this.primaryFireState.active) {
             this.primaryFire(time);
         }
+
+        this.healthbar.update(time, delta);
+        this.shieldbar.update(time, delta);
     }
 
     getActionsState(): ActionsState {

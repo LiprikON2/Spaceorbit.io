@@ -17,7 +17,6 @@ export const OutfittingDrawer = ({ shouldBeOpened, close }) => {
 
     useDidUpdate(() => {
         if (!didLoad) {
-            // TODO: to not mutate state
             const activeOutfit = player.outfitting.outfit;
             if (activeOutfit) {
                 setDidLoad(() => true);

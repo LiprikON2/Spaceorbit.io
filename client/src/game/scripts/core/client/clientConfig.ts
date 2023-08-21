@@ -6,6 +6,7 @@ import MoveToPlugin from "phaser3-rex-plugins/plugins/moveto-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
 import ButtonPlugin from "phaser3-rex-plugins/plugins/button-plugin.js";
 import ContainerLitePlugin from "phaser3-rex-plugins/plugins/containerlite-plugin.js";
+import CustomShapesPlugin from "phaser3-rex-plugins/plugins/customshapes-plugin.js";
 
 import { ClientScene, HudScene, PreloadScene } from "~/scenes/core";
 import { MixinUnnamedMapScene } from "~/scenes/maps/UnnamedMapScene";
@@ -58,6 +59,11 @@ export const plugins = [
     {
         key: "rexContainerLitePlugin",
         plugin: ContainerLitePlugin,
+        start: true,
+    },
+    {
+        key: "rexCustomShapesPlugin",
+        plugin: CustomShapesPlugin,
         start: true,
     },
 ];
