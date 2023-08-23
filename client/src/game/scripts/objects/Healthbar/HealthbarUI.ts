@@ -1,5 +1,4 @@
 import ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/ContainerLite";
-import type CustomShape from "phaser3-rex-plugins/plugins/gameobjects/shape/customshapes/CustomShapes";
 
 import type { BaseScene } from "../../scenes/core";
 import type { Spaceship } from "../Sprite/Spaceship";

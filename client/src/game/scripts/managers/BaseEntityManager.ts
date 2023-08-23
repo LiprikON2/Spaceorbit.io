@@ -36,7 +36,6 @@ export interface EntityManagerServerOptions {}
 
 export interface EntityManagerClientOptions {
     scene: BaseScene;
-    isTextured: boolean;
 }
 
 type GroupNames = "entity" | "players" | "otherPlayers" | "mob";
@@ -50,8 +49,6 @@ export class BaseEntityManager {
     mobGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
     soundManager?: SoundManager;
-
-    isTextured: boolean;
 
     getById(id: string, from: GroupNames = "entity") {
         let fromGroup: SpaceshipGroup;
@@ -68,9 +65,8 @@ export class BaseEntityManager {
         serverOptions: EntityManagerServerOptions,
         clientOptions: EntityManagerClientOptions
     ) {
-        const { scene, isTextured } = clientOptions;
+        const { scene } = clientOptions;
         this.scene = scene;
-        this.isTextured = isTextured;
 
         this.playerGroup = this.scene.add.group({ runChildUpdate: true }) as SpaceshipGroup;
         this.otherPlayersGroup = this.scene.add.group() as SpaceshipGroup;
@@ -92,14 +88,14 @@ export class BaseEntityManager {
             scene: this.scene,
             entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
-            isTextured: this.isTextured,
+            enableNormals: true,
             depth: isMe ? 110 : 100,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const player = new Spaceship(serverOptions, mergedClientOptions);
-        if (clientOptions.soundManager) {
-            if (isMe) clientOptions.soundManager.setPlayer(player);
-            else clientOptions.soundManager.initEntity(player);
+        if (mergedClientOptions.soundManager) {
+            if (isMe) mergedClientOptions.soundManager.setPlayer(player);
+            else mergedClientOptions.soundManager.initEntity(player);
         }
 
         if (!isMe) this.otherPlayersGroup.add(player);
@@ -117,13 +113,14 @@ export class BaseEntityManager {
             scene: this.scene,
             entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
-            isTextured: this.isTextured,
+            soundManager: this.soundManager,
+            enableNormals: true,
             depth: 90,
         };
         const mergedClientOptions = { ...defaultClientOptions, ...clientOptions };
         const mob = new Mob(serverOptions, mergedClientOptions);
 
-        if (clientOptions.soundManager) clientOptions.soundManager.initEntity(mob);
+        if (mergedClientOptions.soundManager) mergedClientOptions.soundManager.initEntity(mob);
 
         this.entityGroup.add(mob);
         this.mobGroup.add(mob);
@@ -271,16 +268,8 @@ export class BaseEntityManager {
                 username: "Enemy",
                 allegiance: AllegianceEnum.Alien,
             };
-            const clientOptions: MobClientOptions = {
-                scene: this.scene,
-                entityGroup: this.scene.entityManager.entityGroup,
-                projectileGroup: this.scene.entityManager.projectileGroup,
-                soundManager: this.soundManager,
-                isTextured: this.isTextured,
-                depth: 90,
-            };
 
-            const mob = this.createMob(serverOptions, clientOptions);
+            const mob = this.createMob(serverOptions);
 
             callback(mob);
         }

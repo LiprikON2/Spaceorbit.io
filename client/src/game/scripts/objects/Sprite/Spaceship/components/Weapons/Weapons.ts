@@ -1,26 +1,33 @@
+import ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/container/containerlite/ContainerLite";
+
+import { Sprite } from "~/objects/Sprite";
 import type { BaseScene } from "~/scenes/core/BaseScene";
-import type { Spaceship } from "~/objects/Sprite/Spaceship";
-import { Projectile } from "./components";
+import type { Spaceship, WeaponOrigin } from "~/objects/Sprite/Spaceship";
+import { Projectile, Weapon } from "./components";
 
-type WeaponType = "laser" | "gatling" | null;
+type WorldPoint = { worldX: number; worldY: number };
 
-export interface Weapon {
+export type WeaponType = "laser" | "gatling" | null;
+
+export interface WeaponSlot extends WeaponOrigin {
     id: number;
     type: WeaponType;
-    x: number;
-    y: number;
-    cooldownTime: number;
     lastFired: number;
+    sprite?: Sprite;
+}
+
+interface WeaponStats {
+    cooldownTime: number;
     addShipMomentum: boolean;
     projectileVelocity: number;
     projectileBaseDamage: number;
     projectileScale: { x: number; y: number };
-    projectileDamageMultiplier: number;
 }
 export class Weapons {
     scene: BaseScene;
     ship: Spaceship;
-    weaponSlots: Weapon[];
+    weaponSlots: WeaponSlot[];
+    box: ContainerLite;
 
     multiplier = 1;
     projectileId = 0;
@@ -33,6 +40,10 @@ export class Weapons {
         return this.weaponSlots.filter((slot) => slot.type !== null).length;
     }
 
+    getWeaponSlot(slot: number) {
+        return this.weaponSlots[slot];
+    }
+
     getWeaponsOfType(type: WeaponType) {
         return this.weaponSlots.filter((slot) => slot.type === type);
     }
@@ -40,32 +51,37 @@ export class Weapons {
     getWeaponById(weaponId: number) {
         return this.weaponSlots.find((slot) => slot.id === weaponId);
     }
-    getDamageByWeapon(weapon: Weapon) {
-        const { projectileDamageMultiplier, projectileBaseDamage } = weapon;
-        return projectileDamageMultiplier * projectileBaseDamage;
+    getDamageByWeapon(weapon: WeaponSlot) {
+        const weaponStats = Weapons.getWeaponStats(weapon.type);
+        const { projectileBaseDamage } = weaponStats;
+        return this.multiplier * projectileBaseDamage;
     }
 
     getIncrementalId() {
         return this.projectileId++;
     }
 
-    constructor(scene: BaseScene, ship: Spaceship, weaponOrigins, multiplier?: number) {
+    constructor(
+        scene: BaseScene,
+        ship: Spaceship,
+        weaponOrigins: WeaponOrigin[],
+        multiplier?: number
+    ) {
         this.scene = scene;
         this.ship = ship;
         this.multiplier = multiplier;
+
+        this.box = this.scene.add.rexContainerLite();
+        this.ship.rotatingBox.pinLocal(this.box);
+
         // Sort by x value in ascending order
         this.weaponSlots = weaponOrigins
             .sort(({ x: x1 }, { x: x2 }) => x1 - x2)
-            .map((origin, index) => ({
-                ...origin,
-                id: index,
+            .map((weaponOrigin, slot) => ({
+                ...weaponOrigin,
+                id: slot,
                 type: null,
-                cooldownTime: 0,
-                addShipMomentum: false,
                 lastFired: -Infinity,
-                projectileVelocity: 0,
-                projectileDamage: 0,
-                projectileScale: { x: 1, y: 1 },
             }));
         if (this.ship.soundManager) {
             this.ship.soundManager.addSounds("laser", [
@@ -75,20 +91,37 @@ export class Weapons {
             ]);
             this.ship.soundManager.addSounds("gatling", ["gatling_sound_1"]);
         }
-
-        const middleSlot = Math.floor((this.slotCount - 1) / 2);
-        this.createLaser(middleSlot);
     }
 
-    placeWeapon(type: string, slot: number) {
-        if (slot <= this.slotCount - 1) {
-            if (type === "laser") {
-                this.createLaser(slot);
-            } else if (type === "gatling") {
-                this.createGatling(slot);
-            } else if (!type) {
-                this.clearSlot(slot);
-            }
+    static getWeaponStats(type: WeaponType): WeaponStats {
+        if (type === "laser") {
+            return {
+                addShipMomentum: false,
+                cooldownTime: 600,
+                projectileVelocity: 5000,
+                projectileBaseDamage: 1000,
+                projectileScale: { x: 3, y: 1 },
+            };
+        } else if (type === "gatling") {
+            return {
+                addShipMomentum: true,
+                cooldownTime: 100,
+                projectileVelocity: 1200,
+                projectileBaseDamage: 200,
+                projectileScale: { x: 0.4, y: 0.4 },
+            };
+        } else if (type === null) return null;
+    }
+
+    fillSlot(type: WeaponType, slot: number) {
+        const doesSlotExists = slot <= this.slotCount - 1;
+        if (doesSlotExists) {
+            const tryingToClearSlot = type === null;
+            const isSlotEmpty = this.getWeaponSlot(slot).type === null;
+
+            if (!tryingToClearSlot && isSlotEmpty) {
+                this.createWeapon(type, slot);
+            } else if (tryingToClearSlot) this.clearSlot(slot);
         }
     }
     canBePlaced(type: string, slot: number) {
@@ -97,52 +130,50 @@ export class Weapons {
         return isEnoughSlots && isWeaponType;
     }
 
-    createLaser(slot: number) {
-        this.weaponSlots[slot] = {
-            ...this.weaponSlots[slot],
-            type: "laser",
-            addShipMomentum: false,
-            cooldownTime: 600,
-            projectileVelocity: 5000,
-            projectileBaseDamage: 1000,
-            projectileScale: { x: 3, y: 1 },
-            projectileDamageMultiplier: this.multiplier,
-        };
+    createWeapon(type: Exclude<WeaponType, null>, slot: number) {
+        // Laser DPS = 1000 * (1000 / 600) = 1666 damage per second
+        // Gatling DPS = 166 * (1000 / 100) = 2000 damage per second
 
-        // DPS = 1000 * (1000 / 600) = 1666 damage per second
-    }
+        const weaponSlot = this.getWeaponSlot(slot);
 
-    createGatling(slot: number) {
-        this.weaponSlots[slot] = {
-            ...this.weaponSlots[slot],
-            type: "gatling",
-            addShipMomentum: true,
-            cooldownTime: 100,
-            projectileVelocity: 1200,
-            projectileBaseDamage: 200,
-            projectileScale: { x: 0.4, y: 0.4 },
-            projectileDamageMultiplier: this.multiplier,
-        };
+        const x = weaponSlot.x - this.ship.halfWidth;
+        const y = weaponSlot.y - this.ship.halfHeight;
 
-        // DPS = 166 * (1000 / 100) = 2000 damage per second
+        const weaponSprite = new Weapon(
+            { id: slot, x, y, type: "laser", variation: weaponSlot.variation, toFlip: false },
+            { ship: this.ship }
+        );
+
+        console.log("weaponSprite", weaponSprite);
+
+        this.weaponSlots[slot].type = type;
+        this.weaponSlots[slot].sprite = weaponSprite;
+
+        this.box.pinLocal(weaponSprite, { syncRotation: false });
     }
 
     clearSlot(slot: number) {
         this.weaponSlots[slot].type = null;
+
+        if (this.weaponSlots[slot].sprite) {
+            this.box.unpin(this.weaponSlots[slot].sprite, true);
+            this.weaponSlots[slot].sprite = null;
+        }
     }
 
-    primaryFire(time: number, point?: { worldX: number; worldY: number }) {
+    primaryFire(time: number, point?: WorldPoint) {
         this.fireAll("laser", time, point);
         this.fireAll("gatling", time, point);
     }
 
-    fireAll(type: WeaponType, time: number, point?: { worldX: number; worldY: number }) {
+    fireAll(type: WeaponType, time: number, point?: WorldPoint) {
         let playedSound = false;
         const weapons = this.getWeaponsOfType(type);
+        const weaponStats = Weapons.getWeaponStats(type);
 
         weapons.forEach((weapon) => {
-            if (time - weapon.lastFired > weapon.cooldownTime) {
-                // Check if enough time passed since last shot
+            // Check if enough time passed since last shot
+            if (time - weapon.lastFired > weaponStats.cooldownTime) {
                 this.shootProjectile(weapon.id, point);
                 // Update cooldown
                 this.weaponSlots[weapon.id].lastFired = time;
@@ -162,7 +193,7 @@ export class Weapons {
 
     getGimbalPointRotation(
         originPoint: { originX: number; originY: number },
-        targetPoint?: { worldX: number; worldY: number },
+        targetPoint?: WorldPoint,
         maxRotationOffset = Math.PI / 9
     ) {
         if (!targetPoint) return this.ship.rotation;
@@ -207,39 +238,60 @@ export class Weapons {
         return { velocityX, velocityY };
     }
 
-    shootProjectile(weaponId: number, targetPoint?: { worldX: number; worldY: number }) {
+    shootProjectile(weaponId: number, targetPoint?: WorldPoint) {
         const serverOptions = this.getProjectileServerOptions(weaponId, targetPoint);
         const clientOptions = {
             scene: this.scene,
-            isTextured: this.ship.isTextured,
+            isTextured: this.scene.isTextured,
             depth: this.ship.depth - 1,
         };
         const projectile = new Projectile(serverOptions, clientOptions);
         this.ship.projectileGroup.add(projectile);
     }
 
-    getProjectileServerOptions(weaponId: number, targetPoint?: { worldX: number; worldY: number }) {
+    getProjectileServerOptions(weaponId: number, targetPoint?: WorldPoint) {
         const weapon = this.getWeaponById(weaponId);
+        const weaponStats = Weapons.getWeaponStats(weapon.type);
         const originPoint = this.ship.getRotatedPoint(weapon);
-        const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
+
+        const angle = this.getWeaponAngle(weaponId, targetPoint);
+        const rotation = Phaser.Math.DegToRad(angle);
         const { velocityX, velocityY } = this.toVelocityVector(
-            weapon.projectileVelocity,
+            weaponStats.projectileVelocity,
             rotation,
-            weapon.addShipMomentum
+            weaponStats.addShipMomentum
         );
 
         return {
             id: this.getIncrementalId(),
             x: originPoint.originX,
             y: originPoint.originY,
-            angle: Phaser.Math.RadToDeg(rotation - Math.PI / 2),
+            angle: angle + 90,
             atlasTexture: weapon.type,
-            scale: { scaleX: weapon.projectileScale.x, scaleY: weapon.projectileScale.y },
+            scale: { scaleX: weaponStats.projectileScale.x, scaleY: weaponStats.projectileScale.y },
             velocity: { velocityX, velocityY },
             firedFrom: weapon,
             weapons: this,
             travelDistance: 900000,
             isAuthority: this.scene.game.isAuthority,
         };
+    }
+
+    getWeaponAngle(slot: number, targetPoint: WorldPoint = this.ship.pointer) {
+        const weapon = this.getWeaponSlot(slot);
+        const originPoint = this.ship.getRotatedPoint(weapon);
+        const rotation = this.getGimbalPointRotation(originPoint, targetPoint);
+        const angle = Phaser.Math.RadToDeg(rotation);
+
+        return angle;
+    }
+
+    update(time: number, delta: number) {
+        this.weaponSlots.forEach((weaponSlot, slot) => {
+            if (weaponSlot.type !== null) {
+                const angle = this.getWeaponAngle(slot);
+                weaponSlot.sprite.setAngle(angle);
+            }
+        });
     }
 }

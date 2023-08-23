@@ -6,7 +6,6 @@ import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 import { Status, type StatusState } from "./components/Status";
-import { HealthbarUI } from "~/game/objects/Healthbar/HealthbarUI";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -65,11 +64,17 @@ export interface SpaceshipClientOptions extends SpriteClientOptions {
     projectileGroup: ProjectileGroup;
 }
 
+export interface WeaponOrigin {
+    x: number;
+    y: number;
+    variation: string;
+}
+
 export class Spaceship extends Sprite {
     declare id: string;
     modules: {
         exhaustOrigins: { x: number; y: number }[];
-        weaponOrigins: { x: number; y: number }[];
+        weaponOrigins: WeaponOrigin[];
     };
     exhausts: Exhausts;
     weapons: Weapons;
@@ -90,18 +95,19 @@ export class Spaceship extends Sprite {
     projectileGroup: ProjectileGroup;
 
     allegiance: AllegianceEnum | AllegianceKeys;
-    allegianceOpposition: AllegianceOpposition = {
+    static allegianceOpposition: AllegianceOpposition = {
         Unaffiliated: ["Unaffiliated", "Alien", "Venus", "Mars", "Earth"],
         Alien: ["Unaffiliated", "Venus", "Mars", "Earth"],
         Venus: ["Unaffiliated", "Alien", "Mars", "Earth"],
         Mars: ["Unaffiliated", "Alien", "Venus", "Earth"],
         Earth: ["Unaffiliated", "Alien", "Venus", "Mars"],
     };
-    boundingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
+    staticBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
+    rotatingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
     rotateToPlugin: RotateTo;
     moveToPlugin: MoveTo;
 
-    _pointer: { worldX: number; worldY: number };
+    #pointer: { worldX: number; worldY: number };
     primaryFireState = { active: false, autoattack: false };
 
     get isAutoattacking() {
@@ -109,7 +115,7 @@ export class Spaceship extends Sprite {
     }
 
     get opposition(): AllegianceKeys[] {
-        return this.allegianceOpposition[this.allegiance];
+        return Spaceship.allegianceOpposition[this.allegiance];
     }
 
     get enemies(): Spaceship[] {
@@ -139,7 +145,7 @@ export class Spaceship extends Sprite {
     }
 
     get isExplosionPlaying() {
-        return this.boundingBox.body.enable;
+        return this.staticBox.body.enable;
     }
 
     get isDead() {
@@ -158,25 +164,32 @@ export class Spaceship extends Sprite {
     }
 
     constructor(serverOptions: SpaceshipServerOptions, clientOptions: SpaceshipClientOptions) {
-        super(serverOptions, clientOptions);
+        super({ ...serverOptions, angle: null }, clientOptions);
         const { baseStats } = this.atlasMetadata;
         this.baseStats = baseStats;
         this.setCircularHitbox(this.baseStats.hitboxRadius);
 
         const { x, y } = serverOptions;
-        this.boundingBox = this.scene.add.rexContainerLite(
+        this.staticBox = this.scene.add.rexContainerLite(
             x,
             y,
             this.body.width * this.scale,
             this.body.height * this.scale
         );
-        this.scene.physics.world.enable(this.boundingBox);
-        this.scene.physics.world.enableBody(this.boundingBox);
-        this.boundingBox.body.setCollideWorldBounds(true);
+        this.rotatingBox = this.scene.add.rexContainerLite(
+            x,
+            y,
+            this.body.width * this.scale,
+            this.body.height * this.scale
+        );
+        this.scene.physics.world.enable(this.staticBox);
+        // this.staticBox.body.setCollideWorldBounds(true);
+
+        this.rotatingBox.pin(this);
 
         this.shields = new Shields(this);
-        this.boundingBox.pin(this, { syncRotation: false });
-        this.boundingBox.pin(this.shields, { syncRotation: false });
+        this.staticBox.pin(this.shields, { syncRotation: false });
+        this.staticBox.pin(this.rotatingBox, { syncRotation: false });
 
         // Modules
         const { modules } = this.atlasMetadata;
@@ -207,14 +220,14 @@ export class Spaceship extends Sprite {
         if (this.status.shields === 0) this.shields.crack(false);
 
         // @ts-ignore
-        this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this);
-        // @ts-ignore
-        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.boundingBox);
-        this.moveToPlugin.on("complete", () => this.onStopThrust());
+        this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this.rotatingBox);
 
-        if (this.isTextured) {
-            this.setPipeline("Light2D");
-        }
+        const { angle } = serverOptions;
+        this.setAngle(angle);
+
+        // @ts-ignore
+        this.moveToPlugin = scene.plugins.get("rexMoveTo").add(this.staticBox);
+        this.moveToPlugin.on("complete", () => this.onStopThrust());
 
         if (this.soundManager) {
             // Make sure relevant sounds are loaded
@@ -227,6 +240,8 @@ export class Spaceship extends Sprite {
             this.scene.input.emit("clickTarget", this);
         });
         this.setPointer(x, y);
+
+        this.rotatingBox.setDepth(this.depth + 100);
     }
     /**
      * Destroys not only the sprite itself, but also related objects pinned to its bounding box
@@ -235,7 +250,7 @@ export class Spaceship extends Sprite {
     destroyFully(fromScene?: boolean) {
         this.setTarget();
         this.breakOffTargeting();
-        this.boundingBox.destroy(fromScene);
+        this.staticBox.destroy(fromScene);
     }
 
     getHit(damage: number) {
@@ -266,20 +281,22 @@ export class Spaceship extends Sprite {
         }
 
         // TODO lastHit time variable in order not to bug out the tween, plus make it possible to regen shields
-        this.setTint(0xee4824);
-        this.scene.time.delayedCall(200, () => this.clearTint());
+        this.getTinted;
+        this.rotatingBox
+            .getAllChildren()
+            .forEach((sprite) => (sprite instanceof Sprite ? sprite.getTinted() : null));
     }
 
     explode() {
         this.breakOffTargeting();
         this.setTarget();
 
-        this.boundingBox.body.enable = false;
+        this.staticBox.body.enable = false;
         this.disableBody(true, false);
         this.status.updateUI();
         this.stopThrust();
 
-        if (this.isTextured) {
+        if (this.scene.isTextured) {
             new Explosion(this.scene, this.x, this.y, this.depth, this.soundManager, {
                 double: true,
             });
@@ -288,7 +305,7 @@ export class Spaceship extends Sprite {
         const isNotAlreadyDying = !this.isDying;
         if (isNotAlreadyDying) {
             this.scene.time.delayedCall(2000, () => {
-                this.boundingBox.setVisible(false);
+                this.staticBox.setVisible(false);
 
                 this.emit("entity:dead", this);
             });
@@ -341,10 +358,10 @@ export class Spaceship extends Sprite {
             worldX = x;
             worldY = y;
         }
-        this._pointer = { worldX, worldY };
+        this.#pointer = { worldX, worldY };
     }
     get pointer() {
-        if (!this.isAutoattacking) return this._pointer;
+        if (!this.isAutoattacking) return this.#pointer;
         else {
             const { x: worldX, y: worldY } = this.target.getActionsState();
             return { worldX, worldY };
@@ -365,7 +382,7 @@ export class Spaceship extends Sprite {
     teleport(worldX: number, worldY: number, map?: string) {
         this.stopThrust();
         this.emit("entity:teleport", this, { worldX, worldY });
-        this.boundingBox.setPosition(worldX, worldY);
+        this.staticBox.setPosition(worldX, worldY);
     }
 
     respawn(worldX?: number, worldY?: number) {
@@ -374,8 +391,8 @@ export class Spaceship extends Sprite {
         }
         this.teleport(worldX, worldY);
 
-        this.boundingBox.setVisible(true);
-        this.boundingBox.body.enable = true;
+        this.staticBox.setVisible(true);
+        this.staticBox.body.enable = true;
         this.status.setToMaxHealth();
         this.status.setToMaxShields();
 
@@ -391,12 +408,12 @@ export class Spaceship extends Sprite {
     }
 
     setAngle(angle?: number) {
-        super.setAngle(angle);
+        this.rotatingBox.setAngle(angle);
         if (this.exhausts) this.exhausts.updateExhaustPosition();
         return this;
     }
     setRotation(rotation?: number) {
-        super.setRotation(rotation);
+        this.rotatingBox.setRotation(rotation);
         if (this.exhausts) this.exhausts.updateExhaustPosition();
         return this;
     }
@@ -414,7 +431,7 @@ export class Spaceship extends Sprite {
     }
 
     stopThrust() {
-        // this.boundingBox.body.stop();
+        // this.staticBox.body.stop();
         this.moveToPlugin.stop();
         this.setThrust();
         this.onStopThrust();
@@ -536,8 +553,8 @@ export class Spaceship extends Sprite {
         });
         const targetSpeed = (vx ** 2 + vy ** 2) ** 0.5;
 
-        this.boundingBox.body.setAcceleration(ax, ay);
-        this.boundingBox.body.setMaxSpeed(targetSpeed);
+        this.staticBox.body.setAcceleration(ax, ay);
+        this.staticBox.body.setMaxSpeed(targetSpeed);
     }
 
     primaryFire(time: number) {
@@ -556,10 +573,11 @@ export class Spaceship extends Sprite {
         } else if (this.primaryFireState.active) {
             this.primaryFire(time);
         }
+        this.weapons.update(time, delta);
     }
 
     getActionsState(): ActionsState {
-        const { id, x, y, angle, activity, _pointer: pointer } = this;
+        const { id, x, y, angle, activity } = this;
 
         const { active, autoattack } = this.primaryFireState;
         const primaryFireActive = active ? 1 : 0;
@@ -572,7 +590,7 @@ export class Spaceship extends Sprite {
             y,
             angle,
             activity,
-            ...pointer,
+            ...this.#pointer,
             primaryFireAutoattack,
             primaryFireActive,
             targetId,
@@ -590,7 +608,7 @@ export class Spaceship extends Sprite {
         primaryFireAutoattack,
         targetId,
     }: ActionsState) {
-        this.boundingBox.setPosition(x, y);
+        this.staticBox.setPosition(x, y);
         this.setPointer(worldX, worldY);
         this.rotateTo(Phaser.Math.DegToRad(angle - 90));
 

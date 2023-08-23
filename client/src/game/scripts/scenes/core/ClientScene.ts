@@ -65,7 +65,7 @@ export class ClientScene extends BaseMapScene {
                 callback: (player) => this.setSingleplayerListeners(player),
             });
 
-            this.entityManager.spawnMobs(1, (mob) => this.setSingleplayerListeners(mob));
+            this.entityManager.spawnMobs(0, (mob) => this.setSingleplayerListeners(mob));
         } else {
             this.player = await this.producePlayer(null, {
                 isMe: true,
@@ -342,8 +342,8 @@ export class ClientScene extends BaseMapScene {
                 // Correct the position faster if player moves
                 const correction = isMoving ? 60 : 180;
                 // Apply a step by step correction of the player's position
-                this.player.boundingBox.x -= offsetX / correction;
-                this.player.boundingBox.y -= offsetY / correction;
+                this.player.staticBox.x -= offsetX / correction;
+                this.player.staticBox.y -= offsetY / correction;
             }
         }
     }

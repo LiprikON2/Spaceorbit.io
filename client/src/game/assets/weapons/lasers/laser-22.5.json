@@ -1,0 +1,22 @@
+{
+    "frames": {
+        "map": {
+            "frame": {
+                "x": 0,
+                "y": 0,
+                "w": 14,
+                "h": 35
+            }
+        }
+    },
+    "meta": {
+        "image": "laser-22.5.webp",
+        "format": "RGB888",
+        "size": {
+            "w": 14,
+            "h": 35
+        },
+        "scale": 1,
+        "relativeDepth": 0
+    }
+}

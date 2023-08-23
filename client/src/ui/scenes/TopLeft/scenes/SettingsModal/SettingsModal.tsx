@@ -41,10 +41,10 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
         player.exhausts.removeExhaust();
     };
     const addLaser = (slot: number) => {
-        player.weapons.createLaser(slot);
+        player.weapons.createWeapon("laser", slot);
     };
     const addGatling = (slot: number) => {
-        player.weapons.createGatling(slot);
+        player.weapons.createWeapon("gatling", slot);
     };
 
     const setVolume = (key: VolumeKeys, volume: number) => {

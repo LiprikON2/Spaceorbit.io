@@ -1,10 +1,10 @@
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "~/objects/Sprite";
-import type { Weapon, Weapons } from "../Weapons";
+import type { WeaponSlot, Weapons } from "../Weapons";
 
 export interface ProjectileServerOptions extends SpriteServerOptions {
     scale: { scaleX: number; scaleY: number };
     velocity: { velocityX: number; velocityY: number };
-    firedFrom: Weapon;
+    firedFrom: WeaponSlot;
     weapons: Weapons;
     travelDistance: number;
 }
@@ -12,13 +12,13 @@ export interface ProjectileServerOptions extends SpriteServerOptions {
 export interface ProjectileClientOptions extends SpriteClientOptions {}
 
 export class Projectile extends Sprite {
-    firedFrom: Weapon;
+    firedFrom: WeaponSlot;
     weapons: Weapons;
     firedFromPoint: { x: number; y: number };
 
     constructor(serverOptions: ProjectileServerOptions, clientOptions: ProjectileClientOptions) {
         super(serverOptions, clientOptions);
-        // if absent, disalignes body and texture
+        // if absent,body and texture ends up disaligned
         this.setCircularHitbox(1);
 
         const { x, y } = serverOptions;

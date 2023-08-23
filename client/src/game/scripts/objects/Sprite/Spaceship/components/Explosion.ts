@@ -41,7 +41,7 @@ export class Explosion extends Phaser.GameObjects.Sprite {
 
         this.soundManager = soundManager;
 
-        this.setDepth(targetDepth + 1);
+        this.setDepth(targetDepth + 5);
         this.setScale(mergedOptions.scale);
         this.setAngle(Phaser.Math.Angle.Random());
 
@@ -52,7 +52,7 @@ export class Explosion extends Phaser.GameObjects.Sprite {
             soundManager.play("explosion", { sourceX: x, sourceY: y });
         }
         if (double) {
-            this.doublyExplode(scene, x, y, targetDepth);
+            this.doublyExplode(x, y, targetDepth);
         }
         this.explode(mergedOptions.keys.at(-1));
     }
@@ -65,7 +65,7 @@ export class Explosion extends Phaser.GameObjects.Sprite {
         });
     }
 
-    doublyExplode(scene: BaseScene, x: number, y: number, targetDepth: number) {
+    doublyExplode(x: number, y: number, targetDepth: number) {
         const underTargetExplosionConf = {
             // @ts-ignore
             keys: [this.options.keys[0]],
@@ -74,6 +74,13 @@ export class Explosion extends Phaser.GameObjects.Sprite {
             double: false,
         };
 
-        new Explosion(scene, x, y, targetDepth - 1, this.soundManager, underTargetExplosionConf);
+        new Explosion(
+            this.scene,
+            x,
+            y,
+            targetDepth - 5,
+            this.soundManager,
+            underTargetExplosionConf
+        );
     }
 }

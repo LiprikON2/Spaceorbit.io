@@ -11,7 +11,7 @@ export class Shields extends Phaser.Physics.Arcade.Sprite {
     soundManager;
 
     constructor(ship) {
-        super(ship.scene, ship.x, ship.y, ship.isTextured ? "shield" : "");
+        super(ship.scene, ship.x, ship.y, ship.scene.isTextured ? "shield" : "");
         this.scene.add.existing(this);
         this.scene.physics.add.existing(this);
 

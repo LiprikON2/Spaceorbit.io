@@ -1,4 +1,5 @@
 import type { Spaceship } from "../Spaceship";
+import type { WeaponType } from "./Weapons";
 
 export interface Item {
     itemName: string;
@@ -120,7 +121,9 @@ export class Outfitting {
         return items;
     }
     #syncWeapons(weapons: Item[]) {
-        weapons.forEach((weapon, index) => this.ship.weapons.placeWeapon(weapon?.itemName, index));
+        weapons.forEach((weapon, index) =>
+            this.ship.weapons.fillSlot((weapon?.itemName ?? null) as WeaponType, index)
+        );
     }
     #syncEngines(engines: Item[]) {
         engines.forEach((engine, index) => this.ship.exhausts.placeEngine(engine?.itemName, index));

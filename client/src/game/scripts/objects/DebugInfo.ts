@@ -120,7 +120,7 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         text += this.getDisplayInfo();
 
         text += this.getSpriteInfo(this.scene.parentScene.player);
-        text += this.getSpriteInfo(this.scene.parentScene.player?.boundingBox);
+        text += this.getSpriteInfo(this.scene.parentScene.player?.staticBox);
 
         text += this.getCamInfo();
 

@@ -64,7 +64,7 @@ export class Status {
         return this.shieldsBar.value;
     }
     get speed() {
-        const { x: vx, y: vy } = this.ship.boundingBox.body.velocity;
+        const { x: vx, y: vy } = this.ship.staticBox.body.velocity;
         const speed = Math.sqrt(vx ** 2 + vy ** 2);
         return speed;
     }
@@ -133,7 +133,7 @@ export class Status {
             .setAlpha(1)
             .setDepth(this.ship.depth + 5);
 
-        this.ship.boundingBox.pin([this.followText, this.shieldbarUI.box, this.healthbarUI.box], {
+        this.ship.staticBox.pin([this.followText, this.shieldbarUI.box, this.healthbarUI.box], {
             syncRotation: false,
         });
     }

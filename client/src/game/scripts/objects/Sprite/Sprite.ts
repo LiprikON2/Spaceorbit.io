@@ -5,15 +5,16 @@ export interface SpriteServerOptions {
     id: string | number;
     x: number;
     y: number;
-    angle: number;
     atlasTexture: string | Phaser.Textures.Texture;
+    angle?: number;
+    disablePhysics?: boolean;
 }
 
 export interface SpriteClientOptions {
     scene: BaseScene;
-    isTextured: boolean;
-    depth: number;
     soundManager?: SoundManager;
+    depth?: number;
+    enableNormals?: boolean;
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
@@ -26,7 +27,6 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
         width: number;
         height: number;
     };
-    isTextured: boolean;
 
     get speed() {
         const { x: vx, y: vy } = this.body.velocity;
@@ -37,14 +37,14 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
     /**
      * Half width of sprite texture, without scaling
      */
-    get absoluteHalfWidth() {
-        return this.atlas.width / 2;
+    get halfWidth() {
+        return this.width / 2;
     }
     /**
      * Half height of sprite texture, without scaling
      */
-    get absoluteHalfHeight() {
-        return this.atlas.height / 2;
+    get halfHeight() {
+        return this.height / 2;
     }
     get atlasMetadata() {
         return this.atlas.metadata;
@@ -56,17 +56,19 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
 
     constructor(serverOptions: SpriteServerOptions, clientOptions: SpriteClientOptions) {
         const { x, y, atlasTexture } = serverOptions;
-        const { scene, isTextured } = clientOptions;
+        const { scene } = clientOptions;
 
-        super(scene, x, y, isTextured ? atlasTexture : "");
+        super(scene, x, y, scene.isTextured ? atlasTexture : "");
+
         scene.add.existing(this);
-        scene.physics.add.existing(this);
-
-        this.isTextured = isTextured;
+        const { disablePhysics } = serverOptions;
+        if (!disablePhysics) scene.physics.add.existing(this);
 
         const { depth } = clientOptions;
+        if (depth) this.setDepth(depth);
+
         const { angle } = serverOptions;
-        this.setOrigin(0.5).setDepth(depth).setAngle(angle);
+        if (angle) this.setAngle(angle);
 
         const { soundManager } = clientOptions;
         this.soundManager = soundManager;
@@ -85,30 +87,35 @@ export class Sprite extends Phaser.Physics.Arcade.Sprite {
 
         const { scale } = this.atlasMetadata;
         this.setScale(scale);
+
+        const { enableNormals } = clientOptions;
+        if (this.scene.isTextured && enableNormals) {
+            this.setPipeline("Light2D");
+        }
     }
 
     setCircularHitbox(hitboxRadius: number) {
         this.body.setCircle(
             hitboxRadius,
-            this.absoluteHalfWidth - hitboxRadius,
-            this.absoluteHalfHeight - hitboxRadius
+            this.halfWidth - hitboxRadius,
+            this.halfHeight - hitboxRadius
         );
+    }
+
+    getTinted(color: number = 0xee4824, duration: number = 200) {
+        this.setTint(color);
+        this.scene.time.delayedCall(duration, () => this.clearTint());
     }
 
     getRotatedPoint(point: { x: number; y: number }, absolute = true) {
         // The center of the ship is xOy
         // Distance from center of a ship to a point on a ship; Corresponds to Y
-        const r = Phaser.Math.Distance.Between(
-            this.absoluteHalfWidth,
-            this.absoluteHalfHeight,
-            point.x,
-            point.y
-        );
+        const r = Phaser.Math.Distance.Between(this.halfWidth, this.halfHeight, point.x, point.y);
 
         // Corresponds to X
         const additionalRotation = Phaser.Math.Angle.Between(
-            this.absoluteHalfWidth,
-            this.absoluteHalfHeight,
+            this.halfWidth,
+            this.halfHeight,
             point.x,
             point.y
         );

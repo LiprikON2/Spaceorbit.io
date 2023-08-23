@@ -106,6 +106,10 @@ export class BaseScene extends Phaser.Scene {
         return this.physics.world.bounds.height / 2;
     }
 
+    get isTextured() {
+        return this.game.isClient;
+    }
+
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
         this.rootElem = document.getElementById("phaser-game");
@@ -114,7 +118,6 @@ export class BaseScene extends Phaser.Scene {
     preload() {
         this.entityManager = new BaseEntityManager(null, {
             scene: this,
-            isTextured: this.game.isClient,
         });
 
         this.collisionManager = new BaseCollisionManager({

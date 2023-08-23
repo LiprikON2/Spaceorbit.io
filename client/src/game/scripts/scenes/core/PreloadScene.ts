@@ -9,6 +9,13 @@ import F5S4 from "~/assets/ships/F5S4.png";
 import F5S4N from "~/assets/ships/F5S4N.png";
 import F5S4_json from "~/assets/ships/F5S4.json";
 
+import laser22 from "~/assets/weapons/lasers/laser-22.5.webp";
+import laser22N from "~/assets/weapons/lasers/laser-22.5-normal.webp";
+import laser22_json from "~/assets/weapons/lasers/laser-22.5.json";
+import laser45 from "~/assets/weapons/lasers/laser-45.webp";
+import laser45N from "~/assets/weapons/lasers/laser-45-normal.webp";
+import laser45_json from "~/assets/weapons/lasers/laser-45.json";
+
 import laser from "~/assets/weapons/lasers/spr_bullet_strip02.png";
 import laser_json from "~/assets/weapons/lasers/spr_bullet_strip02-red.json";
 import gatling from "~/assets/weapons/gatling/projectile.webp";
@@ -130,12 +137,24 @@ export class PreloadScene extends Phaser.Scene {
             texturePath: gatling,
         });
 
+        this.loadTextureWithJson("laser22", {
+            type: "atlas",
+            jsonPath: laser22_json,
+            texturePath: laser22,
+            nTexturePath: laser22N,
+        });
+        this.loadTextureWithJson("laser45", {
+            type: "atlas",
+            jsonPath: laser45_json,
+            texturePath: laser45,
+            nTexturePath: laser45N,
+        });
+
         if (this.isClient) {
             // Modules
             this.emitOut("loading", { name: "Modules", progress: 4 });
             this.load.image("shield", shield);
             // Effects
-            // TODO is it better to use powers of 2?
             this.emitOut("loading", { name: "Effects", progress: 7 });
             this.load.spritesheet("particles", particles, {
                 frameWidth: 1080,
