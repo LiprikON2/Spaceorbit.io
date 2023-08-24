@@ -50,6 +50,7 @@ export class ClientInputManager extends BaseInputManager {
     touchControls = { joystick: null, virtualBtn: null };
     scene: ClientScene;
     zoom = 1;
+    tofollowCursor = false;
 
     get baseZoom() {
         const coef = 0.75;
@@ -95,7 +96,10 @@ export class ClientInputManager extends BaseInputManager {
 
     constructor(scene: ClientScene, player) {
         super(scene, player);
-        scene.cameras.main.startFollow(player);
+        scene.cameras.main.startFollow(player, false);
+        const { toFollowCursor } = scene.game.settings;
+        this.setFollowCursor(toFollowCursor);
+
         this.updateZoom();
 
         // @ts-ignore
@@ -174,6 +178,46 @@ export class ClientInputManager extends BaseInputManager {
 
     update(time: number, delta: number) {
         super.update(time, delta);
+        if (this.tofollowCursor) this.followCursor();
+    }
+
+    setFollowCursor(enable = true, lerp = 0.3) {
+        this.tofollowCursor = enable;
+        if (enable) this.scene.cameras.main.setLerp(lerp);
+        else this.scene.cameras.main.setLerp(1);
+    }
+
+    followCursor(minDistancePercentage = 0.5, maxOffset = 250) {
+        const { x, y } = this.player;
+        const { worldX, worldY } = this.player.pointer;
+
+        const diffX = x - worldX;
+        const diffY = y - worldY;
+
+        const visibleWorldWidth = this.scene.scale.displaySize.width * (1 / this.baseZoom);
+        const visibleWorldHeight = this.scene.scale.displaySize.height * (1 / this.baseZoom);
+
+        const maxDistanceX = visibleWorldWidth / 2 + maxOffset * 2;
+        const minDistanceX = (visibleWorldWidth / 2) * minDistancePercentage;
+
+        const maxDistanceY = visibleWorldHeight / 2 + maxOffset * 2;
+        const minDistanceY = (visibleWorldHeight / 2) * minDistancePercentage;
+
+        const normalizeX = Phaser.Math.Clamp(
+            (Math.abs(diffX) - minDistanceX) / (maxDistanceX - minDistanceX),
+            0,
+            1
+        );
+        const normalizeY = Phaser.Math.Clamp(
+            (Math.abs(diffY) - minDistanceY) / (maxDistanceY - minDistanceY),
+            0,
+            1
+        );
+
+        const offsetX = Math.sign(diffX) * normalizeX * maxOffset;
+        const offsetY = Math.sign(diffY) * normalizeY * maxOffset;
+
+        this.scene.cameras.main.setFollowOffset(offsetX, offsetY);
     }
 
     setTargetById(targetId: string) {

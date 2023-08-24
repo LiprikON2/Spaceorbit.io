@@ -36,8 +36,7 @@ export class SoundManager {
             effectsMute = false,
             musicMute = false,
         } = localStorageSettings;
-        // https://stackoverflow.com/a/37403125
-        const defaults = {
+        const defaultOptions = {
             masterVolume,
             effectsVolume,
             musicVolume,
@@ -47,7 +46,7 @@ export class SoundManager {
             distanceThreshold: 2000,
             pauseOnBlur: false,
         };
-        this.options = Object.assign({}, defaults, options);
+        this.options = { ...defaultOptions, ...options };
 
         this.scene = scene;
         this.soundFade = this.scene.plugins.get("rexSoundFade") as SoundFadePlugin;

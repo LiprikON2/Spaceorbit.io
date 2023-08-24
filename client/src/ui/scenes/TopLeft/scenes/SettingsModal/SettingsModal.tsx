@@ -32,6 +32,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
         setEffectsVolumeSetting,
         setMusicVolumeSetting,
         setGraphicsSettingsSetting,
+        setToFollowCursorSetting,
     } = useSettings();
 
     const addEngine = () => {
@@ -63,11 +64,17 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
 
     const toggleTouchControls = () => {
         inputManager.toggleTouchControls();
-        handleTouchControls.toggle();
+        touchControlToggle();
     };
-    const [touchControlChecked, handleTouchControls] = useDisclosure(settings.isTouchMode);
+    const [touchControlChecked, { toggle: touchControlToggle }] = useDisclosure(
+        settings.isTouchMode
+    );
     const [activeTab, setActiveTab] = useState<string | null>("audio");
 
+    const toggleFollowCursor = () => {
+        inputManager.setFollowCursor(!settings.toFollowCursor);
+        setToFollowCursorSetting(!settings.toFollowCursor);
+    };
     // const sendMobs = (e) => {
     //     e.preventDefault();
     //     const { mobGroup } = entityManager;
@@ -111,7 +118,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                             </Tabs.List>
                             <Tabs.Panel value="audio">
                                 <Container>
-                                    <Stack>
+                                    <Stack spacing="md">
                                         <Title order={3}>Volume</Title>
                                         <SliderInput
                                             label="Master Volume"
@@ -146,7 +153,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                             </Tabs.Panel>
                             <Tabs.Panel value="graphics">
                                 <Container>
-                                    <Stack>
+                                    <Stack spacing="md">
                                         <Title order={3}>General</Title>
                                         <Text>Lighting</Text>
                                         <SegmentedControl
@@ -174,8 +181,15 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                             </Tabs.Panel>
                             <Tabs.Panel value="controls">
                                 <Container>
-                                    <Stack>
-                                        <Title order={3}>Mobile</Title>
+                                    <Stack spacing="md">
+                                        <Title order={3}>Camera</Title>
+                                        <Switch
+                                            label="Make camera follow the cursor"
+                                            checked={settings.toFollowCursor}
+                                            onChange={toggleFollowCursor}
+                                        />
+
+                                        <Title order={3}>Touch</Title>
                                         <Switch
                                             label="Enable touch controls"
                                             checked={touchControlChecked}
@@ -186,7 +200,7 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                             </Tabs.Panel>
                             {/* <Tabs.Panel value="cheats">
                                 <Container>
-                                    <Stack>
+                                    <Stack spacing="md">
                                         <Title order={3}>General</Title>
 
                                         <form onSubmit={sendMobs}>

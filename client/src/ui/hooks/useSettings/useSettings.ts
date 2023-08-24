@@ -16,6 +16,7 @@ interface SettingsStore {
     setMusicVolumeSetting: (volume: number) => void;
     setGraphicsSettingsSetting: (value: string) => void;
     toggleTouchControlsSetting: () => void;
+    setToFollowCursorSetting: (value: boolean) => void;
 }
 
 const defaultSettings = {
@@ -27,6 +28,7 @@ const defaultSettings = {
     graphicsSettings: "1",
     isTouchMode: isTouchDevice(),
     showDeviceInfo: false,
+    toFollowCursor: false,
 };
 
 export const settingsStorageKey = "settings";
@@ -74,6 +76,12 @@ export const useSettings = create<SettingsStore>()(
             set(
                 produce((state) => {
                     state.settings.isTouchMode = !state.settings.isTouchMode;
+                })
+            ),
+        setToFollowCursorSetting: (value) =>
+            set(
+                produce((state) => {
+                    state.settings.toFollowCursor = value;
                 })
             ),
     }))

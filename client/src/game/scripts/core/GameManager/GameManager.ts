@@ -64,7 +64,6 @@ export class GameManager {
         return this;
     };
 
-    // TODO use this when ui modals are opened
     lockInput = () => {
         this.game.input.enabled = false;
         this.game.input.keyboard.enabled = false;
