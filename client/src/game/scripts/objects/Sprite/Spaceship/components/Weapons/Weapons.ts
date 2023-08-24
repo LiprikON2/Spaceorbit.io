@@ -139,12 +139,12 @@ export class Weapons {
         const x = weaponSlot.x - this.ship.halfWidth;
         const y = weaponSlot.y - this.ship.halfHeight;
 
+        const toFlip = weaponSlot.x > this.ship.halfWidth;
+
         const weaponSprite = new Weapon(
-            { id: slot, x, y, type: "laser", variation: weaponSlot.variation, toFlip: false },
+            { id: slot, x, y, type: "laser", variation: weaponSlot.variation, toFlip },
             { ship: this.ship }
         );
-
-        console.log("weaponSprite", weaponSprite);
 
         this.weaponSlots[slot].type = type;
         this.weaponSlots[slot].sprite = weaponSprite;

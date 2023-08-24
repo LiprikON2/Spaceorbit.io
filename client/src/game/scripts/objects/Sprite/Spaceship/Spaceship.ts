@@ -221,7 +221,6 @@ export class Spaceship extends Sprite {
 
         // @ts-ignore
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this.rotatingBox);
-
         const { angle } = serverOptions;
         this.setAngle(angle);
 
@@ -419,7 +418,14 @@ export class Spaceship extends Sprite {
     }
 
     rotateTo(rotation: number, speed = this.status.maxSpeed) {
-        this.rotateToPlugin.rotateTo(Phaser.Math.RadToDeg(rotation + Math.PI / 2), 0, speed);
+        const newAngle = Phaser.Math.RadToDeg(rotation + Math.PI / 2);
+        const angleDiff = Math.abs(newAngle - this.angle);
+
+        // Prevent jerkiness when moving and aiming just to the side
+        const smoothingRangeDeg = 20;
+        const smoothing = angleDiff < smoothingRangeDeg ? angleDiff / smoothingRangeDeg : 1;
+
+        this.rotateToPlugin.rotateTo(newAngle, 0, speed * smoothing);
         if (this.exhausts) this.exhausts.updateExhaustPosition();
     }
 

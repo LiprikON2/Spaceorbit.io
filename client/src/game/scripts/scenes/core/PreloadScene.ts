@@ -15,6 +15,9 @@ import laser22_json from "~/assets/weapons/lasers/laser-22.5.json";
 import laser45 from "~/assets/weapons/lasers/laser-45.webp";
 import laser45N from "~/assets/weapons/lasers/laser-45-normal.webp";
 import laser45_json from "~/assets/weapons/lasers/laser-45.json";
+import laser90 from "~/assets/weapons/lasers/laser-90.webp";
+import laser90N from "~/assets/weapons/lasers/laser-90-normal.webp";
+import laser90_json from "~/assets/weapons/lasers/laser-90.json";
 
 import laser from "~/assets/weapons/lasers/spr_bullet_strip02.png";
 import laser_json from "~/assets/weapons/lasers/spr_bullet_strip02-red.json";
@@ -148,6 +151,12 @@ export class PreloadScene extends Phaser.Scene {
             jsonPath: laser45_json,
             texturePath: laser45,
             nTexturePath: laser45N,
+        });
+        this.loadTextureWithJson("laser90", {
+            type: "atlas",
+            jsonPath: laser90_json,
+            texturePath: laser90,
+            nTexturePath: laser90N,
         });
 
         if (this.isClient) {

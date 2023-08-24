@@ -35,6 +35,7 @@ export class Weapon extends Sprite {
         );
 
         this.ship = ship;
+        this.setOrigin(0.5, 0.8);
 
         const { toFlip } = serverOptions;
 
