@@ -272,7 +272,7 @@ export class Weapons {
             velocity: { velocityX, velocityY },
             firedFrom: weapon,
             weapons: this,
-            travelDistance: 900000,
+            travelDistance: 900,
             isAuthority: this.scene.game.isAuthority,
         };
     }

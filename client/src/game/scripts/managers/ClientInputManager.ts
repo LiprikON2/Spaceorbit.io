@@ -184,7 +184,7 @@ export class ClientInputManager extends BaseInputManager {
     setFollowCursor(enable = true, lerp = 0.3) {
         this.tofollowCursor = enable;
         if (enable) this.scene.cameras.main.setLerp(lerp);
-        else this.scene.cameras.main.setLerp(1);
+        else this.scene.cameras.main.setLerp(1).setFollowOffset(0);
     }
 
     followCursor(minDistancePercentage = 0.5, maxOffset = 250) {

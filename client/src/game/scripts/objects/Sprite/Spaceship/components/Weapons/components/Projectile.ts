@@ -38,6 +38,9 @@ export class Projectile extends Sprite {
 
         const { travelDistance } = serverOptions;
         this.destroyAfterTravelling(travelDistance);
+
+        const { angle } = serverOptions;
+        this.maskSelf(x, y, angle, travelDistance);
     }
 
     get damage() {
@@ -53,8 +56,24 @@ export class Projectile extends Sprite {
         return this.owner.id;
     }
 
+    destroy(fromScene?: boolean) {
+        this.clearMask(true);
+        super.destroy(fromScene);
+    }
+
+    maskSelf(x: number, y: number, angle: number, distance: number) {
+        const height = distance * 1.25;
+        const width = 150;
+        const graphics = this.scene.make
+            .graphics({ x, y }, false)
+            .fillTriangle(0, 0, -(width / 2), -height, width / 2, -height)
+            .setAngle(angle - 90);
+        const mask = graphics.createGeometryMask();
+        this.setMask(mask);
+    }
+
     destroyAfterTravelling(distance: number) {
         const projectileLifespan = distance / this.speed;
-        this.scene.time.delayedCall(projectileLifespan, () => this.destroy());
+        this.scene.time.delayedCall(projectileLifespan * 1000, () => this.destroy());
     }
 }
