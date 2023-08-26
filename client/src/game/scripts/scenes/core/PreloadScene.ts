@@ -57,7 +57,7 @@ interface TextureWithJsonOptions {
 }
 
 export class PreloadScene extends Phaser.Scene {
-    game: GameClient | Phaser.Game;
+    declare game: GameClient | Phaser.Game;
 
     get isClient() {
         return this.game instanceof GameClient;

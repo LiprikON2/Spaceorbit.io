@@ -85,10 +85,10 @@ export interface MultiplayerEvents {
  * BaseScene is a scene, which provides shared logic between ClientScene and ServerScene
  */
 export class BaseScene extends Phaser.Scene {
-    game: GameClient;
+    declare game: GameClient;
     rootElem: HTMLElement | null;
-    plugins: Phaser.Plugins.PluginManager;
-    add: Phaser.GameObjects.GameObjectFactory & {
+    declare plugins: Phaser.Plugins.PluginManager;
+    declare add: Phaser.GameObjects.GameObjectFactory & {
         rexContainerLite: ContainerLiteFactory;
         rexCustomShapes: CustomShapeFactory;
     };

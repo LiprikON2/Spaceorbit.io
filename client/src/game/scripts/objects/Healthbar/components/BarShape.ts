@@ -14,8 +14,8 @@ export class BarShape extends CustomShape {
     progress = 1;
     subPercentCoef = 0;
 
-    height;
-    width;
+    declare height: number;
+    declare width: number;
     flipped = false;
     constructor(options: BarShapeClientOptions) {
         super(options.scene, {

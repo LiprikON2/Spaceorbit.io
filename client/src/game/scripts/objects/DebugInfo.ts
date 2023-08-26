@@ -2,7 +2,7 @@ import type { HudScene } from "~/scenes/core";
 import type { Keys } from "../managers/BaseInputManager";
 
 export class DebugInfo extends Phaser.GameObjects.Text {
-    scene: HudScene;
+    declare scene: HudScene;
     keys: Keys;
 
     constructor(scene) {

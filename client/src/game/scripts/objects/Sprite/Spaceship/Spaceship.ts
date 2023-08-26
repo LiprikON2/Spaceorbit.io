@@ -419,7 +419,7 @@ export class Spaceship extends Sprite {
 
     rotateTo(rotation: number, speed = this.status.maxSpeed) {
         const newAngle = Phaser.Math.RadToDeg(rotation + Math.PI / 2);
-        const angleDiff = Math.abs(newAngle - this.angle);
+        const angleDiff = Math.abs(Phaser.Math.Angle.WrapDegrees(newAngle - this.angle));
 
         // Prevent jerkiness when moving and aiming just to the side
         const smoothingRangeDeg = 20;

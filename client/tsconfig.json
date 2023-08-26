@@ -17,6 +17,9 @@
         "strictPropertyInitialization": false,
         "strictNullChecks": false,
 
+        // MobX support
+        "useDefineForClassFields": true,
+
         "moduleResolution": "node",
         "lib": ["dom", "esnext"],
         "paths": {

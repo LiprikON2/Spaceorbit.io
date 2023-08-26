@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
     Container,
     Modal,
@@ -12,193 +13,220 @@ import {
     Select,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React, { useState } from "react";
+import { autorun, reaction } from "mobx";
 
 import { Button } from "~/ui/components";
 import { SliderInput } from "./components";
 import { useGame, useSettings } from "~/ui/hooks";
 import { VolumeKeys } from "~/game/managers/SoundManager";
+import { observer } from "mobx-react-lite";
 
-export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: () => void }) => {
-    const {
-        computed: {
-            player,
-            scene: { soundManager, inputManager: inputManager, entityManager },
-        },
-    } = useGame();
-    const {
-        settings,
-        setMasterVolumeSetting,
-        setEffectsVolumeSetting,
-        setMusicVolumeSetting,
-        setGraphicsSettingsSetting,
-        setToFollowCursorSetting,
-    } = useSettings();
+export const SettingsModal = observer(
+    ({ opened, onClose }: { opened: boolean; onClose: () => void }) => {
+        const {
+            computed: {
+                player,
+                scene: { soundManager, inputManager, entityManager },
+            },
+        } = useGame();
+        const {
+            settings,
+            setMasterVolumeSetting,
+            setEffectsVolumeSetting,
+            setMusicVolumeSetting,
+            setGraphicsSettingsSetting,
+            setToFollowCursorSetting,
+        } = useSettings();
 
-    const addEngine = () => {
-        player.exhausts.createExhaust();
-    };
-    const removeEngine = () => {
-        player.exhausts.removeExhaust();
-    };
-    const addLaser = (slot: number) => {
-        player.weapons.createWeapon("laser", slot);
-    };
-    const addGatling = (slot: number) => {
-        player.weapons.createWeapon("gatling", slot);
-    };
+        // useEffect(() => {
+        //     return autorun(() => {
+        //         console.log("wow! toFollowCursor", inputManager.toFollowCursor);
+        //     });
+        // }, []);
+        // reaction(
+        //     () => inputManager.toFollowCursor,
+        //     (toFollowCursor) => {
+        //         console.log("wow! toFollowCursor", toFollowCursor);
+        //     }
+        // );
 
-    const setVolume = (key: VolumeKeys, volume: number) => {
-        soundManager.setVolume(key, volume);
-        if (key === "masterVolume") {
-            setMasterVolumeSetting(volume);
-        } else if (key === "musicVolume") {
-            setMusicVolumeSetting(volume);
-        } else if (key === "effectsVolume") {
-            setEffectsVolumeSetting(volume);
-        }
-    };
-    const handleGraphicSettings = (value: string) => {
-        setGraphicsSettingsSetting(value);
-    };
+        const addEngine = () => {
+            player.exhausts.createExhaust();
+        };
+        const removeEngine = () => {
+            player.exhausts.removeExhaust();
+        };
+        const addLaser = (slot: number) => {
+            player.weapons.createWeapon("laser", slot);
+        };
+        const addGatling = (slot: number) => {
+            player.weapons.createWeapon("gatling", slot);
+        };
 
-    const toggleTouchControls = () => {
-        inputManager.toggleTouchControls();
-        touchControlToggle();
-    };
-    const [touchControlChecked, { toggle: touchControlToggle }] = useDisclosure(
-        settings.isTouchMode
-    );
-    const [activeTab, setActiveTab] = useState<string | null>("audio");
+        const setVolume = (key: VolumeKeys, volume: number) => {
+            soundManager.setVolume(key, volume);
+            if (key === "masterVolume") {
+                setMasterVolumeSetting(volume);
+            } else if (key === "musicVolume") {
+                setMusicVolumeSetting(volume);
+            } else if (key === "effectsVolume") {
+                setEffectsVolumeSetting(volume);
+            }
+        };
+        const handleGraphicSettings = (value: string) => {
+            setGraphicsSettingsSetting(value);
+        };
 
-    const toggleFollowCursor = () => {
-        inputManager.setFollowCursor(!settings.toFollowCursor);
-        setToFollowCursorSetting(!settings.toFollowCursor);
-    };
-    // const sendMobs = (e) => {
-    //     e.preventDefault();
-    //     const { mobGroup } = entityManager;
-    //     entityManager.spawnMobs(mobsCount);
+        const toggleTouchControls = () => {
+            inputManager.toggleTouchControls();
+            touchControlToggle();
+        };
+        const [touchControlChecked, { toggle: touchControlToggle }] = useDisclosure(
+            settings.isTouchMode
+        );
+        const [activeTab, setActiveTab] = useState<string | null>("audio");
 
-    //     mobGroup.getChildren().forEach((mob) => {
-    //         mob.moveTo(x, y);
-    //         mob.setPointer(x, y);
-    //     });
-    // };
+        // const toggleFollowCursor = () => {
+        //     inputManager.setFollowCursor(!settings.toFollowCursor);
+        //     setToFollowCursorSetting(!settings.toFollowCursor);
+        // };
+        // const sendMobs = (e) => {
+        //     e.preventDefault();
+        //     const { mobGroup } = entityManager;
+        //     entityManager.spawnMobs(mobsCount);
 
-    // const teleport = () => {
-    //     player.teleport(x, y);
-    // };
+        //     mobGroup.getChildren().forEach((mob) => {
+        //         mob.moveTo(x, y);
+        //         mob.setPointer(x, y);
+        //     });
+        // };
 
-    // const [x, setx] = useState(120);
-    // const [y, sety] = useState(120);
-    // const [mobsCount, setMobsCount] = useState(0);
+        // const teleport = () => {
+        //     player.teleport(x, y);
+        // };
 
-    return (
-        <>
-            <Modal.Root className="modal" opened={opened} onClose={onClose} title="Game Settings">
-                <Modal.Overlay />
-                <Modal.Content>
-                    <Modal.Header>
-                        <Title order={2}>Game Settings</Title>
-                        <Modal.CloseButton />
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Tabs
-                            value={activeTab}
-                            onTabChange={setActiveTab}
-                            color="cyan"
-                            defaultValue="audio"
-                        >
-                            <Tabs.List>
-                                <Tabs.Tab value="audio">Audio</Tabs.Tab>
-                                <Tabs.Tab value="graphics">Graphics</Tabs.Tab>
-                                <Tabs.Tab value="controls">Controls</Tabs.Tab>
-                                {/* <Tabs.Tab value="cheats">Cheats</Tabs.Tab> */}
-                            </Tabs.List>
-                            <Tabs.Panel value="audio">
-                                <Container>
-                                    <Stack spacing="md">
-                                        <Title order={3}>Volume</Title>
-                                        <SliderInput
-                                            label="Master Volume"
-                                            min={0}
-                                            max={1}
-                                            onChangeEnd={(value) =>
-                                                setVolume("masterVolume", value)
-                                            }
-                                            defaultValue={settings.masterVolume}
-                                            value={settings.masterVolume}
-                                        />
-                                        <SliderInput
-                                            label="Music Volume"
-                                            min={0}
-                                            max={0.025}
-                                            onChangeEnd={(value) => setVolume("musicVolume", value)}
-                                            defaultValue={settings.musicVolume}
-                                            value={settings.musicVolume}
-                                        />
-                                        <SliderInput
-                                            label="Effects Volume"
-                                            min={0}
-                                            max={0.1}
-                                            onChangeEnd={(value) =>
-                                                setVolume("effectsVolume", value)
-                                            }
-                                            defaultValue={settings.effectsVolume}
-                                            value={settings.effectsVolume}
-                                        />
-                                    </Stack>
-                                </Container>
-                            </Tabs.Panel>
-                            <Tabs.Panel value="graphics">
-                                <Container>
-                                    <Stack spacing="md">
-                                        <Title order={3}>General</Title>
-                                        <Text>Lighting</Text>
-                                        <SegmentedControl
-                                            color="cyan"
-                                            data={[
-                                                { label: "Low", value: "0.5" },
-                                                { label: "Medium", value: "0.75" },
-                                                { label: "High", value: "1" },
-                                            ]}
-                                            transitionDuration={0}
-                                            value={String(settings.graphicsSettings)}
-                                            onChange={handleGraphicSettings}
-                                        />
+        // const [x, setx] = useState(120);
+        // const [y, sety] = useState(120);
+        // const [mobsCount, setMobsCount] = useState(0);
 
-                                        <Select
-                                            label="Resolution"
-                                            data={[
-                                                { value: "auto", label: "auto" },
-                                                { value: "1920x1080", label: "1920x1080" },
-                                            ]}
-                                            defaultValue="auto"
-                                        />
-                                    </Stack>
-                                </Container>
-                            </Tabs.Panel>
-                            <Tabs.Panel value="controls">
-                                <Container>
-                                    <Stack spacing="md">
-                                        <Title order={3}>Camera</Title>
-                                        <Switch
-                                            label="Make camera follow the cursor"
-                                            checked={settings.toFollowCursor}
-                                            onChange={toggleFollowCursor}
-                                        />
+        return (
+            <>
+                <Modal.Root
+                    className="modal"
+                    opened={opened}
+                    onClose={onClose}
+                    title="Game Settings"
+                >
+                    <Modal.Overlay />
+                    <Modal.Content>
+                        <Modal.Header>
+                            <Title order={2}>Game Settings</Title>
+                            <Modal.CloseButton />
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Tabs
+                                value={activeTab}
+                                onTabChange={setActiveTab}
+                                color="cyan"
+                                defaultValue="audio"
+                            >
+                                <Tabs.List>
+                                    <Tabs.Tab value="audio">Audio</Tabs.Tab>
+                                    <Tabs.Tab value="graphics">Graphics</Tabs.Tab>
+                                    <Tabs.Tab value="controls">Controls</Tabs.Tab>
+                                    {/* <Tabs.Tab value="cheats">Cheats</Tabs.Tab> */}
+                                </Tabs.List>
+                                <Tabs.Panel value="audio">
+                                    <Container>
+                                        <Stack spacing="md">
+                                            <Title order={3}>Volume</Title>
+                                            <SliderInput
+                                                label="Master Volume"
+                                                min={0}
+                                                max={1}
+                                                onChangeEnd={(value) =>
+                                                    setVolume("masterVolume", value)
+                                                }
+                                                defaultValue={settings.masterVolume}
+                                                value={settings.masterVolume}
+                                            />
+                                            <SliderInput
+                                                label="Music Volume"
+                                                min={0}
+                                                max={0.025}
+                                                onChangeEnd={(value) =>
+                                                    setVolume("musicVolume", value)
+                                                }
+                                                defaultValue={settings.musicVolume}
+                                                value={settings.musicVolume}
+                                            />
+                                            <SliderInput
+                                                label="Effects Volume"
+                                                min={0}
+                                                max={0.1}
+                                                onChangeEnd={(value) =>
+                                                    setVolume("effectsVolume", value)
+                                                }
+                                                defaultValue={settings.effectsVolume}
+                                                value={settings.effectsVolume}
+                                            />
+                                        </Stack>
+                                    </Container>
+                                </Tabs.Panel>
+                                <Tabs.Panel value="graphics">
+                                    <Container>
+                                        <Stack spacing="md">
+                                            <Title order={3}>General</Title>
+                                            <Text>Lighting</Text>
+                                            <SegmentedControl
+                                                color="cyan"
+                                                data={[
+                                                    { label: "Low", value: "0.5" },
+                                                    { label: "Medium", value: "0.75" },
+                                                    { label: "High", value: "1" },
+                                                ]}
+                                                transitionDuration={0}
+                                                value={String(settings.graphicsSettings)}
+                                                onChange={handleGraphicSettings}
+                                            />
 
-                                        <Title order={3}>Touch</Title>
-                                        <Switch
-                                            label="Enable touch controls"
-                                            checked={touchControlChecked}
-                                            onChange={toggleTouchControls}
-                                        />
-                                    </Stack>
-                                </Container>
-                            </Tabs.Panel>
-                            {/* <Tabs.Panel value="cheats">
+                                            <Select
+                                                label="Resolution"
+                                                data={[
+                                                    { value: "auto", label: "auto" },
+                                                    { value: "1920x1080", label: "1920x1080" },
+                                                ]}
+                                                defaultValue="auto"
+                                            />
+                                        </Stack>
+                                    </Container>
+                                </Tabs.Panel>
+                                <Tabs.Panel value="controls">
+                                    <Container>
+                                        <Stack spacing="md">
+                                            <Title order={3}>Camera</Title>
+                                            <Switch
+                                                label="Make camera follow the cursor"
+                                                // checked={settings.toFollowCursor}
+                                                // onChange={toggleFollowCursor}
+                                                checked={inputManager.toFollowCursor}
+                                                onChange={() =>
+                                                    inputManager.setFollowCursor(
+                                                        !inputManager.toFollowCursor
+                                                    )
+                                                }
+                                            />
+
+                                            <Title order={3}>Touch</Title>
+                                            <Switch
+                                                label="Enable touch controls"
+                                                checked={touchControlChecked}
+                                                onChange={toggleTouchControls}
+                                            />
+                                        </Stack>
+                                    </Container>
+                                </Tabs.Panel>
+                                {/* <Tabs.Panel value="cheats">
                                 <Container>
                                     <Stack spacing="md">
                                         <Title order={3}>General</Title>
@@ -230,10 +258,11 @@ export const SettingsModal = ({ opened, onClose }: { opened: boolean; onClose: (
                                     </Stack>
                                 </Container>
                             </Tabs.Panel> */}
-                        </Tabs>
-                    </Modal.Body>
-                </Modal.Content>
-            </Modal.Root>
-        </>
-    );
-};
+                            </Tabs>
+                        </Modal.Body>
+                    </Modal.Content>
+                </Modal.Root>
+            </>
+        );
+    }
+);

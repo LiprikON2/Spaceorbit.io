@@ -21,7 +21,7 @@ interface ProducePlayerOptions {
 }
 
 export class ClientScene extends BaseMapScene {
-    game: GameClient;
+    declare game: GameClient;
     channel?: ClientChannel<MultiplayerEvents>;
     si?: SnapshotInterpolation;
     clientVault?: Vault;

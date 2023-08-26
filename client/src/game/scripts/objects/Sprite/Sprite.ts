@@ -18,10 +18,10 @@ export interface SpriteClientOptions {
 }
 
 export class Sprite extends Phaser.Physics.Arcade.Sprite {
+    declare scene: BaseScene;
+    declare name: string;
     id: string | number;
-    name: string;
     soundManager?: SoundManager;
-    scene: BaseScene;
     atlas: {
         metadata: any;
         width: number;

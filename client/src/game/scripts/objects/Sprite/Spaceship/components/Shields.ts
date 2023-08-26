@@ -4,7 +4,7 @@ import type { Spaceship } from "../Spaceship";
 
 export class Shields extends Phaser.Physics.Arcade.Sprite {
     id: string;
-    scene: Phaser.Scene;
+    declare scene: Phaser.Scene;
     ship: Spaceship;
     lastHit = -Infinity;
     tweenFade;

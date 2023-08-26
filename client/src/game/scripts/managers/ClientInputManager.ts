@@ -1,3 +1,4 @@
+import { action, makeObservable, observable } from "mobx";
 import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscroller";
 import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
 
@@ -48,9 +49,9 @@ const makeButton = (scene, enable) => {
 
 export class ClientInputManager extends BaseInputManager {
     touchControls = { joystick: null, virtualBtn: null };
-    scene: ClientScene;
+    declare scene: ClientScene;
     zoom = 1;
-    tofollowCursor = false;
+    toFollowCursor = false;
 
     get baseZoom() {
         const coef = 0.75;
@@ -124,6 +125,10 @@ export class ClientInputManager extends BaseInputManager {
         toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());
 
         this.initTouchControls();
+        makeObservable(this, {
+            toFollowCursor: observable,
+            setFollowCursor: action,
+        });
     }
 
     updateZoom(diff = 0) {
@@ -178,16 +183,16 @@ export class ClientInputManager extends BaseInputManager {
 
     update(time: number, delta: number) {
         super.update(time, delta);
-        if (this.tofollowCursor) this.followCursor();
+        if (this.toFollowCursor) this.makeCameraFollowCursor();
     }
 
     setFollowCursor(enable = true, lerp = 0.3) {
-        this.tofollowCursor = enable;
+        this.toFollowCursor = enable;
         if (enable) this.scene.cameras.main.setLerp(lerp);
         else this.scene.cameras.main.setLerp(1).setFollowOffset(0);
     }
 
-    followCursor(minDistancePercentage = 0.5, maxOffset = 250) {
+    makeCameraFollowCursor(minDistancePercentage = 0.5, maxOffset = 250) {
         const { x, y } = this.player;
         const { worldX, worldY } = this.player.pointer;
 

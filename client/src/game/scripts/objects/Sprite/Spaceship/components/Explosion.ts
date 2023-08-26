@@ -12,7 +12,7 @@ type ExplosionConfig = {
 // TODO add more variety
 
 export class Explosion extends Phaser.GameObjects.Sprite {
-    scene: BaseScene;
+    declare scene: BaseScene;
     explosionSound: Phaser.Sound.BaseSound;
     soundManager: SoundManager;
     options: ExplosionConfig;
