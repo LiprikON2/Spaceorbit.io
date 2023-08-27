@@ -67,18 +67,22 @@ export class ClientInputManager extends BaseInputManager {
         scene.cameras.main.startFollow(player, false);
         this.updateZoom();
 
-        const { toFollowCursor } = scene.game.settings;
+        const { toFollowCursor } = this.scene.game.settings;
         this.setFollowCursor(toFollowCursor);
-        reaction(
-            () => this.scene.game.settings.toFollowCursor,
-            (toFollowCursor) => this.setFollowCursor(toFollowCursor)
+        this.addDisposer(
+            reaction(
+                () => this.scene.game.settings.toFollowCursor,
+                (toFollowCursor) => this.setFollowCursor(toFollowCursor)
+            )
         );
 
         const touchMode = this.scene.game.settings.touchMode;
         this.setTouchMode(touchMode);
-        reaction(
-            () => this.scene.game.settings.touchMode,
-            (touchMode) => this.setTouchMode(touchMode)
+        this.addDisposer(
+            reaction(
+                () => this.scene.game.settings.touchMode,
+                (touchMode) => this.setTouchMode(touchMode)
+            )
         );
 
         // @ts-ignore
@@ -152,7 +156,7 @@ export class ClientInputManager extends BaseInputManager {
 
     update(time: number, delta: number) {
         super.update(time, delta);
-        if (this.toFollowCursor) this.makeCameraFollowCursor();
+        if (this.scene.game.settings.toFollowCursor) this.makeCameraFollowCursor();
     }
 
     setFollowCursor(value = true, lerp = 0.3) {

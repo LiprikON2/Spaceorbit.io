@@ -1,26 +1,19 @@
 import React from "react";
-import { useToggle } from "@mantine/hooks";
 import { Music, MusicOff } from "tabler-icons-react";
+import { observer } from "mobx-react-lite";
 
 import { ToggleButton } from "~/ui/components";
-import { useGame, useSettings } from "~/ui/hooks";
+import { useSettings } from "~/ui/hooks";
 
-const settingName = "musicMute";
+export const MusicMuteBtn = observer(() => {
+    const { settings } = useSettings();
 
-export const MusicMuteBtn = () => {
-    const {
-        computed: {
-            scene: { soundManager },
-        },
-    } = useGame();
-    const { settings, toggleMusicSetting } = useSettings();
-    const [on, toggle] = useToggle([!settings[settingName], settings[settingName]]);
-
-    const handleClick = () => {
-        soundManager.toggleMute(settingName);
-        toggleMusicSetting();
-        toggle();
-    };
-
-    return <ToggleButton on={on} iconOn={<Music />} iconOff={<MusicOff />} onClick={handleClick} />;
-};
+    return (
+        <ToggleButton
+            on={!settings.musicMute}
+            iconOn={<Music strokeWidth={2.5} />}
+            iconOff={<MusicOff strokeWidth={2.5} />}
+            onClick={() => settings.setMusicMute(!settings.musicMute)}
+        />
+    );
+});

@@ -1,13 +1,12 @@
 import "core-js/actual";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { MantineProvider } from "@mantine/core";
-import type { MantineTheme } from "@mantine/core";
+import { type MantineTheme, MantineProvider } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { App } from "./App";
-import { CustomFonts } from "./components/CustomFonts";
+import { CustomFonts } from "./components";
 
 const fontFamilyDisplay =
     "Carter One, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji";

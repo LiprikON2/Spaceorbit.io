@@ -1,7 +1,9 @@
+import { autorun } from "mobx";
 import SoundFadePlugin from "phaser3-rex-plugins/plugins/soundfade-plugin";
 
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import type { BaseScene } from "~/scenes/core/BaseScene";
+import { Disposable } from "~/managers/components";
 
 type SoundManagerConfig = {
     masterVolume: number;
@@ -9,50 +11,33 @@ type SoundManagerConfig = {
     musicVolume: number;
     effectsMute: boolean;
     musicMute: boolean;
-
-    distanceThreshold: number;
-    pauseOnBlur: boolean;
 };
 
 export type VolumeKeys = "masterVolume" | "musicVolume" | "effectsVolume";
 export type MuteKeys = "effectsMute" | "musicMute";
 
-export class SoundManager {
-    scene: BaseScene;
+export class SoundManager extends Disposable {
+    declare scene: BaseScene;
     player: Spaceship;
     sounds = {};
     options: SoundManagerConfig;
     musicPlaylist: string[] = [];
-    music;
+    music: Phaser.Sound.BaseSound & { mute: boolean; volume: number };
     soundFade: SoundFadePlugin;
     loopingSounds = {};
 
-    constructor(scene, options?: SoundManagerConfig) {
-        const localStorageSettings = scene.game.settings;
-        const {
-            masterVolume = 1,
-            effectsVolume = 0.1,
-            musicVolume = 0.025,
-            effectsMute = false,
-            musicMute = false,
-        } = localStorageSettings;
-        const defaultOptions = {
-            masterVolume,
-            effectsVolume,
-            musicVolume,
-            effectsMute,
-            musicMute,
+    distanceThreshold = 2000;
+    constructor(scene: BaseScene) {
+        super(scene);
+        this.options = scene.game.settings;
 
-            distanceThreshold: 2000,
-            pauseOnBlur: false,
-        };
-        this.options = { ...defaultOptions, ...options };
+        this.addDisposer(autorun(() => this.updateVolumes()));
 
         this.scene = scene;
         this.soundFade = this.scene.plugins.get("rexSoundFade") as SoundFadePlugin;
 
         // Prevent sound mute when tabbing out
-        scene.sound.pauseOnBlur = this.options.pauseOnBlur;
+        scene.sound.pauseOnBlur = false;
     }
     setVolume(key: VolumeKeys, newVolume: number) {
         this.options[key] = newVolume;
@@ -64,12 +49,13 @@ export class SoundManager {
     }
 
     updateVolumes() {
+        console.log("TODO this log makes it work", this.options.masterVolume);
         if (this.music) {
             this.music.mute = this.options.musicMute;
             this.music.volume = this.options.masterVolume * this.options.musicVolume;
         }
-        Object.keys(this.loopingSounds).forEach((UUID) => {
-            const soundObj = this.loopingSounds[UUID];
+        Object.keys(this.loopingSounds).forEach((id) => {
+            const soundObj = this.loopingSounds[id];
             soundObj.sound.mute = this.options.effectsMute;
         });
     }
@@ -181,7 +167,7 @@ export class SoundManager {
         };
         const { maxVolume, pitchPower } = Object.assign({}, defaults, options);
 
-        // The more pitch power is, the 'heavier' the sound is
+        // The bigger pitch power is, the 'heavier' the sound is
         const pitch = Math.max(pitchPower * -200, -2000);
         const config = {
             detune: pitch,
@@ -261,6 +247,7 @@ export class SoundManager {
         }
 
         const finalVolume = this.options.masterVolume * this.options.musicVolume;
+        // @ts-ignore
         this.music = this.scene.sound.add(this.musicPlaylist[trackIndex]);
         this.music.play({ volume: finalVolume, mute: this.options.musicMute });
 
@@ -273,7 +260,7 @@ export class SoundManager {
 
     normalizeVolume(distance: number, maxVolume = 1) {
         const minDistance = 0;
-        const maxDistance = this.options.distanceThreshold;
+        const maxDistance = this.distanceThreshold;
 
         if (distance < maxDistance) {
             const normalizedVolume = 1 - (distance - minDistance) / (maxDistance - minDistance);

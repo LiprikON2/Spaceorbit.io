@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 
 import background from "~/assets/ui/background-space.webp";
 import { ErrorModal, BackgroundImage } from "./components";
-import { useGame, useMainMenu, useSyncSettingsToSession } from "./hooks";
+import { useGame, useMainMenu } from "./hooks";
 import { TopLeft } from "./scenes/TopLeft";
 import { TopRight } from "./scenes/TopRight";
 import { Center } from "./scenes/Center";
@@ -96,7 +96,7 @@ const StyledBottomRightGroup = styled(Group)`
 `;
 
 export const App = () => {
-    useSyncSettingsToSession();
+    // useSyncSettingsToSession();
 
     useMainMenu();
 

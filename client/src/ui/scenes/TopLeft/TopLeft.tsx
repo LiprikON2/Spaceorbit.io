@@ -1,5 +1,4 @@
-import React from "react";
-import { useToggle } from "@mantine/hooks";
+import React, { useState } from "react";
 import { Settings } from "tabler-icons-react";
 
 import { Button } from "~/ui/components";
@@ -10,27 +9,27 @@ import { useGame } from "~/ui/hooks";
 
 export const TopLeft = ({ GroupComponent }) => {
     const { gameManager } = useGame();
-    const [openedSettings, toggleSettingsModal] = useToggle([false, true]);
+    const [openedSettings, setOpenedSettings] = useState(false);
 
-    const toggleSettings = () => {
-        if (openedSettings) {
-            gameManager.unlockInput();
-        } else {
-            gameManager.lockInput();
-        }
-
-        toggleSettingsModal();
+    const openSettings = () => {
+        gameManager.lockInput();
+        setOpenedSettings(true);
     };
+    const closeSettings = () => {
+        gameManager.unlockInput();
+        setOpenedSettings(false);
+    };
+
     return (
         <>
             <GroupComponent>
-                <Button isSquare onClick={toggleSettings}>
+                <Button isSquare onClick={openSettings}>
                     <Settings strokeWidth={2.5} />
                 </Button>
                 <EffectsMuteBtn />
                 <MusicMuteBtn />
             </GroupComponent>
-            <SettingsModal opened={openedSettings} onClose={toggleSettings} />
+            <SettingsModal opened={openedSettings} onClose={closeSettings} />
         </>
     );
 };

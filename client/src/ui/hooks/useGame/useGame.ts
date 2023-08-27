@@ -53,7 +53,7 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "singleplayer";
             })
         );
-        const singleplayerGame = await gameManager.init(settings);
+        const singleplayerGame = await gameManager.init();
 
         set(
             produce((state) => {
@@ -67,7 +67,7 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "multiplayer";
             })
         );
-        const multiplayerGame = await gameManager.init(settings, true, url);
+        const multiplayerGame = await gameManager.init(true, url);
 
         set(
             produce((state) => {

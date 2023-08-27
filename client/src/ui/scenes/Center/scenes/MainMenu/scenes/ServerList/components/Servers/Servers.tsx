@@ -165,7 +165,7 @@ export const Servers = ({
                             </ThemeIcon>
                         }
                     >
-                        <Chip value={url} color="cyan" size="sm">
+                        <Chip value={url} size="sm">
                             {url}
                         </Chip>
 

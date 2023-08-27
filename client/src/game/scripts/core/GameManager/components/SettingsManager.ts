@@ -23,42 +23,43 @@ class SettingsManager {
         Object.assign(this, initSettings);
 
         makeAutoObservable(this);
+        console.dir(this);
     }
 
-    setMasterVolume(value: number) {
+    setMasterVolume = (value: number) => {
         this.masterVolume = value;
-    }
-    setEffectsVolume(value: number) {
+    };
+    setEffectsVolume = (value: number) => {
         this.effectsVolume = value;
-    }
-    setMusicVolume(value: number) {
+    };
+    setMusicVolume = (value: number) => {
         this.musicVolume = value;
-    }
-    setEffectsMute(value: boolean) {
+    };
+    setEffectsMute = (value: boolean) => {
         this.effectsMute = value;
-    }
-    setMusicMute(value: boolean) {
+    };
+    setMusicMute = (value: boolean) => {
         this.musicMute = value;
-    }
-    setGraphicsSettings(value: GraphicsSettings) {
+    };
+    setGraphicsSettings = (value: GraphicsSettings) => {
         this.graphicsSettings = value;
-    }
-    setShowDeviceInfo(value: boolean) {
+    };
+    setShowDeviceInfo = (value: boolean) => {
         this.showDeviceInfo = value;
-    }
-    setTouchMode(value: boolean) {
+    };
+    setTouchMode = (value: boolean) => {
         this.touchMode = value;
-    }
-    setToFollowCursor(value: boolean) {
+    };
+    setToFollowCursor = (value: boolean) => {
         this.toFollowCursor = value;
-    }
+    };
 
     static defaultSettings: Settings = {
         musicMute: false,
         effectsMute: false,
         masterVolume: 1,
         effectsVolume: 0.1,
-        musicVolume: 0.05,
+        musicVolume: 0.025,
         graphicsSettings: "high",
         touchMode: SettingsManager.isTouchDevice(),
         showDeviceInfo: false,

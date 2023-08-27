@@ -1,5 +1,6 @@
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import type { BaseScene } from "~/scenes/core/BaseScene";
+import { Disposable } from "./components";
 
 export interface Keys {
     [key: string]: Phaser.Input.Keyboard.Key;
@@ -36,8 +37,8 @@ const defaultActions = {
     targetId: null,
 };
 
-export default class BaseInputManager {
-    scene: BaseScene;
+export default class BaseInputManager extends Disposable {
+    declare scene: BaseScene;
     player: Spaceship;
     keys: Keys;
     #actions: Required<Actions>;
@@ -60,7 +61,8 @@ export default class BaseInputManager {
         this.#actions = { ...defaultActions, ...actions };
     }
 
-    constructor(scene, player) {
+    constructor(scene: BaseScene, player: Spaceship) {
+        super(scene);
         this.scene = scene;
         this.player = player;
 

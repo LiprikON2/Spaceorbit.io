@@ -21,22 +21,20 @@ export const MainMenu = () => {
         }
     };
     return (
-        <>
-            <Paper>
-                <Stack>
-                    <Button variant="light" color="cyan" fullWidth onClick={handleSingleplayer}>
-                        Singleplayer
-                    </Button>
-                    <AccordionButton
-                        disabled={!selectedServer}
-                        label="Multiplayer"
-                        color="cyan"
-                        onClick={handleMultiplayer}
-                    >
-                        {(collapsed) => <ServerList collapsed={collapsed} />}
-                    </AccordionButton>
-                </Stack>
-            </Paper>
-        </>
+        <Paper>
+            <Stack>
+                <Button variant="light" color="cyan" fullWidth onClick={handleSingleplayer}>
+                    Singleplayer
+                </Button>
+                <AccordionButton
+                    disabled={!selectedServer}
+                    label="Multiplayer"
+                    color="cyan"
+                    onClick={handleMultiplayer}
+                >
+                    {(collapsed) => <ServerList collapsed={collapsed} />}
+                </AccordionButton>
+            </Stack>
+        </Paper>
     );
 };

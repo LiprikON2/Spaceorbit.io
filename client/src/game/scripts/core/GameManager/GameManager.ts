@@ -6,6 +6,7 @@ import { geckos } from "@geckos.io/client";
 import type { ClientScene } from "~/scenes/core/ClientScene";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import { GameClient, clientConfig } from "../GameClient";
+import { type Settings, SettingsManager } from "./components";
 
 export interface StatusEvent {
     name: string;
@@ -25,9 +26,11 @@ export class GameManager {
     config: Phaser.Types.Core.GameConfig;
     game: GameClient;
     emitter: Emitter<OutEvents>;
+    settings: SettingsManager;
 
-    constructor(config) {
+    constructor(config: Phaser.Types.Core.GameConfig, settings: Partial<Settings> = {}) {
         this.config = config;
+        this.settings = new SettingsManager(settings);
         this.emitter = createNanoEvents();
     }
 
@@ -35,7 +38,7 @@ export class GameManager {
         return this.emitter.on(event, callback);
     };
 
-    init = async (settings, isMultiplayer = false, url = "http://localhost:3010") => {
+    init = async (isMultiplayer = false, url = "http://localhost:3010") => {
         let channel;
         if (isMultiplayer)
             channel = geckos({
@@ -49,7 +52,7 @@ export class GameManager {
                     ...this.config,
                     callbacks: { postBoot: () => resolve(true) },
                 },
-                settings,
+                this.settings,
                 this.emitter,
                 channel ?? undefined
             );
@@ -81,6 +84,7 @@ export class GameManager {
         this.scene.input.keyboard.resetKeys();
     };
 
+    // TODO phaser registry?
     get scene(): ClientScene | null {
         const clientScene = this.game?.scene?.keys["UnnamedMapScene"] as ClientScene;
         return clientScene ?? null;

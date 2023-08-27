@@ -98,6 +98,6 @@ export const clientConfig: Phaser.Types.Core.GameConfig = {
         global: plugins,
     },
     input: {
-        gamepad: true,
+        gamepad: false,
     },
 };

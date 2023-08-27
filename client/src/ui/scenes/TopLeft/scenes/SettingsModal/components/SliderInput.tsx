@@ -1,20 +1,22 @@
+import React, { useState } from "react";
 import { Text, Slider, Space } from "@mantine/core";
-import React from "react";
+import { useDidUpdate } from "@mantine/hooks";
 
 export const SliderInput = ({
-    color = "cyan",
     label = null,
     onChangeEnd = (value: number) => {},
-    defaultValue = undefined,
     value = undefined,
     min = 0,
     max = 1,
 }) => {
+    const [internalValue, setInternalValue] = useState(value);
+
+    useDidUpdate(() => setInternalValue(value), [value]);
+
     return (
         <>
             {label && <Text>{label}</Text>}
             <Slider
-                color={color}
                 label={(value) => `${(value * 100 * (1 / max)).toFixed(0)}%`}
                 marks={[
                     { value: max * 0, label: "0%" },
@@ -27,9 +29,9 @@ export const SliderInput = ({
                 max={max}
                 precision={4}
                 step={max * 0.01}
+                onChange={(value) => setInternalValue(value)}
                 onChangeEnd={onChangeEnd}
-                defaultValue={defaultValue}
-                value={value}
+                value={internalValue}
             />
             <Space h="md" />
         </>
