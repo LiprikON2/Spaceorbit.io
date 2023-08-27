@@ -40,7 +40,6 @@ export class ServerScene extends BaseMapScene {
             {},
             {
                 scene: this,
-                isTextured: false,
             }
         );
         this.collisionManager = new BaseCollisionManager({

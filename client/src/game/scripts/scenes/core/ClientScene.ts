@@ -27,7 +27,7 @@ export class ClientScene extends BaseMapScene {
     clientVault?: Vault;
     every30Ticks = new EveryTick(30);
     everyOnceInAWhile = new EveryTick(0.1);
-    ping = new PingBuffer(180);
+    ping = new PingBuffer(60);
 
     inputManager: ClientInputManager;
     soundManager: SoundManager;
@@ -270,9 +270,9 @@ export class ClientScene extends BaseMapScene {
             this.every30Ticks.update(time, delta, () => {
                 this.sendPlayerActions();
                 this.reconciliatePlayerPos();
+                this.updatePing();
             });
             this.updateEntitiesActions();
-            this.updatePing();
 
             this.everyOnceInAWhile.update(time, delta, () => {
                 this.reconciliateMissingEntites();

@@ -3,6 +3,7 @@ import type { ClientChannel as GeckosClientChannel } from "@geckos.io/client";
 
 import type { OutEvents } from "~/game/core/GameManager/GameManager";
 import type { MultiplayerEvents } from "~/scenes/core/BaseScene";
+import { type Settings, SettingsManager } from "./components";
 
 interface EventsMap {
     [event: string]: any;
@@ -43,18 +44,18 @@ export interface Game {
 }
 
 export class GameClient extends Phaser.Game implements Game {
-    settings;
+    settings: SettingsManager;
     outEmitter: Emitter<OutEvents> | null;
     channel?: ClientChannel<MultiplayerEvents>;
 
     constructor(
         GameConfig?: Phaser.Types.Core.GameConfig,
-        settings = {},
-        outEmitter = null,
-        channel?
+        settings: Partial<Settings> = {},
+        outEmitter: Emitter<OutEvents> = null,
+        channel?: ClientChannel<MultiplayerEvents>
     ) {
         super(GameConfig);
-        this.settings = settings;
+        this.settings = new SettingsManager(settings);
         this.outEmitter = outEmitter;
         this.channel = channel;
     }

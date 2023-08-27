@@ -5,7 +5,7 @@ import type { Snapshot } from "@geckos.io/snapshot-interpolation/lib/types";
 import type { ChannelId } from "@geckos.io/client";
 import BezierEasing from "bezier-easing";
 
-import type { GameClient } from "~/game/core/client/GameClient";
+import type { GameClient } from "~/game/core/GameClient/GameClient";
 import { Spaceship, type SpaceshipServerOptions } from "~/game/objects/Sprite/Spaceship";
 import {
     type Actions,

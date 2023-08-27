@@ -5,7 +5,7 @@ import { geckos } from "@geckos.io/client";
 
 import type { ClientScene } from "~/scenes/core/ClientScene";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
-import { GameClient, clientConfig } from "../client";
+import { GameClient, clientConfig } from "../GameClient";
 
 export interface StatusEvent {
     name: string;

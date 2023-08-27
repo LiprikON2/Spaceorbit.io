@@ -25,8 +25,8 @@ const defaultSettings = {
     masterVolume: 1,
     effectsVolume: 0.1,
     musicVolume: 0.05,
-    graphicsSettings: "1",
-    isTouchMode: isTouchDevice(),
+    graphicsSettings: "high",
+    touchMode: isTouchDevice(),
     showDeviceInfo: false,
     toFollowCursor: false,
 };
@@ -75,7 +75,7 @@ export const useSettings = create<SettingsStore>()(
         toggleTouchControlsSetting: () =>
             set(
                 produce((state) => {
-                    state.settings.isTouchMode = !state.settings.isTouchMode;
+                    state.settings.touchMode = !state.settings.touchMode;
                 })
             ),
         setToFollowCursorSetting: (value) =>

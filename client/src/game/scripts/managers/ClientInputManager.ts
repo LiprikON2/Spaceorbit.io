@@ -1,57 +1,24 @@
-import { action, makeObservable, observable } from "mobx";
+import { joystick1 } from "~/assets/ui/joystick_1.svg";
 import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscroller";
 import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
 
 import type { ClientScene } from "~/scenes/core/ClientScene";
-import { GameClient } from "~/game/core/client/GameClient";
+import { GameClient } from "~/game/core/GameClient/GameClient";
 import BaseInputManager, { type Keys, type Actions } from "./BaseInputManager";
+import { reaction } from "mobx";
 
 type VirtualJoyStick = RexVirtualJoyStick & Phaser.Events.EventEmitter;
 
-const makeJoystick = (scene, enable) => {
-    const baseJoystick = scene.add.image(0, 0, "joystick_1").setDepth(1000);
-    const thumbJoystick = scene.add.image(0, 0, "joystick_2").setDepth(1000);
-
-    const joystick: VirtualJoyStick = scene.plugins
-        .get("rexVirtualJoystick")
-        // @ts-ignore
-        .add(scene, {
-            x: Number(scene.game.config.height) * 0.25,
-            y: Number(scene.game.config.height) - Number(scene.game.config.height) * 0.25,
-            radius: 100,
-            base: baseJoystick,
-            thumb: thumbJoystick,
-            enable,
-            fixed: true,
-        });
-    joystick.setVisible(enable);
-
-    return joystick;
-};
-const makeButton = (scene, enable) => {
-    const thumbBtn = scene.add.image(0, 0, "joystick_2").setDepth(1000);
-    const virtualBtn: VirtualJoyStick = scene.plugins
-        .get("rexVirtualJoystick")
-        // @ts-ignore
-        .add(scene, {
-            x: Number(scene.game.config.width) * 0.75,
-            y: Number(scene.game.config.height) - Number(scene.game.config.height) * 0.25,
-            radius: 100,
-            base: scene.add.rectangle(-999, -999),
-            thumb: thumbBtn,
-            enable: false,
-            fixed: true,
-        });
-    virtualBtn.setVisible(enable);
-
-    return virtualBtn;
-};
-
 export class ClientInputManager extends BaseInputManager {
-    touchControls = { joystick: null, virtualBtn: null };
+    touchControls: { joystick: VirtualJoyStick; virtualBtn: VirtualJoyStick } = {
+        joystick: null,
+        virtualBtn: null,
+    };
     declare scene: ClientScene;
     zoom = 1;
-    toFollowCursor = false;
+
+    toFollowCursor: boolean;
+    touchMode: boolean;
 
     get baseZoom() {
         const coef = 0.75;
@@ -80,7 +47,7 @@ export class ClientInputManager extends BaseInputManager {
             primaryFire: this.isGameInFocus && this.scene.input.activePointer.isDown,
             secondaryFire: false,
 
-            touchMode: this.isTouchMode,
+            touchMode: this.touchMode,
             autoattack: this.player.isAutoattacking,
             targetId: this.targetId,
         };
@@ -98,22 +65,28 @@ export class ClientInputManager extends BaseInputManager {
     constructor(scene: ClientScene, player) {
         super(scene, player);
         scene.cameras.main.startFollow(player, false);
+        this.updateZoom();
+
         const { toFollowCursor } = scene.game.settings;
         this.setFollowCursor(toFollowCursor);
+        reaction(
+            () => this.scene.game.settings.toFollowCursor,
+            (toFollowCursor) => this.setFollowCursor(toFollowCursor)
+        );
 
-        this.updateZoom();
+        const touchMode = this.scene.game.settings.touchMode;
+        this.setTouchMode(touchMode);
+        reaction(
+            () => this.scene.game.settings.touchMode,
+            (touchMode) => this.setTouchMode(touchMode)
+        );
 
         // @ts-ignore
         const scroller: MouseWheelScroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
             speed: 0.001,
         }) as MouseWheelScroller;
-        scroller.on("scroll", (diff, gameObject, scroller) => this.updateZoom(diff));
-        this.scene.scale.on("resize", (gameSize, baseSize, displaySize) => this.updateZoom());
-
-        if (this.scene.game instanceof GameClient) {
-            const isTouchMode = this.scene.game.settings?.localStorageSettings?.isTouchMode;
-            this.isTouchMode = isTouchMode ?? this.isTouchMode;
-        }
+        scroller.on("scroll", (diff) => this.updateZoom(diff));
+        this.scene.scale.on("resize", () => this.updateZoom());
 
         this.keys = this.scene.input.keyboard.addKeys(
             "W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT"
@@ -125,10 +98,6 @@ export class ClientInputManager extends BaseInputManager {
         toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());
 
         this.initTouchControls();
-        makeObservable(this, {
-            toFollowCursor: observable,
-            setFollowCursor: action,
-        });
     }
 
     updateZoom(diff = 0) {
@@ -151,7 +120,7 @@ export class ClientInputManager extends BaseInputManager {
         // TODO multitouch
         this.scene.input.addPointer(1);
 
-        const joystick = makeJoystick(this.scene, this.isTouchMode);
+        const joystick = ClientInputManager.makeJoystick(this.scene, this.touchMode);
         joystick.on("update", () => {
             const accelerationPercentage = Math.min(1, Math.floor(joystick.force) / 100);
             const rotation = Phaser.Math.DegToRad(Math.floor(joystick.angle * 100) / 100);
@@ -162,23 +131,23 @@ export class ClientInputManager extends BaseInputManager {
             }
         });
 
-        const virtualBtn = makeButton(this.scene, this.isTouchMode);
+        const virtualBtn = ClientInputManager.makeButton(this.scene, this.touchMode);
         virtualBtn.on("pointerdown", () => this.player.toggleAutoattack());
 
         this.touchControls = { joystick, virtualBtn };
     }
 
-    toggleTouchControls() {
+    setTouchMode(value: boolean) {
         const { joystick, virtualBtn } = this.touchControls;
         if (joystick) {
-            joystick.toggleVisible();
-            joystick.toggleEnable();
+            joystick.setVisible(value);
+            joystick.setEnable(value);
         }
         if (virtualBtn) {
-            virtualBtn.toggleVisible();
+            virtualBtn.setVisible(value);
         }
 
-        this.isTouchMode = !this.isTouchMode;
+        this.touchMode = value;
     }
 
     update(time: number, delta: number) {
@@ -186,9 +155,9 @@ export class ClientInputManager extends BaseInputManager {
         if (this.toFollowCursor) this.makeCameraFollowCursor();
     }
 
-    setFollowCursor(enable = true, lerp = 0.3) {
-        this.toFollowCursor = enable;
-        if (enable) this.scene.cameras.main.setLerp(lerp);
+    setFollowCursor(value = true, lerp = 0.3) {
+        this.toFollowCursor = value;
+        if (value) this.scene.cameras.main.setLerp(lerp);
         else this.scene.cameras.main.setLerp(1).setFollowOffset(0);
     }
 
@@ -227,5 +196,44 @@ export class ClientInputManager extends BaseInputManager {
 
     setTargetById(targetId: string) {
         // TODO disable this on client more gracefully
+    }
+
+    static makeJoystick(scene: Phaser.Scene, enable: boolean) {
+        const baseJoystick = scene.add.image(0, 0, "joystick_1").setDepth(1000);
+        const thumbJoystick = scene.add.image(0, 0, "joystick_2").setDepth(1000);
+
+        const joystick: VirtualJoyStick = scene.plugins
+            .get("rexVirtualJoystick")
+            // @ts-ignore
+            .add(scene, {
+                x: Number(scene.game.config.height) * 0.25,
+                y: Number(scene.game.config.height) - Number(scene.game.config.height) * 0.25,
+                radius: 100,
+                base: baseJoystick,
+                thumb: thumbJoystick,
+                enable,
+                fixed: true,
+            });
+        joystick.setVisible(enable);
+
+        return joystick;
+    }
+    static makeButton(scene: Phaser.Scene, enable: boolean) {
+        const thumbBtn = scene.add.image(0, 0, "joystick_2").setDepth(1000);
+        const virtualBtn: VirtualJoyStick = scene.plugins
+            .get("rexVirtualJoystick")
+            // @ts-ignore
+            .add(scene, {
+                x: Number(scene.game.config.width) * 0.75,
+                y: Number(scene.game.config.height) - Number(scene.game.config.height) * 0.25,
+                radius: 100,
+                base: scene.add.rectangle(-999, -999),
+                thumb: thumbBtn,
+                enable: false,
+                fixed: true,
+            });
+        virtualBtn.setVisible(enable);
+
+        return virtualBtn;
     }
 }

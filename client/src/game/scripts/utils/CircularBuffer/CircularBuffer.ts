@@ -2,7 +2,7 @@ export class CircularBuffer {
     /**
      * Last bufferLength number of elements
      */
-    buffer = [];
+    #buffer = [];
     /**
      * Value between 0 and bufferLength
      */
@@ -17,20 +17,20 @@ export class CircularBuffer {
     }
 
     push(element: any) {
-        if (this.buffer.length === this.bufferLength) {
-            this.buffer[this.pointer] = element;
+        if (this.#buffer.length === this.bufferLength) {
+            this.#buffer[this.pointer] = element;
         } else {
-            this.buffer.push(element);
+            this.#buffer.push(element);
         }
         this.pointer = (this.pointer + 1) % this.bufferLength;
     }
 
     get(i: number) {
-        return this.buffer[i];
+        return this.#buffer[i];
     }
 
-    //Gets the ith element before last one
+    // Gets the i-th element before last one
     getLast(i: number) {
-        return this.buffer[this.pointer + this.bufferLength - 1 - i];
+        return this.#buffer[this.pointer + this.bufferLength - 1 - i];
     }
 }

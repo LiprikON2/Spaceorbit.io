@@ -40,11 +40,10 @@ export default class BaseInputManager {
     scene: BaseScene;
     player: Spaceship;
     keys: Keys;
-    isTouchMode = false;
-    _actions: Required<Actions>;
+    #actions: Required<Actions>;
 
     get actions() {
-        return this._actions;
+        return this.#actions;
     }
 
     /**
@@ -58,14 +57,14 @@ export default class BaseInputManager {
         return actionsCompact;
     }
     setActions(actions: Partial<Actions>) {
-        this._actions = { ...defaultActions, ...actions };
+        this.#actions = { ...defaultActions, ...actions };
     }
 
     constructor(scene, player) {
         this.scene = scene;
         this.player = player;
 
-        this._actions = defaultActions;
+        this.#actions = defaultActions;
     }
 
     update(time: number, delta: number) {

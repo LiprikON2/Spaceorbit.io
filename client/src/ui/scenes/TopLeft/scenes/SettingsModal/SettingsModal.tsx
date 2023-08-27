@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Container,
     Modal,
-    NumberInput,
     SegmentedControl,
-    Space,
     Text,
     Stack,
     Switch,
@@ -12,21 +10,18 @@ import {
     Title,
     Select,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { autorun, reaction } from "mobx";
+import { observer } from "mobx-react-lite";
 
-import { Button } from "~/ui/components";
 import { SliderInput } from "./components";
 import { useGame, useSettings } from "~/ui/hooks";
 import { VolumeKeys } from "~/game/managers/SoundManager";
-import { observer } from "mobx-react-lite";
 
 export const SettingsModal = observer(
     ({ opened, onClose }: { opened: boolean; onClose: () => void }) => {
         const {
+            gameManager,
             computed: {
-                player,
-                scene: { soundManager, inputManager, entityManager },
+                scene: { soundManager },
             },
         } = useGame();
         const {
@@ -35,33 +30,7 @@ export const SettingsModal = observer(
             setEffectsVolumeSetting,
             setMusicVolumeSetting,
             setGraphicsSettingsSetting,
-            setToFollowCursorSetting,
         } = useSettings();
-
-        // useEffect(() => {
-        //     return autorun(() => {
-        //         console.log("wow! toFollowCursor", inputManager.toFollowCursor);
-        //     });
-        // }, []);
-        // reaction(
-        //     () => inputManager.toFollowCursor,
-        //     (toFollowCursor) => {
-        //         console.log("wow! toFollowCursor", toFollowCursor);
-        //     }
-        // );
-
-        const addEngine = () => {
-            player.exhausts.createExhaust();
-        };
-        const removeEngine = () => {
-            player.exhausts.removeExhaust();
-        };
-        const addLaser = (slot: number) => {
-            player.weapons.createWeapon("laser", slot);
-        };
-        const addGatling = (slot: number) => {
-            player.weapons.createWeapon("gatling", slot);
-        };
 
         const setVolume = (key: VolumeKeys, volume: number) => {
             soundManager.setVolume(key, volume);
@@ -76,38 +45,7 @@ export const SettingsModal = observer(
         const handleGraphicSettings = (value: string) => {
             setGraphicsSettingsSetting(value);
         };
-
-        const toggleTouchControls = () => {
-            inputManager.toggleTouchControls();
-            touchControlToggle();
-        };
-        const [touchControlChecked, { toggle: touchControlToggle }] = useDisclosure(
-            settings.isTouchMode
-        );
         const [activeTab, setActiveTab] = useState<string | null>("audio");
-
-        // const toggleFollowCursor = () => {
-        //     inputManager.setFollowCursor(!settings.toFollowCursor);
-        //     setToFollowCursorSetting(!settings.toFollowCursor);
-        // };
-        // const sendMobs = (e) => {
-        //     e.preventDefault();
-        //     const { mobGroup } = entityManager;
-        //     entityManager.spawnMobs(mobsCount);
-
-        //     mobGroup.getChildren().forEach((mob) => {
-        //         mob.moveTo(x, y);
-        //         mob.setPointer(x, y);
-        //     });
-        // };
-
-        // const teleport = () => {
-        //     player.teleport(x, y);
-        // };
-
-        // const [x, setx] = useState(120);
-        // const [y, sety] = useState(120);
-        // const [mobsCount, setMobsCount] = useState(0);
 
         return (
             <>
@@ -134,7 +72,6 @@ export const SettingsModal = observer(
                                     <Tabs.Tab value="audio">Audio</Tabs.Tab>
                                     <Tabs.Tab value="graphics">Graphics</Tabs.Tab>
                                     <Tabs.Tab value="controls">Controls</Tabs.Tab>
-                                    {/* <Tabs.Tab value="cheats">Cheats</Tabs.Tab> */}
                                 </Tabs.List>
                                 <Tabs.Panel value="audio">
                                     <Container>
@@ -181,19 +118,19 @@ export const SettingsModal = observer(
                                             <SegmentedControl
                                                 color="cyan"
                                                 data={[
-                                                    { label: "Low", value: "0.5" },
-                                                    { label: "Medium", value: "0.75" },
-                                                    { label: "High", value: "1" },
+                                                    { label: "Low", value: "low" },
+                                                    { label: "Medium", value: "medium" },
+                                                    { label: "High", value: "high" },
                                                 ]}
                                                 transitionDuration={0}
-                                                value={String(settings.graphicsSettings)}
+                                                value={settings.graphicsSettings}
                                                 onChange={handleGraphicSettings}
                                             />
 
                                             <Select
                                                 label="Resolution"
                                                 data={[
-                                                    { value: "auto", label: "auto" },
+                                                    { value: "auto", label: "Auto" },
                                                     { value: "1920x1080", label: "1920x1080" },
                                                 ]}
                                                 defaultValue="auto"
@@ -207,12 +144,10 @@ export const SettingsModal = observer(
                                             <Title order={3}>Camera</Title>
                                             <Switch
                                                 label="Make camera follow the cursor"
-                                                // checked={settings.toFollowCursor}
-                                                // onChange={toggleFollowCursor}
-                                                checked={inputManager.toFollowCursor}
+                                                checked={gameManager.game.settings.toFollowCursor}
                                                 onChange={() =>
-                                                    inputManager.setFollowCursor(
-                                                        !inputManager.toFollowCursor
+                                                    gameManager.game.settings.setToFollowCursor(
+                                                        !gameManager.game.settings.toFollowCursor
                                                     )
                                                 }
                                             />
@@ -220,44 +155,16 @@ export const SettingsModal = observer(
                                             <Title order={3}>Touch</Title>
                                             <Switch
                                                 label="Enable touch controls"
-                                                checked={touchControlChecked}
-                                                onChange={toggleTouchControls}
+                                                checked={gameManager.game.settings.touchMode}
+                                                onChange={() =>
+                                                    gameManager.game.settings.setTouchMode(
+                                                        !gameManager.game.settings.touchMode
+                                                    )
+                                                }
                                             />
                                         </Stack>
                                     </Container>
                                 </Tabs.Panel>
-                                {/* <Tabs.Panel value="cheats">
-                                <Container>
-                                    <Stack spacing="md">
-                                        <Title order={3}>General</Title>
-
-                                        <form onSubmit={sendMobs}>
-                                            <NumberInput
-                                                onChange={(value) => setMobsCount(Number(value))}
-                                                defaultValue={mobsCount}
-                                                placeholder="You better not put 1000..."
-                                                label="Mobs Count"
-                                            />
-                                            <NumberInput
-                                                onChange={(value) => setx(Number(value))}
-                                                defaultValue={x}
-                                                placeholder="x"
-                                                label="x"
-                                            />
-                                            <NumberInput
-                                                onChange={(value) => sety(Number(value))}
-                                                defaultValue={y}
-                                                placeholder="y"
-                                                label="y"
-                                            />
-                                            <Space h="md" />
-                                            <Button type="submit">Send mobs at x, y</Button>
-                                            <Space h="md" />
-                                            <Button onClick={teleport}>Teleport to x, y</Button>
-                                        </form>
-                                    </Stack>
-                                </Container>
-                            </Tabs.Panel> */}
                             </Tabs>
                         </Modal.Body>
                     </Modal.Content>

@@ -82,9 +82,7 @@ export class ServerEntityManager extends BaseEntityManager {
     }
 
     addPlayer(serverOptions: SpaceshipServerOptions) {
-        const player = this.createPlayer(serverOptions, {
-            isTextured: this.isTextured,
-        });
+        const player = this.createPlayer(serverOptions);
         const inputManager = new BaseInputManager(this, player);
 
         this.players[serverOptions.id] = {
@@ -111,9 +109,7 @@ export class ServerEntityManager extends BaseEntityManager {
     }
 
     addMob(serverOptions: SpaceshipServerOptions) {
-        const mob = this.createMob(serverOptions, {
-            isTextured: this.isTextured,
-        });
+        const mob = this.createMob(serverOptions);
 
         this.mobs[serverOptions.id] = {
             entity: mob,
