@@ -89,6 +89,15 @@ export const SettingsModal = observer(
                                             onChange={settings.setGraphicsSettings}
                                             value={settings.graphicsSettings}
                                         />
+                                        <Title order={3}>Debug</Title>
+
+                                        <Switch
+                                            label="Show device info"
+                                            checked={settings.showDeviceInfo}
+                                            onChange={() =>
+                                                settings.setShowDeviceInfo(!settings.showDeviceInfo)
+                                            }
+                                        />
                                     </Stack>
                                 </Container>
                             </Tabs.Panel>

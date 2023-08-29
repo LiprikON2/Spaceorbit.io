@@ -1,9 +1,15 @@
 export const setSessionStorage = (key, value) => {
     sessionStorage.setItem(key, serializeJSON(value));
 };
-
 export const getSessionStorage = (key) => {
     return deserializeJSON(sessionStorage.getItem(key) ?? "{}");
+};
+
+export const setLocalStorage = (key, value) => {
+    localStorage.setItem(key, serializeJSON(value));
+};
+export const getLocalStorage = (key) => {
+    return deserializeJSON(localStorage.getItem(key) ?? "{}");
 };
 
 export const serializeJSON = (value: any) => {

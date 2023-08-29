@@ -33,7 +33,7 @@ export const Right = observer(({ GroupComponent }: { GroupComponent: StyledGroup
                 <StyledStack>
                     {settings.showDeviceInfo &&
                         Object.entries(deviceInfo).map(([key, value]) => (
-                            <Text key={key} color="white" size="xs">
+                            <Text key={key} color="white" size="sm">
                                 {`${key}: ${value}`}
                             </Text>
                         ))}

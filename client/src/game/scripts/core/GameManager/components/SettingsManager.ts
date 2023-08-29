@@ -1,4 +1,6 @@
-import { makeAutoObservable } from "mobx";
+import { autorun, makeAutoObservable } from "mobx";
+
+import { setLocalStorage, getLocalStorage } from "~/game/utils/localStorage";
 
 type GraphicsSettings = "low" | "medium" | "high";
 
@@ -18,12 +20,28 @@ export interface Settings {
 interface SettingsManager extends Settings {}
 
 class SettingsManager {
-    constructor(settings: Partial<Settings>) {
-        const initSettings = { ...SettingsManager.defaultSettings, ...settings };
+    readonly storageKey = "settings";
+    readonly settingKeys: string[] = [];
+
+    constructor(defaultOverride: Partial<Settings>) {
+        const localStorageSettings = getLocalStorage(this.storageKey);
+
+        const initSettings = {
+            ...SettingsManager.defaultSettings,
+            ...defaultOverride,
+            ...localStorageSettings,
+        };
         Object.assign(this, initSettings);
+        this.settingKeys = Object.keys(initSettings);
 
         makeAutoObservable(this);
-        console.dir(this);
+        autorun(() => setLocalStorage(this.storageKey, this.settings));
+    }
+
+    get settings() {
+        return Object.fromEntries(
+            this.settingKeys.map((settingKey) => [settingKey, this[settingKey]])
+        );
     }
 
     setMasterVolume = (value: number) => {
