@@ -5,7 +5,13 @@ import { useDisclosure } from "@mantine/hooks";
 import { Errors } from "./components";
 import { Button } from "../ToggleButton";
 
-export const ErrorModal = ({ errors, clearErrors }) => {
+export const ErrorModal = ({
+    errors,
+    clearErrors,
+}: {
+    errors: string[];
+    clearErrors: Function;
+}) => {
     const [opened, { close, open }] = useDisclosure(false);
 
     useEffect(() => {

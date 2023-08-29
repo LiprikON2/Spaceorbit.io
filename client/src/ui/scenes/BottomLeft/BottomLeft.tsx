@@ -6,8 +6,9 @@ import { Tool } from "tabler-icons-react";
 import { Button } from "~/ui/components";
 import { OutfittingDrawer } from "./scenes/OutfittingDrawer";
 import { useGame } from "~/ui/hooks";
+import type { StyledGroup } from "~/ui/App";
 
-export const BottomLeft = ({ GroupComponent }) => {
+export const BottomLeft = ({ GroupComponent }: { GroupComponent: StyledGroup }) => {
     const { gameManager } = useGame();
 
     const [openedOutfittingDrawer, { close: closeOutfittngDrawer, toggle: toggleOutfittngDrawer }] =

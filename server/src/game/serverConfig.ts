@@ -3,7 +3,7 @@ import Phaser from "phaser";
 
 import { ServerScene } from "./scenes/ServerScene";
 import { MixinUnnamedMapScene, PreloadScene } from "@spaceorbit/client";
-import { plugins } from "@spaceorbit/client/src/game/scripts/core/client/clientConfig";
+import { plugins } from "@spaceorbit/client/src/game/scripts/core/GameClient";
 
 const DEFAULT_WIDTH = 1920;
 const DEFAULT_HEIGHT = 1080;

@@ -4,8 +4,9 @@ import { Home, User } from "tabler-icons-react";
 import { Button } from "~/ui/components";
 import { ProfileModal } from "./scenes/ProfileModal";
 import { useGame } from "~/ui/hooks";
+import type { StyledGroup } from "~/ui/App";
 
-export const BottomRight = ({ GroupComponent }) => {
+export const BottomRight = ({ GroupComponent }: { GroupComponent: StyledGroup }) => {
     const {
         gameManager,
         exit,

@@ -6,8 +6,9 @@ import { SettingsModal } from "./scenes/SettingsModal";
 import { EffectsMuteBtn } from "./scenes/EffectsMuteBtn";
 import { MusicMuteBtn } from "./scenes/MusicMuteBtn";
 import { useGame } from "~/ui/hooks";
+import type { StyledGroup } from "~/ui/App";
 
-export const TopLeft = ({ GroupComponent }) => {
+export const TopLeft = ({ GroupComponent }: { GroupComponent: StyledGroup }) => {
     const { gameManager } = useGame();
     const [openedSettings, setOpenedSettings] = useState(false);
 

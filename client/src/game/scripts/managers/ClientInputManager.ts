@@ -1,24 +1,22 @@
-import { joystick1 } from "~/assets/ui/joystick_1.svg";
 import type MouseWheelScroller from "phaser3-rex-plugins/plugins/mousewheelscroller";
 import type RexVirtualJoyStick from "phaser3-rex-plugins/plugins/virtualjoystick";
+import { Mixin, settings } from "ts-mixer";
+settings.initFunction = "init";
 
 import type { ClientScene } from "~/scenes/core/ClientScene";
-import { GameClient } from "~/game/core/GameClient/GameClient";
 import BaseInputManager, { type Keys, type Actions } from "./BaseInputManager";
-import { reaction } from "mobx";
+import { Reactive } from "./components";
 
 type VirtualJoyStick = RexVirtualJoyStick & Phaser.Events.EventEmitter;
 
-export class ClientInputManager extends BaseInputManager {
+interface ClientInputManager extends BaseInputManager {}
+class ClientInputManager extends Mixin(BaseInputManager, Reactive) {
     touchControls: { joystick: VirtualJoyStick; virtualBtn: VirtualJoyStick } = {
         joystick: null,
         virtualBtn: null,
     };
     declare scene: ClientScene;
     zoom = 1;
-
-    toFollowCursor: boolean;
-    touchMode: boolean;
 
     get baseZoom() {
         const coef = 0.75;
@@ -62,33 +60,24 @@ export class ClientInputManager extends BaseInputManager {
         return { worldX, worldY };
     }
 
+    get toFollowCursor() {
+        return this.scene.game.settings.toFollowCursor;
+    }
+    get touchMode() {
+        return this.scene.game.settings.touchMode;
+    }
+
     constructor(scene: ClientScene, player) {
         super(scene, player);
         scene.cameras.main.startFollow(player, false);
         this.updateZoom();
 
-        const { toFollowCursor } = this.scene.game.settings;
-        this.setFollowCursor(toFollowCursor);
-        this.addDisposer(
-            reaction(
-                () => this.scene.game.settings.toFollowCursor,
-                (toFollowCursor) => this.setFollowCursor(toFollowCursor)
-            )
-        );
-
-        const touchMode = this.scene.game.settings.touchMode;
-        this.setTouchMode(touchMode);
-        this.addDisposer(
-            reaction(
-                () => this.scene.game.settings.touchMode,
-                (touchMode) => this.setTouchMode(touchMode)
-            )
-        );
-
-        // @ts-ignore
-        const scroller: MouseWheelScroller = scene.plugins.get("rexMouseWheelScroller").add(this, {
-            speed: 0.001,
-        }) as MouseWheelScroller;
+        const scroller: MouseWheelScroller = this.scene.plugins
+            .get("rexMouseWheelScroller")
+            // @ts-ignore
+            .add(this, {
+                speed: 0.001,
+            }) as MouseWheelScroller;
         scroller.on("scroll", (diff) => this.updateZoom(diff));
         this.scene.scale.on("resize", () => this.updateZoom());
 
@@ -100,8 +89,21 @@ export class ClientInputManager extends BaseInputManager {
 
         const toggleShootTargetBtn = this.keys.SPACE;
         toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());
+    }
 
+    // https://github.com/tannerntannern/ts-mixer#dealing-with-constructors
+    init() {
         this.initTouchControls();
+        this.reaction(
+            () => this.toFollowCursor,
+            () => this.updateFollowCursor(),
+            { fireImmediately: true }
+        );
+        this.reaction(
+            () => this.touchMode,
+            () => this.updateTouchMode(),
+            { fireImmediately: true }
+        );
     }
 
     updateZoom(diff = 0) {
@@ -141,17 +143,15 @@ export class ClientInputManager extends BaseInputManager {
         this.touchControls = { joystick, virtualBtn };
     }
 
-    setTouchMode(value: boolean) {
+    updateTouchMode() {
         const { joystick, virtualBtn } = this.touchControls;
         if (joystick) {
-            joystick.setVisible(value);
-            joystick.setEnable(value);
+            joystick.setVisible(this.touchMode);
+            joystick.setEnable(this.touchMode);
         }
         if (virtualBtn) {
-            virtualBtn.setVisible(value);
+            virtualBtn.setVisible(this.touchMode);
         }
-
-        this.touchMode = value;
     }
 
     update(time: number, delta: number) {
@@ -159,9 +159,8 @@ export class ClientInputManager extends BaseInputManager {
         if (this.scene.game.settings.toFollowCursor) this.makeCameraFollowCursor();
     }
 
-    setFollowCursor(value = true, lerp = 0.3) {
-        this.toFollowCursor = value;
-        if (value) this.scene.cameras.main.setLerp(lerp);
+    updateFollowCursor(lerp = 0.3) {
+        if (this.toFollowCursor) this.scene.cameras.main.setLerp(lerp);
         else this.scene.cameras.main.setLerp(1).setFollowOffset(0);
     }
 
@@ -241,3 +240,5 @@ export class ClientInputManager extends BaseInputManager {
         return virtualBtn;
     }
 }
+
+export { ClientInputManager };

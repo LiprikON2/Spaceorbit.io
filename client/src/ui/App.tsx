@@ -1,6 +1,6 @@
 import React from "react";
-import { Group } from "@mantine/core";
-import styled from "@emotion/styled";
+import { Group, GroupProps } from "@mantine/core";
+import styled, { StyledComponent } from "@emotion/styled";
 
 import background from "~/assets/ui/background-space.webp";
 import { ErrorModal, BackgroundImage } from "./components";
@@ -41,6 +41,8 @@ const StyledUI = styled(BackgroundImage)`
     }
 ` as typeof BackgroundImage;
 
+export type StyledGroup = StyledComponent<GroupProps>;
+
 const StyledTopLeftGroup = styled(Group)`
     grid-area: top-l;
     justify-self: start;
@@ -49,6 +51,7 @@ const StyledTopLeftGroup = styled(Group)`
     display: flex;
     flex-wrap: nowrap;
 `;
+
 const StyledTopRightGroup = styled(Group)`
     grid-area: top-r;
     justify-self: end;

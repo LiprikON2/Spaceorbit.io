@@ -4,6 +4,7 @@ import { Title } from "@mantine/core";
 
 import background from "~/assets/ui/background-space.webp";
 import galaxy from "~/assets/ui/galaxy.webp";
+import type { StyledGroup } from "~/ui/App";
 
 const StyledTitle = styled(Title)`
     margin-bottom: calc(var(--responsive-size) * 0.25);
@@ -62,7 +63,7 @@ const StyledTitle = styled(Title)`
     }
 `;
 
-export const TopCenter = ({ GroupComponent }) => {
+export const TopCenter = ({ GroupComponent }: { GroupComponent: StyledGroup }) => {
     const StyledGroupComponent = styled(GroupComponent)`
         --responsive-size: clamp(4rem, 1rem + 8vw, 9rem);
 

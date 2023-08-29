@@ -1,5 +1,5 @@
 import type { GeckosServer } from "@geckos.io/server";
-import type { Game } from "@spaceorbit/client/src/game/scripts/core/client/GameClient";
+import type { Game } from "@spaceorbit/client/src/game/scripts/core/GameClient";
 
 export class GameServer extends Phaser.Game implements Game {
     server: GeckosServer;

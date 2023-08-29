@@ -4,6 +4,8 @@ import { Stack, Text } from "@mantine/core";
 import styled from "@emotion/styled";
 
 import { useSettings } from "~/ui/hooks";
+import { observer } from "mobx-react-lite";
+import type { StyledGroup } from "~/ui/App";
 
 const StyledStack = styled(Stack)`
     gap: 0;
@@ -12,7 +14,7 @@ const StyledStack = styled(Stack)`
     opacity: 0.5;
 `;
 
-export const Right = ({ GroupComponent }) => {
+export const Right = observer(({ GroupComponent }: { GroupComponent: StyledGroup }) => {
     const { settings } = useSettings();
 
     const [deviceInfo, setDeviceInfo] = useState({});
@@ -39,4 +41,4 @@ export const Right = ({ GroupComponent }) => {
             </GroupComponent>
         </>
     );
-};
+});
