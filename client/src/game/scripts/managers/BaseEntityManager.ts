@@ -291,7 +291,8 @@ export class BaseEntityManager {
 
     getMobMultipliers(type): Multipliers {
         if (type === "normal") {
-            return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
+            // return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
+            return { speed: 0.6, health: 0.3, shields: 0.6, damage: 4 };
         }
     }
 }

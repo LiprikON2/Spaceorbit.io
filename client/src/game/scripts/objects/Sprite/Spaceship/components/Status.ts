@@ -164,10 +164,12 @@ export class Status {
 
     setToMaxHealth() {
         this.healthBar.setValue(this.maxHealth);
+        this.healthBar.resetIncreaseDebounce();
     }
 
     setToMaxShields() {
-        this.shieldsBar.setValue(this.maxHealth);
+        this.shieldsBar.setValue(this.maxShields);
+        this.shieldsBar.resetIncreaseDebounce();
     }
 
     getState() {

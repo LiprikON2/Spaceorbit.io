@@ -23,6 +23,18 @@ class SettingsManager {
     readonly storageKey = "settings";
     readonly settingKeys: string[] = [];
 
+    static defaultSettings: Settings = {
+        musicMute: false,
+        effectsMute: false,
+        masterVolume: 1,
+        effectsVolume: 0.1,
+        musicVolume: 0.025,
+        graphicsSettings: "high",
+        touchMode: SettingsManager.isTouchDevice(),
+        showDeviceInfo: false,
+        toFollowCursor: false,
+    };
+
     constructor(defaultOverride: Partial<Settings>) {
         const localStorageSettings = getLocalStorage(this.storageKey);
 
@@ -35,10 +47,10 @@ class SettingsManager {
         this.settingKeys = Object.keys(initSettings);
 
         makeAutoObservable(this);
-        autorun(() => setLocalStorage(this.storageKey, this.settings));
+        autorun(() => setLocalStorage(this.storageKey, this.all));
     }
 
-    get settings() {
+    get all() {
         return Object.fromEntries(
             this.settingKeys.map((settingKey) => [settingKey, this[settingKey]])
         );
@@ -70,18 +82,6 @@ class SettingsManager {
     };
     setToFollowCursor = (value: boolean) => {
         this.toFollowCursor = value;
-    };
-
-    static defaultSettings: Settings = {
-        musicMute: false,
-        effectsMute: false,
-        masterVolume: 1,
-        effectsVolume: 0.1,
-        musicVolume: 0.025,
-        graphicsSettings: "high",
-        touchMode: SettingsManager.isTouchDevice(),
-        showDeviceInfo: false,
-        toFollowCursor: false,
     };
 
     static isTouchDevice() {

@@ -380,7 +380,7 @@ export class Spaceship extends Sprite {
 
     teleport(worldX: number, worldY: number, map?: string) {
         this.stopThrust();
-        this.emit("entity:teleport", this, { worldX, worldY });
+        this.emit("entity:teleport", { entity: this, point: { worldX, worldY } });
         this.staticBox.setPosition(worldX, worldY);
     }
 
