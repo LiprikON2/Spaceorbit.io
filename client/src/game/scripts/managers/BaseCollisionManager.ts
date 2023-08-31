@@ -7,6 +7,7 @@ interface CollisionManagerClientOptions {
 }
 
 export interface ClientHitData {
+    ownerId: string;
     enemyId: string;
     weaponId: number;
     firedFromPoint: { x: number; y: number };
@@ -99,6 +100,7 @@ export class BaseCollisionManager {
                     projectile.destroy();
 
                     const hitData: Partial<ClientHitData> = {
+                        ownerId: projectile.ownerId,
                         enemyId: enemy.id,
                         weaponId: projectile.firedFrom.id,
                         firedFromPoint: projectile.firedFromPoint,

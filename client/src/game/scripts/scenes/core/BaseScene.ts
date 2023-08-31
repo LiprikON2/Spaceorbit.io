@@ -14,7 +14,7 @@ import {
     BaseCollisionManager,
 } from "~/managers";
 import type { MobServerOptions } from "~/game/objects/Sprite/Spaceship/Mob";
-import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
+import type { StatusState } from "~/game/objects/Sprite/Spaceship/components/Status/Status";
 import type { Outfit } from "~/game/objects/Sprite/Spaceship/components";
 
 export interface MultiplayerEvents {
@@ -167,12 +167,12 @@ export class BaseScene extends Phaser.Scene {
 
     setSingleplayerListeners(entity: Spaceship) {
         entity.on("entity:hit", (hitData) => {
-            const { weaponId, enemyId } = hitData;
+            const { weaponId, enemyId, ownerId } = hitData;
 
             const weapon = entity.weapons.getWeaponById(weaponId);
             if (weapon) {
                 const damage = entity.weapons.getDamageByWeapon(weapon);
-                this.entityManager.hitEntity(enemyId, damage);
+                this.entityManager.hitEntity(ownerId, enemyId, damage);
             }
         });
         entity.on("entity:dead", () => this.entityManager.respawnEntity(entity.id));

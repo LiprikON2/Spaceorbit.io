@@ -3,7 +3,7 @@ import { Device } from "@capacitor/device";
 import { Stack, Text } from "@mantine/core";
 import styled from "@emotion/styled";
 
-import { useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
 import { observer } from "mobx-react-lite";
 import type { StyledGroup } from "~/ui/App";
 
@@ -15,7 +15,9 @@ const StyledStack = styled(Stack)`
 `;
 
 export const Right = observer(({ GroupComponent }: { GroupComponent: StyledGroup }) => {
-    const { settings } = useSettings();
+    const {
+        computed: { settings },
+    } = useGame();
 
     const [deviceInfo, setDeviceInfo] = useState({});
     const logDeviceInfo = async () => {

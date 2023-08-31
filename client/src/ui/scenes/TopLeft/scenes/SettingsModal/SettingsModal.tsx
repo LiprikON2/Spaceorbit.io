@@ -13,11 +13,13 @@ import {
 import { observer } from "mobx-react-lite";
 
 import { SliderInput } from "./components";
-import { useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
 
 export const SettingsModal = observer(
     ({ opened, onClose }: { opened: boolean; onClose: () => void }) => {
-        const { settings } = useSettings();
+        const {
+            computed: { settings },
+        } = useGame();
 
         const [activeTab, setActiveTab] = useState<string | null>("audio");
 

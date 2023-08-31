@@ -19,7 +19,7 @@
         "scale": 1,
         "baseStats": {
             "speed": 200,
-            "health": 16000,
+            "hullHp": 16000,
             "hitboxRadius": 75
         },
         "modules": {

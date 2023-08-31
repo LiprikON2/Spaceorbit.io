@@ -16,8 +16,6 @@ export interface HealthbarClientOptions {
     strokeWidth?: number;
 }
 
-type Point = { x: number; y: number };
-
 const defaultClientOptions = {
     width: 200,
     height: 8,

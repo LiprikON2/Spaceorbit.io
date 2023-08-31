@@ -8,9 +8,9 @@ import {
     type Multipliers,
 } from "~/objects/Sprite/Spaceship";
 import type { Outfit, Projectile } from "~/objects/Sprite/Spaceship/components";
-import { Mob, type MobClientOptions, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
+import { Mob, type MobServerOptions } from "~/objects/Sprite/Spaceship/Mob";
 import { AllegianceEnum } from "~/objects/Sprite/Spaceship";
-import type { StatusState } from "~/objects/Sprite/Spaceship/components/Status";
+import type { StatusState } from "~/game/objects/Sprite/Spaceship/components/Status/Status";
 
 export type SpaceshipGroup = {
     getChildren: () => Spaceship[];
@@ -151,7 +151,7 @@ export class BaseEntityManager {
             // TODO spaceship factory pattern
             outfit: this.getPlayerKit(),
             atlasTexture: "F5S4",
-            multipliers: { speed: 1, health: 1, shields: 1, damage: 1 },
+            multipliers: { speed: 1, hullHp: 1, shieldsHp: 1, damage: 1 },
             username: `Player${playerCount + 1}`,
             allegiance: "Unaffiliated",
         };
@@ -187,10 +187,15 @@ export class BaseEntityManager {
         };
     }
 
-    hitEntity(entityId: string, damage: number, callback: (entity: Spaceship) => void = () => {}) {
+    hitEntity(
+        attackerId: string,
+        entityId: string,
+        damage: number,
+        callback: (entity: Spaceship) => void = () => {}
+    ) {
         const [entity] = this.entityGroup.getMatching("id", entityId);
         if (entity) {
-            entity.getHit(damage);
+            entity.getHit(damage, attackerId);
             callback(entity);
         }
     }
@@ -292,7 +297,7 @@ export class BaseEntityManager {
     getMobMultipliers(type): Multipliers {
         if (type === "normal") {
             // return { speed: 0.6, health: 0.3, shields: 0.6, damage: 0.3 };
-            return { speed: 0.6, health: 0.3, shields: 0.6, damage: 4 };
+            return { speed: 0.6, hullHp: 0.3, shieldsHp: 0.6, damage: 4 };
         }
     }
 }

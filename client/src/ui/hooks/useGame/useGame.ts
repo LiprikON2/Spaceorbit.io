@@ -1,9 +1,11 @@
 import { produce } from "immer";
 import { create } from "zustand";
 
-import { gameManager, type GameManager } from "~/game/core/GameManager/GameManager";
+import { GameManager } from "~/game/core/GameManager";
+import { clientConfig } from "~/game/core/GameClient";
 import type { ClientScene } from "~/scenes/core";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
+import type { SettingsManager } from "~/game/core/GameManager/components";
 
 interface GameStore {
     gameManager: GameManager | null;
@@ -13,6 +15,7 @@ interface GameStore {
         isLoaded: boolean;
         player: Spaceship | null;
         scene: ClientScene | null;
+        settings: SettingsManager;
     };
     errors: string[];
     selectedServer: string | null;
@@ -25,7 +28,7 @@ interface GameStore {
 }
 
 export const useGame = create<GameStore>((set, get) => ({
-    gameManager: null,
+    gameManager: new GameManager(clientConfig),
     mode: "mainMenu",
     errors: [],
     selectedServer: null,
@@ -36,14 +39,18 @@ export const useGame = create<GameStore>((set, get) => ({
             return get().mode !== "mainMenu" && !get().computed.isLoaded;
         },
         get isLoaded() {
-            return !!get().gameManager?.player;
+            return !!get().gameManager.player;
         },
 
         get player() {
-            return get().gameManager?.player;
+            return get().gameManager.player;
         },
         get scene() {
-            return get().gameManager?.scene;
+            return get().gameManager.scene;
+        },
+
+        get settings() {
+            return get().gameManager.settings;
         },
     },
 
@@ -53,11 +60,12 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "singleplayer";
             })
         );
-        const singleplayerGame = await gameManager.init();
-
+        const gameManager = await get().gameManager.init();
+        // TODO remove manual rerender
         set(
             produce((state) => {
-                state.gameManager = singleplayerGame;
+                state.gameManager = null;
+                state.gameManager = gameManager;
             })
         );
     },
@@ -67,21 +75,24 @@ export const useGame = create<GameStore>((set, get) => ({
                 state.mode = "multiplayer";
             })
         );
-        const multiplayerGame = await gameManager.init(true, url);
-
+        const gameManager = await get().gameManager.init(true, url);
+        // TODO remove manual rerender
         set(
             produce((state) => {
-                state.gameManager = multiplayerGame;
+                state.gameManager = null;
+                state.gameManager = gameManager;
             })
         );
     },
     loadMainMenu: () => {
         const { gameManager } = get();
-        if (gameManager) gameManager.exit();
+        gameManager.exit();
 
         set(
             produce((state) => {
+                // TODO remove manual rerender
                 state.gameManager = null;
+                state.gameManager = gameManager;
                 state.mode = "mainMenu";
             })
         );

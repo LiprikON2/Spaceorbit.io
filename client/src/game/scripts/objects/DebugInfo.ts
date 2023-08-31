@@ -125,8 +125,8 @@ export class DebugInfo extends Phaser.GameObjects.Text {
         text += this.getCamInfo();
 
         text += `World: ${this.scene.parentScene.physics.world.bounds.width}x${this.scene.parentScene.physics.world.bounds.height}\n\n`;
-        text += `HP: ${this.rounded(this.scene.parentScene.player?.status?.health)}\n`;
-        text += `Shields: ${this.rounded(this.scene.parentScene.player?.status?.shields)}\n`;
+        text += `HP: ${this.rounded(this.scene.parentScene.player?.status?.hullHp)}\n`;
+        text += `Shields: ${this.rounded(this.scene.parentScene.player?.status?.shieldsHp)}\n`;
 
         this.setText(text);
     }

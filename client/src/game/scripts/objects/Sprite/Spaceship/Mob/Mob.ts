@@ -10,14 +10,15 @@ export interface MobServerOptions extends SpaceshipServerOptions {}
 export interface MobClientOptions extends SpaceshipClientOptions {}
 
 export class Mob extends Spaceship {
-    isReadyToFire: boolean = false;
-    isSleeping: boolean = false;
-    isAggresive: boolean = true;
+    isReadyToFire = false;
+    isSleeping = false;
+    isAggresive = true;
+    disableAI = true;
 
     readyToFireEvent: Phaser.Time.TimerEvent | null;
     sleepEvent: Phaser.Time.TimerEvent | null;
     preferedMovement = Direction.Left;
-    reactionTime: number;
+    reactionTime: number = Phaser.Math.Between(2500, 4500);
     jitter: { x: number; y: number } = { x: 0, y: 0 };
 
     get isMob() {
@@ -26,10 +27,9 @@ export class Mob extends Spaceship {
 
     constructor(serverOptions: MobServerOptions, clientOptions: MobClientOptions) {
         super(serverOptions, clientOptions);
-        this.reactionTime = Phaser.Math.Between(2500, 4500);
     }
 
-    sleep(time) {
+    sleep(time: number) {
         // Usefull for doing some things only once in a while
         if (!this.sleepEvent) {
             this.sleepEvent = this.scene.time.delayedCall(time, () => {
@@ -68,8 +68,10 @@ export class Mob extends Spaceship {
 
     update(time, delta) {
         super.update(time, delta);
+        if (this.disableAI) return;
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
+
         let moved = false;
         // TODO they may get stuck in on the boundaries
         // If it is wandering

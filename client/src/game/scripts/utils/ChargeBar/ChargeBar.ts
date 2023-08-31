@@ -44,7 +44,12 @@ export class ChargeBar {
         return (this.#value - this.minValue) / (this.maxValue - this.minValue);
     }
     setValue(newValue: number) {
+        const oldValue = this.value;
+
         this.#value = clamp(newValue, this.minValue, this.maxValue);
+        const diff = oldValue - this.#value;
+
+        return diff;
     }
 
     get isPaused() {

@@ -3,10 +3,12 @@ import { observer } from "mobx-react-lite";
 import { Volume, VolumeOff } from "tabler-icons-react";
 
 import { ToggleButton } from "~/ui/components";
-import { useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
 
 export const EffectsMuteBtn = observer(() => {
-    const { settings } = useSettings();
+    const {
+        computed: { settings },
+    } = useGame();
 
     return (
         <ToggleButton

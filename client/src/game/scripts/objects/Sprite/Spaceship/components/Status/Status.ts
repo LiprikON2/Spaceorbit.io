@@ -1,15 +1,16 @@
-import type { Multipliers, Spaceship } from "../Spaceship";
+import type { Multipliers, Spaceship } from "~/game/objects/Sprite/Spaceship";
 import { EveryTick, DebounceChargeBar } from "~/game/utils";
 import { HealthbarUI } from "~/game/objects";
 import type { BaseScene } from "~/game/scenes/core";
+import { AttackerRecord } from "./components";
 
 export interface StatusState {
-    health: number;
-    shields: number;
+    hullHp: number;
+    shieldsHp: number;
 }
 
 interface BaseStats {
-    health: number;
+    hullHp: number;
     hitboxRadius: number;
     speed: number;
 }
@@ -29,22 +30,27 @@ export class Status {
     baseStats: BaseStats;
     multipliers: Multipliers;
 
-    healthBar: DebounceChargeBar;
-    shieldsBar: DebounceChargeBar;
+    healthbar: DebounceChargeBar;
+    shieldbar: DebounceChargeBar;
 
     healthbarUI: HealthbarUI;
     shieldbarUI: HealthbarUI;
     followText: Phaser.GameObjects.Text;
 
     everyTick = new EveryTick(10);
+    attackerRecord = new AttackerRecord();
 
-    get maxHealth() {
-        const healthMultiplier = this.multipliers.health;
-        return this.baseStats.health * healthMultiplier;
+    get maxHullHp() {
+        const healthMultiplier = this.multipliers.hullHp;
+        return this.baseStats.hullHp * healthMultiplier;
     }
-    get maxShields() {
-        const shieldsMultiplier = this.multipliers.shields;
+    get maxShieldsHp() {
+        const shieldsMultiplier = this.multipliers.shieldsHp;
         return 10000 * shieldsMultiplier;
+    }
+
+    get maxHp() {
+        return this.maxHullHp + this.maxShieldsHp;
     }
     get maxSpeed() {
         // Each additional engine gives 20% speed boost
@@ -57,11 +63,11 @@ export class Status {
         return shipSpeed * speedMultiplier;
     }
 
-    get health() {
-        return this.healthBar.value;
+    get hullHp() {
+        return this.healthbar.value;
     }
-    get shields() {
-        return this.shieldsBar.value;
+    get shieldsHp() {
+        return this.shieldbar.value;
     }
     get speed() {
         const { x: vx, y: vy } = this.ship.staticBox.body.velocity;
@@ -81,22 +87,22 @@ export class Status {
         const { multipliers } = serverOptions;
         this.multipliers = multipliers;
 
-        this.healthBar = new DebounceChargeBar({
-            value: this.maxHealth,
-            maxValue: this.maxHealth,
+        this.healthbar = new DebounceChargeBar({
+            value: this.maxHullHp,
+            maxValue: this.maxHullHp,
 
             increaseDebouncingTime: 10,
-            increasePerSecond: this.maxHealth * 0.02,
+            increasePerSecond: this.maxHullHp * 0.02,
             state: "increasing",
 
             decreasePerSecond: 0,
         });
-        this.shieldsBar = new DebounceChargeBar({
-            value: this.maxShields,
-            maxValue: this.maxShields,
+        this.shieldbar = new DebounceChargeBar({
+            value: this.maxShieldsHp,
+            maxValue: this.maxShieldsHp,
 
             increaseDebouncingTime: 7,
-            increasePerSecond: this.maxShields * 0.04,
+            increasePerSecond: this.maxShieldsHp * 0.04,
             state: "increasing",
 
             decreasePerSecond: 0,
@@ -138,63 +144,73 @@ export class Status {
         });
     }
 
-    damageHealth(damage: number) {
-        this.healthBar.setValue(this.healthBar.value - Math.abs(damage));
+    damageHull(damage: number) {
+        const damageDealed = this.healthbar.setValue(this.healthbar.value - Math.abs(damage));
         this.resetDebounce();
+
+        return damageDealed;
     }
     damageShields(damage: number) {
-        this.shieldsBar.setValue(this.shieldsBar.value - Math.abs(damage));
+        const damageDealed = this.shieldbar.setValue(this.shieldbar.value - Math.abs(damage));
         this.resetDebounce();
+
+        return damageDealed;
     }
 
     /**
      * Resets debounce progress to 0
      */
     resetDebounce() {
-        this.healthBar.resetIncreaseDebounce();
-        this.shieldsBar.resetIncreaseDebounce();
+        this.healthbar.resetIncreaseDebounce();
+        this.shieldbar.resetIncreaseDebounce();
     }
 
-    healHealth(heal: number) {
-        this.healthBar.setValue(this.healthBar.value + Math.abs(heal));
+    reset() {
+        this.setToMaxHullHp();
+        this.setToMaxShieldsHp();
+        this.attackerRecord.clear();
+    }
+
+    healHull(heal: number) {
+        this.healthbar.setValue(this.healthbar.value + Math.abs(heal));
     }
     healShields(heal: number) {
-        this.shieldsBar.setValue(this.shieldsBar.value + Math.abs(heal));
+        this.shieldbar.setValue(this.shieldbar.value + Math.abs(heal));
     }
 
-    setToMaxHealth() {
-        this.healthBar.setValue(this.maxHealth);
-        this.healthBar.resetIncreaseDebounce();
+    setToMaxHullHp() {
+        this.healthbar.setValue(this.maxHullHp);
+        this.healthbar.resetIncreaseDebounce();
     }
 
-    setToMaxShields() {
-        this.shieldsBar.setValue(this.maxShields);
-        this.shieldsBar.resetIncreaseDebounce();
+    setToMaxShieldsHp() {
+        this.shieldbar.setValue(this.maxShieldsHp);
+        this.shieldbar.resetIncreaseDebounce();
     }
 
-    getState() {
-        return { health: this.health, shields: this.shields };
+    getState(): StatusState {
+        return { hullHp: this.hullHp, shieldsHp: this.shieldsHp };
     }
 
     update(time: number, delta: number) {
         if (this.ship.activity === "moving") {
-            this.healthBar.resetIncreaseDebounce();
+            this.healthbar.resetIncreaseDebounce();
         }
 
         this.everyTick.update(time, delta, () => {
-            if (this.healthBar.isIncreasing || this.shieldsBar.isIncreasing) {
+            if (this.healthbar.isIncreasing || this.shieldbar.isIncreasing) {
                 this.ship.emit("entity:heal", this.ship.id);
             }
         });
 
-        this.healthBar.update(time, delta);
-        this.shieldsBar.update(time, delta);
+        this.healthbar.update(time, delta);
+        this.shieldbar.update(time, delta);
 
         this.updateUI();
     }
 
     updateUI() {
-        this.healthbarUI.setProgress(this.healthBar.normalizedValue);
-        this.shieldbarUI.setProgress(this.shieldsBar.normalizedValue);
+        this.healthbarUI.setProgress(this.healthbar.normalizedValue);
+        this.shieldbarUI.setProgress(this.shieldbar.normalizedValue);
     }
 }

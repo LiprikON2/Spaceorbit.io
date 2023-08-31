@@ -2,13 +2,15 @@ import React from "react";
 import { Paper, Stack } from "@mantine/core";
 
 import { Button } from "~/ui/components";
-import { useGame, useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
 import { AccordionButton } from "./components";
 import { ServerList } from "./scenes/ServerList";
 
 export const MainMenu = () => {
     const { mode, selectedServer, loadSingleplayer, loadMultiplayer } = useGame();
-    const { settings } = useSettings();
+    const {
+        computed: { settings },
+    } = useGame();
 
     const handleSingleplayer = () => {
         if (mode === "mainMenu") {

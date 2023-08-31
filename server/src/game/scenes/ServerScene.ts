@@ -18,7 +18,6 @@ import { EveryTick } from "@spaceorbit/client/src/game/scripts/utils/EveryTick";
 import type { Outfit } from "@spaceorbit/client/src/game/scripts/objects/Sprite/Spaceship/components";
 
 interface ServerHitData extends ClientHitData {
-    ownerId: ChannelId;
     time: number;
 }
 
@@ -53,11 +52,11 @@ export class ServerScene extends BaseMapScene {
 
         this.entityManager.spawnMobs(2, (mob: Spaceship) => {
             mob.on("entity:hit", (hitData: ClientHitData) => {
-                const { weaponId, enemyId } = hitData;
+                const { weaponId, enemyId, ownerId } = hitData;
                 const weapon = mob.weapons.getWeaponById(weaponId);
                 if (weapon) {
                     const damage = mob.weapons.getDamageByWeapon(weapon);
-                    this.entityManager.hitEntity(enemyId, damage, (enemy) =>
+                    this.entityManager.hitEntity(ownerId, enemyId, damage, (enemy) =>
                         this.sendEntityStatus(enemy.id, true)
                     );
                 }
@@ -92,10 +91,7 @@ export class ServerScene extends BaseMapScene {
             );
 
             channel.on("player:assert-hit", (hitData) =>
-                this.assertHit({
-                    ...(hitData as ClientHitData),
-                    ownerId: channel.id,
-                })
+                this.assertHit(hitData as ClientHitData, channel.id!)
             );
 
             channel.on("player:request-respawn", () =>
@@ -135,15 +131,13 @@ export class ServerScene extends BaseMapScene {
         this.game.server.emit("entity:reoutfit", { id: entityId, outfit }, { reliable: true });
     }
 
-    assertHit({
-        ownerId,
-        enemyId,
-        firedFromPoint,
-        weaponId,
-        projectilePoint,
-        time,
-    }: ServerHitData) {
+    assertHit(
+        { ownerId, enemyId, firedFromPoint, weaponId, projectilePoint, time }: ServerHitData,
+        channelId: string
+    ) {
         console.log("player:assert-hit");
+
+        if (ownerId !== channelId) return;
 
         // get the two closest snapshot to the date
         const serverSnapshots = this.si.vault.get(time);
@@ -186,7 +180,7 @@ export class ServerScene extends BaseMapScene {
             if (!weapon) return;
 
             const damage = owner.weapons.getDamageByWeapon(weapon);
-            this.entityManager.hitEntity(enemyId, damage, (enemy) =>
+            this.entityManager.hitEntity(owner.id, enemyId, damage, (enemy) =>
                 this.sendEntityStatus(enemy.id)
             );
         }

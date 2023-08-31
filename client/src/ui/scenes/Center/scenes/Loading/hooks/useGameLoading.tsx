@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { gameManager, ConnectionErrorEvent } from "~/game";
+import { ConnectionErrorEvent } from "~/game";
+import { useGame } from "~/ui/hooks";
 
 export const useGameLoading = () => {
+    const { gameManager } = useGame();
     const [status, setStatus] = useState({ name: "Initializing", progress: 0 });
     const [error, setError] = useState<ConnectionErrorEvent>(null);
 

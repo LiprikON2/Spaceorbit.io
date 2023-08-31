@@ -5,7 +5,7 @@ import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
-import { Status, type StatusState } from "./components/Status";
+import { Status, type StatusState } from "./components/Status/Status";
 
 export enum AllegianceEnum {
     // AlienNeutral = "AlienNeutral",
@@ -46,9 +46,11 @@ export type ActionsState = {
 
 export interface Multipliers {
     speed: number;
-    health: number;
-    shields: number;
+    hullHp: number;
+    shieldsHp: number;
     damage: number;
+    hullRegen?: number;
+    shieldsRegen?: number;
 }
 
 export interface SpaceshipServerOptions extends SpriteServerOptions {
@@ -87,7 +89,7 @@ export class Spaceship extends Sprite {
     outfitting: Outfitting;
 
     status: Status;
-    baseStats: { health: number; hitboxRadius: number; speed: number };
+    baseStats: { hullHp: number; hitboxRadius: number; speed: number };
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
@@ -132,7 +134,7 @@ export class Spaceship extends Sprite {
     }
 
     get hitboxRadius() {
-        const hasShields = this.status.shields > 0;
+        const hasShields = this.status.shieldsHp > 0;
         return hasShields ? this.shields.body.radius : this.body.radius;
     }
 
@@ -149,7 +151,7 @@ export class Spaceship extends Sprite {
     }
 
     get isDead() {
-        return this.status.health <= 0;
+        return this.status.hullHp <= 0;
     }
 
     get isDying() {
@@ -217,7 +219,7 @@ export class Spaceship extends Sprite {
         this.setName(username);
 
         this.status = new Status({ ship: this, baseStats, multipliers }, { scene: this.scene });
-        if (this.status.shields === 0) this.shields.crack(false);
+        if (this.status.shieldsHp === 0) this.shields.crack(false);
 
         // @ts-ignore
         this.rotateToPlugin = scene.plugins.get("rexRotateTo").add(this.rotatingBox);
@@ -235,9 +237,7 @@ export class Spaceship extends Sprite {
 
         // Enables click events
         this.setInteractive();
-        this.on("pointerdown", () => {
-            this.scene.input.emit("clickTarget", this);
-        });
+        this.on("pointerdown", () => this.scene.input.emit("entity:targeted", this));
         this.setPointer(x, y);
 
         this.rotatingBox.setDepth(this.depth + 100);
@@ -252,21 +252,35 @@ export class Spaceship extends Sprite {
         this.staticBox.destroy(fromScene);
     }
 
-    getHit(damage: number) {
-        if (this.status.shields > 0) this.getShieldsHit(damage);
-        else this.getHullHit(damage);
+    getHit(damage: number, attackerId?: string) {
+        if (this.status.shieldsHp > 0) this.getShieldsHit(damage, attackerId);
+        else this.getHullHit(damage, attackerId);
     }
 
-    getShieldsHit(damage: number) {
+    getShieldsHit(damage: number, attackerId?: string) {
         this.shields.playShieldHit();
-        this.status.damageShields(damage);
+        const damageDealed = this.status.damageShields(damage);
 
-        if (this.status.shields <= 0) this.shields.crack();
+        if (attackerId) this.status.attackerRecord.add(damageDealed, attackerId);
+        if (attackerId) {
+            console.log(
+                "calcContributions",
+                this.status.attackerRecord.calcContributions(this.status.maxHp)
+            );
+        }
+        if (this.status.shieldsHp <= 0) this.shields.crack();
     }
-    getHullHit(damage: number) {
+    getHullHit(damage: number, attackerId?: string) {
         this.playHullHit();
-        this.status.damageHealth(damage);
+        const damageDealed = this.status.damageHull(damage);
 
+        if (attackerId) this.status.attackerRecord.add(damageDealed, attackerId);
+        if (attackerId) {
+            console.log(
+                "calcContributions",
+                this.status.attackerRecord.calcContributions(this.status.maxHp)
+            );
+        }
         if (this.isDead) this.explode();
     }
 
@@ -392,8 +406,7 @@ export class Spaceship extends Sprite {
 
         this.staticBox.setVisible(true);
         this.staticBox.body.enable = true;
-        this.status.setToMaxHealth();
-        this.status.setToMaxShields();
+        this.status.reset();
 
         this.scene.physics.add.existing(this);
         this.scene.physics.add.existing(this.shields);
@@ -401,7 +414,7 @@ export class Spaceship extends Sprite {
         this.shields.visible = true;
         this.active = true;
         this.stopThrust();
-        if (this.status.shields === 0) this.shields.crack(false);
+        if (this.status.shieldsHp === 0) this.shields.crack(false);
 
         return [worldX, worldY];
     }
@@ -631,17 +644,17 @@ export class Spaceship extends Sprite {
         if (targetId) this.setTargetById(targetId);
     }
 
-    getStatusState() {
+    getStatusState(): StatusState {
         return this.status.getState();
     }
 
     setStatusState(newStatus: StatusState) {
-        const shieldDiff = this.status.shields - newStatus.shields;
+        const shieldDiff = this.status.shieldsHp - newStatus.shieldsHp;
         if (shieldDiff > 0) this.getShieldsHit(shieldDiff);
         else if (shieldDiff < 0) this.status.healShields(shieldDiff);
 
-        const healthDiff = this.status.health - newStatus.health;
+        const healthDiff = this.status.hullHp - newStatus.hullHp;
         if (healthDiff > 0) this.getHullHit(healthDiff);
-        else if (healthDiff < 0) this.status.healHealth(healthDiff);
+        else if (healthDiff < 0) this.status.healHull(healthDiff);
     }
 }

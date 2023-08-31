@@ -3,11 +3,12 @@ import { Music, MusicOff } from "tabler-icons-react";
 import { observer } from "mobx-react-lite";
 
 import { ToggleButton } from "~/ui/components";
-import { useSettings } from "~/ui/hooks";
+import { useGame } from "~/ui/hooks";
 
 export const MusicMuteBtn = observer(() => {
-    const { settings } = useSettings();
-
+    const {
+        computed: { settings },
+    } = useGame();
     return (
         <ToggleButton
             on={!settings.musicMute}

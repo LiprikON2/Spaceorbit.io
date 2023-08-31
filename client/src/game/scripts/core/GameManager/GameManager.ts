@@ -7,20 +7,7 @@ import type { ClientScene } from "~/scenes/core/ClientScene";
 import type { Spaceship } from "~/objects/Sprite/Spaceship";
 import { GameClient, clientConfig } from "../GameClient";
 import { type Settings, SettingsManager } from "./components";
-
-export interface StatusEvent {
-    name: string;
-    progress: number;
-}
-export interface ConnectionErrorEvent {
-    message: string;
-    navigateToMode: "mainMenu" | "singleplayer" | "multiplayer";
-}
-export interface OutEvents {
-    "world:create": () => void;
-    loading: (status: StatusEvent) => void;
-    connectionError: (errorDetails: ConnectionErrorEvent) => void;
-}
+import type { OutEvents } from "~/game/core";
 
 export class GameManager {
     config: Phaser.Types.Core.GameConfig;
@@ -97,5 +84,3 @@ export class GameManager {
         this.game.destroy(true);
     };
 }
-
-export const gameManager = new GameManager(clientConfig);

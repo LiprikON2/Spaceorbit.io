@@ -85,7 +85,7 @@ class ClientInputManager extends Mixin(BaseInputManager, Reactive) {
             "W,A,S,D,SPACE,CTRL,UP,LEFT,DOWN,RIGHT"
         ) as Keys;
 
-        this.scene.input.on("clickTarget", (target) => this.player.setTarget(target));
+        this.scene.input.on("entity:targeted", (target) => this.player.setTarget(target));
 
         const toggleShootTargetBtn = this.keys.SPACE;
         toggleShootTargetBtn.on("down", () => this.player.toggleAutoattack());

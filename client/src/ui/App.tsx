@@ -99,8 +99,6 @@ const StyledBottomRightGroup = styled(Group)`
 `;
 
 export const App = () => {
-    // useSyncSettingsToSession();
-
     useMainMenu();
 
     const {
