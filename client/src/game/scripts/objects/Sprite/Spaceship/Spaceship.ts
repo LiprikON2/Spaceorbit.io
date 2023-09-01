@@ -262,18 +262,19 @@ export class Spaceship extends Sprite {
     }
 
     getHit(damage: number, attackerId?: string) {
-        if (this.status.shieldsHp > 0) this.getShieldsHit(damage, attackerId);
-        else this.getHullHit(damage, attackerId);
+        console.log("attackerId", attackerId);
+        if (this.status.shieldsHp > 0) this.#getShieldsHit(damage, attackerId);
+        else this.#getHullHit(damage, attackerId);
     }
 
-    getShieldsHit(damage: number, attackerId?: string) {
+    #getShieldsHit(damage: number, attackerId?: string) {
         this.shields.playShieldHit();
         const damageDealed = this.status.damageShields(damage);
 
         if (attackerId) this.status.attackerRecord.add(damageDealed, attackerId);
         if (this.status.shieldsHp <= 0) this.shields.crack();
     }
-    getHullHit(damage: number, attackerId?: string) {
+    #getHullHit(damage: number, attackerId?: string) {
         this.playHullHit();
         const damageDealed = this.status.damageHull(damage);
 
@@ -662,11 +663,11 @@ export class Spaceship extends Sprite {
 
     setStatusState(newStatus: StatusState) {
         const shieldDiff = this.status.shieldsHp - newStatus.shieldsHp;
-        if (shieldDiff > 0) this.getShieldsHit(shieldDiff);
+        if (shieldDiff > 0) this.#getShieldsHit(shieldDiff);
         else if (shieldDiff < 0) this.status.healShields(shieldDiff);
 
         const healthDiff = this.status.hullHp - newStatus.hullHp;
-        if (healthDiff > 0) this.getHullHit(healthDiff);
+        if (healthDiff > 0) this.#getHullHit(healthDiff);
         else if (healthDiff < 0) this.status.healHull(healthDiff);
     }
 }

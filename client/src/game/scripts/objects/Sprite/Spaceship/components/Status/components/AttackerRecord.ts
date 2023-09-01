@@ -48,6 +48,8 @@ export class AttackerRecord {
             i++;
         }
 
+        this.clear();
+
         return contributions;
     }
 }

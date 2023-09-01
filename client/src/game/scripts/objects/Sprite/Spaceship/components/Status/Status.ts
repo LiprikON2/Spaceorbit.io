@@ -163,11 +163,14 @@ export class Status {
         return damageDealed;
     }
 
-    getAttackerRewards() {
+    getAttackerRewards(percentageIncrement = 0.05) {
         const contributions = this.attackerRecord.calcContributions(this.maxHp);
         const rewards = Object.entries(contributions).map(([contributor, contribution]) => {
-            const exp = contribution.percentage * this.attackerReward.exp;
-            const currency = contribution.percentage * this.attackerReward.exp;
+            const roundedPercentage =
+                Math.ceil(contribution.percentage / percentageIncrement) * percentageIncrement;
+
+            const exp = roundedPercentage * this.attackerReward.exp;
+            const currency = roundedPercentage * this.attackerReward.currency;
             const attackerReward: AttackerReward = { exp, currency };
 
             return [contributor, attackerReward];
@@ -187,7 +190,6 @@ export class Status {
     reset() {
         this.setToMaxHullHp();
         this.setToMaxShieldsHp();
-        this.attackerRecord.clear();
     }
 
     healHull(heal: number) {
