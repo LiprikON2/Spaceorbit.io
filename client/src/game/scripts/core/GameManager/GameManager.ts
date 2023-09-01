@@ -14,6 +14,7 @@ export class GameManager {
     game: GameClient;
     emitter: Emitter<OutEvents>;
     settings: SettingsManager;
+    loaded = false;
 
     constructor(config: Phaser.Types.Core.GameConfig, settings: Partial<Settings> = {}) {
         this.config = config;
@@ -50,6 +51,7 @@ export class GameManager {
             this.on("world:create", resolve);
         });
         await whenSceneCreated;
+        this.loaded = true;
 
         return this;
     };
@@ -79,8 +81,14 @@ export class GameManager {
     get player(): Spaceship | null {
         return this.scene?.player ?? null;
     }
-    exit = () => {
-        if (this.game.channel) setTimeout(() => this.game.channel.close(), 0);
-        this.game.destroy(true);
+
+    exit = async () => {
+        new Promise<void>((resolve) => {
+            if (this.game.channel) setTimeout(() => this.game.channel.close(), 0);
+
+            this.game.destroy(true);
+            this.loaded = false;
+            resolve();
+        });
     };
 }

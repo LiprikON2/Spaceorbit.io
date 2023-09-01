@@ -92,16 +92,22 @@ export class ClientScene extends BaseMapScene {
             this.channel.on("entity:status", ({ id, status }) =>
                 this.entityManager.updateEntityStatus(id, status)
             );
+            this.channel.on("entity:explode", ({ id }) => this.entityManager.explodeEntity(id));
 
             this.player.on("entity:dead", () => this.requestRespawn());
-            this.channel.on("entity:respawn", ({ id, point }) =>
-                this.entityManager.respawnEntity(id, point)
+            this.channel.on("entity:respawn", ({ id, respawnPoint }) =>
+                this.entityManager.respawnEntity(id, respawnPoint)
             );
 
             this.player.on("entity:reoutfit", (outfit: Outfit) => this.requestReoutfit(outfit));
             this.channel.on("entity:reoutfit", ({ id, outfit }) =>
                 this.entityManager.reoutfitEntity(id, outfit)
             );
+
+            this.game.events.on("focus", () => {
+                console.log("resync player actions");
+                this.resyncPlayerActions();
+            });
         }
 
         this.inputManager = new ClientInputManager(this, this.player);
@@ -309,9 +315,28 @@ export class ClientScene extends BaseMapScene {
             entitesState.forEach((entityState) => {
                 if (this.player.id !== entityState.id) {
                     const entity = this.entityManager.getById(entityState.id, "entity");
-                    if (entity?.active) entity.setActionsState(entityState);
+                    if (entity) entity.setActionsState(entityState);
                 }
             });
+        }
+    }
+
+    /**
+     * Resyncs player actions, when necessary (e.g. after window blur)
+     */
+    resyncPlayerActions() {
+        const serverEntitiesSnapshot = this.si.calcInterpolation(
+            "x y angle(deg) worldX worldY",
+            "entities"
+        );
+
+        if (serverEntitiesSnapshot) {
+            const entitesState = serverEntitiesSnapshot.state as ActionsState[];
+
+            const playerState = entitesState.find(
+                (entityState) => entityState.id === this.player.id
+            );
+            if (playerState) this.player.setActionsState(playerState);
         }
     }
 
@@ -362,7 +387,10 @@ export class ClientScene extends BaseMapScene {
             };
             serverEntitiesState.forEach(({ id, groupName }) => {
                 const isMissing = !this.entityManager.getById(id, groupName);
-                if (isMissing) missingEntites[groupName].push(id);
+                if (isMissing) {
+                    missingEntites[groupName].push(id);
+                    console.log("found missing:", groupName);
+                }
             });
 
             if (missingEntites.mob.length)

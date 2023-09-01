@@ -8,18 +8,15 @@ import { ServerList } from "./scenes/ServerList";
 
 export const MainMenu = () => {
     const { mode, selectedServer, loadSingleplayer, loadMultiplayer } = useGame();
-    const {
-        computed: { settings },
-    } = useGame();
 
     const handleSingleplayer = () => {
         if (mode === "mainMenu") {
-            loadSingleplayer(settings);
+            loadSingleplayer();
         }
     };
     const handleMultiplayer = () => {
         if (mode === "mainMenu" && selectedServer) {
-            loadMultiplayer(settings, selectedServer);
+            loadMultiplayer(selectedServer);
         }
     };
     return (

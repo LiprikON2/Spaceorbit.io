@@ -19,8 +19,8 @@ interface GameStore {
     };
     errors: string[];
     selectedServer: string | null;
-    loadSingleplayer: (settings) => Promise<void>;
-    loadMultiplayer: (settings, url: string) => Promise<void>;
+    loadSingleplayer: () => Promise<void>;
+    loadMultiplayer: (url: string) => Promise<void>;
     loadMainMenu: () => void;
     exit: (initiatedByUser?: boolean) => void;
     clearErrors: () => void;
@@ -39,7 +39,7 @@ export const useGame = create<GameStore>((set, get) => ({
             return get().mode !== "mainMenu" && !get().computed.isLoaded;
         },
         get isLoaded() {
-            return !!get().gameManager.player;
+            return get().gameManager.loaded;
         },
 
         get player() {
@@ -54,7 +54,7 @@ export const useGame = create<GameStore>((set, get) => ({
         },
     },
 
-    loadSingleplayer: async (settings) => {
+    loadSingleplayer: async () => {
         set(
             produce((state) => {
                 state.mode = "singleplayer";
@@ -69,7 +69,7 @@ export const useGame = create<GameStore>((set, get) => ({
             })
         );
     },
-    loadMultiplayer: async (settings, url) => {
+    loadMultiplayer: async (url) => {
         set(
             produce((state) => {
                 state.mode = "multiplayer";
@@ -84,15 +84,12 @@ export const useGame = create<GameStore>((set, get) => ({
             })
         );
     },
-    loadMainMenu: () => {
+    loadMainMenu: async () => {
         const { gameManager } = get();
-        gameManager.exit();
+        await gameManager.exit();
 
         set(
             produce((state) => {
-                // TODO remove manual rerender
-                state.gameManager = null;
-                state.gameManager = gameManager;
                 state.mode = "mainMenu";
             })
         );

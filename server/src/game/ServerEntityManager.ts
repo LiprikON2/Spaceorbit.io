@@ -118,30 +118,6 @@ export class ServerEntityManager extends BaseEntityManager {
         return mob;
     }
 
-    spawnMobs(upToCount: number, callback: (mob: Spaceship) => void = () => {}) {
-        const mobsToSpawn = upToCount - this.mobGroup.getLength();
-
-        for (let i = 0; i < mobsToSpawn; i++) {
-            const [worldX, worldY] = this.scene.getRandomPositionOnMap();
-
-            const serverOptions: MobServerOptions = {
-                id: Phaser.Utils.String.UUID(),
-                x: worldX,
-                y: worldY,
-                angle: 90,
-                outfit: this.getMobKit("normal"),
-                atlasTexture: "F5S4",
-                multipliers: this.getMobMultipliers("normal"),
-                username: "Enemy",
-                allegiance: "Alien",
-            };
-
-            const mob = this.addMob(serverOptions);
-
-            callback(mob);
-        }
-    }
-
     update(time: number, delta: number) {
         this.updatePlayersInput(time, delta);
     }

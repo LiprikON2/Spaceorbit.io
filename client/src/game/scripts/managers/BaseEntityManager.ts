@@ -50,6 +50,10 @@ export class BaseEntityManager {
     projectileGroup: ProjectileGroup;
     soundManager?: SoundManager;
 
+    get isAuthority() {
+        return this.scene.game.isAuthority;
+    }
+
     getById(id: string, from: GroupNames = "entity") {
         let fromGroup: SpaceshipGroup;
         if (from === "entity") fromGroup = this.entityGroup;
@@ -141,6 +145,13 @@ export class BaseEntityManager {
         }
     }
 
+    explodeEntity(entityId: string) {
+        const entity = this.getById(entityId);
+        if (entity) {
+            entity.explode();
+        }
+    }
+
     getPlayerServerOptions(id?: string) {
         const playerCount = this.playerGroup.getLength();
         const spaceshipServerOptions: SpaceshipServerOptions = {
@@ -154,6 +165,7 @@ export class BaseEntityManager {
             multipliers: { speed: 1, hullHp: 1, shieldsHp: 1, damage: 1 },
             username: `Player${playerCount + 1}`,
             allegiance: "Unaffiliated",
+            attackerReward: { exp: 1000, currency: 5000 },
         };
 
         return spaceshipServerOptions;
@@ -200,30 +212,50 @@ export class BaseEntityManager {
         }
     }
 
-    respawnEntity(
-        entityId: string,
-        point: { worldX: number | null; worldY: number | null } = { worldX: null, worldY: null },
-        callback: (worldX: number, worldY: number) => void = () => {}
-    ) {
-        console.log("entity:respawn");
-        let { worldX, worldY } = point;
-        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
+    getRespawnPoint(entity: Spaceship): [number, number] {
+        if (Spaceship.rogueAllegiances.includes(entity.allegiance)) {
+            const [worldX, worldY] = this.scene.getRandomPositionOnMap();
+            return [worldX, worldY];
+        } else {
+            return [0, 0];
+        }
+    }
 
-        if (entity?.isDead) {
-            const rogueAllegiances: AllegianceKeys[] = ["Alien", "Unaffiliated"];
-            if (point.worldX && point.worldY) {
-                entity.respawn(point.worldX, point.worldY);
-            } else {
-                if (rogueAllegiances.includes(entity.allegiance)) {
-                    [worldX, worldY] = entity.respawn();
-                } else {
-                    [worldX, worldY] = entity.respawn(0, 0);
-                }
-                callback(worldX, worldY);
+    handleDeadEntity(
+        entityId: string,
+        respawnCallback: (respawnPoint: [number, number]) => void = () => {},
+        instantRespawn = true
+    ) {
+        console.log("entity:dead");
+        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
+        if (entity) {
+            if (instantRespawn) {
+                const respanwPoint = this.respawnEntity(entity);
+                respawnCallback(respanwPoint);
+            }
+
+            if (this.isAuthority) {
+                const rewards = entity.status.getAttackerRewards();
+                rewards.map(([contributor, reward]) => {
+                    console.log("contributor", contributor, "reward", reward);
+                });
             }
         }
+    }
 
-        return [worldX, worldY];
+    respawnEntity(
+        entity: Spaceship | string,
+        point?: [number, number],
+        respawnCallback: (respawnPoint: [number, number]) => void = () => {}
+    ) {
+        console.log("entity:respawn");
+        if (typeof entity === "string")
+            [entity] = this.entityGroup.getMatching("id", entity) as Spaceship[];
+
+        if (!point) point = this.getRespawnPoint(entity);
+        if (entity?.isDead) entity.respawn(...point);
+        respawnCallback(point);
+        return point;
     }
 
     /**
@@ -256,7 +288,11 @@ export class BaseEntityManager {
         if (entity) entity.setStatusState(status);
     }
 
-    spawnMobs(upToCount, callback: (mob: Spaceship) => void = () => {}) {
+    spawnMobs(
+        upToCount: number,
+        mobCallback: (mob: Spaceship) => void = () => {},
+        optionsCallback: (mobOptions: MobServerOptions) => void = () => {}
+    ) {
         const mobsToSpawn = upToCount - this.mobGroup.getLength();
 
         for (let i = 0; i < mobsToSpawn; i++) {
@@ -272,11 +308,13 @@ export class BaseEntityManager {
                 multipliers: this.getMobMultipliers("normal"),
                 username: "Enemy",
                 allegiance: AllegianceEnum.Alien,
+                attackerReward: { exp: 300, currency: 1000 },
             };
 
             const mob = this.createMob(serverOptions);
 
-            callback(mob);
+            mobCallback(mob);
+            optionsCallback(serverOptions);
         }
     }
 

@@ -1,4 +1,4 @@
-import type { Multipliers, Spaceship } from "~/game/objects/Sprite/Spaceship";
+import type { AttackerReward, Multipliers, Spaceship } from "~/game/objects/Sprite/Spaceship";
 import { EveryTick, DebounceChargeBar } from "~/game/utils";
 import { HealthbarUI } from "~/game/objects";
 import type { BaseScene } from "~/game/scenes/core";
@@ -19,6 +19,7 @@ export interface StatusServerOptions {
     ship: Spaceship;
     baseStats: BaseStats;
     multipliers: Multipliers;
+    attackerReward: AttackerReward;
 }
 export interface StatusClientOptions {
     scene: BaseScene;
@@ -36,6 +37,8 @@ export class Status {
     healthbarUI: HealthbarUI;
     shieldbarUI: HealthbarUI;
     followText: Phaser.GameObjects.Text;
+
+    attackerReward: AttackerReward;
 
     everyTick = new EveryTick(10);
     attackerRecord = new AttackerRecord();
@@ -86,6 +89,9 @@ export class Status {
 
         const { multipliers } = serverOptions;
         this.multipliers = multipliers;
+
+        const { attackerReward } = serverOptions;
+        this.attackerReward = attackerReward;
 
         this.healthbar = new DebounceChargeBar({
             value: this.maxHullHp,
@@ -157,6 +163,19 @@ export class Status {
         return damageDealed;
     }
 
+    getAttackerRewards() {
+        const contributions = this.attackerRecord.calcContributions(this.maxHp);
+        const rewards = Object.entries(contributions).map(([contributor, contribution]) => {
+            const exp = contribution.percentage * this.attackerReward.exp;
+            const currency = contribution.percentage * this.attackerReward.exp;
+            const attackerReward: AttackerReward = { exp, currency };
+
+            return [contributor, attackerReward];
+        });
+
+        return rewards;
+    }
+
     /**
      * Resets debounce progress to 0
      */
@@ -193,6 +212,11 @@ export class Status {
     }
 
     update(time: number, delta: number) {
+        if (this.ship.isAuthority) this.updateCalculations(time, delta);
+        this.updateUI();
+    }
+
+    updateCalculations(time: number, delta: number) {
         if (this.ship.activity === "moving") {
             this.healthbar.resetIncreaseDebounce();
         }
@@ -205,8 +229,6 @@ export class Status {
 
         this.healthbar.update(time, delta);
         this.shieldbar.update(time, delta);
-
-        this.updateUI();
     }
 
     updateUI() {

@@ -30,6 +30,11 @@ type AllegianceOpposition = {
 
 type MovementActivity = "moving" | "stopped";
 
+export interface AttackerReward {
+    exp: number;
+    currency: number;
+}
+
 export type ActionsState = {
     id: string;
     groupName: "mob" | "players";
@@ -42,6 +47,8 @@ export type ActionsState = {
     primaryFireAutoattack: 0 | 1;
     primaryFireActive: 0 | 1;
     targetId: string | undefined;
+    hidden: 0 | 1;
+    intangible: 0 | 1;
 };
 
 export interface Multipliers {
@@ -59,6 +66,7 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
     allegiance: AllegianceEnum | AllegianceKeys;
     multipliers: Multipliers;
     username: string;
+    attackerReward: { exp: number; currency: number };
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
@@ -104,6 +112,7 @@ export class Spaceship extends Sprite {
         Mars: ["Unaffiliated", "Alien", "Venus", "Earth"],
         Earth: ["Unaffiliated", "Alien", "Venus", "Mars"],
     };
+    static rogueAllegiances: AllegianceKeys[] = ["Alien", "Unaffiliated"];
     staticBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
     rotatingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
     rotateToPlugin: RotateTo;
@@ -113,7 +122,7 @@ export class Spaceship extends Sprite {
     primaryFireState = { active: false, autoattack: false };
 
     get isAutoattacking() {
-        return this.primaryFireState.autoattack && Boolean(this.target?.active);
+        return this.primaryFireState.autoattack && !this.target?.isIntangible;
     }
 
     get opposition(): AllegianceKeys[] {
@@ -146,16 +155,12 @@ export class Spaceship extends Sprite {
         };
     }
 
-    get isExplosionPlaying() {
-        return this.staticBox.body.enable;
+    get isExploding() {
+        return this.isDead && this.isIntangible;
     }
 
     get isDead() {
         return this.status.hullHp <= 0;
-    }
-
-    get isDying() {
-        return this.isDead && this.isExplosionPlaying;
     }
 
     get isMob() {
@@ -218,7 +223,11 @@ export class Spaceship extends Sprite {
         const { username } = serverOptions;
         this.setName(username);
 
-        this.status = new Status({ ship: this, baseStats, multipliers }, { scene: this.scene });
+        const { attackerReward } = serverOptions;
+        this.status = new Status(
+            { ship: this, baseStats, multipliers, attackerReward },
+            { scene: this.scene }
+        );
         if (this.status.shieldsHp === 0) this.shields.crack(false);
 
         // @ts-ignore
@@ -262,12 +271,6 @@ export class Spaceship extends Sprite {
         const damageDealed = this.status.damageShields(damage);
 
         if (attackerId) this.status.attackerRecord.add(damageDealed, attackerId);
-        if (attackerId) {
-            console.log(
-                "calcContributions",
-                this.status.attackerRecord.calcContributions(this.status.maxHp)
-            );
-        }
         if (this.status.shieldsHp <= 0) this.shields.crack();
     }
     getHullHit(damage: number, attackerId?: string) {
@@ -275,13 +278,7 @@ export class Spaceship extends Sprite {
         const damageDealed = this.status.damageHull(damage);
 
         if (attackerId) this.status.attackerRecord.add(damageDealed, attackerId);
-        if (attackerId) {
-            console.log(
-                "calcContributions",
-                this.status.attackerRecord.calcContributions(this.status.maxHp)
-            );
-        }
-        if (this.isDead) this.explode();
+        if (this.isDead && !this.isExploding) this.emit("entity:explode");
     }
 
     playHullHit() {
@@ -303,11 +300,9 @@ export class Spaceship extends Sprite {
     explode() {
         this.breakOffTargeting();
         this.setTarget();
-
-        this.staticBox.body.enable = false;
-        this.disableBody(true, false);
-        this.status.updateUI();
         this.stopThrust();
+
+        this.setIntangible(true);
 
         if (this.scene.isTextured) {
             new Explosion(this.scene, this.x, this.y, this.depth, this.soundManager, {
@@ -315,14 +310,11 @@ export class Spaceship extends Sprite {
             });
         }
 
-        const isNotAlreadyDying = !this.isDying;
-        if (isNotAlreadyDying) {
-            this.scene.time.delayedCall(2000, () => {
-                this.staticBox.setVisible(false);
+        this.scene.time.delayedCall(2000, () => {
+            if (this.isDead) this.setHidden(true);
 
-                this.emit("entity:dead", this);
-            });
-        }
+            this.emit("entity:dead", this);
+        });
     }
 
     toggleAutoattack() {
@@ -382,9 +374,11 @@ export class Spaceship extends Sprite {
     }
 
     lookAtPointer() {
-        let { worldX, worldY } = this.pointer;
-        const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
-        this.rotateTo(rotation);
+        if (!this.isIntangible) {
+            let { worldX, worldY } = this.pointer;
+            const rotation = Phaser.Math.Angle.Between(this.x, this.y, worldX, worldY);
+            this.rotateTo(rotation);
+        }
     }
 
     breakOffTargeting() {
@@ -398,25 +392,33 @@ export class Spaceship extends Sprite {
         this.staticBox.setPosition(worldX, worldY);
     }
 
-    respawn(worldX?: number, worldY?: number) {
-        if (worldX === undefined || worldY === undefined) {
-            [worldX, worldY] = this.scene.getRandomPositionOnMap();
-        }
+    respawn(worldX: number, worldY: number) {
+        this.stopThrust();
+        this.status.reset();
         this.teleport(worldX, worldY);
 
-        this.staticBox.setVisible(true);
-        this.staticBox.body.enable = true;
-        this.status.reset();
+        this.setHidden(false).setIntangible(false);
 
-        this.scene.physics.add.existing(this);
-        this.scene.physics.add.existing(this.shields);
-        this.shields.active = true;
-        this.shields.visible = true;
-        this.active = true;
-        this.stopThrust();
         if (this.status.shieldsHp === 0) this.shields.crack(false);
 
         return [worldX, worldY];
+    }
+
+    get isIntangible() {
+        return !this.staticBox.body.enable && !this.shields.body.enable;
+    }
+    setIntangible(value = true) {
+        this.staticBox.body.setEnable(!value);
+        this.shields.body.setEnable(!value);
+        return this;
+    }
+
+    get isHidden() {
+        return !this.staticBox.visible;
+    }
+    setHidden(value = true) {
+        this.staticBox.setVisible(!value);
+        return this;
     }
 
     setAngle(angle?: number) {
@@ -443,10 +445,12 @@ export class Spaceship extends Sprite {
     }
 
     moveTo(x: number, y: number) {
-        this.moveToPlugin.setSpeed(this.status.maxSpeed);
+        if (!this.isIntangible) {
+            this.moveToPlugin.setSpeed(this.status.maxSpeed);
 
-        this.moveToPlugin.moveTo(x, y);
-        this.onStartThrust();
+            this.moveToPlugin.moveTo(x, y);
+            this.onStartThrust();
+        }
     }
 
     stopThrust() {
@@ -464,50 +468,50 @@ export class Spaceship extends Sprite {
     }
 
     thrustUp() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = -Math.PI / 2;
             this.setThrust(rotation, 1);
         }
     }
     thrustDown() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = Math.PI / 2;
             this.setThrust(rotation, 1);
         }
     }
     thrustLeft() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = Math.PI;
             this.setThrust(rotation, 1);
         }
     }
     thrustRight() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = 0;
             this.setThrust(rotation, 1);
         }
     }
 
     thrustUpRight() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = -Math.PI / 4;
             this.setThrust(rotation, 1);
         }
     }
     thrustUpLeft() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = -Math.PI / 4 - Math.PI / 2;
             this.setThrust(rotation, 1);
         }
     }
     thrustDownRight() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = Math.PI / 4;
             this.setThrust(rotation, 1);
         }
     }
     thrustDownLeft() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = Math.PI / 4 + Math.PI / 2;
             this.setThrust(rotation, 1);
         }
@@ -516,7 +520,7 @@ export class Spaceship extends Sprite {
      * Moves ship right, relative to the ship rotation, instead of to the screen's right side
      */
     thrustSidewaysRight() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = this.rotation;
             this.setThrust(rotation, 1);
         }
@@ -525,7 +529,7 @@ export class Spaceship extends Sprite {
      * Moves ship left relative to the ship rotation, instead of to the screen's left side
      */
     thrustSidewaysLeft() {
-        if (this.active) {
+        if (!this.isIntangible) {
             const rotation = this.rotation + Math.PI;
             this.setThrust(rotation, 1);
         }
@@ -533,7 +537,7 @@ export class Spaceship extends Sprite {
 
     thrust() {
         let movedFromThrust = false;
-        if (this.active) {
+        if (!this.isIntangible) {
             const { rotation, velocityPercentage } = this.#thrust;
             const speed = this.status.maxSpeed * velocityPercentage;
 
@@ -582,7 +586,7 @@ export class Spaceship extends Sprite {
 
     update(time: number, delta: number) {
         this.lookAtPointer();
-        if (this.isAuthority) this.status.update(time, delta);
+        this.status.update(time, delta);
 
         if (this.isAutoattacking) {
             const dist = Phaser.Math.Distance.BetweenPoints(this, this.target);
@@ -602,6 +606,8 @@ export class Spaceship extends Sprite {
         const primaryFireActive = active ? 1 : 0;
         const primaryFireAutoattack = autoattack ? 1 : 0;
         const targetId = this.target?.id;
+        const hidden = this.isHidden ? 1 : 0;
+        const intangible = this.isIntangible ? 1 : 0;
         return {
             id,
             groupName: this.isPlayer ? "players" : "mob",
@@ -613,6 +619,8 @@ export class Spaceship extends Sprite {
             primaryFireAutoattack,
             primaryFireActive,
             targetId,
+            hidden,
+            intangible,
         };
     }
 
@@ -626,6 +634,8 @@ export class Spaceship extends Sprite {
         primaryFireActive,
         primaryFireAutoattack,
         targetId,
+        hidden,
+        intangible,
     }: ActionsState) {
         this.staticBox.setPosition(x, y);
         this.setPointer(worldX, worldY);
@@ -642,6 +652,8 @@ export class Spaceship extends Sprite {
             autoattack: !!primaryFireAutoattack,
         };
         if (targetId) this.setTargetById(targetId);
+
+        this.setHidden(!!hidden).setIntangible(!!intangible);
     }
 
     getStatusState(): StatusState {

@@ -57,8 +57,11 @@ export interface MultiplayerEvents {
         on: (serverSnapshot: Snapshot) => void;
     };
     "entity:respawn"?: {
-        emit: { id: string; point: { worldX: number; worldY: number } };
-        on: (entityRespawnData: { id: string; point: { worldX: number; worldY: number } }) => void;
+        emit: { id: string; respawnPoint: [number, number] };
+        on: (entityRespawnData: { id: string; respawnPoint: [number, number] }) => void;
+    };
+    "entity:explode"?: {
+        emit: { id: string };
     };
     "player:request-reoutfit"?: {
         emit: Outfit;
@@ -175,7 +178,8 @@ export class BaseScene extends Phaser.Scene {
                 this.entityManager.hitEntity(ownerId, enemyId, damage);
             }
         });
-        entity.on("entity:dead", () => this.entityManager.respawnEntity(entity.id));
+        entity.on("entity:dead", () => this.entityManager.handleDeadEntity(entity.id));
+        entity.on("entity:explode", () => this.entityManager.explodeEntity(entity.id));
     }
 
     // TODO tickrate limit and/or memoize

@@ -47,31 +47,42 @@ export class ServerScene extends BaseMapScene {
         });
     }
 
+    setServerListeners(entity: Spaceship) {
+        entity.on("entity:hit", (hitData: ClientHitData) => {
+            const { weaponId, enemyId, ownerId } = hitData;
+            const weapon = entity.weapons.getWeaponById(weaponId);
+            if (weapon) {
+                const damage = entity.weapons.getDamageByWeapon(weapon);
+                this.entityManager.hitEntity(ownerId, enemyId, damage, (enemy) =>
+                    this.sendEntityStatus(enemy.id, true)
+                );
+            }
+        });
+        entity.on("entity:heal", (id: string) => {
+            this.sendEntityStatus(id);
+        });
+
+        entity.on("entity:dead", () =>
+            this.entityManager.handleDeadEntity(
+                entity.id,
+                (respawnPoint) => this.sendRespawned(entity.id, respawnPoint),
+                entity.isMob
+            )
+        );
+        entity.on("entity:explode", () => {
+            this.sendExploded(entity.id);
+            this.entityManager.explodeEntity(entity.id);
+        });
+    }
+
     create() {
         super.create();
 
-        this.entityManager.spawnMobs(2, (mob: Spaceship) => {
-            mob.on("entity:hit", (hitData: ClientHitData) => {
-                const { weaponId, enemyId, ownerId } = hitData;
-                const weapon = mob.weapons.getWeaponById(weaponId);
-                if (weapon) {
-                    const damage = mob.weapons.getDamageByWeapon(weapon);
-                    this.entityManager.hitEntity(ownerId, enemyId, damage, (enemy) =>
-                        this.sendEntityStatus(enemy.id, true)
-                    );
-                }
-            });
-            mob.on("entity:heal", (id: string) => {
-                this.sendEntityStatus(id);
-            });
-            mob.on("entity:dead", () =>
-                this.entityManager.respawnEntity(
-                    mob.id,
-                    { worldX: null, worldY: null },
-                    (worldX, worldY) => this.sendRespawned(mob.id, worldX, worldY)
-                )
-            );
-        });
+        this.entityManager.spawnMobs(
+            2,
+            (mob) => this.setServerListeners(mob),
+            (mobOptions) => this.entityManager.addMob(mobOptions)
+        );
 
         this.game.server.onConnection((channel) => {
             console.log("Channel connected", channel.id);
@@ -95,10 +106,8 @@ export class ServerScene extends BaseMapScene {
             );
 
             channel.on("player:request-respawn", () =>
-                this.entityManager.respawnEntity(
-                    channel.id!,
-                    { worldX: null, worldY: null },
-                    (worldX, worldY) => this.sendRespawned(channel.id!, worldX, worldY)
+                this.entityManager.respawnEntity(channel.id!, undefined, (respawnPoint) =>
+                    this.sendRespawned(channel.id!, respawnPoint)
                 )
             );
 
@@ -119,12 +128,15 @@ export class ServerScene extends BaseMapScene {
         });
     }
 
-    sendRespawned(entityId: string, worldX: number, worldY: number) {
+    sendRespawned(entityId: string, respawnPoint: [number, number]) {
         this.game.server.emit(
             "entity:respawn",
-            { id: entityId, point: { worldX, worldY } },
+            { id: entityId, respawnPoint: respawnPoint },
             { reliable: true }
         );
+    }
+    sendExploded(entityId: string) {
+        this.game.server.emit("entity:explode", { id: entityId }, { reliable: true });
     }
     sendReoutfitted(entityId: string, outfit: Outfit) {
         console.log("entity:reoutfit");
@@ -204,11 +216,7 @@ export class ServerScene extends BaseMapScene {
         channel.emit("player:request-options", serverOptions, { reliable: true });
         channel.broadcast.emit("player:connected", serverOptions, { reliable: true });
 
-        this.entityManager.spawnPlayer(serverOptions, (player) => {
-            player.on("entity:heal", (id: string) => {
-                this.sendEntityStatus(id);
-            });
-        });
+        this.entityManager.spawnPlayer(serverOptions, (player) => this.setServerListeners(player));
     }
 
     sendAlreadyConnected(channel: ServerChannel) {
@@ -220,8 +228,8 @@ export class ServerScene extends BaseMapScene {
     sendMobsOptions(channel: ServerChannel) {
         console.log("world:mobs-options");
 
-        const otherPlayersOptions = this.entityManager.getMobsOptions();
-        channel.emit("world:mobs-options", otherPlayersOptions, { reliable: true });
+        const mobOptions = this.entityManager.getMobsOptions();
+        channel.emit("world:mobs-options", mobOptions, { reliable: true });
     }
 
     broadcastMessage(channel: ServerChannel, message) {
