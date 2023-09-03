@@ -43,7 +43,6 @@ export class ServerScene extends BaseMapScene {
         );
         this.collisionManager = new BaseCollisionManager({
             projectileGroup: this.entityManager.projectileGroup,
-            entityGroup: this.entityManager.entityGroup,
         });
     }
 
@@ -79,7 +78,7 @@ export class ServerScene extends BaseMapScene {
         super.create();
 
         this.entityManager.spawnMobs(
-            2,
+            1,
             (mob) => this.setServerListeners(mob),
             (mobOptions) => this.entityManager.addMob(mobOptions)
         );
@@ -129,11 +128,7 @@ export class ServerScene extends BaseMapScene {
     }
 
     sendRespawned(entityId: string, respawnPoint: [number, number]) {
-        this.game.server.emit(
-            "entity:respawn",
-            { id: entityId, respawnPoint: respawnPoint },
-            { reliable: true }
-        );
+        this.game.server.emit("entity:respawn", { id: entityId, respawnPoint }, { reliable: true });
     }
     sendExploded(entityId: string) {
         this.game.server.emit("entity:explode", { id: entityId }, { reliable: true });

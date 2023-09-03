@@ -17,7 +17,7 @@ import type {
 import { DeepRequired } from "~/server/types/utility";
 
 interface Entities {
-    [key: string]: {
+    [playerId: string]: {
         serverOptions: SpaceshipServerOptions;
         entity: Spaceship;
         inputManager?: BaseInputManager;

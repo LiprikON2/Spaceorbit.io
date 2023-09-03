@@ -2,7 +2,16 @@ import type ContainerLite from "phaser3-rex-plugins/plugins/gameobjects/containe
 import type RotateTo from "phaser3-rex-plugins/plugins/rotateto";
 import type MoveTo from "phaser3-rex-plugins/plugins/moveto";
 
-import { Explosion, Exhausts, Weapons, Shields, Outfitting, type Outfit } from "./components";
+import {
+    Explosion,
+    Exhausts,
+    Weapons,
+    Shields,
+    Outfitting,
+    type Outfit,
+    Pilot,
+    type PilotServerOptions,
+} from "./components";
 import { Sprite, type SpriteClientOptions, type SpriteServerOptions } from "../Sprite";
 import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManager";
 import { Status, type StatusState } from "./components/Status/Status";
@@ -30,7 +39,7 @@ type AllegianceOpposition = {
 
 type MovementActivity = "moving" | "stopped";
 
-export interface AttackerReward {
+export interface Reward {
     exp: number;
     currency: number;
 }
@@ -66,11 +75,11 @@ export interface SpaceshipServerOptions extends SpriteServerOptions {
     allegiance: AllegianceEnum | AllegianceKeys;
     multipliers: Multipliers;
     username: string;
-    attackerReward: { exp: number; currency: number };
+    attackerReward: Reward;
+    pilotServerOptions?: PilotServerOptions;
 }
 
 export interface SpaceshipClientOptions extends SpriteClientOptions {
-    entityGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
 }
 
@@ -80,10 +89,15 @@ export interface WeaponOrigin {
     variation: string;
 }
 
+interface ExhaustOrigin {
+    x: number;
+    y: number;
+}
+
 export class Spaceship extends Sprite {
     declare id: string;
     modules: {
-        exhaustOrigins: { x: number; y: number }[];
+        exhaustOrigins: ExhaustOrigin[];
         weaponOrigins: WeaponOrigin[];
     };
     exhausts: Exhausts;
@@ -97,14 +111,22 @@ export class Spaceship extends Sprite {
     outfitting: Outfitting;
 
     status: Status;
+    pilot: Pilot;
     baseStats: { hullHp: number; hitboxRadius: number; speed: number };
 
     target: Spaceship | null;
     targetedBy: Spaceship[] = [];
-    entityGroup: SpaceshipGroup;
     projectileGroup: ProjectileGroup;
 
     allegiance: AllegianceEnum | AllegianceKeys;
+    staticBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
+    rotatingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
+    rotateToPlugin: RotateTo;
+    moveToPlugin: MoveTo;
+
+    #pointer: { worldX: number; worldY: number };
+    primaryFireState = { active: false, autoattack: false };
+
     static allegianceOpposition: AllegianceOpposition = {
         Unaffiliated: ["Unaffiliated", "Alien", "Venus", "Mars", "Earth"],
         Alien: ["Unaffiliated", "Venus", "Mars", "Earth"],
@@ -113,13 +135,6 @@ export class Spaceship extends Sprite {
         Earth: ["Unaffiliated", "Alien", "Venus", "Mars"],
     };
     static rogueAllegiances: AllegianceKeys[] = ["Alien", "Unaffiliated"];
-    staticBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
-    rotatingBox: ContainerLite & { body: Phaser.Physics.Arcade.Body };
-    rotateToPlugin: RotateTo;
-    moveToPlugin: MoveTo;
-
-    #pointer: { worldX: number; worldY: number };
-    primaryFireState = { active: false, autoattack: false };
 
     get isAutoattacking() {
         return this.primaryFireState.autoattack && !this.target?.isIntangible;
@@ -130,7 +145,7 @@ export class Spaceship extends Sprite {
     }
 
     get enemies(): Spaceship[] {
-        const all = this.entityGroup.getChildren();
+        const all = this.scene.entityManager.getAll();
         const enemies = all.filter(
             (ship) => this.opposition.includes(ship.allegiance) && ship.id !== this.id
         );
@@ -214,9 +229,6 @@ export class Spaceship extends Sprite {
         const { allegiance } = serverOptions;
         this.allegiance = allegiance;
 
-        const { entityGroup } = clientOptions;
-        this.entityGroup = entityGroup;
-
         const { projectileGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
 
@@ -250,6 +262,8 @@ export class Spaceship extends Sprite {
         this.setPointer(x, y);
 
         this.rotatingBox.setDepth(this.depth + 100);
+
+        this.pilot = new Pilot();
     }
     /**
      * Destroys not only the sprite itself, but also related objects pinned to its bounding box
@@ -262,7 +276,6 @@ export class Spaceship extends Sprite {
     }
 
     getHit(damage: number, attackerId?: string) {
-        console.log("attackerId", attackerId);
         if (this.status.shieldsHp > 0) this.#getShieldsHit(damage, attackerId);
         else this.#getHullHit(damage, attackerId);
     }
@@ -354,7 +367,7 @@ export class Spaceship extends Sprite {
     }
 
     setTargetById(targetId: string) {
-        const [target] = this.entityGroup.getMatching("id", targetId);
+        const target = this.scene.entityManager.getById(targetId);
         if (target) this.setTarget(target);
     }
 
@@ -601,7 +614,8 @@ export class Spaceship extends Sprite {
     }
 
     getActionsState(): ActionsState {
-        const { id, x, y, angle, activity } = this;
+        const { x, y } = this.staticBox;
+        const { id, angle, activity } = this;
 
         const { active, autoattack } = this.primaryFireState;
         const primaryFireActive = active ? 1 : 0;

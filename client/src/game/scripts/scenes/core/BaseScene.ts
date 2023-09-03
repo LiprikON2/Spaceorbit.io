@@ -125,7 +125,6 @@ export class BaseScene extends Phaser.Scene {
 
         this.collisionManager = new BaseCollisionManager({
             projectileGroup: this.entityManager.projectileGroup,
-            entityGroup: this.entityManager.entityGroup,
         });
     }
 

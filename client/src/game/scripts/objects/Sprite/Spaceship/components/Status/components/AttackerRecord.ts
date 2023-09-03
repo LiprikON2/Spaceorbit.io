@@ -5,10 +5,12 @@ interface Attacker {
 }
 
 interface Contributions {
-    [attackerId: string]: {
-        damage: number;
-        percentage: number;
-    };
+    [attackerId: string]: Contribution;
+}
+
+interface Contribution {
+    damage: number;
+    percentage: number;
 }
 
 export class AttackerRecord {

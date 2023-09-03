@@ -1,4 +1,4 @@
-import type { AttackerReward, Multipliers, Spaceship } from "~/game/objects/Sprite/Spaceship";
+import type { Reward, Multipliers, Spaceship } from "~/game/objects/Sprite/Spaceship";
 import { EveryTick, DebounceChargeBar } from "~/game/utils";
 import { HealthbarUI } from "~/game/objects";
 import type { BaseScene } from "~/game/scenes/core";
@@ -19,7 +19,7 @@ export interface StatusServerOptions {
     ship: Spaceship;
     baseStats: BaseStats;
     multipliers: Multipliers;
-    attackerReward: AttackerReward;
+    attackerReward: Reward;
 }
 export interface StatusClientOptions {
     scene: BaseScene;
@@ -38,7 +38,7 @@ export class Status {
     shieldbarUI: HealthbarUI;
     followText: Phaser.GameObjects.Text;
 
-    attackerReward: AttackerReward;
+    attackerReward: Reward;
 
     everyTick = new EveryTick(10);
     attackerRecord = new AttackerRecord();
@@ -171,9 +171,9 @@ export class Status {
 
             const exp = roundedPercentage * this.attackerReward.exp;
             const currency = roundedPercentage * this.attackerReward.currency;
-            const attackerReward: AttackerReward = { exp, currency };
+            const attackerReward: Reward = { exp, currency };
 
-            return [contributor, attackerReward];
+            return [contributor, attackerReward] as [string, Reward];
         });
 
         return rewards;

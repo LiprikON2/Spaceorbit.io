@@ -3,7 +3,6 @@ import type { ProjectileGroup, SpaceshipGroup } from "~/managers/BaseEntityManag
 
 interface CollisionManagerClientOptions {
     projectileGroup: ProjectileGroup;
-    entityGroup: SpaceshipGroup;
 }
 
 export interface ClientHitData {
@@ -18,12 +17,10 @@ export interface ClientHitData {
 const copySign = (x, y) => (Math.sign(x) === Math.sign(y) ? x : -x);
 export class BaseCollisionManager {
     projectileGroup: ProjectileGroup;
-    entityGroup: SpaceshipGroup;
 
     constructor(clientOptions: CollisionManagerClientOptions) {
-        const { projectileGroup, entityGroup } = clientOptions;
+        const { projectileGroup } = clientOptions;
         this.projectileGroup = projectileGroup;
-        this.entityGroup = entityGroup;
     }
 
     isPointInCircle(point: { x: number; y: number }, circle: { x: number; y: number; r: number }) {

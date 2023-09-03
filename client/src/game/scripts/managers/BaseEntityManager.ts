@@ -65,6 +65,16 @@ export class BaseEntityManager {
         return entity ?? null;
     }
 
+    getAll(from: GroupNames = "entity") {
+        let fromGroup: SpaceshipGroup;
+        if (from === "entity") fromGroup = this.entityGroup;
+        else if (from === "players") fromGroup = this.playerGroup;
+        else if (from === "otherPlayers") fromGroup = this.otherPlayersGroup;
+        else if (from === "mob") fromGroup = this.mobGroup;
+
+        return fromGroup.getChildren();
+    }
+
     constructor(
         serverOptions: EntityManagerServerOptions,
         clientOptions: EntityManagerClientOptions
@@ -90,7 +100,6 @@ export class BaseEntityManager {
     ) {
         const defaultClientOptions = {
             scene: this.scene,
-            entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
             enableNormals: true,
             depth: isMe ? 110 : 100,
@@ -115,7 +124,6 @@ export class BaseEntityManager {
     ) {
         const defaultClientOptions = {
             scene: this.scene,
-            entityGroup: this.entityGroup,
             projectileGroup: this.projectileGroup,
             soundManager: this.soundManager,
             enableNormals: true,
@@ -205,7 +213,7 @@ export class BaseEntityManager {
         damage: number,
         callback: (entity: Spaceship) => void = () => {}
     ) {
-        const [entity] = this.entityGroup.getMatching("id", entityId);
+        const entity = this.getById(entityId);
         if (entity) {
             entity.getHit(damage, attackerId);
             callback(entity);
@@ -227,7 +235,7 @@ export class BaseEntityManager {
         instantRespawn = true
     ) {
         console.log("entity:dead");
-        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
+        const entity = this.getById(entityId);
         if (entity) {
             if (instantRespawn) {
                 const respanwPoint = this.respawnEntity(entity);
@@ -236,8 +244,11 @@ export class BaseEntityManager {
 
             if (this.isAuthority) {
                 const rewards = entity.status.getAttackerRewards();
-                rewards.map(([contributor, reward]) => {
-                    console.log("contributor", contributor, "reward", reward);
+                rewards.map(([contributorId, reward]) => {
+                    const contributor = this.getById(contributorId);
+                    if (contributor) contributor.pilot.receiveReward(reward);
+
+                    console.log("reward", reward);
                 });
             }
         }
@@ -249,11 +260,11 @@ export class BaseEntityManager {
         respawnCallback: (respawnPoint: [number, number]) => void = () => {}
     ) {
         console.log("entity:respawn");
-        if (typeof entity === "string")
-            [entity] = this.entityGroup.getMatching("id", entity) as Spaceship[];
+        if (typeof entity === "string") entity = this.getById(entity);
 
         if (!point) point = this.getRespawnPoint(entity);
         if (entity?.isDead) entity.respawn(...point);
+
         respawnCallback(point);
         return point;
     }
@@ -272,7 +283,7 @@ export class BaseEntityManager {
     ) {
         console.log("entity:reoutfit");
 
-        const [entity] = this.entityGroup.getMatching("id", entityId) as Spaceship[];
+        const entity = this.getById(entityId);
         if (entity) {
             const [added] = entity.outfitting.diffOutfitItems(newOutfit);
 
@@ -284,7 +295,7 @@ export class BaseEntityManager {
     }
 
     updateEntityStatus(id: string, status: StatusState) {
-        const [entity] = this.entityGroup.getMatching("id", id);
+        const entity = this.getById(id);
         if (entity) entity.setStatusState(status);
     }
 
