@@ -24,3 +24,5 @@ Android build can be downloaded at [releases/latest](https://github.com/LiprikON
 
 
 ### [Server](./server)
+
+You can self-host a server for a multiplayer
