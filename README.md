@@ -21,8 +21,10 @@ Web version can be accessed at [spaceorbit-io.netlify.app](https://spaceorbit-io
 
 Android build can be downloaded at [releases/latest](https://github.com/LiprikON2/spaceorbit.io/releases/latest)
 
-
+[Click here to see the full client docs](./client)
 
 ### [Server](./server)
 
 You can self-host a server for a multiplayer
+
+[Click here to see the full server docs](./server)
