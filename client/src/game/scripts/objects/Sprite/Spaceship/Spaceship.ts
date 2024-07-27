@@ -207,11 +207,11 @@ export class Spaceship extends Sprite {
         this.scene.physics.world.enable(this.staticBox);
         // this.staticBox.body.setCollideWorldBounds(true);
 
-        this.rotatingBox.pin(this);
+        this.rotatingBox.pin(this, { syncPosition: false });
 
         this.shields = new Shields(this);
         this.staticBox.pin(this.shields, { syncRotation: false });
-        this.staticBox.pin(this.rotatingBox, { syncRotation: false });
+        this.staticBox.pin(this.rotatingBox, { syncPosition: false, syncRotation: false });
 
         // Modules
         const { modules } = this.atlasMetadata;
@@ -264,6 +264,10 @@ export class Spaceship extends Sprite {
         this.rotatingBox.setDepth(this.depth + 100);
 
         this.pilot = new Pilot();
+
+        for (let i = 0; i < 100; i++) {
+            this.setPosition(x, y);
+        }
     }
     /**
      * Destroys not only the sprite itself, but also related objects pinned to its bounding box
