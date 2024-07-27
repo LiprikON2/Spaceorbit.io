@@ -13,7 +13,7 @@ export class Mob extends Spaceship {
     isReadyToFire = false;
     isSleeping = false;
     isAggresive = true;
-    disableAi = true;
+    disableAi = false;
 
     readyToFireEvent: Phaser.Time.TimerEvent | null;
     sleepEvent: Phaser.Time.TimerEvent | null;
