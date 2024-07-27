@@ -68,13 +68,6 @@ export class Mob extends Spaceship {
 
     update(time, delta) {
         super.update(time, delta);
-        const { x, y } = this.getActionsState();
-
-        const s = Phaser.Math.Between(0, 200);
-        // if (s === 444) this.teleport(x + 50, y + 50);
-        if (s === 111) this.staticBox.setPosition(x + 50, y + 50);
-        console.log("x,y", x, y);
-
         if (this.disableAi) return;
         this.sleep(this.reactionTime);
         this.exhausts.updateExhaustPosition();
